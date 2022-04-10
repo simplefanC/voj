@@ -1,0 +1,7 @@
+package com.simplefanc.voj.dao.problem;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.simplefanc.voj.pojo.entity.problem.ProblemTag;
+
+public interface ProblemTagEntityService extends IService<ProblemTag> {
+}
