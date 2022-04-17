@@ -1,16 +1,16 @@
 package com.simplefanc.voj.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.pojo.entity.problem.Category;
 import com.simplefanc.voj.pojo.vo.DiscussionVo;
 import com.simplefanc.voj.service.oj.DiscussionService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 

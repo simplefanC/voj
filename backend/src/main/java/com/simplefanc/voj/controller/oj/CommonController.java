@@ -1,11 +1,6 @@
 package com.simplefanc.voj.controller.oj;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.pojo.entity.problem.Language;
@@ -13,6 +8,11 @@ import com.simplefanc.voj.pojo.entity.problem.Tag;
 import com.simplefanc.voj.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.pojo.vo.CaptchaVo;
 import com.simplefanc.voj.service.oj.CommonService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
 import java.util.List;

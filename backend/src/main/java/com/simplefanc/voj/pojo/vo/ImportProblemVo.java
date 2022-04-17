@@ -16,11 +16,14 @@ import java.util.Map;
 @ToString
 @Accessors(chain = true)
 public class ImportProblemVo implements Serializable {
-
+    // TODO
     private HashMap<String, Object> problem;
 
     private List<String> languages;
 
+    /**
+     * TODO
+     */
     private List<HashMap<String, Object>> samples;
 
     private List<String> tags;

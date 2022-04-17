@@ -3,18 +3,17 @@ package com.simplefanc.voj.service.oj;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.pojo.entity.contest.Contest;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -159,6 +158,7 @@ public class ContestCalculateRankService {
     }
 
 
+    // TODO 行数过多
     private List<ACMContestRankVo> getACMOrderRank(Contest contest, Boolean isOpenSealRank) {
 
 
@@ -369,6 +369,7 @@ public class ContestCalculateRankService {
         return topOIRankVoList;
     }
 
+    // TODO 行数过多
     private List<OIContestRankVo> getOIOrderRank(Contest contest, Boolean isOpenSealRank) {
 
         List<ContestRecordVo> oiContestRecord = contestRecordEntityService.getOIContestRecord(contest, isOpenSealRank);

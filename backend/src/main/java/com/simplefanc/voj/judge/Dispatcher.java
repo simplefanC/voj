@@ -3,11 +3,6 @@ package com.simplefanc.voj.judge;
 
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
@@ -15,8 +10,14 @@ import com.simplefanc.voj.dao.judge.JudgeServerEntityService;
 import com.simplefanc.voj.dao.judge.impl.RemoteJudgeAccountEntityServiceImpl;
 import com.simplefanc.voj.pojo.dto.CompileDTO;
 import com.simplefanc.voj.pojo.dto.ToJudge;
-import com.simplefanc.voj.pojo.entity.judge.*;
+import com.simplefanc.voj.pojo.entity.judge.Judge;
+import com.simplefanc.voj.pojo.entity.judge.JudgeServer;
+import com.simplefanc.voj.pojo.entity.judge.RemoteJudgeAccount;
 import com.simplefanc.voj.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -59,80 +60,80 @@ public class Dispatcher {
         return null;
     }
 
+    class QueryTask implements Runnable {
+        String path;
+        ToJudge data;
+        Long submitId;
+        Boolean isRemote;
+        String oj;
+        String key;
+        // 尝试600s
+        AtomicInteger count = new AtomicInteger(0);
+
+        public QueryTask(String path, ToJudge data, Long submitId, Boolean isRemote, String oj, String key) {
+            this.path = path;
+            this.data = data;
+            this.submitId = submitId;
+            this.isRemote = isRemote;
+            this.oj = oj;
+            this.key = key;
+        }
+
+        @Override
+        public void run() {
+            // 300次失败则判为提交失败
+            if (count.get() > 300) {
+                // 远程判题需要将账号归为可用
+                if (isRemote) {
+                    changeRemoteJudgeStatus(oj, data.getUsername());
+                }
+                checkResult(null, submitId);
+                cancelFutureTask(key);
+                return;
+            }
+            count.getAndIncrement();
+            JudgeServer judgeServer = chooseUtils.chooseServer(isRemote);
+
+            // 获取到判题机资源
+            if (judgeServer != null) {
+                data.setJudgeServerIp(judgeServer.getIp());
+                data.setJudgeServerPort(judgeServer.getPort());
+                CommonResult result = null;
+                try {
+                    result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
+                } catch (Exception e) {
+                    log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e);
+                    if (isRemote) {
+                        changeRemoteJudgeStatus(oj, data.getUsername());
+                    }
+                } finally {
+                    checkResult(result, submitId);
+                    // 无论成功与否，都要将对应的当前判题机当前判题数减1
+                    reduceCurrentTaskNum(judgeServer.getId());
+                    cancelFutureTask(key);
+                }
+            }
+        }
+    }
 
     public void toJudge(String path, ToJudge data, Long submitId, Boolean isRemote) {
-
         String oj = null;
         if (isRemote) {
             oj = data.getRemoteJudgeProblem().split("-")[0];
-            if (oj.equals("GYM")) {
-                oj = "CF";
+        }
+        String key = UUID.randomUUID().toString() + submitId;
+        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(new QueryTask(path, data, submitId, isRemote, oj, key), 0, 2, TimeUnit.SECONDS);
+        futureTaskMap.put(key, scheduledFuture);
+    }
+
+    private void cancelFutureTask(String key) {
+        Future future = futureTaskMap.get(key);
+        if (future != null) {
+            boolean isCanceled = future.cancel(true);
+            if (isCanceled) {
+                futureTaskMap.remove(key);
             }
         }
-
-        // 如果是vj判題，同时不是已有提交id的获取结果操作，归属于CF的判題，需要控制判题机的权限，一机一题
-        boolean isCFFirstSubmit = isRemote && !data.getIsHasSubmitIdRemoteReJudge()
-                && Constants.RemoteOJ.CODEFORCES.getName().equals(oj);
-
-        // 尝试600s
-        AtomicInteger count = new AtomicInteger(0);
-        String key = UUID.randomUUID().toString() + submitId;
-        final String finalOj = oj;
-        Runnable getResultTask = new Runnable() {
-            @Override
-            public void run() {
-                if (count.get() > 300) { // 300次失败则判为提交失败
-                    if (isRemote) { // 远程判题需要将账号归为可用
-                        changeRemoteJudgeStatus(finalOj, data.getUsername(), null);
-                    }
-                    checkResult(null, submitId);
-                    Future future = futureTaskMap.get(key);
-                    if (future != null) {
-                        boolean isCanceled = future.cancel(true);
-                        if (isCanceled) {
-                            futureTaskMap.remove(key);
-                        }
-                    }
-                    return;
-                }
-                count.getAndIncrement();
-                JudgeServer judgeServer = null;
-                if (!isCFFirstSubmit) {
-                    judgeServer = chooseUtils.chooseServer(isRemote);
-                } else {
-                    judgeServer = chooseUtils.chooseFixedServer(true, "cf_submittable", data.getIndex(), data.getSize());
-                }
-
-                if (judgeServer != null) { // 获取到判题机资源
-                    data.setJudgeServerIp(judgeServer.getIp());
-                    data.setJudgeServerPort(judgeServer.getPort());
-                    CommonResult result = null;
-                    try {
-                        result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
-                    } catch (Exception e) {
-                        log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e);
-                        if (isRemote) {
-                            changeRemoteJudgeStatus(finalOj, data.getUsername(), judgeServer);
-                        }
-                    } finally {
-                        checkResult(result, submitId);
-                        if (!isCFFirstSubmit) {
-                            // 无论成功与否，都要将对应的当前判题机当前判题数减1
-                            reduceCurrentTaskNum(judgeServer.getId());
-                        }
-                        Future future = futureTaskMap.get(key);
-                        if (future != null) {
-                            boolean isCanceled = future.cancel(true);
-                            if (isCanceled) {
-                                futureTaskMap.remove(key);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(getResultTask, 0, 2, TimeUnit.SECONDS);
-        futureTaskMap.put(key, scheduledFuture);
     }
 
 
@@ -154,15 +155,16 @@ public class Dispatcher {
 
 
     private void checkResult(CommonResult<Void> result, Long submitId) {
-
         Judge judge = new Judge();
-        if (result == null) { // 调用失败
+        // 调用失败
+        if (result == null) {
             judge.setSubmitId(submitId);
             judge.setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus());
             judge.setErrorMessage("Failed to connect the judgeServer. Please resubmit this submission again!");
             judgeEntityService.updateById(judge);
         } else {
-            if (result.getStatus() != ResultStatus.SUCCESS.getStatus()) { // 如果是结果码不是200 说明调用有错误
+            // 如果是结果码不是200 说明调用有错误
+            if (result.getStatus() != ResultStatus.SUCCESS.getStatus()) {
                 // 判为系统错误
                 judge.setStatus(Constants.Judge.STATUS_SYSTEM_ERROR.getStatus())
                         .setErrorMessage(result.getMsg());
@@ -176,7 +178,8 @@ public class Dispatcher {
         UpdateWrapper<JudgeServer> judgeServerUpdateWrapper = new UpdateWrapper<>();
         judgeServerUpdateWrapper.setSql("task_number = task_number-1").eq("id", id);
         boolean isOk = judgeServerEntityService.update(judgeServerUpdateWrapper);
-        if (!isOk) { // 重试八次
+        if (!isOk) {
+            // 重试八次
             tryAgainUpdateJudge(judgeServerUpdateWrapper);
         }
     }
@@ -204,31 +207,17 @@ public class Dispatcher {
     }
 
 
-    public void changeRemoteJudgeStatus(String oj, String username, JudgeServer judgeServer) {
-        changeAccountStatus(oj, username);
-        if (oj.equals(Constants.RemoteOJ.CODEFORCES.getName())
-                || oj.equals(Constants.RemoteOJ.GYM.getName())) {
-            if (judgeServer != null) {
-                changeServerSubmitCFStatus(judgeServer.getIp(), judgeServer.getPort());
-            }
-        }
-    }
-
-
-    public void changeAccountStatus(String remoteJudge, String username) {
-
+    public void changeRemoteJudgeStatus(String remoteJudge, String username) {
         UpdateWrapper<RemoteJudgeAccount> remoteJudgeAccountUpdateWrapper = new UpdateWrapper<>();
         remoteJudgeAccountUpdateWrapper.set("status", true)
                 .eq("status", false)
                 .eq("username", username);
-        if (remoteJudge.equals("GYM")) {
-            remoteJudge = "CF";
-        }
         remoteJudgeAccountUpdateWrapper.eq("oj", remoteJudge);
 
         boolean isOk = remoteJudgeAccountService.update(remoteJudgeAccountUpdateWrapper);
 
-        if (!isOk) { // 重试8次
+        if (!isOk) {
+            // 重试8次
             tryAgainUpdateAccount(remoteJudgeAccountUpdateWrapper, remoteJudge, username);
         }
     }
@@ -257,44 +246,4 @@ public class Dispatcher {
         } while (retryable);
     }
 
-
-    public void changeServerSubmitCFStatus(String ip, Integer port) {
-
-        if (StringUtils.isEmpty(ip) || port == null) {
-            return;
-        }
-        UpdateWrapper<JudgeServer> judgeServerUpdateWrapper = new UpdateWrapper<>();
-        judgeServerUpdateWrapper.set("cf_submittable", true)
-                .eq("ip", ip)
-                .eq("is_remote", true)
-                .eq("port", port);
-        boolean isOk = judgeServerEntityService.update(judgeServerUpdateWrapper);
-
-        if (!isOk) { // 重试8次
-            tryAgainUpdateServer(judgeServerUpdateWrapper, ip, port);
-        }
-    }
-
-    private void tryAgainUpdateServer(UpdateWrapper<JudgeServer> updateWrapper, String ip, Integer port) {
-        boolean retryable;
-        int attemptNumber = 0;
-        do {
-            boolean success = judgeServerEntityService.update(updateWrapper);
-            if (success) {
-                return;
-            } else {
-                attemptNumber++;
-                retryable = attemptNumber < 8;
-                if (attemptNumber == 8) {
-                    log.error("Remote Judge：Change CF Judge Server Status to `true` Failed! =======>{}", "ip:" + ip + ",port:" + port);
-                    break;
-                }
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        } while (retryable);
-    }
 }

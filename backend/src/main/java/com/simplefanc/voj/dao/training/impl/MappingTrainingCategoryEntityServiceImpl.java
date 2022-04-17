@@ -1,10 +1,10 @@
 package com.simplefanc.voj.dao.training.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.training.MappingTrainingCategoryEntityService;
 import com.simplefanc.voj.mapper.MappingTrainingCategoryMapper;
 import com.simplefanc.voj.pojo.entity.training.MappingTrainingCategory;
+import org.springframework.stereotype.Service;
 
 /**
  * @Author: chenfan

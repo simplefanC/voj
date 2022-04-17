@@ -2,11 +2,6 @@ package com.simplefanc.voj.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.common.exception.StatusNotFoundException;
@@ -21,6 +16,11 @@ import com.simplefanc.voj.pojo.vo.*;
 import com.simplefanc.voj.service.oj.ProblemService;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.validator.ContestValidator;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -112,6 +112,7 @@ public class ProblemServiceImpl implements ProblemService {
      * @Description 获取用户对应该题目列表中各个题目的做题情况
      * @Since 2020/12/29
      */
+    // TODO 行数过多
     @Override
     public HashMap<Long, Object> getUserProblemStatus(PidListDto pidListDto) {
 

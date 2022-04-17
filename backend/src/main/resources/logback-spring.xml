@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <!-- 属性文件:在properties文件中找到对应的配置项 -->
-<!--    <springProperty scope="context" name="logging.path" source="logging.file.path"/>-->
-    <property name="logging.path" value="/voj/log/backend"/>
+    <springProperty scope="context" name="logging.path" source="voj.logging.filepath"/>
+<!--    <property name="logging.path" value="/voj/log/backend"/>-->
     <contextName>voj</contextName>
 
     <!--控制台打印-->

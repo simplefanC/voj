@@ -1,11 +1,6 @@
 package com.simplefanc.voj.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.Logical;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.TrainingDto;
 import com.simplefanc.voj.pojo.dto.TrainingProblemDto;
@@ -13,6 +8,10 @@ import com.simplefanc.voj.pojo.entity.training.Training;
 import com.simplefanc.voj.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.service.admin.training.AdminTrainingService;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -126,7 +125,6 @@ public class AdminTrainingController {
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> importTrainingRemoteOJProblem(@RequestParam("name") String name,
                                                             @RequestParam("problemId") String problemId,
                                                             @RequestParam("tid") Long tid) {

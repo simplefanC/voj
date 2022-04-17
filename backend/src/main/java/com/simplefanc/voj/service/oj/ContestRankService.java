@@ -2,10 +2,10 @@ package com.simplefanc.voj.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.stereotype.Component;
 import com.simplefanc.voj.pojo.entity.contest.Contest;
 import com.simplefanc.voj.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.pojo.vo.OIContestRankVo;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;

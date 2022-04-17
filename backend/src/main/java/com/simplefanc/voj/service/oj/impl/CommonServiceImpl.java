@@ -2,10 +2,6 @@ package com.simplefanc.voj.service.oj.impl;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.wf.captcha.SpecCaptcha;
-import com.wf.captcha.base.Captcha;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.problem.*;
 import com.simplefanc.voj.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.pojo.entity.problem.*;
@@ -13,6 +9,10 @@ import com.simplefanc.voj.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.pojo.vo.CaptchaVo;
 import com.simplefanc.voj.service.oj.CommonService;
 import com.simplefanc.voj.utils.RedisUtils;
+import com.wf.captcha.SpecCaptcha;
+import com.wf.captcha.base.Captcha;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,6 +74,7 @@ public class CommonServiceImpl implements CommonService {
         return trainingCategoryEntityService.list();
     }
 
+    @Override
     public List<Tag> getAllProblemTagsList(String oj) {
         List<Tag> tagList;
         oj = oj.toUpperCase();
@@ -88,6 +89,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
 
+    @Override
     public Collection<Tag> getProblemTags(Long pid) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
@@ -99,8 +101,9 @@ public class CommonServiceImpl implements CommonService {
     }
 
 
+    @Override
     public List<Language> getLanguages(Long pid, Boolean all) {
-
+        // TODO 魔法值
         String oj = "ME";
         if (pid != null) {
             Problem problem = problemEntityService.getById(pid);
@@ -109,16 +112,13 @@ public class CommonServiceImpl implements CommonService {
             }
         }
 
-        if (oj.equals("GYM")) {  // GYM用与CF一样的编程语言列表
-            oj = "CF";
-        }
-
         QueryWrapper<Language> queryWrapper = new QueryWrapper<>();
         // 获取对应OJ支持的语言列表
         queryWrapper.eq(all != null && !all, "oj", oj);
         return languageEntityService.list(queryWrapper);
     }
 
+    @Override
     public Collection<Language> getProblemLanguages(Long pid) {
         QueryWrapper<ProblemLanguage> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid).select("lid");
@@ -128,6 +128,7 @@ public class CommonServiceImpl implements CommonService {
 
     }
 
+    @Override
     public List<CodeTemplate> getProblemCodeTemplate(Long pid) {
         QueryWrapper<CodeTemplate> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid);

@@ -76,9 +76,6 @@ public class ConfigVo {
     @Value("${voj.mail.ssl}")
     private Boolean emailSsl;
 
-    @Value("${voj.mail.background-img}")
-    private String emailBGImg;
-
     // 网站前端显示配置
     @Value("${voj.web-config.base-url}")
     private String baseUrl;
@@ -95,6 +92,30 @@ public class ConfigVo {
     @Value("${voj.web-config.register}")
     private Boolean register;
 
+    @Value("${voj.web-config.problem}")
+    private Boolean problem;
+
+    @Value("${voj.web-config.training}")
+    private Boolean training;
+
+    @Value("${voj.web-config.contest}")
+    private Boolean contest;
+
+    @Value("${voj.web-config.status}")
+    private Boolean status;
+
+    @Value("${voj.web-config.rank}")
+    private Boolean rank;
+
+    @Value("${voj.web-config.discussion}")
+    private Boolean discussion;
+
+    @Value("${voj.web-config.introduction}")
+    private Boolean introduction;
+
+    @Value("${voj.web-config.code-visible-start-time}")
+    private Long codeVisibleStartTime;
+
     @Value("${voj.web-config.footer.record.name}")
     private String recordName;
 
@@ -106,35 +127,5 @@ public class ConfigVo {
 
     @Value("${voj.web-config.footer.project.url}")
     private String projectUrl;
-
-    @Value("${voj.hdu.account.username:}")
-    private List<String> hduUsernameList;
-
-    @Value("${voj.hdu.account.password:}")
-    private List<String> hduPasswordList;
-
-    @Value("${voj.cf.account.username:}")
-    private List<String> cfUsernameList;
-
-    @Value("${voj.cf.account.password:}")
-    private List<String> cfPasswordList;
-
-    @Value("${voj.poj.account.username:}")
-    private List<String> pojUsernameList;
-
-    @Value("${voj.poj.account.password:}")
-    private List<String> pojPasswordList;
-
-    @Value("${voj.atcoder.account.username:}")
-    private List<String> atcoderUsernameList;
-
-    @Value("${voj.atcoder.account.password:}")
-    private List<String> atcoderPasswordList;
-
-    @Value("${voj.spoj.account.username:}")
-    private List<String> spojUsernameList;
-
-    @Value("${voj.spoj.account.password:}")
-    private List<String> spojPasswordList;
 
 }

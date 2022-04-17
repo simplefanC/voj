@@ -4,9 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.mapper.JudgeMapper;
@@ -15,6 +12,9 @@ import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.vo.JudgeVo;
 import com.simplefanc.voj.pojo.vo.ProblemCountVo;
 import com.simplefanc.voj.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -53,6 +53,7 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
         return judgeMapper.getCommonJudgeList(page, searchPid, status, username, uid, completeProblemID);
     }
 
+    // TODO 参数过多
     @Override
     public IPage<JudgeVo> getContestJudgeList(Integer limit, Integer currentPage, String displayId, Long cid, Integer status,
                                               String username, String uid, Boolean beforeContestSubmit, String rule,

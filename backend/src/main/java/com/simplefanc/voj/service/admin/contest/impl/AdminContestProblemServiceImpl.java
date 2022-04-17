@@ -6,20 +6,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.dao.contest.ContestEntityService;
-import com.simplefanc.voj.pojo.entity.contest.Contest;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
-import com.simplefanc.voj.crawler.problem.ProblemStrategy;
+import com.simplefanc.voj.crawler.ProblemCrawler;
 import com.simplefanc.voj.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.problem.ProblemEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.dto.ContestProblemDto;
 import com.simplefanc.voj.pojo.dto.ProblemDto;
 import com.simplefanc.voj.pojo.entity.contest.ContestProblem;
@@ -29,6 +22,12 @@ import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.utils.Constants;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
@@ -54,7 +53,11 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Autowired
     private RemoteProblemService remoteProblemService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
                                                   Long cid, Integer problemType, String oj) {
         if (currentPage == null || currentPage < 1) currentPage = 1;
@@ -71,17 +74,16 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             contestProblemMap.put(contestProblem.getPid(), contestProblem);
             pidList.add(contestProblem.getPid());
         });
-
         HashMap<String, Object> contestProblem = new HashMap<>();
-
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-
-        if (problemType != null) { // 必备条件 隐藏的不可取来做比赛题目
+        // 必备条件 隐藏的不可取来做比赛题目
+        if (problemType != null) {
             problemQueryWrapper.eq("is_group", false)
                     // vj题目不限制赛制
                     .and(wrapper -> wrapper.eq("type", problemType)
                             .or().eq("is_remote", true))
-                    .ne("auth", 2); // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
+                    // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
+                    .ne("auth", 2);
         }
 
         // 逻辑判断，如果是查询已有的就应该是in，如果是查询不要重复的，使用not in
@@ -143,7 +145,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         Problem problem = problemEntityService.getById(pid);
 
-        if (problem != null) { // 查询成功
+        if (problem != null) {
             // 获取当前登录的用户
             Session session = SecurityUtils.getSubject().getSession();
             UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
@@ -162,6 +164,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteProblem(Long pid, Long cid) {
         //  比赛id不为null，表示就是从比赛列表移除而已
         if (cid != null) {
@@ -173,18 +176,17 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             judgeUpdateWrapper.eq("cid", cid).eq("pid", pid);
             judgeEntityService.remove(judgeUpdateWrapper);
         } else {
-             /*
-                problem的id为其他表的外键的表中的对应数据都会被一起删除！
-              */
+            // problem的id为其他表的外键的表中的对应数据都会被一起删除！
             problemEntityService.removeById(pid);
         }
 
         if (cid == null) {
-            FileUtil.del(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid);
+            FileUtil.del(filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid);
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Map<Object, Object> addProblem(ProblemDto problemDto) {
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
@@ -196,7 +198,8 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         // 设置为比赛题目
         problemDto.getProblem().setAuth(3);
         boolean isOk = problemEntityService.adminAddProblem(problemDto);
-        if (isOk) { // 添加成功
+        // 添加成功
+        if (isOk) {
             // 顺便返回新的题目id，好下一步添加外键操作
             return MapUtil.builder().put("pid", problemDto.getProblem().getId()).map();
         } else {
@@ -205,6 +208,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateProblem(ProblemDto problemDto) {
         // 获取当前登录的用户
         Session session = SecurityUtils.getSubject().getSession();
@@ -301,7 +305,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             Session session = SecurityUtils.getSubject().getSession();
             UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
             try {
-                ProblemStrategy.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {

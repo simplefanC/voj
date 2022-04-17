@@ -1,11 +1,12 @@
 package com.simplefanc.voj.config;
 
 
+import com.simplefanc.voj.pojo.bo.FilePathProps;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.simplefanc.voj.utils.Constants;
 
 import java.io.File;
 
@@ -14,6 +15,9 @@ import java.io.File;
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
+    @Autowired
+    private FilePathProps filePathProps;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -24,14 +28,18 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedHeaders("*");
     }
 
-    // 前端直接通过/public/img/图片名称即可拿到
+    /**
+     * 前端直接通过/public/img/图片名称即可拿到
+     *
+     * @param registry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // /api/public/img/** /api/public/file/**
-        registry.addResourceHandler(Constants.File.IMG_API.getPath() + "**", Constants.File.FILE_API.getPath() + "**")
-                .addResourceLocations("file:" + Constants.File.USER_AVATAR_FOLDER.getPath() + File.separator,
-                        "file:" + Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator,
-                        "file:" + Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator,
-                        "file:" + Constants.File.PROBLEM_FILE_FOLDER.getPath() + File.separator);
+        registry.addResourceHandler(filePathProps.getImgApi() + "**", filePathProps.getFileApi() + "**")
+                .addResourceLocations("file:" + filePathProps.getUserAvatarFolder() + File.separator,
+                        "file:" + filePathProps.getMarkdownFileFolder() + File.separator,
+                        "file:" + filePathProps.getHomeCarouselFolder() + File.separator,
+                        "file:" + filePathProps.getProblemFileFolder() + File.separator);
     }
 }

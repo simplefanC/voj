@@ -2,21 +2,19 @@ package com.simplefanc.voj.dao.contest.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.mapper.ContestProblemMapper;
 import com.simplefanc.voj.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.pojo.entity.contest.ContestRecord;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.vo.ContestProblemVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * <p>

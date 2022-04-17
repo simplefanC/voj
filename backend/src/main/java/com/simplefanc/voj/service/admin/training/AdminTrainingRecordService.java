@@ -1,9 +1,6 @@
 package com.simplefanc.voj.service.admin.training;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.training.TrainingEntityService;
 import com.simplefanc.voj.dao.training.TrainingProblemEntityService;
@@ -14,6 +11,9 @@ import com.simplefanc.voj.pojo.entity.training.Training;
 import com.simplefanc.voj.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.pojo.entity.training.TrainingRecord;
 import com.simplefanc.voj.utils.Constants;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -58,7 +58,8 @@ public class AdminTrainingRecordService {
             QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
             judgeQueryWrapper.in("pid", pidList)
                     .eq("cid", 0)
-                    .eq("status", Constants.Judge.STATUS_ACCEPTED.getStatus()) // 只同步ac的提交
+                    // 只同步ac的提交
+                    .eq("status", Constants.Judge.STATUS_ACCEPTED.getStatus())
                     .eq("uid", uid);
             List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
             saveBatchNewRecordByJudgeList(judgeList, tid, null, pidMapTPid);

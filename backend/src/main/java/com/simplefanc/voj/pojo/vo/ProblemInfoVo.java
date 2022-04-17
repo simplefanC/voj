@@ -1,9 +1,9 @@
 package com.simplefanc.voj.pojo.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import com.simplefanc.voj.pojo.entity.problem.Problem;
 import com.simplefanc.voj.pojo.entity.problem.Tag;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.List;

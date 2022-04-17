@@ -64,7 +64,8 @@ public class Compiler {
         }
 
         boolean copyOutExe = true;
-        if (pid == null) { // 题目id为空，则不进行本地存储，可能为新建题目时测试特判程序是否正常的判断而已
+        // 题目id为空，则不进行本地存储，可能为新建题目时测试特判程序是否正常的判断而已
+        if (pid == null) {
             copyOutExe = false;
         }
 
@@ -100,7 +101,8 @@ public class Compiler {
         }
 
         boolean copyOutExe = true;
-        if (pid == null) { // 题目id为空，则不进行本地存储，可能为新建题目时测试特判程序是否正常的判断而已
+        // 题目id为空，则不进行本地存储，可能为新建题目时测试特判程序是否正常的判断而已
+        if (pid == null) {
             copyOutExe = false;
         }
 

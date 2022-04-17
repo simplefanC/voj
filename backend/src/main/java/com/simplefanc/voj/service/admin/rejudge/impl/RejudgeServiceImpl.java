@@ -2,8 +2,6 @@ package com.simplefanc.voj.service.admin.rejudge.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.dao.judge.JudgeCaseEntityService;
@@ -19,6 +17,8 @@ import com.simplefanc.voj.pojo.entity.problem.Problem;
 import com.simplefanc.voj.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.utils.Constants;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -54,6 +54,7 @@ public class RejudgeServiceImpl implements RejudgeService {
     @Resource
     private RemoteJudgeDispatcher remoteJudgeDispatcher;
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Judge rejudge(Long submitId) {
         Judge judge = judgeEntityService.getById(submitId);
@@ -82,10 +83,9 @@ public class RejudgeServiceImpl implements RejudgeService {
         judgeCaseQueryWrapper.eq("submit_id", submitId);
         judgeCaseEntityService.remove(judgeCaseQueryWrapper);
 
-        boolean hasSubmitIdRemoteRejudge = isHasSubmitIdRemoteRejudge(judge.getVjudgeSubmitId(), judge.getStatus());
-
         // 设置默认值
-        judge.setStatus(Constants.Judge.STATUS_PENDING.getStatus()); // 开始进入判题队列
+        // 开始进入判题队列
+        judge.setStatus(Constants.Judge.STATUS_PENDING.getStatus());
         judge.setVersion(judge.getVersion() + 1);
         judge.setJudger("")
                 .setTime(null)
@@ -100,9 +100,9 @@ public class RejudgeServiceImpl implements RejudgeService {
         if (result && resetContestRecordResult) {
             // 调用判题服务
             Problem problem = problemEntityService.getById(judge.getPid());
-            if (problem.getIsRemote()) { // 如果是远程oj判题
-                remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(),
-                        isContestSubmission, hasSubmitIdRemoteRejudge);
+            // 如果是远程oj判题
+            if (problem.getIsRemote()) {
+                remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(), isContestSubmission);
             } else {
                 judgeDispatcher.sendTask(judge, isContestSubmission);
             }
@@ -112,6 +112,7 @@ public class RejudgeServiceImpl implements RejudgeService {
         }
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void rejudgeContestProblem(Long cid, Long pid) {
         QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
@@ -127,7 +128,8 @@ public class RejudgeServiceImpl implements RejudgeService {
         // 全部设置默认值
         for (Judge judge : rejudgeList) {
             idMapStatus.put(judge.getSubmitId(), judge.getStatus());
-            judge.setStatus(Constants.Judge.STATUS_PENDING.getStatus()); // 开始进入判题队列
+            // 开始进入判题队列
+            judge.setStatus(Constants.Judge.STATUS_PENDING.getStatus());
             judge.setVersion(judge.getVersion() + 1);
             judge.setJudger("")
                     .setTime(null)
@@ -150,12 +152,11 @@ public class RejudgeServiceImpl implements RejudgeService {
         if (resetContestRecordResult && resetJudgeResult) {
             // 调用重判服务
             Problem problem = problemEntityService.getById(pid);
-            if (problem.getIsRemote()) { // 如果是远程oj判题
+            // 如果是远程oj判题
+            if (problem.getIsRemote()) {
                 for (Judge judge : rejudgeList) {
                     // 进入重判队列，等待调用判题服务
-                    remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(),
-                            judge.getCid() != 0,
-                            isHasSubmitIdRemoteRejudge(judge.getVjudgeSubmitId(), idMapStatus.get(judge.getSubmitId())));
+                    remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(), judge.getCid() != 0);
                 }
             } else {
                 for (Judge judge : rejudgeList) {
@@ -166,18 +167,5 @@ public class RejudgeServiceImpl implements RejudgeService {
         } else {
             throw new StatusFailException("重判失败！请重新尝试！");
         }
-    }
-
-    private boolean isHasSubmitIdRemoteRejudge(Long vjudgeSubmitId, int status) {
-        boolean isHasSubmitIdRemoteRejudge = false;
-        if (vjudgeSubmitId != null &&
-                (status == Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus()
-                        || status == Constants.Judge.STATUS_COMPILING.getStatus()
-                        || status == Constants.Judge.STATUS_PENDING.getStatus()
-                        || status == Constants.Judge.STATUS_JUDGING.getStatus()
-                        || status == Constants.Judge.STATUS_SYSTEM_ERROR.getStatus())) {
-            isHasSubmitIdRemoteRejudge = true;
-        }
-        return isHasSubmitIdRemoteRejudge;
     }
 }

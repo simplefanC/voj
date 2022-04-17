@@ -3,10 +3,6 @@ package com.simplefanc.voj.service.oj;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.validator.TrainingValidator;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.common.exception.StatusNotFoundException;
@@ -29,6 +25,10 @@ import com.simplefanc.voj.pojo.entity.training.TrainingRecord;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.validator.ContestValidator;
+import com.simplefanc.voj.validator.TrainingValidator;
+import org.apache.shiro.SecurityUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 

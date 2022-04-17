@@ -1,7 +1,7 @@
 package com.simplefanc.voj.utils;
 
-import org.apache.shiro.SecurityUtils;
 import com.simplefanc.voj.shiro.AccountProfile;
+import org.apache.shiro.SecurityUtils;
 
 
 /**

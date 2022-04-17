@@ -1,20 +1,21 @@
 package com.simplefanc.voj.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.pojo.dto.WebConfigDto;
+import com.simplefanc.voj.pojo.vo.ACMRankVo;
+import com.simplefanc.voj.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.pojo.vo.ContestVo;
+import com.simplefanc.voj.service.admin.system.ConfigService;
+import com.simplefanc.voj.service.oj.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.pojo.vo.AnnouncementVo;
-import com.simplefanc.voj.pojo.vo.ContestVo;
-import com.simplefanc.voj.service.oj.HomeService;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 ;
 
@@ -29,6 +30,9 @@ public class HomeController {
 
     @Autowired
     private HomeService homeService;
+
+    @Autowired
+    private ConfigService configService;
 
     /**
      * @MethodName getRecentContest
@@ -107,8 +111,8 @@ public class HomeController {
      */
 
     @GetMapping("/get-website-config")
-    public CommonResult<Map<Object, Object>> getWebConfig() {
-        return CommonResult.successResponse(homeService.getWebConfig());
+    public CommonResult<WebConfigDto> getWebConfig() {
+        return CommonResult.successResponse(configService.getWebConfig());
     }
 
 }

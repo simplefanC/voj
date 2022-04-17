@@ -46,7 +46,7 @@ public class NacosConfig {
     @Primary
     public NacosDiscoveryProperties nacosProperties() {
         NacosDiscoveryProperties nacosDiscoveryProperties = new NacosDiscoveryProperties();
-        //此处我只改了ip，其他参数可以根据自己的需求改变
+        // 此处我只改了ip，其他参数可以根据自己的需求改变
         nacosDiscoveryProperties.setIp(IpUtils.getServiceIp());
         HashMap<String, String> meta = new HashMap<>();
         int max = cpuNum * 2 + 1;
@@ -63,7 +63,7 @@ public class NacosConfig {
         }
         meta.put("judgeName", name);
         nacosDiscoveryProperties.setMetadata(meta);
-        if (!ip.equals("-1")) {
+        if (!"-1".equals(ip)) {
             nacosDiscoveryProperties.setIp(ip);
         }
         nacosDiscoveryProperties.setPort(port);

@@ -52,6 +52,8 @@ management:
         include: '*'
 
 voj:
+  logging:
+    filepath: "/judge/log/judgeserver"
   judgedir:
     run-workplace-dir: "/judge/run"
     test-case-dir: "/judge/testcase"

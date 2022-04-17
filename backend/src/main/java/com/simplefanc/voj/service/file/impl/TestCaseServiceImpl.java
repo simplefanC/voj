@@ -8,18 +8,19 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.simplefanc.voj.common.exception.StatusFailException;
+import com.simplefanc.voj.common.exception.StatusSystemErrorException;
+import com.simplefanc.voj.common.result.ResultStatus;
+import com.simplefanc.voj.dao.problem.ProblemCaseEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
+import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.service.file.TestCaseService;
+import com.simplefanc.voj.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.simplefanc.voj.common.exception.StatusFailException;
-import com.simplefanc.voj.common.exception.StatusSystemErrorException;
-import com.simplefanc.voj.common.result.ResultStatus;
-import com.simplefanc.voj.dao.problem.ProblemCaseEntityService;
-import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
-import com.simplefanc.voj.service.file.TestCaseService;
-import com.simplefanc.voj.utils.Constants;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -42,6 +43,11 @@ public class TestCaseServiceImpl implements TestCaseService {
     @Autowired
     private ProblemCaseEntityService problemCaseEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
+    // TODO 行数过多
+    @Override
     public Map<Object, Object> uploadTestcaseZip(MultipartFile file) {
         //获取文件后缀
         String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
@@ -49,7 +55,7 @@ public class TestCaseServiceImpl implements TestCaseService {
             throw new StatusFailException("请上传zip格式的测试数据压缩包！");
         }
         String fileDirId = IdUtil.simpleUUID();
-        String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
+        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
         FileUtil.mkdir(fileDir);
@@ -139,11 +145,14 @@ public class TestCaseServiceImpl implements TestCaseService {
     }
 
 
+    // TODO 行数过多
+    @Override
     public void downloadTestcase(Long pid, HttpServletResponse response) {
 
-        String workDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid;
+        String workDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
         File file = new File(workDir);
-        if (!file.exists()) { // 本地为空 尝试去数据库查找
+        // 本地为空 尝试去数据库查找
+        if (!file.exists()) {
             QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
             problemCaseQueryWrapper.eq("pid", pid);
             List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
@@ -176,11 +185,13 @@ public class TestCaseServiceImpl implements TestCaseService {
 
         String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
-        ZipUtil.zip(workDir, Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+        ZipUtil.zip(workDir, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
         // 将zip变成io流返回给前端
-        FileReader fileReader = new FileReader(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
-        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());//放到缓冲流里面
-        OutputStream outs = null;//获取文件输出IO流
+        FileReader fileReader = new FileReader(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
+        // 放到缓冲流里面
+        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());
+        // 获取文件输出IO流
+        OutputStream outs = null;
         BufferedOutputStream bouts = null;
         try {
             outs = response.getOutputStream();
@@ -221,7 +232,7 @@ public class TestCaseServiceImpl implements TestCaseService {
                 e.printStackTrace();
             }
             // 清空临时文件
-            FileUtil.del(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+            FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
         }
     }
 }

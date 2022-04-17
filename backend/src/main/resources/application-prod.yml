@@ -58,3 +58,7 @@ logging:
     com.gargoylesoftware: off
     root: error
   config: classpath:logback-spring.xml
+
+voj:
+  logging:
+    filepath: "/voj/log/backend"

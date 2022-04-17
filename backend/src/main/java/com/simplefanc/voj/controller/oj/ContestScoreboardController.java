@@ -1,10 +1,10 @@
 package com.simplefanc.voj.controller.oj;
 
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.service.oj.ContestScoreboardService;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;

@@ -1,11 +1,11 @@
 package com.simplefanc.voj.pojo.dto;
 
+import com.simplefanc.voj.pojo.entity.judge.Judge;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
 
 import java.io.Serializable;
 
@@ -30,9 +30,6 @@ public class ToJudge implements Serializable {
 
     @ApiModelProperty("远程判题不为空，voj判题为null，例如HDU-1000")
     private String remoteJudgeProblem;
-
-    @ApiModelProperty("是否为远程判题重判，仅限于已有远程OJ的提交id的重判")
-    private Boolean isHasSubmitIdRemoteReJudge;
 
     @ApiModelProperty("远程判题所用账号")
     private String username;

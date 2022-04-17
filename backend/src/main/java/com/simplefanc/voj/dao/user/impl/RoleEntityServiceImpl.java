@@ -1,10 +1,10 @@
 package com.simplefanc.voj.dao.user.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.user.RoleEntityService;
 import com.simplefanc.voj.mapper.RoleMapper;
 import com.simplefanc.voj.pojo.entity.user.Role;
+import org.springframework.stereotype.Service;
 
 /**
  * <p>

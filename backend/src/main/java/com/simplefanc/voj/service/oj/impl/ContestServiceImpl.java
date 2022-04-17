@@ -2,11 +2,6 @@ package com.simplefanc.voj.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.common.exception.StatusNotFoundException;
@@ -22,13 +17,17 @@ import com.simplefanc.voj.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.pojo.entity.common.Announcement;
 import com.simplefanc.voj.pojo.entity.contest.*;
 import com.simplefanc.voj.pojo.entity.problem.*;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.vo.*;
 import com.simplefanc.voj.service.oj.ContestRankService;
 import com.simplefanc.voj.service.oj.ContestService;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
 import com.simplefanc.voj.validator.ContestValidator;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -223,6 +222,7 @@ public class ContestServiceImpl implements ContestService {
     }
 
     @Override
+    // TODO 行数过多
     public ProblemInfoVo getContestProblemDetails(Long cid, String displayId) {
 
         // 获取当前登录的用户
@@ -307,17 +307,17 @@ public class ContestServiceImpl implements ContestService {
         QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
         codeTemplateQueryWrapper.eq("pid", problem.getId()).eq("status", true);
         List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
-        HashMap<String, String> LangNameAndCode = new HashMap<>();
+        HashMap<String, String> langNameAndCode = new HashMap<>();
         if (codeTemplates.size() > 0) {
             for (CodeTemplate codeTemplate : codeTemplates) {
-                LangNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
+                langNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
             }
         }
         // 将数据统一写入到一个Vo返回数据实体类中
-        return new ProblemInfoVo(problem, tags, languagesStr, problemCount, LangNameAndCode);
+        return new ProblemInfoVo(problem, tags, languagesStr, problemCount, langNameAndCode);
     }
 
-
+    // TODO 参数过多
     @Override
     public IPage<JudgeVo> getContestSubmissionList(Integer limit,
                                                    Integer currentPage,

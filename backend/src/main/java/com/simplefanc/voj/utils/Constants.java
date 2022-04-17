@@ -35,7 +35,7 @@ public class Constants {
         private final String name;
         private final String columnName;
 
-        private Judge(Integer status, String name, String columnName) {
+        Judge(Integer status, String name, String columnName) {
             this.status = status;
             this.name = name;
             this.columnName = columnName;
@@ -79,15 +79,13 @@ public class Constants {
 
     public enum RemoteOJ {
         HDU("HDU"),
-        CODEFORCES("CF"),
-        GYM("GYM"),
         POJ("POJ"),
         SPOJ("SPOJ"),
         ATCODER("AC");
 
         private final String name;
 
-        private RemoteOJ(String name) {
+        RemoteOJ(String name) {
             this.name = name;
         }
 
@@ -171,9 +169,7 @@ public class Constants {
         SUBMIT_NON_CONTEST_LOCK("submit_non_contest_lock:"),
         SUBMIT_CONTEST_LOCK("submit_contest_lock:"),
         DISCUSSION_ADD_NUM_LOCK("discussion_add_num_lock:"),
-        CONTEST_ADD_PRINT_LOCK("contest_add_print_lock:"),
-
-        REMOTE_JUDGE_CF_ACCOUNT_NUM("remote_judge_cf_account:");
+        CONTEST_ADD_PRINT_LOCK("contest_add_print_lock:");
 
         private final String code;
 

@@ -1,7 +1,7 @@
 package com.simplefanc.voj.shiro;
 
-import lombok.Data;
 import com.simplefanc.voj.pojo.entity.user.Role;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;

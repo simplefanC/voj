@@ -17,13 +17,21 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @MapperScan("com.simplefanc.voj.mapper")
 public class MybatisPlusConfig {
 
-    // 注册乐观锁插件
+    /**
+     * 注册乐观锁插件
+     *
+     * @return
+     */
     @Bean
     public OptimisticLockerInterceptor optimisticLockerInterceptor() {
         return new OptimisticLockerInterceptor();
     }
 
-    // 分页插件
+    /**
+     * 分页插件
+     *
+     * @return
+     */
     @Bean
     public PaginationInterceptor paginationInterceptor() {
         return new PaginationInterceptor();

@@ -1,8 +1,8 @@
 package com.simplefanc.voj.validator;
 
-import org.springframework.stereotype.Component;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.pojo.dto.ToJudgeDto;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;

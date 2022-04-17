@@ -5,15 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
-import com.simplefanc.voj.crawler.problem.ProblemStrategy;
+import com.simplefanc.voj.crawler.ProblemCrawler;
 import com.simplefanc.voj.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.dao.training.TrainingEntityService;
 import com.simplefanc.voj.dao.training.TrainingProblemEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.dto.TrainingProblemDto;
 import com.simplefanc.voj.pojo.entity.problem.Problem;
 import com.simplefanc.voj.pojo.entity.training.Training;
@@ -23,6 +20,12 @@ import com.simplefanc.voj.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.service.admin.training.AdminTrainingRecordService;
 import com.simplefanc.voj.utils.Constants;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -52,6 +55,9 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     @Resource
     private RemoteProblemService remoteProblemService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     @Override
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Boolean queryExisted, Long tid) {
         if (currentPage == null || currentPage < 1) currentPage = 1;
@@ -72,7 +78,8 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
         });
 
         HashMap<String, Object> trainingProblem = new HashMap<>();
-        if (pidList.size() == 0 && queryExisted) { // 该训练原本就无题目数据
+        // 该训练原本就无题目数据
+        if (pidList.size() == 0 && queryExisted) {
             trainingProblem.put("problemList", pidList);
             trainingProblem.put("contestProblemMap", trainingProblemMap);
             return trainingProblem;
@@ -121,23 +128,20 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
     @Override
     public void deleteProblem(Long pid, Long tid) {
-        boolean isOk = false;
+        boolean isOk;
         //  训练id不为null，表示就是从比赛列表移除而已
         if (tid != null) {
             QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
             trainingProblemQueryWrapper.eq("tid", tid).eq("pid", pid);
             isOk = trainingProblemEntityService.remove(trainingProblemQueryWrapper);
-
         } else {
-             /*
-                problem的id为其他表的外键的表中的对应数据都会被一起删除！
-              */
+            // problem的id为其他表的外键的表中的对应数据都会被一起删除！
             isOk = problemEntityService.removeById(pid);
         }
 
-        if (isOk) { // 删除成功
+        if (isOk) {
             if (tid == null) {
-                FileUtil.del(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid);
+                FileUtil.del(filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid);
             }
 
             // 更新训练最近更新时间
@@ -171,8 +175,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
         TrainingProblem newTProblem = new TrainingProblem();
         boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
                 .setTid(tid).setPid(pid).setDisplayId(displayId));
-        if (isOk) { // 添加成功
-
+        if (isOk) { 
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
             trainingUpdateWrapper.set("gmt_modified", new Date())
@@ -187,6 +190,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void importTrainingRemoteOJProblem(String name, String problemId, Long tid) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
@@ -197,7 +201,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             Session session = SecurityUtils.getSubject().getSession();
             UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
             try {
-                ProblemStrategy.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {
@@ -225,8 +229,8 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
         TrainingProblem newTProblem = new TrainingProblem();
         boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
                 .setTid(tid).setPid(problem.getId()).setDisplayId(problem.getProblemId()));
-        if (isOk) { // 添加成功
-
+        // 添加成功
+        if (isOk) {
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
             trainingUpdateWrapper.set("gmt_modified", new Date())

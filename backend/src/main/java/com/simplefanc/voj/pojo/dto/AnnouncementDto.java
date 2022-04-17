@@ -1,7 +1,7 @@
 package com.simplefanc.voj.pojo.dto;
 
-import lombok.Data;
 import com.simplefanc.voj.pojo.entity.common.Announcement;
+import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 

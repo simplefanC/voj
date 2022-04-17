@@ -44,6 +44,7 @@ public class Constants {
         STATUS_PARTIAL_ACCEPTED(8, "Partial Accepted"),
         STATUS_SUBMITTING(9, "Submitting"),
         STATUS_SUBMITTED_FAILED(10, "Submitted Failed"),
+        STATUS_OUTPUT_LIMIT_EXCEEDED(11, "Output Limit Exceeded"),
         STATUS_NULL(15, "No Status");
 
         private final Integer status;
@@ -65,57 +66,6 @@ public class Constants {
 
         public Integer getStatus() {
             return status;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
-    public enum RemoteJudge {
-
-
-        HDU_JUDGE("HDU"),
-
-        CF_JUDGE("CF"),
-
-        GYM_JUDGE("GYM"),
-
-        POJ_JUDGE("POJ"),
-
-        SPOJ_JUDGE("SPOJ"),
-
-        ATCODER_JUDGE("AC"),
-
-        HDU_REMOTE_JUDGE_ACCOUNT("Hdu Remote Judge Account"),
-
-        CF_REMOTE_JUDGE_ACCOUNT("Codeforces Remote Judge Account");
-
-        private final String name;
-
-        RemoteJudge(String remoteJudgeName) {
-            this.name = remoteJudgeName;
-        }
-
-        public static RemoteJudge getTypeByName(String judgeName) {
-            if (judgeName == null) return null;
-            for (RemoteJudge remoteJudge : RemoteJudge.values()) {
-                if (remoteJudge.getName().equals(judgeName)) {
-                    return remoteJudge;
-                }
-            }
-            return null;
-        }
-
-        public static String getListNameByOJName(String judgeName) {
-            if (judgeName == null) return null;
-            switch (judgeName) {
-                case "HDU":
-                    return RemoteJudge.HDU_REMOTE_JUDGE_ACCOUNT.getName();
-                case "CF":
-                    return RemoteJudge.CF_REMOTE_JUDGE_ACCOUNT.getName();
-            }
-            return null;
         }
 
         public String getName() {
@@ -152,7 +102,7 @@ public class Constants {
 
         RUN_WORKPLACE_DIR("/judge/run"),
 
-        TEST_CASE_DIR("/judge/test_case"),
+        TEST_CASE_DIR("/judge/testcase"),
 
         SPJ_WORKPLACE_DIR("/judge/spj"),
 
@@ -217,6 +167,7 @@ public class Constants {
         private final String command;
         private final List<String> envs;
 
+        // TODO 参数过多
         CompileConfig(String language, String srcName, String exeName, Long maxCpuTime, Long maxRealTime, Long maxMemory,
                       String command, List<String> envs) {
             this.language = language;

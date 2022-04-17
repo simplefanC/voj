@@ -2,15 +2,15 @@ package com.simplefanc.voj.judge.self;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.pojo.entity.judge.Judge;
+import com.simplefanc.voj.utils.Constants;
+import com.simplefanc.voj.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
-import com.simplefanc.voj.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
-import com.simplefanc.voj.utils.Constants;
-import com.simplefanc.voj.utils.RedisUtils;
 
 /**
  * @Author: chenfan

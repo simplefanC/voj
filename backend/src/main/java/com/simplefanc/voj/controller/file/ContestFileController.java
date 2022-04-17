@@ -1,6 +1,7 @@
 package com.simplefanc.voj.controller.file;
 
 
+import com.simplefanc.voj.service.file.ContestFileService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.simplefanc.voj.service.file.ContestFileService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;

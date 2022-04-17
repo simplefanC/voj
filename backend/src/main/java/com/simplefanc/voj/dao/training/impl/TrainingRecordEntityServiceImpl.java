@@ -1,11 +1,11 @@
 package com.simplefanc.voj.dao.training.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.training.TrainingRecordEntityService;
 import com.simplefanc.voj.mapper.TrainingRecordMapper;
 import com.simplefanc.voj.pojo.entity.training.TrainingRecord;
 import com.simplefanc.voj.pojo.vo.TrainingRecordVo;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;

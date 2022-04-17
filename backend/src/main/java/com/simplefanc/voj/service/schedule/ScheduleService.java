@@ -8,14 +8,6 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import com.simplefanc.voj.dao.common.FileEntityService;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.msg.AdminSysNoticeEntityService;
@@ -23,6 +15,7 @@ import com.simplefanc.voj.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.dao.user.SessionEntityService;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.entity.common.File;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.entity.msg.AdminSysNotice;
@@ -34,6 +27,14 @@ import com.simplefanc.voj.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.JsoupUtils;
 import com.simplefanc.voj.utils.RedisUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -96,6 +97,9 @@ public class ScheduleService {
     @Resource
     private RejudgeService rejudgeService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     /**
      * @MethodName deleteAvatar
      * @Params * @param null
@@ -135,9 +139,8 @@ public class ScheduleService {
      * @Since 2021/2/7
      */
     @Scheduled(cron = "0 0 3 * * *")
-//    @Scheduled(cron = "0/5 * * * * *")
     public void deleteTestCase() {
-        boolean result = FileUtil.del(Constants.File.TESTCASE_TMP_FOLDER.getPath());
+        boolean result = FileUtil.del(filePathProps.getTestcaseTmpFolder());
         if (!result) {
             log.error("每日定时任务异常------------------------>{}", "清除本地的题目测试数据失败!");
         }
@@ -152,7 +155,7 @@ public class ScheduleService {
      */
     @Scheduled(cron = "0 0 4 * * *")
     public void deleteContestPrintText() {
-        boolean result = FileUtil.del(Constants.File.CONTEST_TEXT_PRINT_FOLDER.getPath());
+        boolean result = FileUtil.del(filePathProps.getContestTextPrintFolder());
         if (!result) {
             log.error("每日定时任务异常------------------------>{}", "清除本地的比赛打印数据失败!");
         }
@@ -166,8 +169,7 @@ public class ScheduleService {
      * beginTime: "2020-11-08T05:00:00Z",
      * endTime: "2020-11-08T08:00:00Z",
      */
-    @Scheduled(cron = "0 0 0/2 * * *")
-//    @Scheduled(cron = "0/5 * * * * *")
+//    @Scheduled(cron = "0 0 0/2 * * *")
     public void getOjContestsList() {
         // 待格式化的API，需要填充年月查询
         String nowcoderContestAPI = "https://ac.nowcoder.com/acm/calendar/contest?token=&month=%d-%d";
@@ -226,8 +228,7 @@ public class ScheduleService {
     /**
      * 每天3点获取codeforces的rating分数
      */
-    @Scheduled(cron = "0 0 3 * * *")
-//    @Scheduled(cron = "0/5 * * * * *")
+//    @Scheduled(cron = "0 0 3 * * *")
     public void getCodeforcesRating() {
         String codeforcesUserInfoAPI = "https://codeforces.com/api/user.info?handles=%s";
         QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
@@ -289,8 +290,7 @@ public class ScheduleService {
      * @Return
      * @Since 2021/9/6
      */
-    @Scheduled(cron = "0 0 3 * * *")
-//    @Scheduled(cron = "0/5 * * * * *")
+//    @Scheduled(cron = "0 0 3 * * *")
     public void deleteUserSession() {
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
         DateTime dateTime = DateUtil.offsetMonth(new Date(), -6);

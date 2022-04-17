@@ -47,6 +47,7 @@ public class SpecialJudge extends AbstractJudge {
         return null;
     }
 
+    // TODO 行数过多
     @Override
     public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
 
@@ -133,7 +134,7 @@ public class SpecialJudge extends AbstractJudge {
         return result;
     }
 
-
+    // TODO 参数过多
     private JSONObject spjRunAndCheckResult(String userOutputFilePath,
                                             String userOutputFileName,
                                             String testCaseInputFilePath,

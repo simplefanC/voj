@@ -1,9 +1,6 @@
 package com.simplefanc.voj.controller.oj;
 
 
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.ChangeEmailDto;
 import com.simplefanc.voj.pojo.dto.ChangePasswordDto;
@@ -13,6 +10,9 @@ import com.simplefanc.voj.pojo.vo.CheckUsernameOrEmailVo;
 import com.simplefanc.voj.pojo.vo.UserHomeVo;
 import com.simplefanc.voj.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.service.oj.AccountService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author: chenfan

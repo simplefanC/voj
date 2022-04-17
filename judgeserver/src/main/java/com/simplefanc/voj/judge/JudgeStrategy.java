@@ -42,6 +42,7 @@ public class JudgeStrategy {
     @Resource
     private JudgeRun judgeRun;
 
+    // TODO 行数过多
     public HashMap<String, Object> judge(Problem problem, Judge judge) {
 
         HashMap<String, Object> result = new HashMap<>();
@@ -132,6 +133,7 @@ public class JudgeStrategy {
         return result;
     }
 
+    // TODO 行数过多
     private Boolean checkOrCompileExtraProgram(Problem problem) throws CompileError, SystemError {
 
         Constants.JudgeMode judgeMode = Constants.JudgeMode.getJudgeMode(problem.getJudgeMode());

@@ -1,11 +1,11 @@
 package com.simplefanc.voj.service.admin.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.service.admin.training.AdminTrainingCategoryService;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 

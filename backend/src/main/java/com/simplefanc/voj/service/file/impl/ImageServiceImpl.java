@@ -4,6 +4,16 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.simplefanc.voj.common.exception.StatusFailException;
+import com.simplefanc.voj.common.exception.StatusSystemErrorException;
+import com.simplefanc.voj.dao.common.FileEntityService;
+import com.simplefanc.voj.dao.user.UserInfoEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
+import com.simplefanc.voj.pojo.entity.user.Role;
+import com.simplefanc.voj.pojo.entity.user.UserInfo;
+import com.simplefanc.voj.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.service.file.ImageService;
+import com.simplefanc.voj.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
@@ -11,15 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.simplefanc.voj.common.exception.StatusFailException;
-import com.simplefanc.voj.common.exception.StatusSystemErrorException;
-import com.simplefanc.voj.dao.common.FileEntityService;
-import com.simplefanc.voj.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.pojo.entity.user.Role;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
-import com.simplefanc.voj.pojo.vo.UserRolesVo;
-import com.simplefanc.voj.service.file.ImageService;
-import com.simplefanc.voj.utils.Constants;
 
 import java.io.File;
 import java.util.Map;
@@ -39,6 +40,10 @@ public class ImageServiceImpl implements ImageService {
     @Autowired
     private UserInfoEntityService userInfoEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<Object, Object> uploadAvatar(MultipartFile image) {
         if (image == null) {
@@ -53,12 +58,12 @@ public class ImageServiceImpl implements ImageService {
             throw new StatusFailException("请选择jpg,jpeg,gif,png,webp格式的头像图片！");
         }
         //若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.USER_AVATAR_FOLDER.getPath());
+        FileUtil.mkdir(filePathProps.getUserAvatarFolder());
         //通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
             //将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.USER_AVATAR_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(FileUtil.file(filePathProps.getUserAvatarFolder() + File.separator + filename));
         } catch (Exception e) {
             log.error("头像文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：头像上传失败！");
@@ -74,27 +79,27 @@ public class ImageServiceImpl implements ImageService {
 
         //更新user_info里面的avatar
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
-        userInfoUpdateWrapper.set("avatar", Constants.File.IMG_API.getPath() + filename)
+        userInfoUpdateWrapper.set("avatar", filePathProps.getImgApi() + filename)
                 .eq("uuid", userRolesVo.getUid());
         userInfoEntityService.update(userInfoUpdateWrapper);
 
         // 插入file表记录
         com.simplefanc.voj.pojo.entity.common.File imgFile = new com.simplefanc.voj.pojo.entity.common.File();
-        imgFile.setName(filename).setFolderPath(Constants.File.USER_AVATAR_FOLDER.getPath())
-                .setFilePath(Constants.File.USER_AVATAR_FOLDER.getPath() + File.separator + filename)
+        imgFile.setName(filename).setFolderPath(filePathProps.getUserAvatarFolder())
+                .setFilePath(filePathProps.getUserAvatarFolder() + File.separator + filename)
                 .setSuffix(suffix)
                 .setType("avatar")
                 .setUid(userRolesVo.getUid());
         fileEntityService.saveOrUpdate(imgFile);
 
         // 更新session
-        userRolesVo.setAvatar(Constants.File.IMG_API.getPath() + filename);
+        userRolesVo.setAvatar(filePathProps.getImgApi() + filename);
         session.setAttribute("userInfo", userRolesVo);
         return MapUtil.builder()
                 .put("uid", userRolesVo.getUid())
                 .put("username", userRolesVo.getUsername())
                 .put("nickname", userRolesVo.getNickname())
-                .put("avatar", Constants.File.IMG_API.getPath() + filename)
+                .put("avatar", filePathProps.getImgApi() + filename)
                 .put("email", userRolesVo.getEmail())
                 .put("number", userRolesVo.getNumber())
                 .put("school", userRolesVo.getSchool())
@@ -109,6 +114,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<Object, Object> uploadCarouselImg(MultipartFile image) {
 
@@ -116,18 +122,19 @@ public class ImageServiceImpl implements ImageService {
             throw new StatusFailException("上传的图片文件不能为空！");
         }
 
-        //获取文件后缀
+        // 获取文件后缀
         String suffix = image.getOriginalFilename().substring(image.getOriginalFilename().lastIndexOf(".") + 1);
+        // TODO 魔法
         if (!"jpg,jpeg,gif,png,webp,jfif,svg".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请选择jpg,jpeg,gif,png,webp,jfif,svg格式的头像图片！");
         }
-        //若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.HOME_CAROUSEL_FOLDER.getPath());
-        //通过UUID生成唯一文件名
+        // 若不存在该目录，则创建目录
+        FileUtil.mkdir(filePathProps.getHomeCarouselFolder());
+        // 通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
-            //将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename));
+            // 将文件保存指定目录
+            image.transferTo(FileUtil.file(filePathProps.getHomeCarouselFolder() + File.separator + filename));
         } catch (Exception e) {
             log.error("图片文件上传异常-------------->{}", e.getMessage());
             throw new StatusSystemErrorException("服务器异常：图片上传失败！");
@@ -140,8 +147,8 @@ public class ImageServiceImpl implements ImageService {
 
         // 插入file表记录
         com.simplefanc.voj.pojo.entity.common.File imgFile = new com.simplefanc.voj.pojo.entity.common.File();
-        imgFile.setName(filename).setFolderPath(Constants.File.HOME_CAROUSEL_FOLDER.getPath())
-                .setFilePath(Constants.File.HOME_CAROUSEL_FOLDER.getPath() + File.separator + filename)
+        imgFile.setName(filename).setFolderPath(filePathProps.getHomeCarouselFolder())
+                .setFilePath(filePathProps.getHomeCarouselFolder() + File.separator + filename)
                 .setSuffix(suffix)
                 .setType("carousel")
                 .setUid(userRolesVo.getUid());
@@ -149,7 +156,7 @@ public class ImageServiceImpl implements ImageService {
 
         return MapUtil.builder()
                 .put("id", imgFile.getId())
-                .put("url", Constants.File.IMG_API.getPath() + filename)
+                .put("url", filePathProps.getImgApi() + filename)
                 .map();
     }
 

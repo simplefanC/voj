@@ -2,8 +2,6 @@ package com.simplefanc.voj.validator;
 
 import cn.hutool.core.util.ReUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.dao.contest.ContestRegisterEntityService;
@@ -11,6 +9,8 @@ import com.simplefanc.voj.pojo.entity.contest.Contest;
 import com.simplefanc.voj.pojo.entity.contest.ContestRegister;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.utils.Constants;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;

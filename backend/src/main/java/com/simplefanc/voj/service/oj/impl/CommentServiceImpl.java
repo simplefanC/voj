@@ -1,16 +1,9 @@
 package com.simplefanc.voj.service.oj.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.extra.emoji.EmojiUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.dao.discussion.CommentEntityService;
@@ -28,6 +21,12 @@ import com.simplefanc.voj.pojo.vo.CommentListVo;
 import com.simplefanc.voj.pojo.vo.CommentVo;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.oj.CommentService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -101,7 +100,7 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public CommentVo addComment(Comment comment) {
 
         if (StringUtils.isEmpty(comment.getContent().trim())) {

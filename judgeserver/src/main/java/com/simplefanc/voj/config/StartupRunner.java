@@ -40,16 +40,16 @@ public class StartupRunner implements CommandLineRunner {
     private JudgeServerEntityService judgeServerEntityService;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void run(String... args) {
 
-        log.info("IP  of the current judge server:" + ip);
+        log.info("IP of the current judge server:" + ip);
         log.info("Port of the current judge server:" + port);
 
         if (maxTaskNum == -1) {
             maxTaskNum = cpuNum + 1;
         }
-        if (ip.equals("-1")) {
+        if ("-1".equals(ip)) {
             ip = IpUtils.getLocalIpv4Address();
         }
         UpdateWrapper<JudgeServer> judgeServerQueryWrapper = new UpdateWrapper<>();
@@ -63,6 +63,7 @@ public class StartupRunner implements CommandLineRunner {
                 .setMaxTaskNumber(maxTaskNum)
                 .setIsRemote(false)
                 .setName(name));
+
         boolean isOk2 = true;
         if (openRemoteJudge) {
             if (maxRemoteTaskNum == -1) {
@@ -82,7 +83,7 @@ public class StartupRunner implements CommandLineRunner {
             log.error("初始化判题机信息到数据库失败，请重新启动试试！");
         } else {
             HashMap<String, Object> judgeServerInfo = judgeServerEntityService.getJudgeServerInfo();
-            log.info("VOJ-JudgeServer had successfully started! The judge config and sandbox config Info:" + judgeServerInfo);
+            log.info("VOJ-JudgeServer had successfully started! The judge config and sandbox config Info: {}", judgeServerInfo);
         }
 
     }

@@ -1,13 +1,13 @@
 package com.simplefanc.voj.dao.common.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.common.FileEntityService;
 import com.simplefanc.voj.mapper.FileMapper;
 import com.simplefanc.voj.pojo.entity.common.File;
 import com.simplefanc.voj.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.pojo.vo.OIContestRankVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -110,7 +110,8 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
             HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVo.getSubmissionInfo();
             for (String displayID : contestProblemDisplayIDList) {
                 HashMap<String, Object> problemInfo = submissionInfo.getOrDefault(displayID, null);
-                if (problemInfo != null) { // 如果是有提交记录的
+                // 如果是有提交记录的
+                if (problemInfo != null) {
                     boolean isAC = (boolean) problemInfo.getOrDefault("isAC", false);
                     String info = "";
                     int errorNum = (int) problemInfo.getOrDefault("errorNum", 0);

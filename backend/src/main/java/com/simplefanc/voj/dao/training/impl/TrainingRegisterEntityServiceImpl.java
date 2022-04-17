@@ -2,10 +2,10 @@ package com.simplefanc.voj.dao.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.training.TrainingRegisterEntityService;
 import com.simplefanc.voj.mapper.TrainingRegisterMapper;
 import com.simplefanc.voj.pojo.entity.training.TrainingRegister;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;

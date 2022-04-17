@@ -7,7 +7,6 @@ import com.simplefanc.voj.pojo.vo.ContestVo;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: chenfan
@@ -60,13 +59,4 @@ public interface HomeService {
      * @Since 2020/12/29
      */
     IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage);
-
-    /**
-     * @MethodName getWebConfig
-     * @Params * @param null
-     * @Description 获取网站的基础配置。例如名字，缩写名字等等。
-     * @Return CommonResult
-     * @Since 2020/12/29
-     */
-    Map<Object, Object> getWebConfig();
 }

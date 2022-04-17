@@ -2,23 +2,17 @@ package com.simplefanc.voj.config;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.simplefanc.voj.dao.judge.RemoteJudgeAccountEntityService;
+import com.simplefanc.voj.pojo.bo.RemoteAccountProps;
+import com.simplefanc.voj.pojo.entity.judge.RemoteJudgeAccount;
+import com.simplefanc.voj.pojo.vo.ConfigVo;
+import com.simplefanc.voj.service.admin.system.ConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-import com.simplefanc.voj.crawler.language.LanguageContext;
-import com.simplefanc.voj.dao.judge.RemoteJudgeAccountEntityService;
-import com.simplefanc.voj.dao.problem.LanguageEntityService;
-import com.simplefanc.voj.pojo.entity.judge.RemoteJudgeAccount;
-import com.simplefanc.voj.pojo.entity.problem.Language;
-import com.simplefanc.voj.pojo.vo.ConfigVo;
-import com.simplefanc.voj.service.admin.system.ConfigService;
-import com.simplefanc.voj.utils.Constants;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,13 +34,12 @@ public class StartupRunner implements CommandLineRunner {
     @Autowired
     private RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
 
-    @Autowired
-    private LanguageEntityService languageEntityService;
-
     @Value("${OPEN_REMOTE_JUDGE:true}")
     private String openRemoteJudge;
 
-    // jwt配置
+    /**
+     * jwt配置
+     */
     @Value("${JWT_TOKEN_SECRET:default}")
     private String tokenSecret;
 
@@ -56,7 +49,9 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${JWT_TOKEN_FRESH_EXPIRE:43200}")
     private String checkRefreshExpire;
 
-    // 数据库配置
+    /**
+     * 数据库配置
+     */
     @Value("${MYSQL_USERNAME:root}")
     private String mysqlUsername;
 
@@ -75,7 +70,9 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${MYSQL_PORT:3306}")
     private Integer mysqlPort;
 
-    // 缓存配置
+    /**
+     * 缓存配置
+     */
     @Value("${REDIS_HOST:172.20.0.2}")
     private String redisHost;
 
@@ -84,11 +81,15 @@ public class StartupRunner implements CommandLineRunner {
 
     @Value("${REDIS_PASSWORD:voj123456}")
     private String redisPassword;
-    // 判题服务token
+    /**
+     * 判题服务token
+     */
     @Value("${JUDGE_TOKEN:default}")
     private String judgeToken;
 
-    // 邮箱配置
+    /**
+     * 邮箱配置
+     */
     @Value("${EMAIL_USERNAME:your_email_username}")
     private String emailUsername;
 
@@ -134,22 +135,24 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${spring.profiles.active}")
     private String profile;
 
+    @Autowired
+    private RemoteAccountProps remoteAccountProps;
+
 
     @Override
     public void run(String... args) {
-
-        if (profile.equals("dev")) {
+        if ("dev".equals(profile)) {
             return;
         }
 
         // 动态修改nacos上的配置文件
-        if (judgeToken.equals("default")) {
+        if ("default".equals(judgeToken)) {
             configVo.setJudgeToken(IdUtil.fastSimpleUUID());
         } else {
             configVo.setJudgeToken(judgeToken);
         }
 
-        if (tokenSecret.equals("default")) {
+        if ("default".equals(tokenSecret)) {
             configVo.setTokenSecret(IdUtil.fastSimpleUUID());
         } else {
             configVo.setTokenSecret(tokenSecret);
@@ -173,223 +176,33 @@ public class StartupRunner implements CommandLineRunner {
         configVo.setEmailUsername(emailUsername);
         configVo.setEmailPassword(emailPassword);
 
-        configVo.setHduUsernameList(hduUsernameList);
-        configVo.setHduPasswordList(hduPasswordList);
-
-        configVo.setCfUsernameList(cfUsernameList);
-        configVo.setCfPasswordList(cfPasswordList);
-
-        configVo.setPojUsernameList(pojUsernameList);
-        configVo.setPojPasswordList(pojPasswordList);
-
-        configVo.setAtcoderUsernameList(atcoderUsernameList);
-        configVo.setAtcoderPasswordList(atcoderUsernameList);
-
-        configVo.setSpojUsernameList(spojUsernameList);
-        configVo.setSpojPasswordList(spojPasswordList);
-
         configService.sendNewConfigToNacos();
 
-        upsertVOJLanguage("PHP", "PyPy2", "PyPy3", "JavaScript Node", "JavaScript V8");
-
-        checkAllLanguageUpdate();
-
-        if (openRemoteJudge.equals("true")) {
-            // 初始化清空表
-            remoteJudgeAccountEntityService.remove(new QueryWrapper<>());
-            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.HDU.getName(), hduUsernameList, hduPasswordList);
-            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.POJ.getName(), pojUsernameList, pojPasswordList);
-            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.CODEFORCES.getName(), cfUsernameList, cfPasswordList);
-            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.SPOJ.getName(), spojUsernameList, spojPasswordList);
-            addRemoteJudgeAccountToMySQL(Constants.RemoteOJ.ATCODER.getName(), atcoderUsernameList, atcoderPasswordList);
-
-            checkRemoteOJLanguage(Constants.RemoteOJ.SPOJ, Constants.RemoteOJ.ATCODER);
+        if ("true".equals(openRemoteJudge)) {
+            addRemoteJudgeAccountToDb();
         }
-
     }
 
-    /**
-     * @param oj
-     * @param usernameList
-     * @param passwordList
-     * @MethodName addRemoteJudgeAccountToRedis
-     * @Description 将传入的对应oj账号写入到mysql
-     * @Return
-     * @Since 2021/5/18
-     */
-    private void addRemoteJudgeAccountToMySQL(String oj, List<String> usernameList, List<String> passwordList) {
 
-
-        if (CollectionUtils.isEmpty(usernameList) || CollectionUtils.isEmpty(passwordList) || usernameList.size() != passwordList.size()) {
-            log.error("[{}]: There is no account or password configured for remote judge, " +
-                            "username list:{}, password list:{}", oj, Arrays.toString(usernameList.toArray()),
-                    Arrays.toString(passwordList.toArray()));
-        }
-
-        List<RemoteJudgeAccount> remoteAccountList = new LinkedList<>();
-        for (int i = 0; i < usernameList.size(); i++) {
-
-            remoteAccountList.add(new RemoteJudgeAccount()
-                    .setUsername(usernameList.get(i))
-                    .setPassword(passwordList.get(i))
-                    .setStatus(true)
-                    .setVersion(0L)
-                    .setOj(oj));
-
-        }
-
-        if (remoteAccountList.size() > 0) {
-            boolean addOk = remoteJudgeAccountEntityService.saveOrUpdateBatch(remoteAccountList);
-            if (!addOk) {
-                log.error("Remote judge initialization failed. Failed to add account for: [{}]. Please check the configuration file and restart!", oj);
+    private void addRemoteJudgeAccountToDb() {
+        // 初始化清空表
+        remoteJudgeAccountEntityService.remove(new QueryWrapper<>());
+        List<RemoteJudgeAccount> accountList = new LinkedList<>();
+        for (RemoteAccountProps.RemoteOJ remoteOj : remoteAccountProps.getOjs()) {
+            for (RemoteAccountProps.Account account : remoteOj.getAccounts()) {
+                accountList.add(
+                        new RemoteJudgeAccount()
+                                .setUsername(account.getUsername())
+                                .setPassword(account.getPassword())
+                                .setStatus(true)
+                                .setVersion(0L)
+                                .setOj(remoteOj.getOj())
+                );
             }
         }
-    }
-
-
-    private void upsertVOJLanguage(String... languageList) {
-        /**
-         * 2022.02.25 新增js、pypy、php语言
-         */
-        for (String language : languageList) {
-            QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-            languageQueryWrapper.eq("oj", "ME")
-                    .eq("name", language);
-            int count = languageEntityService.count(languageQueryWrapper);
-            if (count == 0) {
-                Language newLanguage = buildVOJLanguage(language);
-                boolean isOk = languageEntityService.save(newLanguage);
-                if (!isOk) {
-                    log.error("[VOJ] Failed to add new language [{}]! Please check whether the language table corresponding to the database has the language!", language);
-                }
-            }
+        if (!remoteJudgeAccountEntityService.saveOrUpdateBatch(accountList)) {
+            log.error("RemoteJudgeAccount添加失败------------>{}", "请检查配置文件，然后重新启动！");
         }
     }
-
-    private void checkAllLanguageUpdate() {
-
-        /**
-         * 2022.02.25 更新原有的python3.6.9为python3.7.5
-         */
-        UpdateWrapper<Language> languageUpdateWrapper = new UpdateWrapper<>();
-        languageUpdateWrapper.eq("oj", "ME")
-                .eq("name", "Python3")
-                .set("description", "Python 3.7.5");
-        languageEntityService.update(languageUpdateWrapper);
-
-        /**
-         * 2022.02.25 删除cf的Microsoft Visual C++ 2010
-         */
-        UpdateWrapper<Language> deleteWrapper = new UpdateWrapper<>();
-        deleteWrapper.eq("name", "Microsoft Visual C++ 2010")
-                .eq("oj", "CF");
-        languageEntityService.remove(deleteWrapper);
-    }
-
-    private void checkRemoteOJLanguage(Constants.RemoteOJ... remoteOJList) {
-        for (Constants.RemoteOJ remoteOJ : remoteOJList) {
-            QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-            languageQueryWrapper.eq("oj", remoteOJ.getName());
-            int count = languageEntityService.count(languageQueryWrapper);
-            if (count == 0) {
-                List<Language> languageList = new LanguageContext(remoteOJ).buildLanguageList();
-                boolean isOk = languageEntityService.saveBatch(languageList);
-                if (!isOk) {
-                    log.error("[{}] Failed to initialize language list! Please check whether the language table corresponding to the database has the OJ language!", remoteOJ.getName());
-                }
-            }
-        }
-    }
-
-
-    private Language buildVOJLanguage(String lang) {
-        Language language = new Language();
-        switch (lang) {
-            case "PHP":
-                language.setName("PHP")
-                        .setCompileCommand("/usr/bin/php {src_path}")
-                        .setContentType("text/x-php")
-                        .setDescription("PHP 7.3.33")
-                        .setTemplate("<?=array_sum(fscanf(STDIN, \"%d %d\"));")
-                        .setIsSpj(false)
-                        .setOj("ME");
-                return language;
-            case "JavaScript Node":
-                language.setName("JavaScript Node")
-                        .setCompileCommand("/usr/bin/node {src_path}")
-                        .setContentType("text/javascript")
-                        .setDescription("Node.js 14.19.0")
-                        .setTemplate("var readline = require('readline');\n" +
-                                "const rl = readline.createInterface({\n" +
-                                "        input: process.stdin,\n" +
-                                "        output: process.stdout\n" +
-                                "});\n" +
-                                "rl.on('line', function(line){\n" +
-                                "   var tokens = line.split(' ');\n" +
-                                "    console.log(parseInt(tokens[0]) + parseInt(tokens[1]));\n" +
-                                "});")
-                        .setIsSpj(false)
-                        .setOj("ME");
-                return language;
-            case "JavaScript V8":
-                language.setName("JavaScript V8")
-                        .setCompileCommand("/usr/bin/jsv8/d8 {src_path}")
-                        .setContentType("text/javascript")
-                        .setDescription("JavaScript V8 8.4.109")
-                        .setTemplate("const [a, b] = readline().split(' ').map(n => parseInt(n, 10));\n" +
-                                "print((a + b).toString());")
-                        .setIsSpj(false)
-                        .setOj("ME");
-                return language;
-            case "PyPy2":
-                language.setName("PyPy2")
-                        .setContentType("text/x-python")
-                        .setCompileCommand("/usr/bin/pypy -m py_compile {src_path}")
-                        .setDescription("PyPy 2.7.18 (7.3.8)")
-                        .setTemplate("print sum(int(x) for x in raw_input().split(' '))")
-                        .setCodeTemplate("//PREPEND BEGIN\n" +
-                                "//PREPEND END\n" +
-                                "\n" +
-                                "//TEMPLATE BEGIN\n" +
-                                "def add(a, b):\n" +
-                                "    return a + b\n" +
-                                "//TEMPLATE END\n" +
-                                "\n" +
-                                "\n" +
-                                "if __name__ == '__main__':  \n" +
-                                "    //APPEND BEGIN\n" +
-                                "    a, b = 1, 1\n" +
-                                "    print add(a, b)\n" +
-                                "    //APPEND END")
-                        .setIsSpj(false)
-                        .setOj("ME");
-                return language;
-            case "PyPy3":
-                language.setName("PyPy3")
-                        .setContentType("text/x-python")
-                        .setDescription("PyPy 3.8.12 (7.3.8)")
-                        .setCompileCommand("/usr/bin/pypy3 -m py_compile {src_path}")
-                        .setTemplate("print(sum(int(x) for x in input().split(' ')))")
-                        .setCodeTemplate("//PREPEND BEGIN\n" +
-                                "//PREPEND END\n" +
-                                "\n" +
-                                "//TEMPLATE BEGIN\n" +
-                                "def add(a, b):\n" +
-                                "    return a + b\n" +
-                                "//TEMPLATE END\n" +
-                                "\n" +
-                                "\n" +
-                                "if __name__ == '__main__':  \n" +
-                                "    //APPEND BEGIN\n" +
-                                "    a, b = 1, 1\n" +
-                                "    print(add(a, b))\n" +
-                                "    //APPEND END")
-                        .setIsSpj(false)
-                        .setOj("ME");
-                return language;
-        }
-        return null;
-    }
-
 }
 

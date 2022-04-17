@@ -1,10 +1,5 @@
 package com.simplefanc.voj.controller.oj;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.ApplyResetPasswordDto;
 import com.simplefanc.voj.pojo.dto.LoginDto;
@@ -13,6 +8,11 @@ import com.simplefanc.voj.pojo.dto.ResetPasswordDto;
 import com.simplefanc.voj.pojo.vo.RegisterCodeVo;
 import com.simplefanc.voj.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.service.oj.PassportService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

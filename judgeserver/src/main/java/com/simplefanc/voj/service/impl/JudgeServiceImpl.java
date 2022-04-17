@@ -1,12 +1,15 @@
 package com.simplefanc.voj.service.impl;
 
 import com.simplefanc.voj.common.exception.SystemError;
+import com.simplefanc.voj.dao.ContestRecordEntityService;
 import com.simplefanc.voj.dao.JudgeEntityService;
 import com.simplefanc.voj.dao.ProblemEntityService;
+import com.simplefanc.voj.dao.UserAcproblemEntityService;
 import com.simplefanc.voj.judge.JudgeContext;
 import com.simplefanc.voj.pojo.dto.ToJudge;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.entity.problem.Problem;
+import com.simplefanc.voj.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.remoteJudge.RemoteJudgeContext;
 import com.simplefanc.voj.service.JudgeService;
 import com.simplefanc.voj.util.Constants;
@@ -28,7 +31,7 @@ import java.util.HashMap;
 public class JudgeServiceImpl implements JudgeService {
 
     @Value("${voj-judge-server.name}")
-    private String name;
+    private String judgeServerName;
 
     @Resource
     private JudgeEntityService judgeEntityService;
@@ -42,12 +45,18 @@ public class JudgeServiceImpl implements JudgeService {
     @Autowired
     private RemoteJudgeContext remoteJudgeContext;
 
+    @Autowired
+    private UserAcproblemEntityService userAcproblemEntityService;
+
+    @Autowired
+    private ContestRecordEntityService contestRecordEntityService;
+
     @Override
     public void judge(Judge judge) {
         // 标志该判题过程进入编译阶段
         judge.setStatus(Constants.Judge.STATUS_COMPILING.getStatus());
         // 写入当前判题服务的名字
-        judge.setJudger(name);
+        judge.setJudger(judgeServerName);
         judgeEntityService.updateById(judge);
         // 进行判题操作
         Problem problem = problemEntityService.getById(judge.getPid());
@@ -81,5 +90,31 @@ public class JudgeServiceImpl implements JudgeService {
     @Override
     public Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError {
         return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
+    }
+
+    @Override
+    public void updateOtherTable(Long submitId,
+                                 Integer status,
+                                 Long cid,
+                                 String uid,
+                                 Long pid,
+                                 Integer score,
+                                 Integer useTime) {
+
+        // 非比赛提交
+        if (cid == 0) {
+            // 如果是AC,就更新user_acproblem表,
+            if (status.intValue() == Constants.Judge.STATUS_ACCEPTED.getStatus()) {
+                userAcproblemEntityService.saveOrUpdate(new UserAcproblem()
+                        .setPid(pid)
+                        .setUid(uid)
+                        .setSubmitId(submitId)
+                );
+            }
+
+        } else {
+            // 如果是比赛提交
+            contestRecordEntityService.UpdateContestRecord(uid, score, status, submitId, cid, useTime);
+        }
     }
 }

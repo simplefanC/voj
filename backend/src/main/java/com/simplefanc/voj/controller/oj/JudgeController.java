@@ -2,10 +2,6 @@ package com.simplefanc.voj.controller.oj;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.SubmitIdListDto;
 import com.simplefanc.voj.pojo.dto.ToJudgeDto;
@@ -14,6 +10,10 @@ import com.simplefanc.voj.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.pojo.vo.JudgeVo;
 import com.simplefanc.voj.pojo.vo.SubmissionInfoVo;
 import com.simplefanc.voj.service.oj.JudgeService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;

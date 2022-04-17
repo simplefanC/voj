@@ -2,6 +2,9 @@ package com.simplefanc.voj.advice;
 
 
 import com.google.protobuf.ServiceException;
+import com.simplefanc.voj.common.exception.*;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.common.result.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.shiro.ShiroException;
@@ -22,9 +25,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.simplefanc.voj.common.exception.*;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.common.result.ResultStatus;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;

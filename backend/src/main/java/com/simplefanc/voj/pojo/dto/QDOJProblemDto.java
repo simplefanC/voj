@@ -1,10 +1,10 @@
 package com.simplefanc.voj.pojo.dto;
 
-import lombok.ToString;
-import lombok.experimental.Accessors;
 import com.simplefanc.voj.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.pojo.entity.problem.Problem;
 import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.util.List;

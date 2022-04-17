@@ -2,14 +2,14 @@ package com.simplefanc.voj.controller.oj;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.CheckACDto;
 import com.simplefanc.voj.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.service.oj.ContestAdminService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author: chenfan

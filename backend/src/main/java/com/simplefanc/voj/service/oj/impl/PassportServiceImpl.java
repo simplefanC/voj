@@ -7,9 +7,6 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
@@ -34,6 +31,9 @@ import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.IpUtils;
 import com.simplefanc.voj.utils.JwtUtils;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -190,8 +190,8 @@ public class PassportServiceImpl implements PassportService {
 
     @Transactional(rollbackFor = Exception.class)
     public void register(RegisterDto registerDto) {
-
-        if (!configVo.getRegister()) { // 需要判断一下网站是否开启注册
+        // 需要判断一下网站是否开启注册
+        if (!configVo.getRegister()) {
             throw new StatusAccessDeniedException("对不起！本站暂未开启注册功能！");
         }
 

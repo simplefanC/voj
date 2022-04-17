@@ -16,4 +16,11 @@ public interface JudgeService {
 
     Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError;
 
+    void updateOtherTable(Long submitId,
+                          Integer status,
+                          Long cid,
+                          String uid,
+                          Long pid,
+                          Integer score,
+                          Integer useTime);
 }

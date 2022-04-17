@@ -1,10 +1,10 @@
 package com.simplefanc.voj.dao.judge.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.mapper.RemoteJudgeAccountMapper;
 import com.simplefanc.voj.pojo.entity.judge.RemoteJudgeAccount;
+import org.springframework.stereotype.Service;
 
 
 /**

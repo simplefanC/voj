@@ -1,8 +1,8 @@
 package com.simplefanc.voj.pojo.dto;
 
+import com.simplefanc.voj.pojo.entity.discussion.Reply;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import com.simplefanc.voj.pojo.entity.discussion.Reply;
 
 /**
  * @Author: chenfan

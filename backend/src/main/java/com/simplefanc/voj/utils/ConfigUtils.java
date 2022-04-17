@@ -1,9 +1,9 @@
 package com.simplefanc.voj.utils;
 
 import cn.hutool.core.text.UnicodeUtil;
+import com.simplefanc.voj.pojo.vo.ConfigVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.simplefanc.voj.pojo.vo.ConfigVo;
 
 import java.util.List;
 
@@ -48,7 +48,6 @@ public class ConfigUtils {
                 "    password: " + configVo.getEmailPassword() + "\n" +
                 "    host: " + configVo.getEmailHost() + "\n" +
                 "    port: " + configVo.getEmailPort() + "\n" +
-                "    background-img: " + configVo.getEmailBGImg() + "\n" +
                 "  redis:\n" +
                 "    host: " + configVo.getRedisHost() + "\n" +
                 "    port: " + configVo.getRedisPort() + "\n" +
@@ -59,33 +58,21 @@ public class ConfigUtils {
                 "    short-name: \"" + UnicodeUtil.toUnicode(configVo.getShortName(), false) + "\"\n" +
                 "    description: \"" + UnicodeUtil.toUnicode(configVo.getDescription(), false) + "\"\n" +
                 "    register: " + configVo.getRegister() + "\n" +
+                "    problem: " + configVo.getProjectName() + "\n" +
+                "    training: " + configVo.getTraining() + "\n" +
+                "    contest: " + configVo.getContest() + "\n" +
+                "    status: " + configVo.getStatus() + "\n" +
+                "    rank: " + configVo.getRank() + "\n" +
+                "    discussion: " + configVo.getDiscussion() + "\n" +
+                "    introduction: " + configVo.getIntroduction() + "\n" +
+                "    code-visible-start-time: " + configVo.getCodeVisibleStartTime() + "\n" +
                 "    footer:\n" +
                 "      record:\n" +
                 "        name: \"" + UnicodeUtil.toUnicode(configVo.getRecordName(), false) + "\"\n" +
                 "        url: \"" + UnicodeUtil.toUnicode(configVo.getRecordUrl(), false) + "\"\n" +
                 "      project:\n" +
                 "        name: \"" + UnicodeUtil.toUnicode(configVo.getProjectName(), false) + "\"\n" +
-                "        url: \"" + UnicodeUtil.toUnicode(configVo.getProjectUrl(), false) + "\"\n" +
-                "  hdu:\n" +
-                "    account:\n" +
-                "      username: " + listToStr(configVo.getHduUsernameList()) + "\n" +
-                "      password: " + listToStr(configVo.getHduPasswordList()) + "\n" +
-                "  cf:\n" +
-                "    account:\n" +
-                "      username: " + listToStr(configVo.getCfUsernameList()) + "\n" +
-                "      password: " + listToStr(configVo.getCfPasswordList()) + "\n" +
-                "  poj:\n" +
-                "    account:\n" +
-                "      username: " + listToStr(configVo.getPojUsernameList()) + "\n" +
-                "      password: " + listToStr(configVo.getPojPasswordList()) + "\n" +
-                "  atcoder:\n" +
-                "    account:\n" +
-                "      username: " + listToStr(configVo.getAtcoderUsernameList()) + "\n" +
-                "      password: " + listToStr(configVo.getAtcoderPasswordList()) + "\n" +
-                "  spoj:\n" +
-                "    account:\n" +
-                "      username: " + listToStr(configVo.getSpojUsernameList()) + "\n" +
-                "      password: " + listToStr(configVo.getSpojPasswordList());
+                "        url: \"" + UnicodeUtil.toUnicode(configVo.getProjectUrl(), false) + "\"\n";
     }
 
     private String listToStr(List<String> list) {

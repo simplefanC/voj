@@ -3,12 +3,12 @@ package com.simplefanc.voj.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.vo.JudgeVo;
 import com.simplefanc.voj.pojo.vo.ProblemCountVo;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
@@ -32,6 +32,7 @@ public interface JudgeMapper extends BaseMapper<Judge> {
                                       @Param("uid") String uid,
                                       @Param("completeProblemID") Boolean completeProblemID);
 
+    // TODO 参数过多
     IPage<JudgeVo> getContestJudgeList(Page<JudgeVo> page,
                                        @Param("displayId") String displayId,
                                        @Param("cid") Long cid,

@@ -75,7 +75,8 @@ public class InteractiveJudge extends AbstractJudge {
         // 如果运行超过题目限制时间，直接TLE
         if (userSandBoxRes.getTime() > judgeGlobalDTO.getMaxTime()) {
             result.set("status", Constants.Judge.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
-        } else if (userSandBoxRes.getMemory() > judgeGlobalDTO.getMaxMemory() * 1024) { // 如果运行超过题目限制空间，直接MLE
+        } else if (userSandBoxRes.getMemory() > judgeGlobalDTO.getMaxMemory() * 1024) {
+            // 如果运行超过题目限制空间，直接MLE
             result.set("status", Constants.Judge.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
         } else if ((userExitCode != 0 && userExitCode != 13) || (userExitCode == 13 && interactiveSandBoxRes.getExitCode() == 0)) {
             // Broken Pipe

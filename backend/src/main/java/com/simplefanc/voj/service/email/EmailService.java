@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.UnicodeUtil;
+import com.simplefanc.voj.utils.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +15,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import com.simplefanc.voj.utils.Constants;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -38,8 +38,6 @@ public class EmailService {
     public String ojName;
     @Value("${voj.web-config.short-name}")
     public String ojShortName;
-    @Value("${voj.mail.background-img}")
-    public String ojEmailBg;
     @Value("${voj.mail.username}")
     public String ojEmailFrom;
     @Value("${voj.mail.password}")
@@ -85,7 +83,7 @@ public class EmailService {
      * @Since 2021/6/12
      */
     public boolean isOk() {
-        return !ojEmailFrom.equals("your_email_username") && !ojEmailPassword.equals("your_email_password")
+        return !"your_email_username".equals(ojEmailFrom) && !"your_email_password".equals(ojEmailPassword)
                 && Validator.isEmail(ojEmailFrom);
     }
 
@@ -111,7 +109,6 @@ public class EmailService {
             context.setVariable(Constants.Email.OJ_NAME.name(), UnicodeUtil.toString(ojName));
             context.setVariable(Constants.Email.OJ_SHORT_NAME.name(), UnicodeUtil.toString(ojShortName).toUpperCase());
             context.setVariable(Constants.Email.OJ_URL.name(), ojAddr);
-            context.setVariable(Constants.Email.EMAIL_BACKGROUND_IMG.name(), ojEmailBg);
             context.setVariable("CODE", code);
             context.setVariable("EXPIRE_TIME", expireTime.toString());
 
@@ -155,7 +152,6 @@ public class EmailService {
             context.setVariable(Constants.Email.OJ_NAME.name(), UnicodeUtil.toString(ojName));
             context.setVariable(Constants.Email.OJ_SHORT_NAME.name(), UnicodeUtil.toString(ojShortName).toUpperCase());
             context.setVariable(Constants.Email.OJ_URL.name(), ojAddr);
-            context.setVariable(Constants.Email.EMAIL_BACKGROUND_IMG.name(), ojEmailBg);
 
             String resetUrl;
             if (ojAddr.endsWith("/")) {
@@ -204,7 +200,6 @@ public class EmailService {
             context.setVariable(Constants.Email.OJ_NAME.name(), UnicodeUtil.toString(ojName));
             context.setVariable(Constants.Email.OJ_SHORT_NAME.name(), UnicodeUtil.toString(ojShortName).toUpperCase());
             context.setVariable(Constants.Email.OJ_URL.name(), ojAddr);
-            context.setVariable(Constants.Email.EMAIL_BACKGROUND_IMG.name(), ojEmailBg);
             //利用模板引擎加载html文件进行渲染并生成对应的字符串
             String emailContent = templateEngine.process("emailTemplate_testEmail", context);
 

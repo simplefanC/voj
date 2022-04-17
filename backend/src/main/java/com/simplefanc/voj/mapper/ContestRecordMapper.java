@@ -1,11 +1,11 @@
 package com.simplefanc.voj.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.simplefanc.voj.pojo.entity.contest.ContestRecord;
+import com.simplefanc.voj.pojo.vo.ContestRecordVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-import com.simplefanc.voj.pojo.entity.contest.ContestRecord;
-import com.simplefanc.voj.pojo.vo.ContestRecordVo;
 
 import java.util.Date;
 import java.util.List;

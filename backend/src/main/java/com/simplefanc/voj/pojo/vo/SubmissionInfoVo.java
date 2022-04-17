@@ -1,8 +1,8 @@
 package com.simplefanc.voj.pojo.vo;
 
+import com.simplefanc.voj.pojo.entity.judge.Judge;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
 
 /**
  * @Author: chenfan

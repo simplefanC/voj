@@ -1,10 +1,10 @@
 package com.simplefanc.voj.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 import com.simplefanc.voj.pojo.dto.RegisterDto;
 import com.simplefanc.voj.pojo.entity.user.UserInfo;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

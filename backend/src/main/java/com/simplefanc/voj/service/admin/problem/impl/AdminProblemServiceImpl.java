@@ -5,6 +5,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.simplefanc.voj.common.exception.StatusFailException;
+import com.simplefanc.voj.common.exception.StatusForbiddenException;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.crawler.ProblemCrawler;
+import com.simplefanc.voj.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.dao.problem.ProblemCaseEntityService;
+import com.simplefanc.voj.dao.problem.ProblemEntityService;
+import com.simplefanc.voj.judge.Dispatcher;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
+import com.simplefanc.voj.pojo.dto.CompileDTO;
+import com.simplefanc.voj.pojo.dto.ProblemDto;
+import com.simplefanc.voj.pojo.entity.judge.Judge;
+import com.simplefanc.voj.pojo.entity.problem.Problem;
+import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.service.admin.problem.AdminProblemService;
+import com.simplefanc.voj.service.admin.problem.RemoteProblemService;
+import com.simplefanc.voj.utils.Constants;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,23 +31,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import com.simplefanc.voj.common.exception.StatusFailException;
-import com.simplefanc.voj.common.exception.StatusForbiddenException;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.crawler.problem.ProblemStrategy;
-import com.simplefanc.voj.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.dao.problem.ProblemCaseEntityService;
-import com.simplefanc.voj.dao.problem.ProblemEntityService;
-import com.simplefanc.voj.judge.Dispatcher;
-import com.simplefanc.voj.pojo.dto.ProblemDto;
-import com.simplefanc.voj.pojo.dto.CompileDTO;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
-import com.simplefanc.voj.pojo.entity.problem.Problem;
-import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
-import com.simplefanc.voj.pojo.vo.UserRolesVo;
-import com.simplefanc.voj.service.admin.problem.AdminProblemService;
-import com.simplefanc.voj.service.admin.problem.RemoteProblemService;
-import com.simplefanc.voj.utils.Constants;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -62,6 +63,9 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     @Autowired
     private RemoteProblemService remoteProblemService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     @Override
     public IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj) {
         if (currentPage == null || currentPage < 1) currentPage = 1;
@@ -91,10 +95,8 @@ public class AdminProblemServiceImpl implements AdminProblemService {
             queryWrapper.and(wrapper -> wrapper.like("title", key).or()
                     .like("author", key).or()
                     .like("problem_id", key));
-            problemList = problemEntityService.page(iPage, queryWrapper);
-        } else {
-            problemList = problemEntityService.page(iPage, queryWrapper);
         }
+        problemList = problemEntityService.page(iPage, queryWrapper);
         return problemList;
     }
 
@@ -102,7 +104,8 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     public Problem getProblem(Long pid) {
         Problem problem = problemEntityService.getById(pid);
 
-        if (problem != null) { // 查询成功
+        // 查询成功
+        if (problem != null) {
             // 获取当前登录的用户
             Session session = SecurityUtils.getSubject().getSession();
             UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
@@ -123,11 +126,10 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     @Override
     public void deleteProblem(Long pid) {
         boolean isOk = problemEntityService.removeById(pid);
-        /*
-        problem的id为其他表的外键的表中的对应数据都会被一起删除！
-         */
-        if (isOk) { // 删除成功
-            FileUtil.del(Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid);
+        // problem的id为其他表的外键的表中的对应数据都会被一起删除！
+        // 删除成功
+        if (isOk) {
+            FileUtil.del(filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid);
         } else {
             throw new StatusFailException("删除失败！");
         }
@@ -176,8 +178,10 @@ public class AdminProblemServiceImpl implements AdminProblemService {
         problemDto.getProblem().setModifiedUser(userRolesVo.getUsername());
 
         boolean result = problemEntityService.adminUpdateProblem(problemDto);
-        if (result) { // 更新成功
-            if (problem == null) { // 说明改了problemId，同步一下judge表
+        // 更新成功
+        if (result) {
+            // 说明改了problemId，同步一下judge表
+            if (problem == null) {
                 UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
                 judgeUpdateWrapper.eq("pid", problemDto.getProblem().getId())
                         .set("display_pid", problemId);
@@ -224,7 +228,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
         Session session = SecurityUtils.getSubject().getSession();
         UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
         try {
-            ProblemStrategy.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+            ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
             if (otherOJProblemInfo != null) {
                 Problem importProblem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                 if (importProblem == null) {

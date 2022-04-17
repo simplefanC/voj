@@ -123,7 +123,12 @@ public class DefaultJudge extends AbstractJudge {
     }
 
 
-    // 去除行末尾空白符
+    /**
+     * 去除行末尾空白符
+     *
+     * @param value
+     * @return
+     */
     private String rtrim(String value) {
         if (value == null) return null;
         StringBuilder sb = new StringBuilder();

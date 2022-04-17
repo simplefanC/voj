@@ -7,11 +7,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.dao.contest.ContestEntityService;
@@ -22,6 +17,12 @@ import com.simplefanc.voj.pojo.vo.AdminContestVo;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.admin.contest.AdminContestService;
 import com.simplefanc.voj.utils.Constants;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,7 @@ public class AdminContestServiceImpl implements AdminContestService {
     @Autowired
     private ContestRegisterEntityService contestRegisterEntityService;
 
+    @Override
     public IPage<Contest> getContestList(Integer limit, Integer currentPage, String keyword) {
 
         if (currentPage == null || currentPage < 1) currentPage = 1;
@@ -59,10 +61,12 @@ public class AdminContestServiceImpl implements AdminContestService {
         return contestEntityService.page(iPage, queryWrapper);
     }
 
+    @Override
     public AdminContestVo getContest(Long cid) {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
-        if (contest == null) { // 查询不存在
+        // 查询不存在
+        if (contest == null) {
             throw new StatusFailException("查询失败：该比赛不存在,请检查参数cid是否准确！");
         }
         // 获取当前登录的用户
@@ -86,6 +90,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         return adminContestVo;
     }
 
+    @Override
     public void deleteContest(Long cid) {
         boolean isOk = contestEntityService.removeById(cid);
         /*
@@ -96,6 +101,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         }
     }
 
+    @Override
     public void addContest(AdminContestVo adminContestVo) {
         Contest contest = BeanUtil.copyProperties(adminContestVo, Contest.class, "starAccount");
         JSONObject accountJson = new JSONObject();
@@ -107,6 +113,8 @@ public class AdminContestServiceImpl implements AdminContestService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateContest(AdminContestVo adminContestVo) {
         // 获取当前登录的用户
         Session session = SecurityUtils.getSubject().getSession();
@@ -136,6 +144,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         }
     }
 
+    @Override
     public void changeContestVisible(Long cid, String uid, Boolean visible) {
         // 获取当前登录的用户
         Session session = SecurityUtils.getSubject().getSession();

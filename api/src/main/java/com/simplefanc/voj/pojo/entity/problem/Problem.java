@@ -32,6 +32,9 @@ public class Problem implements Serializable {
     @ApiModelProperty(value = "题目的自定义ID 例如（VOJ-1000）")
     private String problemId;
 
+    @ApiModelProperty(value = "题目的自定义信息 例如JSK除题面外的真实id")
+    private String info;
+
     @ApiModelProperty(value = "题目")
     private String title;
 
@@ -122,6 +125,4 @@ public class Problem implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
-
-
 }

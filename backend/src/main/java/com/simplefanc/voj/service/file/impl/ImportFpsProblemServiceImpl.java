@@ -5,17 +5,10 @@ import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.dao.problem.ProblemEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.dto.ProblemDto;
 import com.simplefanc.voj.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.pojo.entity.problem.Language;
@@ -24,6 +17,15 @@ import com.simplefanc.voj.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.file.ImportFpsProblemService;
 import com.simplefanc.voj.utils.Constants;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -59,6 +61,9 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
     @Resource
     private ProblemEntityService problemEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     /**
      * @param file
      * @MethodName importFpsProblem
@@ -66,6 +71,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
      * @Return
      * @Since 2021/10/06
      */
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void importFPSProblem(MultipartFile file) throws IOException {
         String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
@@ -83,6 +89,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
     }
 
+    // TODO 行数过多
     private List<ProblemDto> parseFps(InputStream inputStream, String username) {
         Document document = XmlUtil.readXML(inputStream);
         Element rootElement = XmlUtil.getRootElement(document);
@@ -91,7 +98,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
         List<ProblemDto> problemDtoList = new ArrayList<>();
 
         String fileDirId = IdUtil.simpleUUID();
-        String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
+        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
 
         int index = 1;
         for (Element item : XmlUtil.getElements(rootElement, "item")) {
@@ -127,8 +134,8 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
                 byte[] decode = Base64.getDecoder().decode(base64);
                 String fileName = IdUtil.fastSimpleUUID() + "." + split[split.length - 1];
 
-                FileUtil.writeBytes(decode, Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + fileName);
-                srcMapUrl.put(src, Constants.File.IMG_API.getPath() + fileName);
+                FileUtil.writeBytes(decode, filePathProps.getMarkdownFileFolder() + File.separator + fileName);
+                srcMapUrl.put(src, filePathProps.getImgApi() + fileName);
             }
 
             Element descriptionElement = XmlUtil.getElement(item, "description");

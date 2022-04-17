@@ -3,24 +3,21 @@ package com.simplefanc.voj.judge.remote;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.judge.AbstractReceiver;
 import com.simplefanc.voj.judge.ChooseUtils;
 import com.simplefanc.voj.judge.Dispatcher;
+import com.simplefanc.voj.pojo.dto.ToJudge;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.entity.judge.RemoteJudgeAccount;
-import com.simplefanc.voj.pojo.dto.ToJudge;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,48 +62,28 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
         Judge judge = task.get("judge", Judge.class);
         String token = task.getStr("token");
         String remoteJudgeProblem = task.getStr("remoteJudgeProblem");
-        Boolean isHasSubmitIdRemoteReJudge = task.getBool("isHasSubmitIdRemoteReJudge");
         String remoteOJName = remoteJudgeProblem.split("-")[0].toUpperCase();
 
         dispatchRemoteJudge(judge,
                 token,
                 remoteJudgeProblem,
-                isHasSubmitIdRemoteReJudge,
                 remoteOJName);
     }
 
-    private void dispatchRemoteJudge(Judge judge, String token, String remoteJudgeProblem,
-                                     Boolean isHasSubmitIdRemoteReJudge, String remoteOJName) {
+    private void dispatchRemoteJudge(Judge judge, String token, String remoteJudgeProblem, String remoteOJName) {
 
         ToJudge toJudge = new ToJudge();
         toJudge.setJudge(judge)
                 .setToken(token)
                 .setRemoteJudgeProblem(remoteJudgeProblem);
 
-        if (remoteOJName.equals(Constants.RemoteOJ.CODEFORCES.getName())
-                || remoteOJName.equals(Constants.RemoteOJ.GYM.getName())) { // GYM与CF共用账号
-            cfJudge(isHasSubmitIdRemoteReJudge, toJudge, judge);
-        } else if (remoteOJName.equals(Constants.RemoteOJ.POJ.getName())) {
-            pojJudge(isHasSubmitIdRemoteReJudge, toJudge, judge);
-        } else {
-            commonJudge(remoteOJName, isHasSubmitIdRemoteReJudge, toJudge, judge);
-        }
+        commonJudge(remoteOJName, toJudge, judge);
         // 如果队列中还有任务，则继续处理
         processWaitingTask();
     }
 
 
-    private void commonJudge(String OJName, Boolean isHasSubmitIdRemoteReJudge, ToJudge toJudge, Judge judge) {
-
-        if (isHasSubmitIdRemoteReJudge) {
-            toJudge.setIsHasSubmitIdRemoteReJudge(true);
-            toJudge.setUsername(judge.getVjudgeUsername());
-            toJudge.setPassword(judge.getVjudgePassword());
-            // 调用判题服务
-            dispatcher.dispatcher("judge", "/remote-judge", toJudge);
-            return;
-        }
-
+    private void commonJudge(String OJName, ToJudge toJudge, Judge judge) {
         // 尝试600s
         AtomicInteger tryNum = new AtomicInteger(0);
         String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
@@ -129,11 +106,10 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
                     return;
                 }
                 tryNum.getAndIncrement();
-                RemoteJudgeAccount account = chooseUtils.chooseRemoteAccount(OJName, judge.getVjudgeUsername(), false);
+                RemoteJudgeAccount account = chooseUtils.chooseRemoteAccount(OJName);
                 if (account != null) {
                     toJudge.setUsername(account.getUsername())
                             .setPassword(account.getPassword());
-                    toJudge.setIsHasSubmitIdRemoteReJudge(false);
                     // 调用判题服务
                     dispatcher.dispatcher("judge", "/remote-judge", toJudge);
                     Future future = futureTaskMap.get(key);
@@ -148,122 +124,4 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
         futureTaskMap.put(key, scheduledFuture);
     }
 
-
-    private void pojJudge(Boolean isHasSubmitIdRemoteReJudge, ToJudge toJudge, Judge judge) {
-
-
-        if (StringUtils.isEmpty(judge.getVjudgeUsername())) {
-            isHasSubmitIdRemoteReJudge = false;
-        }
-
-        if (isHasSubmitIdRemoteReJudge) {
-            QueryWrapper<RemoteJudgeAccount> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("oj", Constants.RemoteOJ.POJ.getName())
-                    .eq("username", judge.getVjudgeUsername());
-            int count = remoteJudgeAccountEntityService.count(queryWrapper);
-            if (count == 0) {
-                // poj以往的账号丢失了，那么只能重新从头到尾提交
-                isHasSubmitIdRemoteReJudge = false;
-            }
-        }
-
-        // 尝试600s
-        AtomicInteger tryNum = new AtomicInteger(0);
-        String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
-        boolean finalIsHasSubmitIdRemoteReJudge = isHasSubmitIdRemoteReJudge;
-        Runnable getResultTask = new Runnable() {
-            @Override
-            public void run() {
-                if (tryNum.get() > 200) {
-                    // 获取调用多次失败可能为系统忙碌，判为提交失败
-                    judge.setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus());
-                    judge.setErrorMessage("Submission failed! Please resubmit this submission again!" +
-                            "Cause: Waiting for account scheduling timeout");
-                    judgeEntityService.updateById(judge);
-                    Future future = futureTaskMap.get(key);
-                    if (future != null) {
-                        boolean isCanceled = future.cancel(true);
-                        if (isCanceled) {
-                            futureTaskMap.remove(key);
-                        }
-                    }
-                    return;
-                }
-                tryNum.getAndIncrement();
-                RemoteJudgeAccount account = chooseUtils.chooseRemoteAccount(Constants.RemoteOJ.POJ.getName()
-                        , judge.getVjudgeUsername(), finalIsHasSubmitIdRemoteReJudge);
-                if (account != null) {
-                    toJudge.setUsername(account.getUsername())
-                            .setPassword(account.getPassword());
-                    toJudge.setIsHasSubmitIdRemoteReJudge(finalIsHasSubmitIdRemoteReJudge);
-                    // 调用判题服务
-                    dispatcher.dispatcher("judge", "/remote-judge", toJudge);
-                    Future future = futureTaskMap.get(key);
-                    if (future != null) {
-                        future.cancel(true);
-                        futureTaskMap.remove(key);
-                    }
-                }
-            }
-        };
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(getResultTask, 0, 3, TimeUnit.SECONDS);
-        futureTaskMap.put(key, scheduledFuture);
-    }
-
-    private void cfJudge(Boolean isHasSubmitIdRemoteReJudge, ToJudge toJudge, Judge judge) {
-
-        if (isHasSubmitIdRemoteReJudge) {
-            toJudge.setIsHasSubmitIdRemoteReJudge(true);
-            toJudge.setUsername(judge.getVjudgeUsername());
-            toJudge.setPassword(judge.getVjudgePassword());
-            // 调用判题服务
-            dispatcher.dispatcher("judge", "/remote-judge", toJudge);
-            return;
-        }
-
-        // 尝试600s
-        String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
-        AtomicInteger tryNum = new AtomicInteger(0);
-        Runnable getResultTask = new Runnable() {
-            @Override
-            public void run() {
-                if (tryNum.get() > 200) {
-                    // 获取调用多次失败可能为系统忙碌，判为提交失败
-                    judge.setStatus(Constants.Judge.STATUS_SUBMITTED_FAILED.getStatus());
-                    judge.setErrorMessage("Submission failed! Please resubmit this submission again!" +
-                            "Cause: Waiting for account scheduling timeout");
-                    judgeEntityService.updateById(judge);
-                    Future future = futureTaskMap.get(key);
-                    if (future != null) {
-                        boolean isCanceled = future.cancel(true);
-                        if (isCanceled) {
-                            futureTaskMap.remove(key);
-                        }
-                    }
-                    return;
-                }
-                tryNum.getAndIncrement();
-                HashMap<String, Object> result = chooseUtils.chooseFixedAccount(Constants.RemoteOJ.CODEFORCES.getName());
-                if (result != null) {
-                    RemoteJudgeAccount account = (RemoteJudgeAccount) result.get("account");
-                    int index = (int) result.get("index");
-                    int size = (int) result.get("size");
-                    toJudge.setUsername(account.getUsername())
-                            .setPassword(account.getPassword());
-                    toJudge.setIsHasSubmitIdRemoteReJudge(false);
-                    toJudge.setIndex(index);
-                    toJudge.setSize(size);
-                    // 调用判题服务
-                    dispatcher.dispatcher("judge", "/remote-judge", toJudge);
-                    Future future = futureTaskMap.get(key);
-                    if (future != null) {
-                        future.cancel(true);
-                        futureTaskMap.remove(key);
-                    }
-                }
-            }
-        };
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(getResultTask, 0, 3, TimeUnit.SECONDS);
-        futureTaskMap.put(key, scheduledFuture);
-    }
 }

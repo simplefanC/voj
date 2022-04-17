@@ -2,9 +2,6 @@ package com.simplefanc.voj.controller.oj;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.ContestPrintDto;
 import com.simplefanc.voj.pojo.dto.ContestRankDto;
@@ -13,6 +10,9 @@ import com.simplefanc.voj.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.pojo.entity.common.Announcement;
 import com.simplefanc.voj.pojo.vo.*;
 import com.simplefanc.voj.service.oj.ContestService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -115,7 +115,7 @@ public class ContestController {
                                                                  @RequestParam(value = "contestID", required = true) Long searchCid,
                                                                  @RequestParam(value = "beforeContestSubmit", required = true) Boolean beforeContestSubmit,
                                                                  @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID) {
-
+        // TODO 参数过多
         return CommonResult.successResponse(contestService.getContestSubmissionList(limit,
                 currentPage,
                 onlyMine,

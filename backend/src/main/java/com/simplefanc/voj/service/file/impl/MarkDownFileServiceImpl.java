@@ -3,18 +3,20 @@ package com.simplefanc.voj.service.file.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.dao.common.FileEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.file.MarkDownFileService;
 import com.simplefanc.voj.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -32,6 +34,9 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
     @Resource
     private FileEntityService fileEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     @Override
     public Map<Object, Object> uploadMDImg(MultipartFile image) {
         if (image == null) {
@@ -47,13 +52,13 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         }
 
         //若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.MARKDOWN_FILE_FOLDER.getPath());
+        FileUtil.mkdir(filePathProps.getMarkdownFileFolder());
 
         //通过UUID生成唯一文件名
         String filename = IdUtil.simpleUUID() + "." + suffix;
         try {
             //将文件保存指定目录
-            image.transferTo(FileUtil.file(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename));
+            image.transferTo(FileUtil.file(filePathProps.getMarkdownFileFolder() + File.separator + filename));
         } catch (Exception e) {
             log.error("图片文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：图片文件上传失败！");
@@ -63,16 +68,16 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         Session session = SecurityUtils.getSubject().getSession();
         UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
         com.simplefanc.voj.pojo.entity.common.File file = new com.simplefanc.voj.pojo.entity.common.File();
-        file.setFolderPath(Constants.File.MARKDOWN_FILE_FOLDER.getPath())
+        file.setFolderPath(filePathProps.getMarkdownFileFolder())
                 .setName(filename)
-                .setFilePath(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename)
+                .setFilePath(filePathProps.getMarkdownFileFolder() + File.separator + filename)
                 .setSuffix(suffix)
                 .setType("md")
                 .setUid(userRolesVo.getUid());
         fileEntityService.save(file);
 
         return MapUtil.builder()
-                .put("link", Constants.File.IMG_API.getPath() + filename)
+                .put("link", filePathProps.getImgApi() + filename)
                 .put("fileId", file.getId()).map();
 
     }
@@ -121,29 +126,29 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         if (file.getSize() >= 1024 * 1024 * 128) {
             throw new StatusFailException("上传的文件大小不能大于128M！");
         }
-        //获取文件后缀
+        // 获取文件后缀
         String suffix = "";
         String filename = "";
         if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")) {
             suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-            //通过UUID生成唯一文件名
+            // 通过UUID生成唯一文件名
             filename = IdUtil.simpleUUID() + "." + suffix;
         } else {
             filename = IdUtil.simpleUUID();
         }
-        //若不存在该目录，则创建目录
-        FileUtil.mkdir(Constants.File.MARKDOWN_FILE_FOLDER.getPath());
+        // 若不存在该目录，则创建目录
+        FileUtil.mkdir(filePathProps.getMarkdownFileFolder());
 
         try {
-            //将文件保存指定目录
-            file.transferTo(FileUtil.file(Constants.File.MARKDOWN_FILE_FOLDER.getPath() + File.separator + filename));
+            // 将文件保存指定目录
+            file.transferTo(FileUtil.file(filePathProps.getMarkdownFileFolder() + File.separator + filename));
         } catch (Exception e) {
             log.error("文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：文件上传失败！");
         }
 
         return MapUtil.builder()
-                .put("link", Constants.File.FILE_API.getPath() + filename)
+                .put("link", filePathProps.getFileApi() + filename)
                 .map();
     }
 

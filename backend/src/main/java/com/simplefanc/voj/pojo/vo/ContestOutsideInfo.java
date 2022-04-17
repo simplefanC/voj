@@ -1,9 +1,9 @@
 package com.simplefanc.voj.pojo.vo;
 
+import com.simplefanc.voj.pojo.entity.contest.ContestProblem;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import com.simplefanc.voj.pojo.entity.contest.ContestProblem;
 
 import java.util.List;
 

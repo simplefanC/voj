@@ -2,9 +2,6 @@ package com.simplefanc.voj.service.admin.system.impl;
 
 import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.contest.ContestEntityService;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.user.SessionEntityService;
@@ -12,6 +9,9 @@ import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.pojo.entity.user.Session;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.admin.system.DashboardService;
+import org.apache.shiro.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;

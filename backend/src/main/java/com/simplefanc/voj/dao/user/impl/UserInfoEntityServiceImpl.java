@@ -1,14 +1,14 @@
 package com.simplefanc.voj.dao.user.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.utils.Constants;
-import com.simplefanc.voj.utils.RedisUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.mapper.UserInfoMapper;
 import com.simplefanc.voj.pojo.dto.RegisterDto;
 import com.simplefanc.voj.pojo.entity.user.UserInfo;
+import com.simplefanc.voj.utils.Constants;
+import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 

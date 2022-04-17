@@ -1,10 +1,12 @@
 package com.simplefanc.voj.service.admin.system;
 
 import cn.hutool.json.JSONObject;
+import com.simplefanc.voj.pojo.dto.DBAndRedisConfigDto;
+import com.simplefanc.voj.pojo.dto.EmailConfigDto;
+import com.simplefanc.voj.pojo.dto.TestEmailDto;
+import com.simplefanc.voj.pojo.dto.WebConfigDto;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: chenfan
@@ -24,22 +26,21 @@ public interface ConfigService {
 
     List<JSONObject> getJudgeServiceInfo();
 
-    Map<Object, Object> getWebConfig();
+    WebConfigDto getWebConfig();
 
-    void setWebConfig(HashMap<String, Object> params);
+    void setWebConfig(WebConfigDto webConfigDto);
 
     void deleteHomeCarousel(Long id);
 
-    Map<Object, Object> getEmailConfig();
+    EmailConfigDto getEmailConfig();
 
-    void setEmailConfig(HashMap<String, Object> params);
+    void setEmailConfig(EmailConfigDto config);
 
+    void testEmail(TestEmailDto testEmailDto);
 
-    void testEmail(HashMap<String, Object> params);
+    DBAndRedisConfigDto getDBAndRedisConfig();
 
-    Map<Object, Object> getDBAndRedisConfig();
-
-    void setDBAndRedisConfig(HashMap<String, Object> params);
+    void setDBAndRedisConfig(DBAndRedisConfigDto config);
 
     boolean sendNewConfigToNacos();
 }

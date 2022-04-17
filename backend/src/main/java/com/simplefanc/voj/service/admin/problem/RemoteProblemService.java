@@ -1,14 +1,13 @@
 package com.simplefanc.voj.service.admin.problem;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.simplefanc.voj.crawler.CrawlersHolder;
+import com.simplefanc.voj.crawler.ProblemCrawler;
+import com.simplefanc.voj.dao.problem.*;
+import com.simplefanc.voj.pojo.entity.problem.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import com.simplefanc.voj.crawler.language.LanguageContext;
-import com.simplefanc.voj.crawler.problem.*;
-import com.simplefanc.voj.dao.problem.*;
-import com.simplefanc.voj.pojo.entity.problem.*;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -38,64 +37,27 @@ public class RemoteProblemService {
     private ProblemLanguageEntityService problemLanguageEntityService;
 
 
-    public ProblemStrategy.RemoteProblemInfo getOtherOJProblemInfo(String OJName, String problemId, String author) throws Exception {
-
-        ProblemStrategy problemStrategy;
-        switch (OJName) {
-            case "HDU":
-                problemStrategy = new HDUProblemStrategy();
-                break;
-            case "CF":
-                problemStrategy = new CFProblemStrategy();
-                break;
-            case "POJ":
-                problemStrategy = new POJProblemStrategy();
-                break;
-            case "GYM":
-                problemStrategy = new GYMProblemStrategy();
-                break;
-            case "SPOJ":
-                problemStrategy = new SPOJProblemStrategy();
-                break;
-            case "AC":
-                problemStrategy = new AtCoderProblemStrategy();
-                break;
-            default:
-                throw new Exception("未知的OJ的名字，暂时不支持！");
-        }
-
-        ProblemContext problemContext = new ProblemContext(problemStrategy);
-        return problemContext.getProblemInfo(problemId, author);
+    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId, String author) throws Exception {
+        return CrawlersHolder.getCrawler(ojName).getProblemInfo(problemId, author);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Problem adminAddOtherOJProblem(ProblemStrategy.RemoteProblemInfo remoteProblemInfo, String OJName) {
+    public Problem adminAddOtherOJProblem(ProblemCrawler.RemoteProblemInfo remoteProblemInfo, String OJName) {
 
         Problem problem = remoteProblemInfo.getProblem();
         boolean addProblemResult = problemEntityService.save(problem);
         // 为新的其它oj题目添加对应的language
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-        if (OJName.equals("GYM")) {
-            languageQueryWrapper.eq("oj", "CF");
-        } else {
-            languageQueryWrapper.eq("oj", OJName);
-        }
+        languageQueryWrapper.eq("oj", OJName);
         List<Language> OJLanguageList = languageEntityService.list(languageQueryWrapper);
         List<ProblemLanguage> problemLanguageList = new LinkedList<>();
-        if (!CollectionUtil.isEmpty(remoteProblemInfo.getLangIdList())) {
-            LanguageContext languageContext = new LanguageContext(remoteProblemInfo.getRemoteOJ());
-            List<Language> languageList = languageContext.buildLanguageListByIds(OJLanguageList, remoteProblemInfo.getLangIdList());
-            for (Language language : languageList) {
-                problemLanguageList.add(new ProblemLanguage().setPid(problem.getId()).setLid(language.getId()));
-            }
-        } else {
-            for (Language language : OJLanguageList) {
-                problemLanguageList.add(new ProblemLanguage().setPid(problem.getId()).setLid(language.getId()));
-            }
+
+        for (Language language : OJLanguageList) {
+            problemLanguageList.add(new ProblemLanguage().setPid(problem.getId()).setLid(language.getId()));
         }
         boolean addProblemLanguageResult = problemLanguageEntityService.saveOrUpdateBatch(problemLanguageList);
 
-        boolean addProblemTagResult = true;
+        boolean addProblemTagResult;
         List<Tag> addTagList = remoteProblemInfo.getTagList();
 
         List<Tag> needAddTagList = new LinkedList<>();

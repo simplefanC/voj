@@ -3,15 +3,15 @@ package com.simplefanc.voj.judge.remote;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.pojo.entity.judge.Judge;
+import com.simplefanc.voj.utils.Constants;
+import com.simplefanc.voj.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
-import com.simplefanc.voj.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
-import com.simplefanc.voj.utils.Constants;
-import com.simplefanc.voj.utils.RedisUtils;
 
 
 @Component
@@ -31,13 +31,12 @@ public class RemoteJudgeDispatcher {
     @Value("${voj.judge.token}")
     private String judgeToken;
 
-    public void sendTask(Judge judge, String remoteJudgeProblem, Boolean isContest, Boolean isHasSubmitIdRemoteReJudge) {
+    public void sendTask(Judge judge, String remoteJudgeProblem, Boolean isContest) {
         JSONObject task = new JSONObject();
         task.set("judge", judge);
         task.set("remoteJudgeProblem", remoteJudgeProblem);
         task.set("token", judgeToken);
         task.set("isContest", isContest);
-        task.set("isHasSubmitIdRemoteReJudge", isHasSubmitIdRemoteReJudge);
         try {
             boolean isOk;
             if (isContest) {

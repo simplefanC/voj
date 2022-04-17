@@ -1,14 +1,11 @@
 package com.simplefanc.voj.service.oj.impl;
 
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.core.text.UnicodeUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.dao.common.FileEntityService;
 import com.simplefanc.voj.dao.contest.ContestEntityService;
 import com.simplefanc.voj.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.entity.common.File;
 import com.simplefanc.voj.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.pojo.vo.AnnouncementVo;
@@ -17,11 +14,12 @@ import com.simplefanc.voj.pojo.vo.ContestVo;
 import com.simplefanc.voj.service.oj.HomeService;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -51,6 +49,9 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private FileEntityService fileEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     /**
      * @MethodName getRecentContest
      * @Params * @param null
@@ -77,7 +78,7 @@ public class HomeServiceImpl implements HomeService {
         List<HashMap<String, Object>> apiList = fileList.stream().map(f -> {
             HashMap<String, Object> param = new HashMap<>(2);
             param.put("id", f.getId());
-            param.put("url", Constants.File.IMG_API.getPath() + f.getName());
+            param.put("url", filePathProps.getImgApi() + f.getName());
             return param;
         }).collect(Collectors.toList());
         return apiList;
@@ -124,27 +125,5 @@ public class HomeServiceImpl implements HomeService {
         if (currentPage == null || currentPage < 1) currentPage = 1;
         if (limit == null || limit < 1) limit = 10;
         return announcementEntityService.getAnnouncementList(limit, currentPage, true);
-    }
-
-    /**
-     * @MethodName getWebConfig
-     * @Params * @param null
-     * @Description 获取网站的基础配置。例如名字，缩写名字等等。
-     * @Return CommonResult
-     * @Since 2020/12/29
-     */
-    @Override
-    public Map<Object, Object> getWebConfig() {
-
-        return MapUtil.builder().put("baseUrl", UnicodeUtil.toString(configVo.getBaseUrl()))
-                .put("name", UnicodeUtil.toString(configVo.getName()))
-                .put("shortName", UnicodeUtil.toString(configVo.getShortName()))
-                .put("register", configVo.getRegister())
-                .put("recordName", UnicodeUtil.toString(configVo.getRecordName()))
-                .put("recordUrl", UnicodeUtil.toString(configVo.getRecordUrl()))
-                .put("description", UnicodeUtil.toString(configVo.getDescription()))
-                .put("email", UnicodeUtil.toString(configVo.getEmailUsername()))
-                .put("projectName", UnicodeUtil.toString(configVo.getProjectName()))
-                .put("projectUrl", UnicodeUtil.toString(configVo.getProjectUrl())).map();
     }
 }

@@ -17,11 +17,11 @@ import com.simplefanc.voj.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.entity.contest.Contest;
 import com.simplefanc.voj.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
@@ -76,6 +76,8 @@ public class ContestFileServiceImpl implements ContestFileService {
     private ContestCalculateRankService contestCalculateRankService;
     @Autowired
     private ContestValidator contestValidator;
+    @Autowired
+    private FilePathProps filePathProps;
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -194,6 +196,7 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
     }
 
+    // TODO 行数过多
     @Override
     public void downloadContestACSubmission(Long cid, Boolean excludeAdmin, String splitType, HttpServletResponse response) throws StatusForbiddenException, StatusFailException {
 
@@ -235,7 +238,7 @@ public class ContestFileServiceImpl implements ContestFileService {
         List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
 
         // 打包文件的临时路径 -> username为文件夹名字
-        String tmpFilesDir = Constants.File.CONTEST_AC_SUBMISSION_TMP_FOLDER.getPath() + File.separator + IdUtil.fastSimpleUUID();
+        String tmpFilesDir = filePathProps.getContestAcSubmissionTmpFolder() + File.separator + IdUtil.fastSimpleUUID();
         FileUtil.mkdir(tmpFilesDir);
 
         HashMap<String, Boolean> recordMap = new HashMap<>();
@@ -244,8 +247,10 @@ public class ContestFileServiceImpl implements ContestFileService {
              * 以用户来分割提交的代码
              */
             List<String> usernameList = judgeList.stream()
-                    .filter(distinctByKey(Judge::getUsername)) // 根据用户名过滤唯一
-                    .map(Judge::getUsername).collect(Collectors.toList()); // 映射出用户名列表
+                    // 根据用户名过滤唯一
+                    .filter(distinctByKey(Judge::getUsername))
+                    // 映射出用户名列表
+                    .map(Judge::getUsername).collect(Collectors.toList());
 
 
             HashMap<Long, String> cpIdMap = new HashMap<>();
@@ -260,8 +265,10 @@ public class ContestFileServiceImpl implements ContestFileService {
                 // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> A_(666666).c
                 // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> A_(666666)_100.c
                 List<Judge> userSubmissionList = judgeList.stream()
-                        .filter(judge -> judge.getUsername().equals(username)) // 过滤出对应用户的提交
-                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed()) // 根据提交时间进行降序
+                        // 过滤出对应用户的提交
+                        .filter(judge -> judge.getUsername().equals(username))
+                        // 根据提交时间进行降序
+                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed())
                         .collect(Collectors.toList());
 
                 for (Judge judge : userSubmissionList) {
@@ -299,8 +306,10 @@ public class ContestFileServiceImpl implements ContestFileService {
                 // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> username_(666666).c
                 // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> username_(666666)_100.c
                 List<Judge> problemSubmissionList = judgeList.stream()
-                        .filter(judge -> judge.getPid().equals(contestProblem.getPid())) // 过滤出对应题目的提交
-                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed()) // 根据提交时间进行降序
+                        // 过滤出对应题目的提交
+                        .filter(judge -> judge.getPid().equals(contestProblem.getPid()))
+                        // 根据提交时间进行降序
+                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed())
                         .collect(Collectors.toList());
 
                 for (Judge judge : problemSubmissionList) {
@@ -326,12 +335,14 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
 
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
-        String zipPath = Constants.File.CONTEST_AC_SUBMISSION_TMP_FOLDER.getPath() + File.separator + zipFileName;
+        String zipPath = filePathProps.getContestAcSubmissionTmpFolder() + File.separator + zipFileName;
         ZipUtil.zip(tmpFilesDir, zipPath);
         // 将zip变成io流返回给前端
         FileReader zipFileReader = new FileReader(zipPath);
-        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());//放到缓冲流里面
-        OutputStream outs = null;//获取文件输出IO流
+        // 放到缓冲流里面
+        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());
+        // 获取文件输出IO流
+        OutputStream outs = null;
         BufferedOutputStream bouts = null;
         try {
             outs = response.getOutputStream();
@@ -383,7 +394,7 @@ public class ContestFileServiceImpl implements ContestFileService {
     public void downloadContestPrintText(Long id, HttpServletResponse response) {
         ContestPrint contestPrint = contestPrintEntityService.getById(id);
         String filename = contestPrint.getUsername() + "_Contest_Print.txt";
-        String filePath = Constants.File.CONTEST_TEXT_PRINT_FOLDER.getPath() + File.separator + id + File.separator + filename;
+        String filePath = filePathProps.getContestTextPrintFolder() + File.separator + id + File.separator + filename;
         if (!FileUtil.exist(filePath)) {
 
             FileWriter fileWriter = new FileWriter(filePath);

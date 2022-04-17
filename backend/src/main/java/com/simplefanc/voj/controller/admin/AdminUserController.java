@@ -2,14 +2,14 @@ package com.simplefanc.voj.controller.admin;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.admin.user.AdminUserService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +50,7 @@ public class AdminUserController {
     @RequiresPermissions("user_admin")
     @RequiresAuthentication
     public CommonResult<Void> deleteUser(@RequestBody Map<String, Object> params) {
+        // TODO 参数
         adminUserService.deleteUser((List<String>) params.get("ids"));
         return CommonResult.successResponse();
     }
@@ -58,6 +59,7 @@ public class AdminUserController {
     @RequiresPermissions("user_admin")
     @RequiresAuthentication
     public CommonResult<Void> insertBatchUser(@RequestBody Map<String, Object> params) {
+        // TODO 参数
         adminUserService.insertBatchUser((List<List<String>>) params.get("users"));
         return CommonResult.successResponse();
     }
@@ -66,6 +68,7 @@ public class AdminUserController {
     @RequiresPermissions("user_admin")
     @RequiresAuthentication
     public CommonResult<Map<Object, Object>> generateUser(@RequestBody Map<String, Object> params) {
+        // TODO 参数
         adminUserService.generateUser(params);
         return CommonResult.successResponse();
     }

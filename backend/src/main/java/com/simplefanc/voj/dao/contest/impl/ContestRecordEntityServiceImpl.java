@@ -3,20 +3,18 @@ package com.simplefanc.voj.dao.contest.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.mapper.ContestRecordMapper;
 import com.simplefanc.voj.pojo.entity.contest.Contest;
 import com.simplefanc.voj.pojo.entity.contest.ContestRecord;
-import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * <p>

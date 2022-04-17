@@ -56,3 +56,7 @@ logging:
   level:
     com.alibaba.nacos.client.naming: info
     root: info
+
+voj:
+  logging:
+    filepath: "./backend"

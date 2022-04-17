@@ -3,13 +3,13 @@ package com.simplefanc.voj.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
 import com.simplefanc.voj.pojo.entity.user.UserRecord;
 import com.simplefanc.voj.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.pojo.vo.OIRankVo;
 import com.simplefanc.voj.pojo.vo.UserHomeVo;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

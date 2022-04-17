@@ -31,6 +31,7 @@ public interface ContestService {
     ProblemInfoVo getContestProblemDetails(Long cid, String displayId);
 
 
+    // TODO 参数过多
     IPage<JudgeVo> getContestSubmissionList(Integer limit,
                                             Integer currentPage,
                                             Boolean onlyMine,

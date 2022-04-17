@@ -11,6 +11,16 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.simplefanc.voj.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.dao.problem.*;
+import com.simplefanc.voj.mapper.ProblemMapper;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
+import com.simplefanc.voj.pojo.dto.ProblemDto;
+import com.simplefanc.voj.pojo.entity.problem.*;
+import com.simplefanc.voj.pojo.vo.ImportProblemVo;
+import com.simplefanc.voj.pojo.vo.ProblemCountVo;
+import com.simplefanc.voj.pojo.vo.ProblemVo;
+import com.simplefanc.voj.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
@@ -18,15 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
-import com.simplefanc.voj.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.dao.problem.*;
-import com.simplefanc.voj.mapper.ProblemMapper;
-import com.simplefanc.voj.pojo.dto.ProblemDto;
-import com.simplefanc.voj.pojo.entity.problem.*;
-import com.simplefanc.voj.pojo.vo.ImportProblemVo;
-import com.simplefanc.voj.pojo.vo.ProblemCountVo;
-import com.simplefanc.voj.pojo.vo.ProblemVo;
-import com.simplefanc.voj.utils.Constants;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -67,6 +68,9 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     @Autowired
     private CodeTemplateEntityService codeTemplateEntityService;
+
+    @Autowired
+    private FilePathProps filePathProps;
 
     // 去除每行末尾的空白符
     public static String rtrim(String value) {
@@ -109,6 +113,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         return page.setRecords(problemList);
     }
 
+    // TODO 行数过多
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean adminUpdateProblem(ProblemDto problemDto) {
@@ -368,6 +373,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     }
 
+    // TODO 行数过多
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean adminAddProblem(ProblemDto problemDto) {
@@ -493,7 +499,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                                    String tmpTestcaseDir,
                                    List<ProblemCase> problemCaseList) {
 
-        String testCasesDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + problemId;
+        String testCasesDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + problemId;
 
         // 将之前的临时文件夹里面的评测文件全部复制到指定文件夹(覆盖)
         if (!StringUtils.isEmpty(tmpTestcaseDir)) {
@@ -567,7 +573,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         JSONArray testCaseList = new JSONArray(problemCaseList.size());
 
-        String testCasesDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + problemId;
+        String testCasesDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + problemId;
         FileUtil.del(testCasesDir);
         for (int index = 0; index < problemCaseList.size(); index++) {
             JSONObject jsonObject = new JSONObject();
@@ -615,9 +621,11 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     }
 
     @Override
+    // 如果是有提交记录的
     @SuppressWarnings("All")
     public ImportProblemVo buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList,
                                               HashMap<Long, String> languageMap, HashMap<Long, String> tagMap) {
+        // TODO 参数
         // 导出相当于导入
         ImportProblemVo importProblemVo = new ImportProblemVo();
         Problem problem = problemMapper.selectById(pid);

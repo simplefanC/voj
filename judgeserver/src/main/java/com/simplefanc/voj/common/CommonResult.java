@@ -5,11 +5,20 @@ import lombok.Data;
 @Data
 public class CommonResult<T> {
 
-    private final Integer status;   // 状态码
+    /**
+     * 状态码
+     */
+    private final Integer status;
 
-    private final T data;   // 返回的数据
+    /**
+     * 返回的数据
+     */
+    private final T data;
 
-    private final String msg;    // 自定义信息
+    /**
+     * 自定义信息
+     */
+    private final String msg;
 
 
     /**

@@ -1,19 +1,17 @@
 package com.simplefanc.voj.service.file.impl;
 
 import com.alibaba.excel.EasyExcel;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.pojo.vo.ExcelUserVo;
 import com.simplefanc.voj.service.file.UserFileService;
 import com.simplefanc.voj.utils.RedisUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: chenfan
@@ -27,6 +25,7 @@ public class UserFileServiceImpl implements UserFileService {
     @Autowired
     private RedisUtils redisUtils;
 
+    @Override
     public void generateUserExcel(String key, HttpServletResponse response) throws IOException {
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
@@ -38,13 +37,6 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     private List<ExcelUserVo> getGenerateUsers(String key) {
-        List<ExcelUserVo> result = new LinkedList<>();
-        Map<Object, Object> userInfo = redisUtils.hmget(key);
-        for (Object hashKey : userInfo.keySet()) {
-            String username = (String) hashKey;
-            String password = (String) userInfo.get(hashKey);
-            result.add(new ExcelUserVo().setUsername(username).setPassword(password));
-        }
-        return result;
+        return (List<ExcelUserVo>) redisUtils.hget("USER_INFO_LIST", key);
     }
 }

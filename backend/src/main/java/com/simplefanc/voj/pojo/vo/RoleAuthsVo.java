@@ -1,9 +1,9 @@
 package com.simplefanc.voj.pojo.vo;
 
+import com.simplefanc.voj.pojo.entity.user.Auth;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import com.simplefanc.voj.pojo.entity.user.Auth;
 
 import java.util.Date;
 import java.util.List;

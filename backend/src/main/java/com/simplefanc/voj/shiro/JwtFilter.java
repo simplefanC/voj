@@ -3,6 +3,10 @@ package com.simplefanc.voj.shiro;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.common.result.ResultStatus;
+import com.simplefanc.voj.utils.JwtUtils;
+import com.simplefanc.voj.utils.RedisUtils;
 import io.jsonwebtoken.Claims;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -11,10 +15,6 @@ import org.apache.shiro.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.common.result.ResultStatus;
-import com.simplefanc.voj.utils.JwtUtils;
-import com.simplefanc.voj.utils.RedisUtils;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -63,7 +63,7 @@ public class JwtFilter extends AuthenticatingFilter {
             }
             String userId = claim.getSubject();
             if (!redisUtils.hasKey(TOKEN_REFRESH + userId) && redisUtils.hasKey(TOKEN_KEY + userId)) {
-                //过了需更新token时间，但是还未过期，则进行token刷新
+                // 过了需更新token时间，但是还未过期，则进行token刷新
                 HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
                 HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
                 this.refreshToken(httpRequest, httpResponse, userId);
@@ -82,14 +82,19 @@ public class JwtFilter extends AuthenticatingFilter {
      * @return
      */
     private void refreshToken(HttpServletRequest request, HttpServletResponse response, String userId) {
-        boolean lock = redisUtils.getLock(TOKEN_LOCK + userId, 20);// 获取锁20s
+        // 获取锁20s
+        boolean lock = redisUtils.getLock(TOKEN_LOCK + userId, 20);
         if (lock) {
             String newToken = jwtUtils.generateToken(userId);
             response.setHeader("Access-Control-Allow-Credentials", "true");
-            response.setHeader("Authorization", newToken); //放到信息头部
-            response.setHeader("Access-Control-Expose-Headers", "Refresh-Token,Authorization,Url-Type"); //让前端可用访问
-            response.setHeader("Url-Type", request.getHeader("Url-Type")); // 为了前端能区别请求来源
-            response.setHeader("Refresh-Token", "true"); //告知前端需要刷新token
+            // 放到信息头部
+            response.setHeader("Authorization", newToken);
+            // 让前端可用访问
+            response.setHeader("Access-Control-Expose-Headers", "Refresh-Token,Authorization,Url-Type");
+            // 为了前端能区别请求来源
+            response.setHeader("Url-Type", request.getHeader("Url-Type"));
+            // 告知前端需要刷新token
+            response.setHeader("Refresh-Token", "true");
         }
         redisUtils.releaseLock(TOKEN_LOCK + userId);
     }
@@ -100,14 +105,16 @@ public class JwtFilter extends AuthenticatingFilter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         try {
-            //处理登录失败的异常
+            // 处理登录失败的异常
             Throwable throwable = e.getCause() == null ? e : e.getCause();
             CommonResult<Void> result = CommonResult.errorResponse(throwable.getMessage(), ResultStatus.ACCESS_DENIED);
             String json = JSONUtil.toJsonStr(result);
             httpResponse.setContentType("application/json;charset=utf-8");
-            httpResponse.setHeader("Access-Control-Expose-Headers", "Refresh-Token,Authorization,Url-Type"); //让前端可用访问
+            // 让前端可用访问
+            httpResponse.setHeader("Access-Control-Expose-Headers", "Refresh-Token,Authorization,Url-Type");
             httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
-            httpResponse.setHeader("Url-Type", httpRequest.getHeader("Url-Type")); // 为了前端能区别请求来源
+            // 为了前端能区别请求来源
+            httpResponse.setHeader("Url-Type", httpRequest.getHeader("Url-Type"));
             httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.getWriter().print(json);
         } catch (IOException e1) {
@@ -126,8 +133,9 @@ public class JwtFilter extends AuthenticatingFilter {
         httpServletResponse.setHeader("Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
         httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
         httpServletResponse.setHeader("Access-Control-Allow-Headers", httpServletRequest.getHeader("Access-Control-Request-Headers"));
+        // 让前端可用访问
         httpServletResponse.setHeader("Access-Control-Expose-Headers",
-                "Refresh-Token,Authorization,Url-Type,Content-disposition,Content-Type"); //让前端可用访问
+                "Refresh-Token,Authorization,Url-Type,Content-disposition,Content-Type");
         // 跨域时会首先发送一个OPTIONS请求，这里我们给OPTIONS请求直接返回正常状态
         if (httpServletRequest.getMethod().equals(RequestMethod.OPTIONS.name())) {
             httpServletResponse.setStatus(org.springframework.http.HttpStatus.OK.value());

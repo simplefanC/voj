@@ -2,16 +2,16 @@ package com.simplefanc.voj.judge.self;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.judge.AbstractReceiver;
+import com.simplefanc.voj.judge.Dispatcher;
+import com.simplefanc.voj.pojo.dto.ToJudge;
+import com.simplefanc.voj.pojo.entity.judge.Judge;
+import com.simplefanc.voj.utils.Constants;
+import com.simplefanc.voj.utils.RedisUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import com.simplefanc.voj.judge.AbstractReceiver;
-import com.simplefanc.voj.judge.Dispatcher;
-import com.simplefanc.voj.pojo.entity.judge.Judge;
-import com.simplefanc.voj.pojo.dto.ToJudge;
-import com.simplefanc.voj.utils.Constants;
-import com.simplefanc.voj.utils.RedisUtils;
 
 /**
  * @Author: chenfan

@@ -1,6 +1,8 @@
 package com.simplefanc.voj.controller.file;
 
 
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.service.file.MarkDownFileService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -10,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.service.file.MarkDownFileService;
 
 import javax.annotation.Resource;
 import java.util.Map;

@@ -1,12 +1,12 @@
 package com.simplefanc.voj.controller.admin;
 
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.pojo.entity.problem.Tag;
+import com.simplefanc.voj.service.admin.tag.AdminTagService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.pojo.entity.problem.Tag;
-import com.simplefanc.voj.service.admin.tag.AdminTagService;
 
 import javax.annotation.Resource;
 

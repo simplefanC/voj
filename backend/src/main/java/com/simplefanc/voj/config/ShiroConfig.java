@@ -6,6 +6,8 @@ package com.simplefanc.voj.config;
  * @Description:
  */
 
+import com.simplefanc.voj.shiro.AccountRealm;
+import com.simplefanc.voj.shiro.JwtFilter;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SecurityManager;
@@ -22,8 +24,6 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.simplefanc.voj.shiro.AccountRealm;
-import com.simplefanc.voj.shiro.JwtFilter;
 
 import javax.servlet.Filter;
 import java.util.HashMap;

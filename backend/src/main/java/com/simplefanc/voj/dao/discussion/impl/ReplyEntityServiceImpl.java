@@ -1,13 +1,13 @@
 package com.simplefanc.voj.dao.discussion.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.dao.discussion.ReplyEntityService;
 import com.simplefanc.voj.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.mapper.ReplyMapper;
 import com.simplefanc.voj.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.pojo.entity.msg.MsgRemind;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 

@@ -45,12 +45,21 @@ public class ProblemTestCaseUtils {
         return sb.toString().replaceAll("\\s+$", "");
     }
 
-    // 本地无文件初始化测试数据，写成json文件
+    /**
+     * 本地无文件初始化测试数据，写成json文件
+     * @param testCases
+     * @param problemId
+     * @param version
+     * @param mode
+     * @return
+     * @throws SystemError
+     * @throws UnsupportedEncodingException
+     */
     public JSONObject initTestCase(List<HashMap<String, Object>> testCases,
                                    Long problemId,
                                    String version,
                                    String mode) throws SystemError, UnsupportedEncodingException {
-
+        // TODO 参数
         if (testCases == null || testCases.size() == 0) {
             throw new SystemError("题号为：" + problemId + "的评测数据为空！", null, "The test cases does not exist.");
         }

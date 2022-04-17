@@ -9,18 +9,12 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.dao.problem.TagEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.dto.ProblemDto;
 import com.simplefanc.voj.pojo.dto.QDOJProblemDto;
 import com.simplefanc.voj.pojo.entity.problem.Language;
@@ -30,6 +24,13 @@ import com.simplefanc.voj.pojo.entity.problem.Tag;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.file.ImportQDUOJProblemService;
 import com.simplefanc.voj.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,9 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
     @Autowired
     private TagEntityService tagEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     /**
      * @param file
      * @MethodName importQDOJProblem
@@ -64,7 +68,8 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
      * @Return
      * @Since 2021/5/27
      */
-
+    // TODO 行数过多
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void importQDOJProblem(MultipartFile file) {
 
@@ -74,7 +79,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
 
         String fileDirId = IdUtil.simpleUUID();
-        String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
+        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
         FileUtil.mkdir(fileDir);
@@ -227,7 +232,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
                 .setIsRemoveEndBlank(true)
                 .setOpenCaseResult(true)
                 .setCodeShare(false)
-                .setType(problemJson.getStr("rule_type").equals("ACM") ? 0 : 1)
+                .setType("ACM".equals(problemJson.getStr("rule_type")) ? 0 : 1)
                 .setTitle(problemJson.getStr("title"))
                 .setDescription(UnicodeUtil.toString(problemJson.getJSONObject("description").getStr("value")))
                 .setInput(UnicodeUtil.toString(problemJson.getJSONObject("input_description").getStr("value")))

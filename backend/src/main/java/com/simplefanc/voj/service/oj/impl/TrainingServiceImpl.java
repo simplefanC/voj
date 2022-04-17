@@ -248,6 +248,7 @@ public class TrainingServiceImpl implements TrainingService {
         return getTrainingRank(tid, training.getAuthor(), currentPage, limit);
     }
 
+    // TODO 行数过多
     private IPage<TrainingRankVo> getTrainingRank(Long tid, String username, int currentPage, int limit) {
 
         Map<Long, String> tpIdMapDisplayId = getTPIdMapDisplayId(tid);

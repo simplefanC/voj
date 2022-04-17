@@ -2,12 +2,6 @@ package com.simplefanc.voj.controller.admin;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.Logical;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.AnnouncementDto;
 import com.simplefanc.voj.pojo.dto.ContestProblemDto;
@@ -20,6 +14,11 @@ import com.simplefanc.voj.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.service.admin.contest.AdminContestAnnouncementService;
 import com.simplefanc.voj.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.service.admin.contest.AdminContestService;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -83,7 +82,6 @@ public class AdminContestController {
     @PutMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> updateContest(@RequestBody AdminContestVo adminContestVo) {
         adminContestService.updateContest(adminContestVo);
         return CommonResult.successResponse();
@@ -106,7 +104,6 @@ public class AdminContestController {
     @GetMapping("/get-problem-list")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<HashMap<String, Object>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
                                                                 @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                                 @RequestParam(value = "keyword", required = false) String keyword,
@@ -128,7 +125,6 @@ public class AdminContestController {
     @DeleteMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> deleteProblem(@RequestParam("pid") Long pid,
                                             @RequestParam(value = "cid", required = false) Long cid) {
         adminContestProblemService.deleteProblem(pid, cid);
@@ -138,7 +134,6 @@ public class AdminContestController {
     @PostMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Map<Object, Object>> addProblem(@RequestBody ProblemDto problemDto) {
         Map<Object, Object> problemMap = adminContestProblemService.addProblem(problemDto);
         return CommonResult.successResponse(problemMap);
@@ -147,7 +142,6 @@ public class AdminContestController {
     @PutMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> updateProblem(@RequestBody ProblemDto problemDto) {
         adminContestProblemService.updateProblem(problemDto);
         return CommonResult.successResponse();
@@ -180,7 +174,6 @@ public class AdminContestController {
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    @Transactional(rollbackFor = Exception.class)
     public CommonResult<Void> importContestRemoteOJProblem(@RequestParam("name") String name,
                                                            @RequestParam("problemId") String problemId,
                                                            @RequestParam("cid") Long cid,

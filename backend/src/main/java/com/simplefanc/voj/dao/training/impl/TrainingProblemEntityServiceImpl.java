@@ -2,14 +2,14 @@ package com.simplefanc.voj.dao.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import com.simplefanc.voj.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.mapper.TrainingProblemMapper;
 import com.simplefanc.voj.pojo.entity.judge.Judge;
 import com.simplefanc.voj.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.pojo.vo.ProblemVo;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;

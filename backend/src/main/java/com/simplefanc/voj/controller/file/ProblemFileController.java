@@ -1,14 +1,14 @@
 package com.simplefanc.voj.controller.file;
 
 
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.service.file.ProblemFileService;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.service.file.ProblemFileService;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;

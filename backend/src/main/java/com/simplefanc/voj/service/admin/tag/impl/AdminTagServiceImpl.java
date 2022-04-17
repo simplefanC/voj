@@ -1,12 +1,12 @@
 package com.simplefanc.voj.service.admin.tag.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.dao.problem.TagEntityService;
 import com.simplefanc.voj.pojo.entity.problem.Tag;
 import com.simplefanc.voj.service.admin.tag.AdminTagService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @Author: chenfan

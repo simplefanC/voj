@@ -2,8 +2,6 @@ package com.simplefanc.voj.controller.oj;
 
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.web.bind.annotation.*;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.pojo.dto.RegisterTrainingDto;
 import com.simplefanc.voj.pojo.vo.AccessVo;
@@ -11,6 +9,8 @@ import com.simplefanc.voj.pojo.vo.ProblemVo;
 import com.simplefanc.voj.pojo.vo.TrainingRankVo;
 import com.simplefanc.voj.pojo.vo.TrainingVo;
 import com.simplefanc.voj.service.oj.TrainingService;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;

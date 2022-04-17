@@ -1,9 +1,6 @@
 package com.simplefanc.voj.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.stereotype.Service;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.common.exception.StatusNotFoundException;
@@ -19,6 +16,9 @@ import com.simplefanc.voj.service.oj.ContestRankService;
 import com.simplefanc.voj.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.validator.ContestValidator;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;

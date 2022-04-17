@@ -1,15 +1,15 @@
 package com.simplefanc.voj.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.pojo.vo.UserMsgVo;
+import com.simplefanc.voj.pojo.vo.UserUnreadMsgCountVo;
+import com.simplefanc.voj.service.msg.UserMessageService;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.pojo.vo.UserMsgVo;
-import com.simplefanc.voj.pojo.vo.UserUnreadMsgCountVo;
-import com.simplefanc.voj.service.msg.UserMessageService;
 
 import javax.annotation.Resource;
 

@@ -1,13 +1,13 @@
 package com.simplefanc.voj.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.service.oj.RankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.service.oj.RankService;
 
 /**
  * @Author: chenfan

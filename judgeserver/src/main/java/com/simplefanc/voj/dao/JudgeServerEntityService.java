@@ -7,5 +7,5 @@ import java.util.HashMap;
 
 public interface JudgeServerEntityService extends IService<JudgeServer> {
 
-    public HashMap<String, Object> getJudgeServerInfo();
+    HashMap<String, Object> getJudgeServerInfo();
 }

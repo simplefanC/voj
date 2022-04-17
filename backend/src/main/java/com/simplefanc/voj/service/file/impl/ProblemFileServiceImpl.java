@@ -10,13 +10,6 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.common.result.ResultStatus;
@@ -24,12 +17,20 @@ import com.simplefanc.voj.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.dao.problem.TagEntityService;
+import com.simplefanc.voj.pojo.bo.FilePathProps;
 import com.simplefanc.voj.pojo.dto.ProblemDto;
 import com.simplefanc.voj.pojo.entity.problem.*;
 import com.simplefanc.voj.pojo.vo.ImportProblemVo;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.file.ProblemFileService;
 import com.simplefanc.voj.utils.Constants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -57,6 +58,9 @@ public class ProblemFileServiceImpl implements ProblemFileService {
     @Autowired
     private TagEntityService tagEntityService;
 
+    @Autowired
+    private FilePathProps filePathProps;
+
     /**
      * @param file
      * @MethodName importProblem
@@ -64,6 +68,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
      * @Return
      * @Since 2021/5/27
      */
+    // TODO 行数过多
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importProblem(MultipartFile file) {
@@ -74,7 +79,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         }
 
         String fileDirId = IdUtil.simpleUUID();
-        String fileDir = Constants.File.TESTCASE_TMP_FOLDER.getPath() + File.separator + fileDirId;
+        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
         FileUtil.mkdir(fileDir);
@@ -193,6 +198,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 }
             }
 
+            // TODO
             Problem problem = BeanUtil.mapToBean(importProblemVo.getProblem(), Problem.class, true);
             if (problem.getAuthor() == null) {
                 problem.setAuthor(userRolesVo.getUsername());
@@ -239,10 +245,12 @@ public class ProblemFileServiceImpl implements ProblemFileService {
      * @Return
      * @Since 2021/5/28
      */
+    // TODO 行数过多
     @Override
     public void exportProblem(List<Long> pidList, HttpServletResponse response) {
 
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
+        // TODO 魔法
         languageQueryWrapper.eq("oj", "ME");
         List<Language> languageList = languageEntityService.list(languageQueryWrapper);
 
@@ -258,17 +266,23 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             tagMap.put(tag.getId(), tag.getName());
         }
 
-        String workDir = Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + IdUtil.simpleUUID();
+        String workDir = filePathProps.getFileDownloadTmpFolder() + File.separator + IdUtil.simpleUUID();
 
         // 使用线程池
         ExecutorService threadPool = new ThreadPoolExecutor(
-                2, // 核心线程数
-                4, // 最大线程数。最多几个线程并发。
-                3,//当非核心线程无任务时，几秒后结束该线程
-                TimeUnit.SECONDS,// 结束线程时间单位
-                new LinkedBlockingDeque<>(200), //阻塞队列，限制等候线程数
+                // 核心线程数
+                2,
+                // 最大线程数。最多几个线程并发。
+                4,
+                // 当非核心线程无任务时，几秒后结束该线程
+                3,
+                // 结束线程时间单位
+                TimeUnit.SECONDS,
+                // 阻塞队列，限制等候线程数
+                new LinkedBlockingDeque<>(200),
                 Executors.defaultThreadFactory(),
-                new ThreadPoolExecutor.DiscardOldestPolicy());//队列满了，尝试去和最早的竞争，也不会抛出异常！
+                //队列满了，尝试去和最早的竞争，也不会抛出异常！
+                new ThreadPoolExecutor.DiscardOldestPolicy());
 
         List<FutureTask<Void>> futureTasks = new ArrayList<>();
 
@@ -277,11 +291,12 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             futureTasks.add(new FutureTask<>(new Callable<Void>() {
                 @Override
                 public Void call() {
-                    String testcaseWorkDir = Constants.File.TESTCASE_BASE_FOLDER.getPath() + File.separator + "problem_" + pid;
+                    String testcaseWorkDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
                     File file = new File(testcaseWorkDir);
 
                     List<HashMap<String, Object>> problemCases = new LinkedList<>();
-                    if (!file.exists() || file.listFiles() == null) { // 本地为空 尝试去数据库查找
+                    // 本地为空 尝试去数据库查找
+                    if (!file.exists() || file.listFiles() == null) {
                         QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
                         problemCaseQueryWrapper.eq("pid", pid);
                         List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
@@ -355,11 +370,13 @@ public class ProblemFileServiceImpl implements ProblemFileService {
 
         String fileName = "problem_export_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
-        ZipUtil.zip(workDir, Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+        ZipUtil.zip(workDir, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
         // 将zip变成io流返回给前端
-        FileReader fileReader = new FileReader(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
-        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());//放到缓冲流里面
-        OutputStream outs = null;//获取文件输出IO流
+        FileReader fileReader = new FileReader(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
+        // 放到缓冲流里面
+        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());
+        // 获取文件输出IO流
+        OutputStream outs = null;
         BufferedOutputStream bouts = null;
         try {
             outs = response.getOutputStream();
@@ -368,7 +385,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
             int bytesRead = 0;
             byte[] buffer = new byte[1024 * 10];
-            //开始向网络传输文件流
+            // 开始向网络传输文件流
             while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
                 bouts.write(buffer, 0, bytesRead);
             }
@@ -401,7 +418,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             }
             // 清空临时文件
             FileUtil.del(workDir);
-            FileUtil.del(Constants.File.FILE_DOWNLOAD_TMP_FOLDER.getPath() + File.separator + fileName);
+            FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
         }
     }
 

@@ -1,9 +1,9 @@
 package com.simplefanc.voj.pojo.dto;
 
-import lombok.Data;
-import lombok.experimental.Accessors;
 import com.simplefanc.voj.pojo.entity.training.Training;
 import com.simplefanc.voj.pojo.entity.training.TrainingCategory;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @Author: chenfan

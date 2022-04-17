@@ -7,13 +7,6 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.utils.Constants;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import com.simplefanc.voj.common.exception.StatusFailException;
 import com.simplefanc.voj.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.dao.user.UserRecordEntityService;
@@ -22,10 +15,18 @@ import com.simplefanc.voj.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.pojo.entity.user.UserRecord;
 import com.simplefanc.voj.pojo.entity.user.UserRole;
+import com.simplefanc.voj.pojo.vo.ExcelUserVo;
 import com.simplefanc.voj.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.service.admin.user.AdminUserService;
 import com.simplefanc.voj.service.msg.AdminNoticeService;
+import com.simplefanc.voj.utils.Constants;
 import com.simplefanc.voj.utils.RedisUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -198,7 +199,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<Object, Object> generateUser(Map<String, Object> params) {
-
+        // TODO 参数
         String prefix = (String) params.getOrDefault("prefix", "");
         String suffix = (String) params.getOrDefault("suffix", "");
         int numberFrom = (int) params.getOrDefault("number_from", 1);
@@ -208,18 +209,20 @@ public class AdminUserServiceImpl implements AdminUserService {
         List<UserInfo> userInfoList = new LinkedList<>();
         List<UserRole> userRoleList = new LinkedList<>();
         List<UserRecord> userRecordList = new LinkedList<>();
-
-        HashMap<String, Object> userInfo = new HashMap<>(); // 存储账号密码放入redis中，等待导出excel
+        List<ExcelUserVo> userVoList = new LinkedList<>();
+        // 存储账号密码放入redis中，等待导出excel
+        final int numLen = String.valueOf(numberTo).length();
         for (int num = numberFrom; num <= numberTo; num++) {
             String uuid = IdUtil.simpleUUID();
-            String password = RandomUtil.randomString(passwordLength);
-            String username = prefix + num + suffix;
+            String password = RandomUtil.randomString(passwordLength).toUpperCase();
+            String username = prefix + String.format("%0" + numLen + "d", num) + suffix;
             userInfoList.add(new UserInfo()
                     .setUuid(uuid)
                     .setUsername(username)
                     .setPassword(SecureUtil.md5(password)));
-            userInfo.put(username, password);
+            userVoList.add(new ExcelUserVo().setUsername(username).setPassword(password));
             userRoleList.add(new UserRole()
+                    // TODO 魔法
                     .setRoleId(1002L)
                     .setUid(uuid));
             userRecordList.add(new UserRecord().setUid(uuid));
@@ -229,7 +232,9 @@ public class AdminUserServiceImpl implements AdminUserService {
         boolean result3 = userRecordEntityService.saveBatch(userRecordList);
         if (result1 && result2 && result3) {
             String key = IdUtil.simpleUUID();
-            redisUtils.hmset(key, userInfo, 1800); // 存储半小时
+            // 存储半小时
+            // TODO 魔数
+            redisUtils.hset("USER_INFO_LIST", key, userVoList, 1800);
             // 异步同步系统通知
             List<String> uidList = userInfoList.stream().map(UserInfo::getUuid).collect(Collectors.toList());
             adminNoticeService.syncNoticeToNewRegisterBatchUser(uidList);

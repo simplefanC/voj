@@ -106,7 +106,6 @@ public class JudgeController {
             return CommonResult.errorResponse("对不起！您使用的判题服务调用凭证不正确！访问受限！", ResultStatus.ACCESS_DENIED);
         }
 
-
         if (toJudge.getJudge() == null) {
             return CommonResult.errorResponse("请求参数不能为空！");
         }
