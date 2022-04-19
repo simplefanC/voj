@@ -1,0 +1,12 @@
+package com.simplefanc.voj.judger.dao;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
+
+/**
+ * @Author: chenfan
+ * @Date: 2020/12/14 19:58
+ * @Description:
+ */
+public interface ProblemCaseEntityService extends IService<ProblemCase> {
+}

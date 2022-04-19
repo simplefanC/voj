@@ -1,0 +1,16 @@
+package com.simplefanc.voj.server.dao.problem.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.server.dao.problem.ProblemCaseEntityService;
+import com.simplefanc.voj.server.mapper.ProblemCaseMapper;
+import org.springframework.stereotype.Service;
+
+/**
+ * @Author: chenfan
+ * @Date: 2020/12/14 19:59
+ * @Description:
+ */
+@Service
+public class ProblemCaseEntityServiceImpl extends ServiceImpl<ProblemCaseMapper, ProblemCase> implements ProblemCaseEntityService {
+}

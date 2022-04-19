@@ -1,0 +1,11 @@
+package com.simplefanc.voj.judger.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
+
+@Mapper
+@Repository
+public interface JudgeServerMapper extends BaseMapper<JudgeServer> {
+}

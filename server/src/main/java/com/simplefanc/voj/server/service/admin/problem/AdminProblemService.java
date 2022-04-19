@@ -1,0 +1,41 @@
+package com.simplefanc.voj.server.service.admin.problem;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.common.pojo.dto.CompileDTO;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.server.pojo.dto.ProblemDto;
+
+import java.util.List;
+
+/**
+ * @Author: chenfan
+ * @Date: 2022/3/9 16:32
+ * @Description:
+ */
+
+public interface AdminProblemService {
+
+    IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj);
+
+    Problem getProblem(Long pid);
+
+    void deleteProblem(Long pid);
+
+    void addProblem(ProblemDto problemDto);
+
+    void updateProblem(ProblemDto problemDto);
+
+    List<ProblemCase> getProblemCases(Long pid, Boolean isUpload);
+
+    CommonResult compileSpj(CompileDTO compileDTO);
+
+    CommonResult compileInteractive(CompileDTO compileDTO);
+
+    void importRemoteOJProblem(String name, String problemId);
+
+    void changeProblemAuth(Problem problem);
+
+
+}
