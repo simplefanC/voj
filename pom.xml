@@ -9,9 +9,9 @@
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
   <modules>
-    <module>common</module>
-    <module>server</module>
-    <module>judger</module>
+    <module>voj-common</module>
+    <module>voj-backend</module>
+    <module>voj-judger</module>
   </modules>
 
   <name>voj-springboot</name>
