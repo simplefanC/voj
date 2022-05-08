@@ -51,7 +51,8 @@ public class DruidConfiguration {
     @RefreshScope
     public DruidDataSource dataSource() {
         DruidDataSource datasource = new DruidDataSource();
-        String url = "jdbc:mysql://" + host + ":" + port + "/" + name + "?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true";
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + name
+                + "?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true";
         datasource.setUrl(url);
         datasource.setUsername(username);
         datasource.setPassword(password);
@@ -62,4 +63,5 @@ public class DruidConfiguration {
         datasource.setMaxWait(maxWait);
         return datasource;
     }
+
 }

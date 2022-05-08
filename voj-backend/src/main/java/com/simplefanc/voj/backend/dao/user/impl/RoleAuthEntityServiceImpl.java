@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.user.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.user.RoleAuth;
 import com.simplefanc.voj.backend.dao.user.RoleAuthEntityService;
 import com.simplefanc.voj.backend.mapper.RoleAuthMapper;
+import com.simplefanc.voj.common.pojo.entity.user.RoleAuth;
 import org.springframework.stereotype.Service;
 
 /**

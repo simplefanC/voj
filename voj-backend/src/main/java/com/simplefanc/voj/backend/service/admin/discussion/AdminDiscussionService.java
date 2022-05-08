@@ -13,6 +13,7 @@ import java.util.List;
  */
 
 public interface AdminDiscussionService {
+
     void updateDiscussion(Discussion discussion);
 
     void removeDiscussion(List<Integer> didList);

@@ -2,9 +2,8 @@ package com.simplefanc.voj.backend.dao.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
-
+import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 
 /**
  * @Author: chenfan

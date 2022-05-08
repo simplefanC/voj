@@ -1,15 +1,19 @@
 package com.simplefanc.voj.judger.common.constants;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.List;
 
 /**
- * {0} --> tmpfs_dir
- * {1} --> exeName (user or spj)
- * {2} --> The test case standard input file name of question
- * {3} --> The user's program output file name of question
- * {4} --> The test case standard output file name of question
+ * {0} --> tmpfs_dir {1} --> exeName (user or spj) {2} --> The test case standard input
+ * file name of question {3} --> The user's program output file name of question {4} -->
+ * The test case standard output file name of question
  */
+@Getter
+@AllArgsConstructor
 public enum RunConfig {
+
     C("C", "{0}/{1}", "main", Constants.DEFAULT_ENV),
 
     CWithO2("C With O2", "{0}/{1}", "main", Constants.DEFAULT_ENV),
@@ -47,16 +51,12 @@ public enum RunConfig {
     INTERACTIVE_CPP("INTERACTIVE-C++", "{0}/{1} {2} {3} {4}", "interactive", Constants.DEFAULT_ENV);
 
     private final String language;
-    private final String command;
-    private final String exeName;
-    private final List<String> envs;
 
-    RunConfig(String language, String command, String exeName, List<String> envs) {
-        this.language = language;
-        this.command = command;
-        this.exeName = exeName;
-        this.envs = envs;
-    }
+    private final String command;
+
+    private final String exeName;
+
+    private final List<String> envs;
 
     public static RunConfig getRunnerByLanguage(String language) {
         for (RunConfig runConfig : RunConfig.values()) {
@@ -65,22 +65,6 @@ public enum RunConfig {
             }
         }
         return null;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public String getExeName() {
-        return exeName;
-    }
-
-    public List<String> getEnvs() {
-        return envs;
     }
 
 }

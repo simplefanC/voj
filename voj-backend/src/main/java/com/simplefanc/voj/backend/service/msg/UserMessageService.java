@@ -23,4 +23,5 @@ public interface UserMessageService {
     IPage<UserMsgVo> getLikeMsg(Integer limit, Integer currentPage);
 
     void updateUserMsgRead(IPage<UserMsgVo> userMsgList);
+
 }

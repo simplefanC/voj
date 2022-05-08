@@ -8,13 +8,13 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
-import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.service.file.TestCaseService;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.common.result.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,7 @@ public class TestCaseServiceImpl implements TestCaseService {
     // TODO 行数过多
     @Override
     public Map<Object, Object> uploadTestcaseZip(MultipartFile file) {
-        //获取文件后缀
+        // 获取文件后缀
         String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
         if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请上传zip格式的测试数据压缩包！");
@@ -124,25 +124,19 @@ public class TestCaseServiceImpl implements TestCaseService {
             problemCaseList.add(testcaseMap);
         }
 
-        List<HashMap<String, String>> fileList = problemCaseList.stream()
-                .sorted((o1, o2) -> {
-                    String a = o1.get("input").split("\\.")[0];
-                    String b = o2.get("input").split("\\.")[0];
-                    if (a.length() > b.length()) {
-                        return 1;
-                    } else if (a.length() < b.length()) {
-                        return -1;
-                    }
-                    return a.compareTo(b);
-                })
-                .collect(Collectors.toList());
+        List<HashMap<String, String>> fileList = problemCaseList.stream().sorted((o1, o2) -> {
+            String a = o1.get("input").split("\\.")[0];
+            String b = o2.get("input").split("\\.")[0];
+            if (a.length() > b.length()) {
+                return 1;
+            } else if (a.length() < b.length()) {
+                return -1;
+            }
+            return a.compareTo(b);
+        }).collect(Collectors.toList());
 
-        return MapUtil.builder()
-                .put("fileList", fileList)
-                .put("fileListDir", fileDir)
-                .map();
+        return MapUtil.builder().put("fileList", fileList).put("fileListDir", fileDir).map();
     }
-
 
     // TODO 行数过多
     @Override
@@ -161,8 +155,9 @@ public class TestCaseServiceImpl implements TestCaseService {
             }
 
             boolean hasTestCase = true;
-            if (problemCaseList.get(0).getInput().endsWith(".in") && (problemCaseList.get(0).getOutput().endsWith(".out") ||
-                    problemCaseList.get(0).getOutput().endsWith(".ans"))) {
+            if (problemCaseList.get(0).getInput().endsWith(".in")
+                    && (problemCaseList.get(0).getOutput().endsWith(".out")
+                    || problemCaseList.get(0).getOutput().endsWith(".ans"))) {
                 hasTestCase = false;
             }
             if (!hasTestCase) {
@@ -199,7 +194,7 @@ public class TestCaseServiceImpl implements TestCaseService {
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
             int bytesRead = 0;
             byte[] buffer = new byte[1024 * 10];
-            //开始向网络传输文件流
+            // 开始向网络传输文件流
             while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
                 bouts.write(buffer, 0, bytesRead);
             }
@@ -234,4 +229,5 @@ public class TestCaseServiceImpl implements TestCaseService {
             FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
         }
     }
+
 }

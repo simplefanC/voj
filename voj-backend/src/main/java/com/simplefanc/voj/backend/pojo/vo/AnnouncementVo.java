@@ -18,6 +18,7 @@ import java.util.Date;
 @ApiModel(value = "公告数据", description = "")
 @Data
 public class AnnouncementVo {
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
@@ -41,4 +42,5 @@ public class AnnouncementVo {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

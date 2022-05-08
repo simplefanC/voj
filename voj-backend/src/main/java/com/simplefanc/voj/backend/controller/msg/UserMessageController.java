@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
 import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
 import com.simplefanc.voj.backend.service.msg.UserMessageService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-
 
 /**
  * @Author: chenfan
@@ -38,7 +37,6 @@ public class UserMessageController {
         return CommonResult.successResponse(userMessageService.getUnreadMsgCount());
     }
 
-
     /**
      * @param type Discuss Reply Like Sys Mine
      * @MethodName cleanMsg
@@ -53,7 +51,6 @@ public class UserMessageController {
         userMessageService.cleanMsg(type, id);
         return CommonResult.successResponse();
     }
-
 
     /**
      * @param limit
@@ -84,7 +81,6 @@ public class UserMessageController {
                                                       @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(userMessageService.getReplyMsg(limit, currentPage));
     }
-
 
     /**
      * @param limit

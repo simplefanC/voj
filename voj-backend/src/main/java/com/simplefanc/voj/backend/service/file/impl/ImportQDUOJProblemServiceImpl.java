@@ -9,11 +9,6 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.JudgeMode;
-import com.simplefanc.voj.common.pojo.entity.problem.Language;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
-import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
@@ -24,9 +19,13 @@ import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.dto.QDOJProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ImportQDUOJProblemService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.*;
+import com.simplefanc.voj.common.pojo.entity.problem.Language;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
+import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +48,7 @@ import java.util.stream.Collectors;
 @Slf4j(topic = "voj")
 public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService {
 
+    public static final List<String> LANGUAGES = Arrays.asList("C", "C With O2", "C++", "C++ With O2", "Java", "Python3", "Python2", "Golang", "C#");
     @Autowired
     private LanguageEntityService languageEntityService;
 
@@ -96,7 +96,6 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         // 删除zip文件
         FileUtil.del(filePath);
 
-
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
@@ -104,7 +103,6 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             FileUtil.del(fileDir);
             throw new StatusFailException("评测数据压缩包里文件不能为空！");
         }
-
 
         HashMap<String, File> problemInfo = new HashMap<>();
         for (File tmp : files) {
@@ -142,7 +140,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
 
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-        languageQueryWrapper.eq("oj", "LOCAL");
+        languageQueryWrapper.eq("oj", Constant.LOCAL);
         List<Language> languageList = languageEntityService.list(languageQueryWrapper);
 
         HashMap<String, Long> languageMap = new HashMap<>();
@@ -151,10 +149,9 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
-        List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", "LOCAL"));
+        List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", Constant.LOCAL));
         HashMap<String, Tag> tagMap = new HashMap<>();
         for (Tag tag : tagList) {
             tagMap.put(tag.getName().toUpperCase(), tag);
@@ -175,7 +172,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             for (String tagStr : qdojProblemDto.getTags()) {
                 Tag tag = tagMap.getOrDefault(tagStr.toUpperCase(), null);
                 if (tag == null) {
-                    tags.add(new Tag().setName(tagStr).setOj("LOCAL"));
+                    tags.add(new Tag().setName(tagStr).setOj(Constant.LOCAL));
                 } else {
                     tags.add(tag);
                 }
@@ -192,14 +189,10 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
                 mode = JudgeMode.SPJ.getMode();
             }
 
-            problemDto.setJudgeMode(mode)
-                    .setProblem(problem)
-                    .setCodeTemplates(qdojProblemDto.getCodeTemplates())
-                    .setTags(tags)
-                    .setLanguages(languages)
+            problemDto.setJudgeMode(mode).setProblem(problem).setCodeTemplates(qdojProblemDto.getCodeTemplates())
+                    .setTags(tags).setLanguages(languages)
                     .setUploadTestcaseDir(fileDir + File.separator + key + File.separator + "testcase")
-                    .setIsUploadTestCase(true)
-                    .setSamples(qdojProblemDto.getSamples());
+                    .setIsUploadTestCase(true).setSamples(qdojProblemDto.getSamples());
 
             problemDtos.add(problemDto);
         }
@@ -208,12 +201,11 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
     }
 
-
     private QDOJProblemDto QDOJProblemToProblemVo(JSONObject problemJson) {
         QDOJProblemDto qdojProblemDto = new QDOJProblemDto();
         List<String> tags = (List<String>) problemJson.get("tags");
         qdojProblemDto.setTags(tags.stream().map(UnicodeUtil::toString).collect(Collectors.toList()));
-        qdojProblemDto.setLanguages(Arrays.asList("C", "C With O2", "C++", "C++ With O2", "Java", "Python3", "Python2", "Golang", "C#"));
+        qdojProblemDto.setLanguages(LANGUAGES);
         Object spj = problemJson.getObj("spj");
         boolean isSpj = !JSONUtil.isNull(spj);
         qdojProblemDto.setIsSpj(isSpj);
@@ -221,25 +213,19 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         Problem problem = new Problem();
         if (isSpj) {
             JSONObject spjJson = JSONUtil.parseObj(spj);
-            problem.setSpjCode(spjJson.getStr("code"))
-                    .setSpjLanguage(spjJson.getStr("language"));
+            problem.setSpjCode(spjJson.getStr("code")).setSpjLanguage(spjJson.getStr("language"));
         }
-        problem.setAuth(1)
-                .setIsUploadCase(true)
-                .setSource(problemJson.getStr("source", null))
-                .setDifficulty(1)
-                .setProblemId(problemJson.getStr("display_id"))
-                .setIsRemoveEndBlank(true)
-                .setOpenCaseResult(true)
-                .setCodeShare(false)
-                .setType("ACM".equals(problemJson.getStr("rule_type")) ? 0 : 1)
+        problem.setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
+                .setIsUploadCase(true).setSource(problemJson.getStr("source", null))
+                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode())
+                .setProblemId(problemJson.getStr("display_id")).setIsRemoveEndBlank(true).setOpenCaseResult(true)
+                .setCodeShare(false).setType("ACM".equals(problemJson.getStr("rule_type")) ? ContestEnum.TYPE_ACM.getCode() : ContestEnum.TYPE_OI.getCode())
                 .setTitle(problemJson.getStr("title"))
                 .setDescription(UnicodeUtil.toString(problemJson.getJSONObject("description").getStr("value")))
                 .setInput(UnicodeUtil.toString(problemJson.getJSONObject("input_description").getStr("value")))
                 .setOutput(UnicodeUtil.toString(problemJson.getJSONObject("output_description").getStr("value")))
                 .setHint(UnicodeUtil.toString(problemJson.getJSONObject("hint").getStr("value")))
-                .setTimeLimit(problemJson.getInt("time_limit"))
-                .setMemoryLimit(problemJson.getInt("memory_limit"));
+                .setTimeLimit(problemJson.getInt("time_limit")).setMemoryLimit(problemJson.getInt("memory_limit"));
 
         JSONArray samples = problemJson.getJSONArray("samples");
         StringBuilder sb = new StringBuilder();
@@ -272,4 +258,5 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         return qdojProblemDto;
 
     }
+
 }

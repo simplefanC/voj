@@ -20,4 +20,5 @@ public class ContestRegisterCountVo implements Serializable {
 
     @ApiModelProperty(value = "比赛报名人数")
     private Integer count;
+
 }

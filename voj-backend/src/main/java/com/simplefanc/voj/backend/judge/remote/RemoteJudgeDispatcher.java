@@ -2,17 +2,16 @@ package com.simplefanc.voj.backend.judge.remote;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
-
 
 @Component
 @Slf4j(topic = "voj")
@@ -45,11 +44,9 @@ public class RemoteJudgeDispatcher {
                 isOk = redisUtil.llPush(QueueConstant.GENERAL_REMOTE_JUDGE_WAITING_HANDLE, JSONUtil.toJsonStr(task));
             }
             if (!isOk) {
-                judgeEntityService.updateById(new Judge()
-                        .setSubmitId(judge.getSubmitId())
+                judgeEntityService.updateById(new Judge().setSubmitId(judge.getSubmitId())
                         .setStatus(JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus())
-                        .setErrorMessage("Please try to submit again!")
-                );
+                        .setErrorMessage("Please try to submit again!"));
             }
             remoteJudgeReceiver.processWaitingTask();
         } catch (Exception e) {
@@ -57,4 +54,5 @@ public class RemoteJudgeDispatcher {
             judgeEntityService.failToUseRedisPublishJudge(judge.getSubmitId(), judge.getPid(), isContest);
         }
     }
+
 }

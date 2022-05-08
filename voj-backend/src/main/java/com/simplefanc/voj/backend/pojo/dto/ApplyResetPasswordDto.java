@@ -15,4 +15,5 @@ public class ApplyResetPasswordDto {
     private String captchaKey;
 
     private String email;
+
 }

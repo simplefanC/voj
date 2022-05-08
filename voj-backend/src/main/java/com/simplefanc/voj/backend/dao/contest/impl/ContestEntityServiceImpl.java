@@ -3,11 +3,11 @@ package com.simplefanc.voj.backend.dao.contest.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.mapper.ContestMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -39,8 +39,9 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
     }
 
     @Override
-    public IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer type, Integer status, String keyword) {
-        //新建分页
+    public IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer type, Integer status,
+                                           String keyword) {
+        // 新建分页
         IPage<ContestVo> page = new Page<>(currentPage, limit);
 
         List<ContestVo> contestList = contestMapper.getContestList(page, type, status, keyword);
@@ -63,7 +64,6 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
         return contestVo;
     }
 
-
     private void setRegisterCount(List<ContestVo> contestList) {
         List<Long> cidList = contestList.stream().map(ContestVo::getId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(cidList)) {
@@ -78,6 +78,5 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
             }
         }
     }
-
 
 }

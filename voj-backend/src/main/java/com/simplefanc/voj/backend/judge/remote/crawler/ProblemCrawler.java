@@ -17,9 +17,15 @@ public abstract class ProblemCrawler {
     @Data
     @Accessors(chain = true)
     public static class RemoteProblemInfo {
+
         private Problem problem;
+
         private List<Tag> tagList;
+
         private List<String> langIdList;
+
         private RemoteOj remoteOJ;
+
     }
+
 }

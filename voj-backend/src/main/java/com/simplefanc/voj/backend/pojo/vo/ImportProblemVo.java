@@ -16,6 +16,7 @@ import java.util.Map;
 @ToString
 @Accessors(chain = true)
 public class ImportProblemVo implements Serializable {
+
     // TODO
     private HashMap<String, Object> problem;
 
@@ -99,4 +100,5 @@ public class ImportProblemVo implements Serializable {
     public void setJudgeExtraFile(HashMap<String, String> judgeExtraFile) {
         this.judgeExtraFile = judgeExtraFile;
     }
+
 }

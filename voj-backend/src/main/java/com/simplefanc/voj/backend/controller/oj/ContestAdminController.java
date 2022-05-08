@@ -1,12 +1,11 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.backend.pojo.dto.CheckAcDto;
+import com.simplefanc.voj.backend.service.oj.ContestAdminService;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.pojo.dto.CheckACDto;
-import com.simplefanc.voj.backend.service.oj.ContestAdminService;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +37,6 @@ public class ContestAdminController {
         return CommonResult.successResponse(contestAdminService.getContestACInfo(cid, currentPage, limit));
     }
 
-
     /**
      * @MethodName checkContestACInfo
      * @Params * @param null
@@ -48,11 +46,10 @@ public class ContestAdminController {
      */
     @PutMapping("/check-contest-ac-info")
     @RequiresAuthentication
-    public CommonResult<Void> checkContestACInfo(@RequestBody CheckACDto checkACDto) {
-        contestAdminService.checkContestACInfo(checkACDto);
+    public CommonResult<Void> checkContestACInfo(@RequestBody CheckAcDto checkACDto) {
+        contestAdminService.checkContestAcInfo(checkACDto);
         return CommonResult.successResponse();
     }
-
 
     @GetMapping("/get-contest-print")
     @RequiresAuthentication
@@ -72,8 +69,7 @@ public class ContestAdminController {
      */
     @PutMapping("/check-contest-print-status")
     @RequiresAuthentication
-    public CommonResult<Void> checkContestPrintStatus(@RequestParam("id") Long id,
-                                                      @RequestParam("cid") Long cid) {
+    public CommonResult<Void> checkContestPrintStatus(@RequestParam("id") Long id, @RequestParam("cid") Long cid) {
         contestAdminService.checkContestPrintStatus(id, cid);
         return CommonResult.successResponse();
     }

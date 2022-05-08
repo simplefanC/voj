@@ -27,20 +27,23 @@ public class JSKQuerier implements Querier {
     /**
      * 统计计蒜客的所有静态原生状态 --> unkown error 暂时未统计
      */
-    private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {{
-        put("AC", JudgeStatus.STATUS_ACCEPTED);
-        put("PE", JudgeStatus.STATUS_PRESENTATION_ERROR);
-        put("WA", JudgeStatus.STATUS_WRONG_ANSWER);
-        put("TL", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
-        put("ML", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
-        put("OL", JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
-        put("RE", JudgeStatus.STATUS_RUNTIME_ERROR);
-        put("SF", JudgeStatus.STATUS_RUNTIME_ERROR);
-        put("AE", JudgeStatus.STATUS_RUNTIME_ERROR);
-        put("CE", JudgeStatus.STATUS_COMPILE_ERROR);
-        put("pending", JudgeStatus.STATUS_JUDGING);
-        put("fail", JudgeStatus.STATUS_SUBMITTED_FAILED);
-    }};
+    private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {
+        {
+            put("AC", JudgeStatus.STATUS_ACCEPTED);
+            put("PE", JudgeStatus.STATUS_PRESENTATION_ERROR);
+            put("WA", JudgeStatus.STATUS_WRONG_ANSWER);
+            put("TL", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
+            put("ML", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
+            put("OL", JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
+            put("RE", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("SF", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("AE", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("CE", JudgeStatus.STATUS_COMPILE_ERROR);
+            put("pending", JudgeStatus.STATUS_JUDGING);
+            put("fail", JudgeStatus.STATUS_SUBMITTED_FAILED);
+        }
+    };
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -52,9 +55,7 @@ public class JSKQuerier implements Querier {
     @Override
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "id", info.remotePid
-        );
+        HttpEntity entity = SimpleNameValueEntityFactory.create("id", info.remotePid);
         HttpPost post = new HttpPost("/solve/check/" + info.remoteRunId);
         post.setEntity(entity);
         post.setHeader("X-XSRF-TOKEN", CookieUtil.getCookieValue(client, "XSRF-TOKEN"));

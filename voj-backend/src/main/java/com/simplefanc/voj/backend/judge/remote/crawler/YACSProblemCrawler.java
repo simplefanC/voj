@@ -1,13 +1,14 @@
 package com.simplefanc.voj.backend.judge.remote.crawler;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.ProblemEnum;
+import com.simplefanc.voj.common.constants.ProblemLevelEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.backend.common.utils.JsoupUtil;
-import org.jsoup.Connection;
-import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -17,8 +18,11 @@ import org.springframework.util.Assert;
  **/
 @Component
 public class YACSProblemCrawler extends ProblemCrawler {
+
     public static final String JUDGE_NAME = "YACS";
+
     public static final String HOST = "http://www.iai.sh.cn";
+
     public static final String PROBLEM_URL = "/problem/%s";
 
     /**
@@ -33,10 +37,7 @@ public class YACSProblemCrawler extends ProblemCrawler {
         Assert.isTrue(problemId.matches("\\d+"), "YACS题号格式错误！");
         Problem info = new Problem();
         String url = HOST + String.format(PROBLEM_URL, problemId);
-        // 获取连接
-        Connection connection = JsoupUtil.getConnectionFromUrl(url, null, null);
-        Document document = JsoupUtil.getDocument(connection, null);
-        String html = document.html();
+        String html = HttpUtil.get(url);
         html = html.replaceAll("<br>", "\n");
         String problem = ReUtil.getGroup1("\"problem\":({[\\s\\S]*?})}}", html);
         JSONObject jsonObject = JSONUtil.parseObj(problem);
@@ -51,22 +52,23 @@ public class YACSProblemCrawler extends ProblemCrawler {
 
         JSONArray exampleList = jsonObject.getJSONArray("exampleList");
 
-        StringBuilder sb = new StringBuilder("<input>")
-//                .append(jsonObject.getStr("sample_input"))
-                .append("</input><output>")
-//                .append(jsonObject.getStr("sample_output"))
-                .append("</output>");
-        info.setExamples(sb.toString());
+        String sb = "<input>" +
+                // .append(jsonObject.getStr("sample_input"))
+                "</input><output>" +
+                // .append(jsonObject.getStr("sample_output"))
+                "</output>";
+        info.setExamples(sb);
 
         info.setHint(jsonObject.getStr("dataRange"));
         info.setIsRemote(true);
-        info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>", problemId, JUDGE_NAME + "-" + problemId));
-        info.setType(0)
-                .setAuth(1)
+        info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>",
+                problemId, JUDGE_NAME + "-" + problemId));
+        info.setType(ContestEnum.TYPE_ACM.getCode())
+                .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
                 .setAuthor(author)
                 .setOpenCaseResult(false)
                 .setIsRemoveEndBlank(false)
-                .setDifficulty(1);
+                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode());
         return new RemoteProblemInfo().setProblem(info).setTagList(null);
     }
 
@@ -74,4 +76,5 @@ public class YACSProblemCrawler extends ProblemCrawler {
     public String getOjInfo() {
         return JUDGE_NAME;
     }
+
 }

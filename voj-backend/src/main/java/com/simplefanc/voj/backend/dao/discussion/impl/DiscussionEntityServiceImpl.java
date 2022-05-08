@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.dao.discussion.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
-import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import com.simplefanc.voj.backend.dao.discussion.DiscussionEntityService;
 import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.mapper.DiscussionMapper;
 import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
+import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
+import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,10 +19,12 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
-public class DiscussionEntityServiceImpl extends ServiceImpl<DiscussionMapper, Discussion> implements DiscussionEntityService {
+public class DiscussionEntityServiceImpl extends ServiceImpl<DiscussionMapper, Discussion>
+        implements DiscussionEntityService {
 
     @Autowired
     private DiscussionMapper discussionMapper;
+
     @Resource
     private MsgRemindEntityService msgRemindEntityService;
 
@@ -36,12 +38,9 @@ public class DiscussionEntityServiceImpl extends ServiceImpl<DiscussionMapper, D
     public void updatePostLikeMsg(String recipientId, String senderId, Integer discussionId) {
 
         MsgRemind msgRemind = new MsgRemind();
-        msgRemind.setAction("Like_Post")
-                .setRecipientId(recipientId)
-                .setSenderId(senderId)
-                .setSourceId(discussionId)
-                .setSourceType("Discussion")
-                .setUrl("/discussion-detail/" + discussionId);
+        msgRemind.setAction("Like_Post").setRecipientId(recipientId).setSenderId(senderId).setSourceId(discussionId)
+                .setSourceType("Discussion").setUrl("/discussion-detail/" + discussionId);
         msgRemindEntityService.saveOrUpdate(msgRemind);
     }
+
 }

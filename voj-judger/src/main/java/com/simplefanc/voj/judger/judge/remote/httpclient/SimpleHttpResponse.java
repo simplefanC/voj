@@ -9,7 +9,9 @@ import java.io.IOException;
 public class SimpleHttpResponse {
 
     private String body;
+
     private int statusCode;
+
     private HttpResponse rawResponse;
 
     public SimpleHttpResponse(String body, int statusCode, HttpResponse rawResponse) {
@@ -33,8 +35,8 @@ public class SimpleHttpResponse {
     }
 
     /**
-     * Note, when SimpleHttpResponse instance is ready, rawResponse has been
-     * disposed. Hence don't read the body of rawResponse.
+     * Note, when SimpleHttpResponse instance is ready, rawResponse has been disposed.
+     * Hence don't read the body of rawResponse.
      *
      * @return
      */

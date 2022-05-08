@@ -1,13 +1,13 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.oj.HomeService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
-
 
 /**
  * @Author: chenfan
@@ -46,7 +45,6 @@ public class HomeController {
         return CommonResult.successResponse(homeService.getRecentContest());
     }
 
-
     /**
      * @MethodName getHomeCarousel
      * @Params
@@ -59,7 +57,6 @@ public class HomeController {
         return CommonResult.successResponse(homeService.getHomeCarousel());
     }
 
-
     /**
      * @MethodName getRecentSevenACRank
      * @Params * @param null
@@ -71,7 +68,6 @@ public class HomeController {
     public CommonResult<List<ACMRankVo>> getRecentSevenACRank() {
         return CommonResult.successResponse(homeService.getRecentSevenACRank());
     }
-
 
     /**
      * @MethodName getRecentOtherContest
@@ -86,7 +82,6 @@ public class HomeController {
         return CommonResult.successResponse(homeService.getRecentOtherContest());
     }
 
-
     /**
      * @MethodName getCommonAnnouncement
      * @Params * @param null
@@ -96,8 +91,9 @@ public class HomeController {
      */
 
     @GetMapping("/get-common-announcement")
-    public CommonResult<IPage<AnnouncementVo>> getCommonAnnouncement(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                     @RequestParam(value = "currentPage", required = false) Integer currentPage) {
+    public CommonResult<IPage<AnnouncementVo>> getCommonAnnouncement(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(homeService.getCommonAnnouncement(limit, currentPage));
     }
 

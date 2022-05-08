@@ -1,10 +1,11 @@
 package com.simplefanc.voj.backend.common.utils;
 
+import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public final class RedisUtil {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
     // =============================common============================
 
     public boolean getLock(String lockName, int expireTime) {
@@ -34,7 +36,7 @@ public final class RedisUtil {
             }
             long reVal = incr(lockName, 1);
             if (1 == reVal) {
-                //获取到锁
+                // 获取到锁
                 result = true;
             }
         } catch (Exception e) {
@@ -91,7 +93,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 删除缓存
      *
@@ -103,11 +104,10 @@ public final class RedisUtil {
             if (key.length == 1) {
                 redisTemplate.delete(key[0]);
             } else {
-                redisTemplate.delete(CollectionUtils.arrayToList(key));
+                redisTemplate.delete(CollUtil.newArrayList(key));
             }
         }
     }
-
 
     // ============================String=============================
 
@@ -119,6 +119,10 @@ public final class RedisUtil {
      */
     public Object get(String key) {
         return key == null ? null : redisTemplate.opsForValue().get(key);
+    }
+
+    public <T> T get(String key, Class<? extends T> clazz) {
+        return key == null ? null : (T) redisTemplate.opsForValue().get(key);
     }
 
     /**
@@ -138,7 +142,6 @@ public final class RedisUtil {
             return false;
         }
     }
-
 
     /**
      * 普通缓存放入并设置时间
@@ -163,7 +166,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 递增
      *
@@ -177,7 +179,6 @@ public final class RedisUtil {
         return redisTemplate.opsForValue().increment(key, delta);
     }
 
-
     /**
      * 递减
      *
@@ -190,7 +191,6 @@ public final class RedisUtil {
         }
         return redisTemplate.opsForValue().increment(key, -delta);
     }
-
 
     // ================================Map=================================
 
@@ -230,7 +230,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * HashSet 并设置时间
      *
@@ -251,7 +250,6 @@ public final class RedisUtil {
             return false;
         }
     }
-
 
     /**
      * 向一张hash表中放入数据,如果不存在将创建
@@ -293,7 +291,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 删除hash表中的值
      *
@@ -303,7 +300,6 @@ public final class RedisUtil {
     public void hdel(String key, Object... item) {
         redisTemplate.opsForHash().delete(key, item);
     }
-
 
     /**
      * 判断hash表中是否有该项的值
@@ -316,7 +312,6 @@ public final class RedisUtil {
         return redisTemplate.opsForHash().hasKey(key, item);
     }
 
-
     /**
      * hash递增 如果不存在,就会创建一个 并把新增后的值返回
      *
@@ -328,7 +323,6 @@ public final class RedisUtil {
         return redisTemplate.opsForHash().increment(key, item, by);
     }
 
-
     /**
      * hash递减
      *
@@ -339,7 +333,6 @@ public final class RedisUtil {
     public double hdecr(String key, String item, double by) {
         return redisTemplate.opsForHash().increment(key, item, -by);
     }
-
 
     // ============================set=============================
 
@@ -357,7 +350,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 根据value从一个set中查询,是否存在
      *
@@ -374,7 +366,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 将数据放入set缓存
      *
@@ -390,7 +381,6 @@ public final class RedisUtil {
             return 0;
         }
     }
-
 
     /**
      * 将set数据放入缓存
@@ -412,7 +402,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 获取set缓存的长度
      *
@@ -426,7 +415,6 @@ public final class RedisUtil {
             return 0;
         }
     }
-
 
     /**
      * 移除值为value的
@@ -464,7 +452,6 @@ public final class RedisUtil {
         }
     }
 
-
     /**
      * 获取list缓存的长度
      *
@@ -478,7 +465,6 @@ public final class RedisUtil {
             return 0;
         }
     }
-
 
     /**
      * 通过索引 获取list中的值
@@ -494,7 +480,6 @@ public final class RedisUtil {
             return null;
         }
     }
-
 
     /**
      * 将list右边放入缓存
@@ -548,7 +533,6 @@ public final class RedisUtil {
 
     }
 
-
     /**
      * 将list放入缓存
      *
@@ -567,7 +551,6 @@ public final class RedisUtil {
 
     }
 
-
     public boolean llPushList(String key, List<Object> value) {
         try {
             redisTemplate.opsForList().leftPushAll(key, value);
@@ -578,7 +561,6 @@ public final class RedisUtil {
         }
 
     }
-
 
     public Object lrPop(String key) {
         try {
@@ -648,7 +630,6 @@ public final class RedisUtil {
 
     }
 
-
     /**
      * 给特定频道发布消息
      *
@@ -659,6 +640,5 @@ public final class RedisUtil {
     public void sendMessage(String channel, Object message) {
         redisTemplate.convertAndSend(channel, message);
     }
-
 
 }

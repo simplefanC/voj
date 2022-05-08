@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

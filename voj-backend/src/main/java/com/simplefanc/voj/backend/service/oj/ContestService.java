@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.backend.pojo.dto.ContestPrintDto;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
 import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
+import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 
 import java.util.List;
 
@@ -30,25 +30,16 @@ public interface ContestService {
 
     ProblemInfoVo getContestProblemDetails(Long cid, String displayId);
 
-
     // TODO 参数过多
-    IPage<JudgeVo> getContestSubmissionList(Integer limit,
-                                            Integer currentPage,
-                                            Boolean onlyMine,
-                                            String displayId,
-                                            Integer searchStatus,
-                                            String searchUsername,
-                                            Long searchCid,
-                                            Boolean beforeContestSubmit,
-                                            Boolean completeProblemID);
+    IPage<JudgeVo> getContestSubmissionList(Integer limit, Integer currentPage, Boolean onlyMine, String displayId,
+                                            Integer searchStatus, String searchUsername, Long searchCid, Boolean beforeContestSubmit,
+                                            Boolean completeProblemId);
 
     IPage getContestRank(ContestRankDto contestRankDto);
 
     IPage<AnnouncementVo> getContestAnnouncement(Long cid, Integer limit, Integer currentPage);
 
-
     List<Announcement> getContestUserNotReadAnnouncement(UserReadContestAnnouncementDto userReadContestAnnouncementDto);
-
 
     void submitPrintText(ContestPrintDto contestPrintDto);
 

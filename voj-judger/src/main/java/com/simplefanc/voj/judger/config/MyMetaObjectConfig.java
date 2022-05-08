@@ -24,4 +24,5 @@ public class MyMetaObjectConfig implements MetaObjectHandler {
     public void updateFill(MetaObject metaObject) {
         this.setFieldValByName("gmtModified", new Date(), metaObject);
     }
+
 }

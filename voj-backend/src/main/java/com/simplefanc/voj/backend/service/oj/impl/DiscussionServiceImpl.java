@@ -1,14 +1,10 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
-import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionLike;
-import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
-import com.simplefanc.voj.common.pojo.entity.problem.Category;
-import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
@@ -22,12 +18,15 @@ import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
 import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.DiscussionService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
+import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionLike;
+import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
+import com.simplefanc.voj.common.pojo.entity.problem.Category;
+import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -38,6 +37,7 @@ import java.util.List;
  */
 @Service
 public class DiscussionServiceImpl implements DiscussionService {
+
     @Autowired
     private DiscussionEntityService discussionEntityService;
 
@@ -57,13 +57,8 @@ public class DiscussionServiceImpl implements DiscussionService {
     private UserAcproblemEntityService userAcproblemEntityService;
 
     @Override
-    public IPage<Discussion> getDiscussionList(Integer limit,
-                                               Integer currentPage,
-                                               Integer categoryId,
-                                               String pid,
-                                               Boolean onlyMine,
-                                               String keyword,
-                                               Boolean admin) {
+    public IPage<Discussion> getDiscussionList(Integer limit, Integer currentPage, Integer categoryId, String pid,
+                                               Boolean onlyMine, String keyword, Boolean admin) {
 
         QueryWrapper<Discussion> discussionQueryWrapper = new QueryWrapper<>();
 
@@ -73,34 +68,25 @@ public class DiscussionServiceImpl implements DiscussionService {
             discussionQueryWrapper.eq("category_id", categoryId);
         }
 
-        if (!StringUtils.isEmpty(keyword)) {
+        if (!StrUtil.isEmpty(keyword)) {
 
             final String key = keyword.trim();
 
-            discussionQueryWrapper.and(wrapper -> wrapper.like("title", key).or()
-                    .like("author", key).or()
-                    .like("id", key).or()
-                    .like("description", key));
+            discussionQueryWrapper.and(wrapper -> wrapper.like("title", key).or().like("author", key).or()
+                    .like("id", key).or().like("description", key));
         }
 
-        if (!StringUtils.isEmpty(pid)) {
+        if (!StrUtil.isEmpty(pid)) {
             discussionQueryWrapper.eq("pid", pid);
         }
 
-
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("problem_admin")
-                || SecurityUtils.getSubject().hasRole("admin");
-        discussionQueryWrapper
-                .eq(!(admin && isAdmin), "status", 0)
-                .orderByDesc("top_priority")
-                .orderByDesc("gmt_create")
-                .orderByDesc("like_num")
-                .orderByDesc("view_num");
+        boolean isAdmin = UserSessionUtil.isRoot()
+                || UserSessionUtil.isProblemAdmin() || UserSessionUtil.isAdmin();
+        discussionQueryWrapper.eq(!(admin && isAdmin), "status", 0).orderByDesc("top_priority")
+                .orderByDesc("gmt_create").orderByDesc("like_num").orderByDesc("view_num");
 
         if (onlyMine) {
-            Session session = SecurityUtils.getSubject().getSession();
-            UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
             discussionQueryWrapper.eq("uid", userRolesVo.getUid());
         }
 
@@ -111,8 +97,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     public DiscussionVo getDiscussion(Integer did) {
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         String uid = null;
 
@@ -143,13 +128,11 @@ public class DiscussionServiceImpl implements DiscussionService {
     public void addDiscussion(Discussion discussion) {
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 除管理员外 其它用户需要AC20道题目以上才可发帖，同时限制一天只能发帖5次
-        if (!SecurityUtils.getSubject().hasRole("root")
-                && !SecurityUtils.getSubject().hasRole("admin")
-                && !SecurityUtils.getSubject().hasRole("problem_admin")) {
+        if (!UserSessionUtil.isRoot() && !UserSessionUtil.isAdmin()
+                && !UserSessionUtil.isProblemAdmin()) {
 
             QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
@@ -160,7 +143,7 @@ public class DiscussionServiceImpl implements DiscussionService {
             }
 
             String lockKey = AccountConstant.DISCUSSION_ADD_NUM_LOCK + userRolesVo.getUid();
-            Integer num = (Integer) redisUtil.get(lockKey);
+            Integer num = redisUtil.get(lockKey, Integer.class);
             if (num == null) {
                 redisUtil.set(lockKey, 1, 3600 * 24);
             } else if (num >= 5) {
@@ -170,14 +153,11 @@ public class DiscussionServiceImpl implements DiscussionService {
             }
         }
 
-        discussion.setAuthor(userRolesVo.getUsername())
-                .setAvatar(userRolesVo.getAvatar())
-                .setUid(userRolesVo.getUid());
+        discussion.setAuthor(userRolesVo.getUsername()).setAvatar(userRolesVo.getAvatar()).setUid(userRolesVo.getUid());
 
-        if (SecurityUtils.getSubject().hasRole("root")) {
+        if (UserSessionUtil.isRoot()) {
             discussion.setRole("root");
-        } else if (SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        } else if (UserSessionUtil.isAdmin() || UserSessionUtil.isProblemAdmin()) {
             discussion.setRole("admin");
         } else {
             // 如果不是管理员角色，一律重置为不置顶
@@ -190,7 +170,6 @@ public class DiscussionServiceImpl implements DiscussionService {
         }
     }
 
-
     @Override
     public void updateDiscussion(Discussion discussion) {
         boolean isOk = discussionEntityService.updateById(discussion);
@@ -202,14 +181,12 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     public void removeDiscussion(Integer did) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         UpdateWrapper<Discussion> discussionUpdateWrapper = new UpdateWrapper<Discussion>().eq("id", did);
         // 如果不是是管理员,则需要附加当前用户的uid条件
-        if (!SecurityUtils.getSubject().hasRole("root")
-                && !SecurityUtils.getSubject().hasRole("admin")
-                && !SecurityUtils.getSubject().hasRole("problem_admin")) {
+        if (!UserSessionUtil.isRoot() && !UserSessionUtil.isAdmin()
+                && !UserSessionUtil.isProblemAdmin()) {
             discussionUpdateWrapper.eq("uid", userRolesVo.getUid());
         }
         boolean isOk = discussionEntityService.remove(discussionUpdateWrapper);
@@ -223,8 +200,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Transactional(rollbackFor = Exception.class)
     public void addDiscussionLike(Integer did, Boolean toLike) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         QueryWrapper<DiscussionLike> discussionLikeQueryWrapper = new QueryWrapper<>();
         discussionLikeQueryWrapper.eq("did", did).eq("uid", userRolesVo.getUid());
@@ -235,7 +211,8 @@ public class DiscussionServiceImpl implements DiscussionService {
         if (toLike) {
             // 如果不存在就添加
             if (discussionLike == null) {
-                boolean isSave = discussionLikeEntityService.saveOrUpdate(new DiscussionLike().setUid(userRolesVo.getUid()).setDid(did));
+                boolean isSave = discussionLikeEntityService
+                        .saveOrUpdate(new DiscussionLike().setUid(userRolesVo.getUid()).setDid(did));
                 if (!isSave) {
                     throw new StatusFailException("点赞失败，请重试尝试！");
                 }
@@ -248,8 +225,10 @@ public class DiscussionServiceImpl implements DiscussionService {
                 // 更新点赞消息
                 discussionEntityService.updatePostLikeMsg(discussion.getUid(), userRolesVo.getUid(), did);
             }
-        } else { // 取消点赞
-            if (discussionLike != null) { // 如果存在就删除
+        } else {
+            // 取消点赞
+            // 如果存在就删除
+            if (discussionLike != null) {
                 boolean isDelete = discussionLikeEntityService.removeById(discussionLike.getId());
                 if (!isDelete) {
                     throw new StatusFailException("取消点赞失败，请重试尝试！");
@@ -275,4 +254,5 @@ public class DiscussionServiceImpl implements DiscussionService {
             throw new StatusFailException("举报失败，请重新尝试");
         }
     }
+
 }

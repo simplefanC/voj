@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.oj;
 
+import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
 import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
-import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,4 +30,5 @@ public interface CommonService {
     Collection<Language> getProblemLanguages(Long pid);
 
     List<CodeTemplate> getProblemCodeTemplate(Long pid);
+
 }

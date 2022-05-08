@@ -9,10 +9,10 @@
         <where>
             p.id = j.pid AND j.cid = 0 AND j.cpid = 0 AND p.auth = 1
             <if test="searchPid!=null">
-                <if test="completeProblemID != true">
+                <if test="completeProblemId != true">
                     AND p.problem_id like concat('%',#{searchPid},'%')
                 </if>
-                <if test="completeProblemID">
+                <if test="completeProblemId">
                     AND p.problem_id = #{searchPid}
                 </if>
             </if>
@@ -40,10 +40,10 @@
                 AND j.cid = #{cid}
             </if>
             <if test="displayId!=null and displayId!=''">
-                <if test="completeProblemID != true">
+                <if test="completeProblemId != true">
                     AND cp.display_id like concat('%',#{displayId},'%')
                 </if>
-                <if test="completeProblemID">
+                <if test="completeProblemId">
                     AND cp.display_id = #{displayId}
                 </if>
             </if>

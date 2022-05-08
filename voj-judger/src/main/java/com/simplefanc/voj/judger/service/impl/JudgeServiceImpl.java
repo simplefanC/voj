@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.service.impl;
 
-
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -78,12 +77,14 @@ public class JudgeServiceImpl implements JudgeService {
     }
 
     @Override
-    public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError {
+    public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)
+            throws SystemError {
         return judgeContext.compileSpj(code, pid, spjLanguage, extraFiles);
     }
 
     @Override
-    public Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError {
+    public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
+                                      HashMap<String, String> extraFiles) throws SystemError {
         return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
     }
 
@@ -93,15 +94,13 @@ public class JudgeServiceImpl implements JudgeService {
         if (judge.getCid() == 0) {
             // 如果是AC，就更新user_acproblem表
             if (JudgeStatus.STATUS_ACCEPTED.getStatus().equals(judge.getStatus())) {
-                userAcproblemEntityService.saveOrUpdate(new UserAcproblem()
-                        .setPid(judge.getPid())
-                        .setUid(judge.getUid())
-                        .setSubmitId(judge.getSubmitId())
-                );
+                userAcproblemEntityService.saveOrUpdate(new UserAcproblem().setPid(judge.getPid())
+                        .setUid(judge.getUid()).setSubmitId(judge.getSubmitId()));
             }
         } else {
             // 如果是比赛提交
             contestRecordEntityService.updateContestRecord(judge);
         }
     }
+
 }

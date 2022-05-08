@@ -1,5 +1,6 @@
 package com.simplefanc.voj.judger.judge.local.task;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -12,7 +13,6 @@ import com.simplefanc.voj.judger.judge.local.entity.JudgeDTO;
 import com.simplefanc.voj.judger.judge.local.entity.JudgeGlobalDTO;
 import com.simplefanc.voj.judger.judge.local.entity.SandBoxRes;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 
@@ -31,41 +31,33 @@ public class InteractiveJudge extends AbstractJudge {
         RunConfig interactiveRunConfig = judgeGlobalDTO.getInteractiveRunConfig();
 
         // 交互程序的路径
-        String interactiveExeSrc = JudgeDir.INTERACTIVE_WORKPLACE_DIR
-                + File.separator + judgeGlobalDTO.getProblemId() + File.separator + interactiveRunConfig.getExeName();
+        String interactiveExeSrc = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + judgeGlobalDTO.getProblemId()
+                + File.separator + interactiveRunConfig.getExeName();
 
         String testCaseInputFileName = judgeGlobalDTO.getProblemId() + "_input";
         String testCaseOutputFileName = judgeGlobalDTO.getProblemId() + "_output";
 
         String userOutputFileName = judgeGlobalDTO.getProblemId() + "_user_output";
 
-        return SandboxRun.interactTestCase(
-                parseRunCommand(runConfig.getCommand(), runConfig, null, null, null),
-                runConfig.getEnvs(),
-                runConfig.getExeName(),
-                judgeGlobalDTO.getUserFileId(),
-                judgeGlobalDTO.getUserFileSrc(),
-                judgeGlobalDTO.getTestTime(),
-                judgeGlobalDTO.getMaxMemory(),
-                judgeGlobalDTO.getMaxStack(),
-                judgeDTO.getTestCaseInputPath(),
-                testCaseInputFileName,
-                judgeDTO.getTestCaseOutputPath(),
-                testCaseOutputFileName,
-                userOutputFileName,
-                parseRunCommand(interactiveRunConfig.getCommand(), interactiveRunConfig, testCaseInputFileName, userOutputFileName, testCaseOutputFileName),
-                interactiveRunConfig.getEnvs(),
-                interactiveExeSrc,
-                interactiveRunConfig.getExeName());
+        return SandboxRun.interactTestCase(parseRunCommand(runConfig.getCommand(), runConfig, null, null, null),
+                runConfig.getEnvs(), runConfig.getExeName(), judgeGlobalDTO.getUserFileId(),
+                judgeGlobalDTO.getUserFileSrc(), judgeGlobalDTO.getTestTime(), judgeGlobalDTO.getMaxMemory(),
+                judgeGlobalDTO.getMaxStack(), judgeDTO.getTestCaseInputPath(), testCaseInputFileName,
+                judgeDTO.getTestCaseOutputPath(), testCaseOutputFileName, userOutputFileName,
+                parseRunCommand(interactiveRunConfig.getCommand(), interactiveRunConfig, testCaseInputFileName,
+                        userOutputFileName, testCaseOutputFileName),
+                interactiveRunConfig.getEnvs(), interactiveExeSrc, interactiveRunConfig.getExeName());
     }
 
     @Override
-    public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
+            throws SystemError {
         return null;
     }
 
     @Override
-    public JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
+    public JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
+                                          JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
 
         JSONObject result = new JSONObject();
 
@@ -80,11 +72,13 @@ public class InteractiveJudge extends AbstractJudge {
         } else if (userSandBoxRes.getMemory() > judgeGlobalDTO.getMaxMemory() * 1024) {
             // 如果运行超过题目限制空间，直接MLE
             result.set("status", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
-        } else if ((userExitCode != 0 && userExitCode != 13) || (userExitCode == 13 && interactiveSandBoxRes.getExitCode() == 0)) {
+        } else if ((userExitCode != 0 && userExitCode != 13)
+                || (userExitCode == 13 && interactiveSandBoxRes.getExitCode() == 0)) {
             // Broken Pipe
             result.set("status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
             if (userExitCode < 32) {
-                errMsg.append(String.format("The program return exit status code: %s (%s)\n", userExitCode, SandboxRun.signals.get(userExitCode)));
+                errMsg.append(String.format("The program return exit status code: %s (%s)\n", userExitCode,
+                        SandboxRun.signals.get(userExitCode)));
             } else {
                 errMsg.append(String.format("The program return exit status code: %s\n", userExitCode));
             }
@@ -106,11 +100,12 @@ public class InteractiveJudge extends AbstractJudge {
             }
 
             String spjErrMsg = interactiveCheckRes.getStr("errMsg");
-            if (!StringUtils.isEmpty(spjErrMsg)) {
+            if (!StrUtil.isEmpty(spjErrMsg)) {
                 errMsg.append(spjErrMsg).append(" ");
             }
-            if (interactiveSandBoxRes.getExitCode() != 0 && !StringUtils.isEmpty(interactiveSandBoxRes.getStderr())) {
-                errMsg.append(String.format("Interactive program exited with code: %s", interactiveSandBoxRes.getExitCode()));
+            if (interactiveSandBoxRes.getExitCode() != 0 && !StrUtil.isEmpty(interactiveSandBoxRes.getStderr())) {
+                errMsg.append(
+                        String.format("Interactive program exited with code: %s", interactiveSandBoxRes.getExitCode()));
             }
         }
         // kb
@@ -119,14 +114,13 @@ public class InteractiveJudge extends AbstractJudge {
         result.set("time", userSandBoxRes.getTime());
 
         // 记录该测试点的错误信息
-        if (!StringUtils.isEmpty(errMsg.toString())) {
+        if (!StrUtil.isEmpty(errMsg.toString())) {
             String str = errMsg.toString();
             result.set("errMsg", str.substring(0, Math.min(1024 * 1024, str.length())));
         }
 
         return result;
     }
-
 
     private JSONObject checkInteractiveRes(SandBoxRes interactiveSandBoxRes) {
 
@@ -135,7 +129,7 @@ public class InteractiveJudge extends AbstractJudge {
         int exitCode = interactiveSandBoxRes.getExitCode();
 
         // 获取跑题用户输出或错误输出
-        if (!StringUtils.isEmpty(interactiveSandBoxRes.getStderr())) {
+        if (!StrUtil.isEmpty(interactiveSandBoxRes.getStderr())) {
             result.set("errMsg", interactiveSandBoxRes.getStderr());
         }
 
@@ -147,10 +141,11 @@ public class InteractiveJudge extends AbstractJudge {
                 result.set("code", exitCode);
             }
         } else if (interactiveSandBoxRes.getStatus().equals(JudgeStatus.STATUS_RUNTIME_ERROR.getStatus())) {
-            if (exitCode == SPJ_WA || exitCode == SPJ_ERROR || exitCode == SPJ_AC || exitCode == SPJ_PE || exitCode == SPJ_PC) {
+            if (exitCode == SPJ_WA || exitCode == SPJ_ERROR || exitCode == SPJ_AC || exitCode == SPJ_PE
+                    || exitCode == SPJ_PC) {
                 result.set("code", exitCode);
             } else {
-                if (!StringUtils.isEmpty(interactiveSandBoxRes.getStderr())) {
+                if (!StrUtil.isEmpty(interactiveSandBoxRes.getStderr())) {
                     // 适配testlib.h 根据错误信息前缀判断
                     return parseTestLibErr(interactiveSandBoxRes.getStderr());
                 } else {

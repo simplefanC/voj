@@ -56,4 +56,5 @@ public class TrainingRecordVo {
 
     @ApiModelProperty(value = "提交耗时")
     private Integer useTime;
+
 }

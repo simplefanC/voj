@@ -16,4 +16,5 @@ public class CommentListVo {
     private IPage<CommentVo> commentList;
 
     private HashMap<Integer, Boolean> commentLikeMap;
+
 }

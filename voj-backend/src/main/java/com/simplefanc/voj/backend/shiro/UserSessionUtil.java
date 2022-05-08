@@ -26,19 +26,24 @@ public class UserSessionUtil {
         return (UserRolesVo) getSessionAttribute("userInfo");
     }
 
+    public static void logout() {
+        SecurityUtils.getSubject().logout();
+    }
+
     public static void setUserInfo(UserRolesVo userInfo) {
         setSessionAttribute("userInfo", userInfo);
     }
 
-    public static Session getSession() {
+    private static Session getSession() {
         return SecurityUtils.getSubject().getSession();
     }
 
-    public static void setSessionAttribute(Object key, Object value) {
+    private static void setSessionAttribute(Object key, Object value) {
         getSession().setAttribute(key, value);
     }
 
-    public static Object getSessionAttribute(Object key) {
+    private static Object getSessionAttribute(Object key) {
         return getSession().getAttribute(key);
     }
+
 }

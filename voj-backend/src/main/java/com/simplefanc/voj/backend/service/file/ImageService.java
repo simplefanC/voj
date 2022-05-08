@@ -14,4 +14,5 @@ public interface ImageService {
     Map<Object, Object> uploadAvatar(MultipartFile image);
 
     Map<Object, Object> uploadCarouselImg(MultipartFile image);
+
 }

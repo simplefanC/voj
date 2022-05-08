@@ -20,4 +20,5 @@ public class TrainingProblemDto {
 
     @NotBlank(message = "题目在比赛中的展示id不能为空")
     private String displayId;
+
 }

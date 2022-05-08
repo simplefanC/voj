@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
@@ -8,6 +7,8 @@ import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
 import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.backend.service.oj.PassportService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/api")
 public class PassportController {
 
-
     @Autowired
     private PassportService passportService;
 
@@ -38,7 +38,8 @@ public class PassportController {
      * @Since 2020/10/24
      */
     @PostMapping("/login")
-    public CommonResult<UserInfoVo> login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response, HttpServletRequest request) {
+    public CommonResult<UserInfoVo> login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response,
+                                          HttpServletRequest request) {
         return CommonResult.successResponse(passportService.login(loginDto, response, request));
     }
 
@@ -49,10 +50,9 @@ public class PassportController {
      * @Since 2020/10/26
      */
     @RequestMapping(value = "/get-register-code", method = RequestMethod.GET)
-    public CommonResult<RegisterCodeVo> getRegisterCode(@RequestParam(value = "email", required = true) String email) {
+    public CommonResult<RegisterCodeVo> getRegisterCode(@RequestParam(value = "email") String email) {
         return CommonResult.successResponse(passportService.getRegisterCode(email));
     }
-
 
     /**
      * @param registerDto
@@ -67,7 +67,6 @@ public class PassportController {
         return CommonResult.successResponse();
     }
 
-
     /**
      * @param applyResetPasswordDto
      * @MethodName applyResetPassword
@@ -80,7 +79,6 @@ public class PassportController {
         passportService.applyResetPassword(applyResetPasswordDto);
         return CommonResult.successResponse();
     }
-
 
     /**
      * @param resetPasswordDto
@@ -95,7 +93,6 @@ public class PassportController {
         return CommonResult.successResponse();
     }
 
-
     /**
      * @MethodName logout
      * @Description 退出逻辑，将jwt在redis中清除，下次需要再次登录。
@@ -105,7 +102,7 @@ public class PassportController {
     @GetMapping("/logout")
     @RequiresAuthentication
     public CommonResult<Void> logout() {
-        SecurityUtils.getSubject().logout();
+        UserSessionUtil.logout();
         return CommonResult.successResponse("登出成功！");
     }
 

@@ -2,6 +2,7 @@ package com.simplefanc.voj.judger.judge.local.task;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileWriter;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -14,7 +15,6 @@ import com.simplefanc.voj.judger.judge.local.entity.JudgeDTO;
 import com.simplefanc.voj.judger.judge.local.entity.JudgeGlobalDTO;
 import com.simplefanc.voj.judger.judge.local.entity.SandBoxRes;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 
@@ -26,32 +26,27 @@ import java.io.File;
 
 @Component
 public class SpecialJudge extends AbstractJudge {
+
     @Override
     public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
-        return SandboxRun.testCase(
-                parseRunCommand(runConfig.getCommand(), runConfig, null, null, null),
-                runConfig.getEnvs(),
-                judgeDTO.getTestCaseInputPath(),
-                judgeGlobalDTO.getTestTime(),
-                judgeGlobalDTO.getMaxMemory(),
-                judgeDTO.getMaxOutputSize(),
-                judgeGlobalDTO.getMaxStack(),
-                runConfig.getExeName(),
-                judgeGlobalDTO.getUserFileId(),
-                judgeGlobalDTO.getUserFileSrc());
+        return SandboxRun.testCase(parseRunCommand(runConfig.getCommand(), runConfig, null, null, null),
+                runConfig.getEnvs(), judgeDTO.getTestCaseInputPath(), judgeGlobalDTO.getTestTime(),
+                judgeGlobalDTO.getMaxMemory(), judgeDTO.getMaxOutputSize(), judgeGlobalDTO.getMaxStack(),
+                runConfig.getExeName(), judgeGlobalDTO.getUserFileId(), judgeGlobalDTO.getUserFileSrc());
     }
 
-
     @Override
-    public JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
+    public JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
+                                          JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
         return null;
     }
 
     // TODO 行数过多
     @Override
-    public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
+            throws SystemError {
 
         JSONObject result = new JSONObject();
         StringBuilder errMsg = new StringBuilder();
@@ -66,28 +61,24 @@ public class SpecialJudge extends AbstractJudge {
             } else {
 
                 // 对于当前测试样例，用户程序的输出对应生成的文件
-                String userOutputFilePath = judgeGlobalDTO.getRunDir() + File.separator + judgeDTO.getTestCaseId() + ".out";
+                String userOutputFilePath = judgeGlobalDTO.getRunDir() + File.separator + judgeDTO.getTestCaseId()
+                        + ".out";
                 FileWriter stdWriter = new FileWriter(userOutputFilePath);
                 stdWriter.write(sandBoxRes.getStdout());
 
                 RunConfig spjRunConfig = judgeGlobalDTO.getSpjRunConfig();
 
                 // 特判程序的路径
-                String spjExeSrc = JudgeDir.SPJ_WORKPLACE_DIR + File.separator
-                        + judgeGlobalDTO.getProblemId() + File.separator + spjRunConfig.getExeName();
+                String spjExeSrc = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + judgeGlobalDTO.getProblemId()
+                        + File.separator + spjRunConfig.getExeName();
 
                 String userOutputFileName = judgeGlobalDTO.getProblemId() + "_user_output";
                 String testCaseInputFileName = judgeGlobalDTO.getProblemId() + "_input";
                 String testCaseOutputFileName = judgeGlobalDTO.getProblemId() + "_output";
                 // 进行spj程序运行比对
-                JSONObject spjResult = spjRunAndCheckResult(userOutputFilePath,
-                        userOutputFileName,
-                        judgeDTO.getTestCaseInputPath(),
-                        testCaseInputFileName,
-                        judgeDTO.getTestCaseOutputPath(),
-                        testCaseOutputFileName,
-                        spjExeSrc,
-                        spjRunConfig);
+                JSONObject spjResult = spjRunAndCheckResult(userOutputFilePath, userOutputFileName,
+                        judgeDTO.getTestCaseInputPath(), testCaseInputFileName, judgeDTO.getTestCaseOutputPath(),
+                        testCaseOutputFileName, spjExeSrc, spjRunConfig);
 
                 // 删除用户输出文件
                 FileUtil.del(userOutputFilePath);
@@ -104,7 +95,7 @@ public class SpecialJudge extends AbstractJudge {
                 }
 
                 String spjErrMsg = spjResult.getStr("errMsg");
-                if (!StringUtils.isEmpty(spjErrMsg)) {
+                if (!StrUtil.isEmpty(spjErrMsg)) {
                     errMsg.append(spjErrMsg).append(" ");
                 }
 
@@ -114,7 +105,8 @@ public class SpecialJudge extends AbstractJudge {
         } else if (sandBoxRes.getExitCode() != 0) {
             result.set("status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
             if (sandBoxRes.getExitCode() < 32) {
-                errMsg.append(String.format("The program return exit status code: %s (%s)\n", sandBoxRes.getExitCode(), SandboxRun.signals.get(sandBoxRes.getExitCode())));
+                errMsg.append(String.format("The program return exit status code: %s (%s)\n", sandBoxRes.getExitCode(),
+                        SandboxRun.signals.get(sandBoxRes.getExitCode())));
             } else {
                 errMsg.append(String.format("The program return exit status code: %s\n", sandBoxRes.getExitCode()));
             }
@@ -128,7 +120,7 @@ public class SpecialJudge extends AbstractJudge {
         result.set("time", sandBoxRes.getTime());
 
         // 记录该测试点的错误信息
-        if (!StringUtils.isEmpty(errMsg.toString())) {
+        if (!StrUtil.isEmpty(errMsg.toString())) {
             String str = errMsg.toString();
             result.set("errMsg", str.substring(0, Math.min(1024 * 1024, str.length())));
         }
@@ -137,26 +129,16 @@ public class SpecialJudge extends AbstractJudge {
     }
 
     // TODO 参数过多
-    private JSONObject spjRunAndCheckResult(String userOutputFilePath,
-                                            String userOutputFileName,
-                                            String testCaseInputFilePath,
-                                            String testCaseInputFileName,
-                                            String testCaseOutputFilePath,
-                                            String testCaseOutputFileName,
-                                            String spjExeSrc,
-                                            RunConfig spjRunConfig) throws SystemError {
+    private JSONObject spjRunAndCheckResult(String userOutputFilePath, String userOutputFileName,
+                                            String testCaseInputFilePath, String testCaseInputFileName, String testCaseOutputFilePath,
+                                            String testCaseOutputFileName, String spjExeSrc, RunConfig spjRunConfig) throws SystemError {
 
         // 调用安全沙箱运行spj程序
         JSONArray spjJudgeResultList = SandboxRun.spjCheckResult(
-                parseRunCommand(spjRunConfig.getCommand(), spjRunConfig, testCaseInputFileName, userOutputFileName, testCaseOutputFileName),
-                spjRunConfig.getEnvs(),
-                userOutputFilePath,
-                userOutputFileName,
-                testCaseInputFilePath,
-                testCaseInputFileName,
-                testCaseOutputFilePath,
-                testCaseOutputFileName,
-                spjExeSrc,
+                parseRunCommand(spjRunConfig.getCommand(), spjRunConfig, testCaseInputFileName, userOutputFileName,
+                        testCaseOutputFileName),
+                spjRunConfig.getEnvs(), userOutputFilePath, userOutputFileName, testCaseInputFilePath,
+                testCaseInputFileName, testCaseOutputFilePath, testCaseOutputFileName, spjExeSrc,
                 spjRunConfig.getExeName());
 
         JSONObject result = new JSONObject();
@@ -166,7 +148,7 @@ public class SpecialJudge extends AbstractJudge {
         // 获取跑题用户输出或错误输出
         String spjErrOut = ((JSONObject) spjJudgeResult.get("files")).getStr("stderr");
 
-        if (!StringUtils.isEmpty(spjErrOut)) {
+        if (!StrUtil.isEmpty(spjErrOut)) {
             result.set("errMsg", spjErrOut);
         }
 
@@ -180,10 +162,11 @@ public class SpecialJudge extends AbstractJudge {
                 result.set("code", exitCode);
             }
         } else if (spjJudgeResult.getInt("status").intValue() == JudgeStatus.STATUS_RUNTIME_ERROR.getStatus()) {
-            if (exitCode == SPJ_WA || exitCode == SPJ_ERROR || exitCode == SPJ_AC || exitCode == SPJ_PE || exitCode == SPJ_PC) {
+            if (exitCode == SPJ_WA || exitCode == SPJ_ERROR || exitCode == SPJ_AC || exitCode == SPJ_PE
+                    || exitCode == SPJ_PC) {
                 result.set("code", exitCode);
             } else {
-                if (!StringUtils.isEmpty(spjErrOut)) {
+                if (!StrUtil.isEmpty(spjErrOut)) {
                     // 适配testlib.h 根据错误信息前缀判断
                     return parseTestLibErr(spjErrOut);
                 } else {
@@ -196,4 +179,5 @@ public class SpecialJudge extends AbstractJudge {
 
         return result;
     }
+
 }

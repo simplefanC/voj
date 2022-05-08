@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.service.admin.account;
 
-
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;
 
 import java.util.Map;
@@ -15,4 +14,5 @@ public interface AdminAccountService {
     Map<Object, Object> login(LoginDto loginDto);
 
     void logout();
+
 }

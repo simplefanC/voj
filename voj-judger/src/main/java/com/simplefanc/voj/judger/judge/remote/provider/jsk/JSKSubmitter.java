@@ -17,22 +17,25 @@ import java.util.Map;
 @Component
 public class JSKSubmitter implements Submitter {
 
-    private static final Map<String, String> FILE_MAP = new HashMap<String, String>() {{
-        put("FAILED", "Failed");
-        put("c", "main.c");
-        put("c_noi", "main.c");
-        put("c++", "main.cpp");
-        put("c++14", "main.cpp");
-        put("c++_noi", "main.cpp");
-        put("java", "Main.java");
-        put("python", "main.py");
-        put("python3", "main.py");
-        put("ruby", "main.rb");
-        put("blockly", "main.bl");
-        put("octave", "main.m");
-        put("pascal", "main.pas");
-        put("go", "main.go");
-    }};
+    private static final Map<String, String> FILE_MAP = new HashMap<String, String>() {
+        {
+            put("FAILED", "Failed");
+            put("c", "main.c");
+            put("c_noi", "main.c");
+            put("c++", "main.cpp");
+            put("c++14", "main.cpp");
+            put("c++_noi", "main.cpp");
+            put("java", "Main.java");
+            put("python", "main.py");
+            put("python3", "main.py");
+            put("ruby", "main.rb");
+            put("blockly", "main.bl");
+            put("octave", "main.m");
+            put("pascal", "main.pas");
+            put("go", "main.go");
+        }
+    };
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -44,18 +47,13 @@ public class JSKSubmitter implements Submitter {
     @Override
     public void submit(SubmissionInfo info, RemoteAccount account) throws Exception {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "codes[]", info.userCode,
-                "file[]", FILE_MAP.get(info.language),
-                "id", info.remotePid,
-                "language", info.language
-        );
+        HttpEntity entity = SimpleNameValueEntityFactory.create("codes[]", info.userCode, "file[]",
+                FILE_MAP.get(info.language), "id", info.remotePid, "language", info.language);
         HttpPost post = new HttpPost("/solve/submit");
         post.setEntity(entity);
         post.setHeader("X-XSRF-TOKEN", CookieUtil.getCookieValue(client, "XSRF-TOKEN"));
         String result = client.execute(post, HttpStatusValidator.SC_OK).getBody();
         info.remoteRunId = JSONUtil.parseObj(result).getStr("data");
     }
-
 
 }

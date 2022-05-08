@@ -37,4 +37,5 @@ public class RoleAuthsVo {
 
     @ApiModelProperty(value = "权限列表")
     private List<Auth> auths;
+
 }

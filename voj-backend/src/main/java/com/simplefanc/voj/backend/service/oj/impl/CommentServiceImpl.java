@@ -1,14 +1,10 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.emoji.EmojiUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
-import com.simplefanc.voj.common.pojo.entity.discussion.CommentLike;
-import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
-import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
-import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.discussion.CommentEntityService;
@@ -21,12 +17,15 @@ import com.simplefanc.voj.backend.pojo.vo.CommentListVo;
 import com.simplefanc.voj.backend.pojo.vo.CommentVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.CommentService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
+import com.simplefanc.voj.common.pojo.entity.discussion.CommentLike;
+import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
+import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
+import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,15 +54,13 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserAcproblemEntityService userAcproblemEntityService;
 
-
     @Override
     public CommentListVo getComments(Long cid, Integer did, Integer limit, Integer currentPage) {
 
         // 如果有登录，则获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
 
         IPage<CommentVo> commentList = commentEntityService.getCommentList(limit, currentPage, cid, did, isRoot,
                 userRolesVo != null ? userRolesVo.getUid() : null);
@@ -98,24 +95,21 @@ public class CommentServiceImpl implements CommentService {
         return commentListVo;
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CommentVo addComment(Comment comment) {
 
-        if (StringUtils.isEmpty(comment.getContent().trim())) {
+        if (StrUtil.isEmpty(comment.getContent().trim())) {
             throw new StatusFailException("评论内容不能为空！");
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 比赛外的评论 除管理员外 只有AC 10道以上才可评论
         if (comment.getCid() == null) {
-            if (!SecurityUtils.getSubject().hasRole("root")
-                    && !SecurityUtils.getSubject().hasRole("admin")
-                    && !SecurityUtils.getSubject().hasRole("problem_admin")) {
+            if (!UserSessionUtil.isRoot() && !UserSessionUtil.isAdmin()
+                    && !UserSessionUtil.isProblemAdmin()) {
                 QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
                 int userAcProblemCount = userAcproblemEntityService.count(queryWrapper);
@@ -130,10 +124,9 @@ public class CommentServiceImpl implements CommentService {
                 .setFromName(userRolesVo.getUsername())
                 .setFromUid(userRolesVo.getUid());
 
-        if (SecurityUtils.getSubject().hasRole("root")) {
+        if (UserSessionUtil.isRoot()) {
             comment.setFromRole("root");
-        } else if (SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        } else if (UserSessionUtil.isAdmin() || UserSessionUtil.isProblemAdmin()) {
             comment.setFromRole("admin");
         } else {
             comment.setFromRole("user");
@@ -161,10 +154,8 @@ public class CommentServiceImpl implements CommentService {
                     discussion.setCommentNum(discussion.getCommentNum() + 1);
                     discussionEntityService.updateById(discussion);
                     // 更新消息
-                    commentEntityService.updateCommentMsg(discussion.getUid(),
-                            userRolesVo.getUid(),
-                            comment.getContent(),
-                            comment.getDid());
+                    commentEntityService.updateCommentMsg(discussion.getUid(), userRolesVo.getUid(),
+                            comment.getContent(), comment.getDid());
                 }
             }
             return commentVo;
@@ -174,18 +165,14 @@ public class CommentServiceImpl implements CommentService {
 
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteComment(Comment comment) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 如果不是评论本人 或者不是管理员 无权限删除该评论
-        if (comment.getFromUid().equals(userRolesVo.getUid())
-                || SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        if (comment.getFromUid().equals(userRolesVo.getUid()) || UserSessionUtil.isRoot()
+                || UserSessionUtil.isAdmin() || UserSessionUtil.isProblemAdmin()) {
 
             // 获取需要删除该评论的回复数
             int replyNum = replyEntityService.count(new QueryWrapper<Reply>().eq("comment_id", comment.getId()));
@@ -213,25 +200,23 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addDiscussionLike(Integer cid, Boolean toLike, Integer sourceId, String sourceType) {
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         QueryWrapper<CommentLike> commentLikeQueryWrapper = new QueryWrapper<>();
         commentLikeQueryWrapper.eq("cid", cid).eq("uid", userRolesVo.getUid());
 
         CommentLike commentLike = commentLikeEntityService.getOne(commentLikeQueryWrapper, false);
-
-        if (toLike) { // 添加点赞
-            if (commentLike == null) { // 如果不存在就添加
-                boolean isSave = commentLikeEntityService.saveOrUpdate(new CommentLike()
-                        .setUid(userRolesVo.getUid())
-                        .setCid(cid));
+        // 添加点赞
+        if (toLike) {
+            // 如果不存在就添加
+            if (commentLike == null) {
+                boolean isSave = commentLikeEntityService
+                        .saveOrUpdate(new CommentLike().setUid(userRolesVo.getUid()).setCid(cid));
                 if (!isSave) {
                     throw new StatusFailException("点赞失败，请重试尝试！");
                 }
@@ -241,10 +226,14 @@ public class CommentServiceImpl implements CommentService {
             if (comment != null) {
                 comment.setLikeNum(comment.getLikeNum() + 1);
                 commentEntityService.updateById(comment);
-                commentEntityService.updateCommentLikeMsg(comment.getFromUid(), userRolesVo.getUid(), sourceId, sourceType);
+                commentEntityService.updateCommentLikeMsg(comment.getFromUid(), userRolesVo.getUid(), sourceId,
+                        sourceType);
             }
-        } else { // 取消点赞
-            if (commentLike != null) { // 如果存在就删除
+        }
+        // 取消点赞
+        else {
+            // 如果存在就删除
+            if (commentLike != null) {
                 boolean isDelete = commentLikeEntityService.removeById(commentLike.getId());
                 if (!isDelete) {
                     throw new StatusFailException("取消点赞失败，请重试尝试！");
@@ -262,36 +251,30 @@ public class CommentServiceImpl implements CommentService {
     public List<Reply> getAllReply(Integer commentId, Long cid) {
 
         // 如果有登录，则获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        boolean isRoot = UserSessionUtil.isRoot();
 
-        return commentEntityService.getAllReplyByCommentId(cid,
-                userRolesVo != null ? userRolesVo.getUid() : null,
-                isRoot,
-                commentId);
+        return commentEntityService.getAllReplyByCommentId(cid, userRolesVo != null ? userRolesVo.getUid() : null,
+                isRoot, commentId);
     }
-
 
     @Override
     public void addReply(ReplyDto replyDto) {
 
-        if (StringUtils.isEmpty(replyDto.getReply().getContent().trim())) {
+        if (StrUtil.isEmpty(replyDto.getReply().getContent().trim())) {
             throw new StatusFailException("回复内容不能为空！");
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         Reply reply = replyDto.getReply();
         reply.setFromAvatar(userRolesVo.getAvatar())
                 .setFromName(userRolesVo.getUsername())
                 .setFromUid(userRolesVo.getUid());
 
-        if (SecurityUtils.getSubject().hasRole("root")) {
+        if (UserSessionUtil.isRoot()) {
             reply.setFromRole("root");
-        } else if (SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        } else if (UserSessionUtil.isAdmin() || UserSessionUtil.isProblemAdmin()) {
             reply.setFromRole("admin");
         } else {
             reply.setFromRole("user");
@@ -305,17 +288,11 @@ public class CommentServiceImpl implements CommentService {
             // 如果是讨论区的回复，发布成功需要增加统计该讨论的回复数
             if (replyDto.getDid() != null) {
                 UpdateWrapper<Discussion> discussionUpdateWrapper = new UpdateWrapper<>();
-                discussionUpdateWrapper.eq("id", replyDto.getDid())
-                        .setSql("comment_num=comment_num+1");
+                discussionUpdateWrapper.eq("id", replyDto.getDid()).setSql("comment_num=comment_num+1");
                 discussionEntityService.update(discussionUpdateWrapper);
                 // 更新消息
-                replyEntityService.updateReplyMsg(replyDto.getDid(),
-                        "Discussion",
-                        reply.getContent(),
-                        replyDto.getQuoteId(),
-                        replyDto.getQuoteType(),
-                        reply.getToUid(),
-                        reply.getFromUid());
+                replyEntityService.updateReplyMsg(replyDto.getDid(), "Discussion", reply.getContent(),
+                        replyDto.getQuoteId(), replyDto.getQuoteType(), reply.getToUid(), reply.getFromUid());
             }
         } else {
             throw new StatusFailException("回复失败，请重新尝试！");
@@ -325,30 +302,26 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteReply(ReplyDto replyDto) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         Reply reply = replyDto.getReply();
         // 如果不是评论本人 或者不是管理员 无权限删除该评论
-        if (reply.getFromUid().equals(userRolesVo.getUid())
-                || SecurityUtils.getSubject().hasRole("root")
-                || SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        if (reply.getFromUid().equals(userRolesVo.getUid()) || UserSessionUtil.isRoot()
+                || UserSessionUtil.isAdmin() || UserSessionUtil.isProblemAdmin()) {
             // 删除该数据
             boolean isOk = replyEntityService.removeById(reply.getId());
             if (isOk) {
                 // 如果是讨论区的回复，删除成功需要减少统计该讨论的回复数
                 if (replyDto.getDid() != null) {
                     UpdateWrapper<Discussion> discussionUpdateWrapper = new UpdateWrapper<>();
-                    discussionUpdateWrapper.eq("id", replyDto.getDid())
-                            .setSql("comment_num=comment_num-1");
+                    discussionUpdateWrapper.eq("id", replyDto.getDid()).setSql("comment_num=comment_num-1");
                     discussionEntityService.update(discussionUpdateWrapper);
                 }
             } else {
                 throw new StatusFailException("删除失败，请重新尝试");
             }
-
         } else {
             throw new StatusForbiddenException("无权删除该回复");
         }
     }
+
 }

@@ -18,7 +18,8 @@ public class LoginersHolder {
             synchronized (loginers) {
                 if (!loginers.containsKey(remoteOj)) {
                     try {
-                        List<Class<? extends Loginer>> loginerClasses = Tools.findSubClasses("com.simplefanc.voj.judger.judge.remote", Loginer.class);
+                        List<Class<? extends Loginer>> loginerClasses = Tools
+                                .findSubClasses("com.simplefanc.voj.judger.judge.remote", Loginer.class);
                         for (Class<? extends Loginer> loginerClass : loginerClasses) {
                             Loginer loginer = SpringUtil.getBean(loginerClass);
                             loginers.put(loginer.getOjInfo().remoteOj, loginer);
@@ -31,4 +32,5 @@ public class LoginersHolder {
         }
         return loginers.get(remoteOj);
     }
+
 }

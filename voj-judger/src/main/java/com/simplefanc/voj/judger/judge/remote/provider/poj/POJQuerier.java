@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote.provider.poj;
 
-
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ReUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 @Component
 public class POJQuerier implements Querier {
+
     private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {
         {
             put("Compiling", JudgeStatus.STATUS_COMPILING);
@@ -34,6 +34,7 @@ public class POJQuerier implements Querier {
             put("Compile Error", JudgeStatus.STATUS_COMPILE_ERROR);
         }
     };
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -46,8 +47,9 @@ public class POJQuerier implements Querier {
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
         // 需要登录
-        String html = client.get("/showsource?solution_id=" + info.remoteRunId,
-                new HttpBodyValidator("<title>Error</title>", true)).getBody();
+        String html = client
+                .get("/showsource?solution_id=" + info.remoteRunId, new HttpBodyValidator("<title>Error</title>", true))
+                .getBody();
 
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = ReUtil.getGroup1("<b>Result:</b>(.+?)</td>", html).replaceAll("<.*?>", "").trim();
@@ -62,4 +64,5 @@ public class POJQuerier implements Querier {
         }
         return status;
     }
+
 }

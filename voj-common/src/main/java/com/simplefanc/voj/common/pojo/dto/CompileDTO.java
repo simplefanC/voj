@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.util.HashMap;
 
-
 /**
  * @Author: chenfan
  * @Date: 2021/2/6 14:42
@@ -37,4 +36,5 @@ public class CompileDTO {
      * 编译所需的额外文件，key:文件名,value:文件内容
      */
     private HashMap<String, String> extraFiles;
+
 }

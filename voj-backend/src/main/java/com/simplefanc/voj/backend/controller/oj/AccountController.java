@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDto;
 import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
@@ -9,6 +8,7 @@ import com.simplefanc.voj.backend.pojo.vo.CheckUsernameOrEmailVo;
 import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
 import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.backend.service.oj.AccountService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,8 @@ public class AccountController {
      * @Since 2020/11/5
      */
     @RequestMapping(value = "/check-username-or-email", method = RequestMethod.POST)
-    public CommonResult<CheckUsernameOrEmailVo> checkUsernameOrEmail(@RequestBody CheckUsernameOrEmailDto checkUsernameOrEmailDto) {
+    public CommonResult<CheckUsernameOrEmailVo> checkUsernameOrEmail(
+            @RequestBody CheckUsernameOrEmailDto checkUsernameOrEmailDto) {
         return CommonResult.successResponse(accountService.checkUsernameOrEmail(checkUsernameOrEmailDto));
     }
 
@@ -48,7 +49,6 @@ public class AccountController {
                                                     @RequestParam(value = "username", required = false) String username) {
         return CommonResult.successResponse(accountService.getUserHomeInfo(uid, username));
     }
-
 
     /**
      * @MethodName changePassword

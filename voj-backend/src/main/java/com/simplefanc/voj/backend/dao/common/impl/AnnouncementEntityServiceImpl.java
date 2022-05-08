@@ -3,10 +3,10 @@ package com.simplefanc.voj.backend.dao.common.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.backend.mapper.AnnouncementMapper;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,8 @@ import org.springframework.stereotype.Service;
  * @since 2020-10-23
  */
 @Service
-public class AnnouncementEntityServiceImpl extends ServiceImpl<AnnouncementMapper, Announcement> implements AnnouncementEntityService {
+public class AnnouncementEntityServiceImpl extends ServiceImpl<AnnouncementMapper, Announcement>
+        implements AnnouncementEntityService {
 
     @Autowired
     private AnnouncementMapper announcementMapper;
@@ -36,4 +37,5 @@ public class AnnouncementEntityServiceImpl extends ServiceImpl<AnnouncementMappe
         Page<AnnouncementVo> page = new Page<>(currentPage, limit);
         return announcementMapper.getContestAnnouncement(page, cid, notAdmin);
     }
+
 }

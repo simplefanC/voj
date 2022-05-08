@@ -49,5 +49,4 @@ public class TrainingVo implements Serializable {
     @ApiModelProperty(value = "训练更新时间")
     private Date gmtModified;
 
-
 }

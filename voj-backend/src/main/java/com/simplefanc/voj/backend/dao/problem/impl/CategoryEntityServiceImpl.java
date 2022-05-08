@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.problem.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.problem.Category;
 import com.simplefanc.voj.backend.dao.problem.CategoryEntityService;
 import com.simplefanc.voj.backend.mapper.CategoryMapper;
+import com.simplefanc.voj.common.pojo.entity.problem.Category;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,4 +13,5 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CategoryEntityServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryEntityService {
+
 }

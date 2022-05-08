@@ -19,4 +19,5 @@ public interface AdminContestAnnouncementService {
     void addAnnouncement(AnnouncementDto announcementDto);
 
     void updateAnnouncement(AnnouncementDto announcementDto);
+
 }

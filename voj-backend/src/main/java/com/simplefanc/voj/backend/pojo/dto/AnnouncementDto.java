@@ -12,8 +12,10 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 public class AnnouncementDto {
+
     @NotBlank(message = "比赛id不能为空")
     private Long cid;
 
     private Announcement announcement;
+
 }

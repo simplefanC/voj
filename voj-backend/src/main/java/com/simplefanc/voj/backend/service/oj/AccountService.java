@@ -15,7 +15,6 @@ import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
  */
 public interface AccountService {
 
-
     /**
      * @MethodName checkUsernameOrEmail
      * @Params * @param null
@@ -34,7 +33,6 @@ public interface AccountService {
      */
     UserHomeVo getUserHomeInfo(String uid, String username);
 
-
     /**
      * @MethodName changePassword
      * @Description 修改密码的操作，连续半小时内修改密码错误5次，则需要半个小时后才可以再次尝试修改密码
@@ -51,6 +49,6 @@ public interface AccountService {
      */
     ChangeAccountVo changeEmail(ChangeEmailDto changeEmailDto);
 
-
     UserInfoVo changeUserInfo(UserInfoVo userInfoVo);
+
 }

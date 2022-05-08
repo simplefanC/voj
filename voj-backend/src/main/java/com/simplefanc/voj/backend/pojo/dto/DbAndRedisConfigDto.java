@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DBAndRedisConfigDto {
+public class DbAndRedisConfigDto {
 
     /**
      * 数据库名称
@@ -57,4 +57,5 @@ public class DBAndRedisConfigDto {
      * Redis 密码
      */
     private String redisPassword;
+
 }

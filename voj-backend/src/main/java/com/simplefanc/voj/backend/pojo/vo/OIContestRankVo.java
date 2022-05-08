@@ -51,4 +51,5 @@ public class OIContestRankVo {
 
     @ApiModelProperty(value = "OI的题得满分后对应提交最优耗时")
     private HashMap<String, Integer> timeInfo;
+
 }

@@ -38,4 +38,5 @@ public class ACMRankVo implements Serializable {
 
     @ApiModelProperty(value = "cf得分")
     private Integer rating;
+
 }

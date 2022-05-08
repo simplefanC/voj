@@ -3,14 +3,14 @@ package com.simplefanc.voj.backend.dao.contest.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.constants.ContestConstant;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestRecordMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
+import com.simplefanc.voj.common.constants.ContestConstant;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,8 @@ import java.util.*;
  * @since 2020-10-23
  */
 @Service
-public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord> implements ContestRecordEntityService {
+public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord>
+        implements ContestRecordEntityService {
 
     @Autowired
     private ContestRecordMapper contestRecordMapper;
@@ -37,7 +38,8 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
     private RedisUtil redisUtil;
 
     @Override
-    public IPage<ContestRecord> getACInfo(Integer currentPage, Integer limit, Integer status, Long cid, String contestCreatorId) {
+    public IPage<ContestRecord> getACInfo(Integer currentPage, Integer limit, Integer status, Long cid,
+                                          String contestCreatorId) {
 
         List<ContestRecord> acInfo = contestRecordMapper.getACInfo(status, cid);
 
@@ -50,8 +52,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
         for (ContestRecord contestRecord : acInfo) {
             // 超级管理员和比赛创建者的提交跳过
-            if (contestRecord.getUid().equals(contestCreatorId)
-                    || superAdminUidList.contains(contestRecord.getUid())) {
+            if (contestRecord.getUid().equals(contestCreatorId) || superAdminUidList.contains(contestRecord.getUid())) {
                 continue;
             }
 
@@ -71,7 +72,6 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
             userACInfo.add(contestRecord);
         }
 
-
         List<ContestRecord> pageList = new ArrayList<>();
 
         int count = userACInfo.size();
@@ -86,7 +86,6 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
             pageList.add(contestRecord);
         }
 
-
         Page<ContestRecord> page = new Page<>(currentPage, limit);
         page.setSize(limit);
         page.setCurrent(currentPage);
@@ -95,7 +94,6 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
         return page;
     }
-
 
     @Override
     public List<ContestRecordVo> getOIContestRecord(Contest contest, Boolean isOpenSealRank) {
@@ -111,19 +109,11 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
             // 封榜解除 获取最新数据
             // 获取每个用户每道题最近一次提交
             if (Objects.equals(ContestConstant.OI_RANK_RECENT_SCORE, oiRankScoreType)) {
-                return contestRecordMapper.getOIContestRecordByRecentSubmission(cid,
-                        contestAuthor,
-                        false,
-                        sealTime,
-                        startTime,
-                        endTime);
+                return contestRecordMapper.getOIContestRecordByRecentSubmission(cid, contestAuthor, false, sealTime,
+                        startTime, endTime);
             } else {
-                return contestRecordMapper.getOIContestRecordByHighestSubmission(cid,
-                        contestAuthor,
-                        false,
-                        sealTime,
-                        startTime,
-                        endTime);
+                return contestRecordMapper.getOIContestRecordByHighestSubmission(cid, contestAuthor, false, sealTime,
+                        startTime, endTime);
             }
 
         } else {
@@ -131,19 +121,11 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
             List<ContestRecordVo> oiContestRecordList = (List<ContestRecordVo>) redisUtil.get(key);
             if (oiContestRecordList == null) {
                 if (Objects.equals(ContestConstant.OI_RANK_RECENT_SCORE, oiRankScoreType)) {
-                    oiContestRecordList = contestRecordMapper.getOIContestRecordByRecentSubmission(cid,
-                            contestAuthor,
-                            true,
-                            sealTime,
-                            startTime,
-                            endTime);
+                    oiContestRecordList = contestRecordMapper.getOIContestRecordByRecentSubmission(cid, contestAuthor,
+                            true, sealTime, startTime, endTime);
                 } else {
-                    oiContestRecordList = contestRecordMapper.getOIContestRecordByHighestSubmission(cid,
-                            contestAuthor,
-                            true,
-                            sealTime,
-                            startTime,
-                            endTime);
+                    oiContestRecordList = contestRecordMapper.getOIContestRecordByHighestSubmission(cid, contestAuthor,
+                            true, sealTime, startTime, endTime);
                 }
                 redisUtil.set(key, oiContestRecordList, 2 * 3600);
             }

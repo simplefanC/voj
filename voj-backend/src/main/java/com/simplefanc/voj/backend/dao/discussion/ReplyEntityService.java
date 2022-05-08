@@ -10,6 +10,7 @@ import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
  */
 public interface ReplyEntityService extends IService<Reply> {
 
-    public void updateReplyMsg(Integer sourceId, String sourceType, String content,
-                               Integer quoteId, String quoteType, String recipientId, String senderId);
+    public void updateReplyMsg(Integer sourceId, String sourceType, String content, Integer quoteId, String quoteType,
+                               String recipientId, String senderId);
+
 }

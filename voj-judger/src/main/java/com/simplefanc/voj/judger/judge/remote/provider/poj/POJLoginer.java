@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote.provider.poj;
 
-
 import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class POJLoginer extends RetentiveLoginer {
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -28,11 +28,9 @@ public class POJLoginer extends RetentiveLoginer {
         if (client.get("/").getBody().contains(">Log Out</a>")) {
             return;
         }
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "B1", "login",
-                "password1", account.getPassword(),
-                "url", "%2F",
-                "user_id1", account.getAccountId());
+        HttpEntity entity = SimpleNameValueEntityFactory.create("B1", "login", "password1", account.getPassword(),
+                "url", "%2F", "user_id1", account.getAccountId());
         client.post("/login", entity, HttpStatusValidator.SC_MOVED_TEMPORARILY);
     }
+
 }

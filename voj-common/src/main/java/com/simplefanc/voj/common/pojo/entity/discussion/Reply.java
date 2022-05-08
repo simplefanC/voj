@@ -62,4 +62,5 @@ public class Reply {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

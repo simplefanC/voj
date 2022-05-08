@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.TestCaseService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -26,7 +25,6 @@ public class TestCaseController {
     @Autowired
     private TestCaseService testCaseService;
 
-
     @PostMapping("/upload-testcase-zip")
     @ResponseBody
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
@@ -34,11 +32,11 @@ public class TestCaseController {
         return CommonResult.successResponse(testCaseService.uploadTestcaseZip(file));
     }
 
-
     @GetMapping("/download-testcase")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
     public void downloadTestcase(@RequestParam("pid") Long pid, HttpServletResponse response) {
         testCaseService.downloadTestcase(pid, response);
     }
+
 }

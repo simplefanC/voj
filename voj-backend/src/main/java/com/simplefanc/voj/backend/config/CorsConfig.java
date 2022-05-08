@@ -14,17 +14,18 @@ import java.io.File;
  */
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
+
     @Autowired
     private FilePathProps filePathProps;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedOriginPatterns("*")
+                .allowedMethods("*")
+                .allowedHeaders("*")
                 .allowCredentials(true)
-                .maxAge(3600)
-                .allowedHeaders("*");
+                .maxAge(3600);
     }
 
     /**
@@ -41,4 +42,5 @@ public class CorsConfig implements WebMvcConfigurer {
                         "file:" + filePathProps.getHomeCarouselFolder() + File.separator,
                         "file:" + filePathProps.getProblemFileFolder() + File.separator);
     }
+
 }

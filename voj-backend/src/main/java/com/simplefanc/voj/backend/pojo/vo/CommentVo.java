@@ -47,4 +47,5 @@ public class CommentVo {
 
     @ApiModelProperty(value = "该评论回复列表")
     private List<Reply> replyList;
+
 }

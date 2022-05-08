@@ -17,9 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * 1. Decrease HttpContext instances created;<br>
  * 2. Avoid remote OJs creating new sessions for each request from Virtual Judge.<br>
  * <p>
- * HttpContext 作为可重用资源应尽可能多地重用：
- * 1. 减少 HttpContext 实例的创建；
- * 2. 避免远程 OJ 为来自 Virtual Judge 的每个请求创建新会话。
+ * HttpContext 作为可重用资源应尽可能多地重用： 1. 减少 HttpContext 实例的创建； 2. 避免远程 OJ 为来自 Virtual Judge
+ * 的每个请求创建新会话。
  * <p>
  * <p>
  * 匿名 HttpContext 存储库
@@ -28,10 +27,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Repository
 public class AnonymousHttpContextRepository {
+
     private final static Logger log = LoggerFactory.getLogger(AnonymousHttpContextRepository.class);
+
     private final static String RESERVED_FLAG = "trcnkq";
+
     private final int MAX_SIZE = 100;
+
     private Stack<HttpContext> contexts = new Stack<>();
+
     private ReentrantLock lock = new ReentrantLock();
 
     public HttpContext acquire() {

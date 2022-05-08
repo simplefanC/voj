@@ -78,4 +78,5 @@ public class WebConfigDto {
      * 项目地址
      */
     private String projectUrl;
+
 }

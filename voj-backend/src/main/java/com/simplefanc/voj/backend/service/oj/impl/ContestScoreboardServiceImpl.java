@@ -1,9 +1,6 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
@@ -15,9 +12,11 @@ import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.ContestRankService;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -74,7 +73,6 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         return contestOutsideInfo;
     }
 
-
     @Override
     public List getContestOutsideScoreboard(ContestRankDto contestRankDto) {
 
@@ -109,8 +107,7 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 超级管理员或者该比赛的创建者，则为比赛管理者
         boolean isRoot = false;
@@ -118,7 +115,7 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
 
         if (userRolesVo != null) {
             currentUid = userRolesVo.getUid();
-            isRoot = SecurityUtils.getSubject().hasRole("root");
+            isRoot = UserSessionUtil.isRoot();
             // 不是比赛创建者或者超管无权限开启强制实时榜单
             if (!isRoot && !contest.getUid().equals(currentUid)) {
                 forceRefresh = false;
@@ -131,25 +128,18 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
 
             // 获取ACM比赛排行榜外榜
-            return contestRankService.getACMContestScoreboard(isOpenSealRank,
-                    removeStar,
-                    contest,
-                    null,
-                    concernedList,
+            return contestRankService.getACMContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
                     !forceRefresh,
                     // 默认15s缓存
                     15L);
 
         } else {
             // 获取OI比赛排行榜外榜
-            return contestRankService.getOIContestScoreboard(isOpenSealRank,
-                    removeStar,
-                    contest,
-                    null,
-                    concernedList,
+            return contestRankService.getOIContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
                     !forceRefresh,
                     // 默认15s缓存
                     15L);
         }
     }
+
 }

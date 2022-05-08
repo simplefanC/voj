@@ -18,4 +18,5 @@ public interface NoticeService {
     void updateSysOrMineMsgRead(IPage<SysMsgVo> userMsgList);
 
     void syncNoticeToNewRegisterUser(String uid);
+
 }

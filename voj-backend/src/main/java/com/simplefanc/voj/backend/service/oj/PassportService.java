@@ -27,4 +27,5 @@ public interface PassportService {
     void applyResetPassword(ApplyResetPasswordDto applyResetPasswordDto);
 
     void resetPassword(ResetPasswordDto resetPasswordDto);
+
 }

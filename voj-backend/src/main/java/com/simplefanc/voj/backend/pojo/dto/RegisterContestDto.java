@@ -17,4 +17,5 @@ public class RegisterContestDto {
 
     @NotBlank(message = "password不能为空")
     private String password;
+
 }

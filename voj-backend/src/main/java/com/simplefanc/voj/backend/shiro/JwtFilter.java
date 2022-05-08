@@ -1,12 +1,11 @@
 package com.simplefanc.voj.backend.shiro;
 
-
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
+import com.simplefanc.voj.common.result.CommonResult;
+import com.simplefanc.voj.common.result.ResultStatus;
 import io.jsonwebtoken.Claims;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -31,10 +30,14 @@ import java.io.IOException;
 public class JwtFilter extends AuthenticatingFilter {
 
     private final static String TOKEN_KEY = "token-key:";
+
     private final static String TOKEN_LOCK = "token-lock:";
+
     private final static String TOKEN_REFRESH = "token-refresh:";
+
     @Autowired
     private JwtUtil jwtUtil;
+
     @Autowired
     private RedisUtil redisUtil;
 
@@ -43,7 +46,7 @@ public class JwtFilter extends AuthenticatingFilter {
         // 获取 token
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         String jwt = request.getHeader("Authorization");
-        if (StringUtils.isEmpty(jwt)) {
+        if (StrUtil.isEmpty(jwt)) {
             return null;
         }
         return new JwtToken(jwt);
@@ -53,7 +56,7 @@ public class JwtFilter extends AuthenticatingFilter {
     protected boolean onAccessDenied(ServletRequest servletRequest, ServletResponse servletResponse) throws Exception {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         String token = request.getHeader("Authorization");
-        if (StringUtils.isEmpty(token)) {
+        if (StrUtil.isEmpty(token)) {
             return true;
         } else {
             // 判断是否已过期
@@ -99,9 +102,9 @@ public class JwtFilter extends AuthenticatingFilter {
         redisUtil.releaseLock(TOKEN_LOCK + userId);
     }
 
-
     @Override
-    protected boolean onLoginFailure(AuthenticationToken token, AuthenticationException e, ServletRequest request, ServletResponse response) {
+    protected boolean onLoginFailure(AuthenticationToken token, AuthenticationException e, ServletRequest request,
+                                     ServletResponse response) {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         try {
@@ -122,7 +125,6 @@ public class JwtFilter extends AuthenticatingFilter {
         return false;
     }
 
-
     /**
      * 对跨域提供支持
      */
@@ -132,7 +134,8 @@ public class JwtFilter extends AuthenticatingFilter {
         HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
         httpServletResponse.setHeader("Access-control-Allow-Origin", httpServletRequest.getHeader("Origin"));
         httpServletResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
-        httpServletResponse.setHeader("Access-Control-Allow-Headers", httpServletRequest.getHeader("Access-Control-Request-Headers"));
+        httpServletResponse.setHeader("Access-Control-Allow-Headers",
+                httpServletRequest.getHeader("Access-Control-Request-Headers"));
         // 让前端可用访问
         httpServletResponse.setHeader("Access-Control-Expose-Headers",
                 "Refresh-Token,Authorization,Url-Type,Content-disposition,Content-Type");
@@ -143,4 +146,5 @@ public class JwtFilter extends AuthenticatingFilter {
         }
         return super.preHandle(request, response);
     }
+
 }

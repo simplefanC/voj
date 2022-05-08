@@ -21,4 +21,5 @@ public class ContestOutsideInfo {
 
     @ApiModelProperty(value = "比赛题目信息列表")
     private List<ContestProblem> problemList;
+
 }

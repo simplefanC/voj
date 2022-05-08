@@ -3,29 +3,30 @@ package com.simplefanc.voj.backend.service.admin.system.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.UnicodeUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.system.oshi.OshiUtil;
 import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.config.ConfigType;
 import com.alibaba.nacos.api.exception.NacosException;
-import com.simplefanc.voj.common.pojo.entity.common.File;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.ConfigUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
-import com.simplefanc.voj.backend.pojo.dto.DBAndRedisConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
 import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
 import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.email.EmailService;
+import com.simplefanc.voj.common.pojo.entity.common.File;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedList;
@@ -40,6 +41,7 @@ import java.util.Properties;
 @Service
 @Slf4j(topic = "voj")
 public class ConfigServiceImpl implements ConfigService {
+
     @Autowired
     private ConfigVo configVo;
 
@@ -64,23 +66,23 @@ public class ConfigServiceImpl implements ConfigService {
     @Value("${spring.application.name}")
     private String currentServiceName;
 
-    @Value("${spring.cloud.nacos.url}")
+    @Value("${spring.cloud.nacos.discovery.server-addr}")
     private String NACOS_URL;
 
-    @Value("${spring.cloud.nacos.config.prefix}")
-    private String prefix;
+//    @Value("${spring.cloud.nacos.config.prefix}")
+//    private String prefix;
 
-    @Value("${spring.profiles.active}")
-    private String active;
+    @Value("${spring.profiles.active}" + "${spring.profiles.active}" + ".yml")
+    private String dataId;
 
-    @Value("${spring.cloud.nacos.config.file-extension}")
-    private String fileExtension;
+//    @Value("${spring.cloud.nacos.config.file-extension}")
+//    private String fileExtension;
 
     @Value("${spring.cloud.nacos.config.group}")
     private String GROUP;
 
-    @Value("${spring.cloud.nacos.config.type}")
-    private String TYPE;
+//    @Value("${spring.cloud.nacos.config.type}")
+//    private String TYPE;
 
     @Value("${spring.cloud.nacos.config.username}")
     private String nacosUsername;
@@ -90,12 +92,11 @@ public class ConfigServiceImpl implements ConfigService {
 
     /**
      * @MethodName getServiceInfo
-     * @Params * @param null
+     * @Params @param null
      * @Description 获取当前服务的相关信息以及当前系统的cpu情况，内存使用情况
      * @Return CommonResult
      * @Since 2020/12/3
      */
-
     @Override
     public JSONObject getServiceInfo() {
 
@@ -104,7 +105,7 @@ public class ConfigServiceImpl implements ConfigService {
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(currentServiceName);
 
         // 获取nacos中心配置所在的机器环境
-        String response = restTemplate.getForObject(NACOS_URL + "/nacos/v1/ns/operator/metrics", String.class);
+        String response = restTemplate.getForObject(String.format("%s%s%s", "http://", NACOS_URL, "/nacos/v1/ns/operator/metrics"), String.class);
 
         JSONObject jsonObject = JSONUtil.parseObj(response);
         // 获取当前数据后台所在机器环境
@@ -142,42 +143,32 @@ public class ConfigServiceImpl implements ConfigService {
         return serviceInfoList;
     }
 
-
     @Override
     public WebConfigDto getWebConfig() {
-        return WebConfigDto.builder()
-                .baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
-                .name(UnicodeUtil.toString(configVo.getName()))
-                .shortName(UnicodeUtil.toString(configVo.getShortName()))
-                .description(UnicodeUtil.toString(configVo.getDescription()))
-                .register(configVo.getRegister())
-                .codeVisibleStartTime(configVo.getCodeVisibleStartTime())
-                .problem(configVo.getProblem())
-                .training(configVo.getTraining())
-                .contest(configVo.getContest())
-                .status(configVo.getStatus())
-                .rank(configVo.getRank())
-                .discussion(configVo.getDiscussion())
-                .introduction(configVo.getIntroduction())
+        return WebConfigDto.builder().baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
+                .name(UnicodeUtil.toString(configVo.getName())).shortName(UnicodeUtil.toString(configVo.getShortName()))
+                .description(UnicodeUtil.toString(configVo.getDescription())).register(configVo.getRegister())
+                .codeVisibleStartTime(configVo.getCodeVisibleStartTime()).problem(configVo.getProblem())
+                .training(configVo.getTraining()).contest(configVo.getContest()).status(configVo.getStatus())
+                .rank(configVo.getRank()).discussion(configVo.getDiscussion()).introduction(configVo.getIntroduction())
                 .recordName(UnicodeUtil.toString(configVo.getRecordName()))
                 .recordUrl(UnicodeUtil.toString(configVo.getRecordUrl()))
                 .projectName(UnicodeUtil.toString(configVo.getProjectName()))
-                .projectUrl(UnicodeUtil.toString(configVo.getProjectUrl()))
-                .build();
+                .projectUrl(UnicodeUtil.toString(configVo.getProjectUrl())).build();
     }
 
     @Override
     public void setWebConfig(WebConfigDto webConfigDto) {
-        if (!StringUtils.isEmpty(webConfigDto.getBaseUrl())) {
+        if (!StrUtil.isEmpty(webConfigDto.getBaseUrl())) {
             configVo.setBaseUrl(webConfigDto.getBaseUrl());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getName())) {
+        if (!StrUtil.isEmpty(webConfigDto.getName())) {
             configVo.setName(webConfigDto.getName());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getShortName())) {
+        if (!StrUtil.isEmpty(webConfigDto.getShortName())) {
             configVo.setShortName(webConfigDto.getShortName());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getDescription())) {
+        if (!StrUtil.isEmpty(webConfigDto.getDescription())) {
             configVo.setDescription(webConfigDto.getDescription());
         }
         if (webConfigDto.getRegister() != null) {
@@ -186,16 +177,16 @@ public class ConfigServiceImpl implements ConfigService {
         if (webConfigDto.getCodeVisibleStartTime() != null) {
             configVo.setCodeVisibleStartTime(webConfigDto.getCodeVisibleStartTime());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getRecordName())) {
+        if (!StrUtil.isEmpty(webConfigDto.getRecordName())) {
             configVo.setRecordName(webConfigDto.getRecordName());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getRecordUrl())) {
+        if (!StrUtil.isEmpty(webConfigDto.getRecordUrl())) {
             configVo.setRecordUrl(webConfigDto.getRecordUrl());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getProjectName())) {
+        if (!StrUtil.isEmpty(webConfigDto.getProjectName())) {
             configVo.setProjectName(webConfigDto.getProjectName());
         }
-        if (!StringUtils.isEmpty(webConfigDto.getProjectUrl())) {
+        if (!StrUtil.isEmpty(webConfigDto.getProjectUrl())) {
             configVo.setProjectUrl(webConfigDto.getProjectUrl());
         }
 
@@ -222,21 +213,17 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public EmailConfigDto getEmailConfig() {
-        return EmailConfigDto.builder()
-                .emailUsername(configVo.getEmailUsername())
-                .emailPassword(configVo.getEmailPassword())
-                .emailHost(configVo.getEmailHost())
-                .emailPort(configVo.getEmailPort())
-                .emailSsl(configVo.getEmailSsl())
-                .build();
+        return EmailConfigDto.builder().emailUsername(configVo.getEmailUsername())
+                .emailPassword(configVo.getEmailPassword()).emailHost(configVo.getEmailHost())
+                .emailPort(configVo.getEmailPort()).emailSsl(configVo.getEmailSsl()).build();
     }
 
     @Override
     public void setEmailConfig(EmailConfigDto config) {
-        if (!StringUtils.isEmpty(config.getEmailHost())) {
+        if (!StrUtil.isEmpty(config.getEmailHost())) {
             configVo.setEmailHost(config.getEmailHost());
         }
-        if (!StringUtils.isEmpty(config.getEmailPassword())) {
+        if (!StrUtil.isEmpty(config.getEmailPassword())) {
             configVo.setEmailPassword(config.getEmailPassword());
         }
 
@@ -244,7 +231,7 @@ public class ConfigServiceImpl implements ConfigService {
             configVo.setEmailPort(config.getEmailPort());
         }
 
-        if (!StringUtils.isEmpty(config.getEmailUsername())) {
+        if (!StrUtil.isEmpty(config.getEmailUsername())) {
             configVo.setEmailUsername(config.getEmailUsername());
         }
 
@@ -258,11 +245,10 @@ public class ConfigServiceImpl implements ConfigService {
         }
     }
 
-
     @Override
     public void testEmail(TestEmailDto testEmailDto) {
         String email = testEmailDto.getEmail();
-        if (StringUtils.isEmpty(email)) {
+        if (StrUtil.isEmpty(email)) {
             throw new StatusFailException("测试的邮箱不能为空！");
         }
         boolean isEmail = Validator.isEmail(email);
@@ -274,47 +260,40 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public DBAndRedisConfigDto getDBAndRedisConfig() {
-        return DBAndRedisConfigDto.builder()
-                .dbName(configVo.getMysqlDBName())
-                .dbHost(configVo.getMysqlHost())
-                .dbPort(configVo.getMysqlPort())
-                .dbUsername(configVo.getMysqlUsername())
-                .dbPassword(configVo.getMysqlPassword())
-                .redisHost(configVo.getRedisHost())
-                .redisPort(configVo.getRedisPort())
-                .redisPassword(configVo.getRedisPassword())
-                .build();
+    public DbAndRedisConfigDto getDbAndRedisConfig() {
+        return DbAndRedisConfigDto.builder().dbName(configVo.getMysqlDbName()).dbHost(configVo.getMysqlHost())
+                .dbPort(configVo.getMysqlPort()).dbUsername(configVo.getMysqlUsername())
+                .dbPassword(configVo.getMysqlPassword()).redisHost(configVo.getRedisHost())
+                .redisPort(configVo.getRedisPort()).redisPassword(configVo.getRedisPassword()).build();
     }
 
-
     @Override
-    public void setDBAndRedisConfig(DBAndRedisConfigDto config) {
-        if (!StringUtils.isEmpty(config.getDbName())) {
-            configVo.setMysqlDBName(config.getDbName());
+    public void setDbAndRedisConfig(DbAndRedisConfigDto config) {
+        if (!StrUtil.isEmpty(config.getDbName())) {
+            configVo.setMysqlDbName(config.getDbName());
         }
 
-        if (!StringUtils.isEmpty(config.getDbHost())) {
+        if (!StrUtil.isEmpty(config.getDbHost())) {
             configVo.setMysqlHost(config.getDbHost());
         }
         if (config.getDbPort() != null) {
             configVo.setMysqlPort(config.getDbPort());
         }
-        if (!StringUtils.isEmpty(config.getDbUsername())) {
+        if (!StrUtil.isEmpty(config.getDbUsername())) {
             configVo.setMysqlUsername(config.getDbUsername());
         }
-        if (!StringUtils.isEmpty(config.getDbPassword())) {
+        if (!StrUtil.isEmpty(config.getDbPassword())) {
             configVo.setMysqlPassword(config.getDbPassword());
         }
 
-        if (!StringUtils.isEmpty(config.getRedisHost())) {
+        if (!StrUtil.isEmpty(config.getRedisHost())) {
             configVo.setRedisHost(config.getRedisHost());
         }
 
         if (config.getRedisPort() != null) {
             configVo.setRedisPort(config.getRedisPort());
         }
-        if (!StringUtils.isEmpty(config.getRedisPassword())) {
+        if (!StrUtil.isEmpty(config.getRedisPassword())) {
             configVo.setRedisPassword(config.getRedisPassword());
         }
 
@@ -324,7 +303,6 @@ public class ConfigServiceImpl implements ConfigService {
             throw new StatusFailException("修改失败");
         }
     }
-
 
     @Override
     public boolean sendNewConfigToNacos() {
@@ -336,15 +314,16 @@ public class ConfigServiceImpl implements ConfigService {
         properties.put("username", nacosUsername);
         properties.put("password", nacosPassword);
 
-        com.alibaba.nacos.api.config.ConfigService configService = null;
-        boolean isOK = false;
+        com.alibaba.nacos.api.config.ConfigService configService;
+        boolean isOk = false;
         try {
             configService = NacosFactory.createConfigService(properties);
-            isOK = configService.publishConfig(prefix + "-" + active + "." + fileExtension, GROUP,
-                    configUtil.getConfigContent(), TYPE);
+            isOk = configService.publishConfig(String.format("%s%s%s%s", "voj", "-", dataId, ".yml"), GROUP,
+                    configUtil.getConfigContent(), ConfigType.YAML.getType());
         } catch (NacosException e) {
-            log.error("通过Nacos修改网站配置异常--------------->{}", e.getMessage());
+            log.error("通过 Nacos 修改网站配置异常--------------->{}", e.getMessage());
         }
-        return isOK;
+        return isOk;
     }
+
 }

@@ -9,4 +9,5 @@ import org.apache.ibatis.annotations.Param;
 public interface TrainingCategoryMapper extends BaseMapper<TrainingCategory> {
 
     public TrainingCategory getTrainingCategoryByTrainingId(@Param("tid") Long tid);
+
 }

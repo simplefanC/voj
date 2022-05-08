@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import org.apache.ibatis.annotations.Mapper;
 
-
 /**
  * <p>
  * Mapper 接口

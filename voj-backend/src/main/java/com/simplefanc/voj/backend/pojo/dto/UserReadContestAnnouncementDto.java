@@ -16,4 +16,5 @@ public class UserReadContestAnnouncementDto {
     private Long cid;
 
     private List<Long> readAnnouncementList;
+
 }

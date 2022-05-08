@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote;
 
-
 import com.simplefanc.voj.common.constants.RemoteOj;
 import org.apache.http.HttpHost;
 

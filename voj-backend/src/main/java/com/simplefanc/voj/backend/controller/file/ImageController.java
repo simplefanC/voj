@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.ImageService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/file")
 public class ImageController {
-
 
     @Autowired
     private ImageService imageService;

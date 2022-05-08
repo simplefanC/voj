@@ -1,8 +1,8 @@
 package com.simplefanc.voj.judger.common.utils;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -16,11 +16,11 @@ public class JudgeUtil {
     @SuppressWarnings("All")
     public static HashMap<String, String> getProblemExtraFileMap(Problem problem, String type) {
         if ("user".equals(type)) {
-            if (!StringUtils.isEmpty(problem.getUserExtraFile())) {
+            if (!StrUtil.isEmpty(problem.getUserExtraFile())) {
                 return (HashMap<String, String>) JSONUtil.toBean(problem.getUserExtraFile(), Map.class);
             }
         } else if ("judge".equals(type)) {
-            if (!StringUtils.isEmpty(problem.getJudgeExtraFile())) {
+            if (!StrUtil.isEmpty(problem.getJudgeExtraFile())) {
                 return (HashMap<String, String>) JSONUtil.toBean(problem.getJudgeExtraFile(), Map.class);
             }
         }

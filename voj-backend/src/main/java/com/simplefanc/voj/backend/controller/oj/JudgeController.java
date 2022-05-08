@@ -1,15 +1,14 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
 import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
 import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
 import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
 import com.simplefanc.voj.backend.service.oj.JudgeService;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import java.util.List;
 @RequestMapping("/api")
 public class JudgeController {
 
-
     @Autowired
     private JudgeService judgeService;
 
@@ -44,7 +42,6 @@ public class JudgeController {
         return CommonResult.successResponse(judgeService.submitProblemJudge(judgeDto));
     }
 
-
     /**
      * @MethodName resubmit
      * @Description 调用判题服务器提交失败超过60s后，用户点击按钮重新提交判题进入的方法
@@ -57,7 +54,6 @@ public class JudgeController {
         return CommonResult.successResponse(judgeService.resubmit(submitId));
     }
 
-
     /**
      * @MethodName getSubmission
      * @Description 获取单个提交记录的详情
@@ -65,10 +61,10 @@ public class JudgeController {
      * @Since 2021/1/2
      */
     @GetMapping("/submission")
-    public CommonResult<SubmissionInfoVo> getSubmission(@RequestParam(value = "submitId", required = true) Long submitId) {
+    public CommonResult<SubmissionInfoVo> getSubmission(
+            @RequestParam(value = "submitId") Long submitId) {
         return CommonResult.successResponse(judgeService.getSubmission(submitId));
     }
-
 
     /**
      * @MethodName updateSubmission
@@ -90,7 +86,7 @@ public class JudgeController {
      * @param searchPid
      * @param searchStatus
      * @param searchUsername
-     * @param completeProblemID
+     * @param completeProblemId
      * @MethodName getJudgeList
      * @Description 通用查询判题记录列表
      * @Return CommonResult
@@ -103,10 +99,10 @@ public class JudgeController {
                                                      @RequestParam(value = "problemID", required = false) String searchPid,
                                                      @RequestParam(value = "status", required = false) Integer searchStatus,
                                                      @RequestParam(value = "username", required = false) String searchUsername,
-                                                     @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID) {
-        return CommonResult.successResponse(judgeService.getJudgeList(limit, currentPage, onlyMine, searchPid, searchStatus, searchUsername, completeProblemID));
+                                                     @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemId) {
+        return CommonResult.successResponse(judgeService.getJudgeList(limit, currentPage, onlyMine, searchPid,
+                searchStatus, searchUsername, completeProblemId));
     }
-
 
     /**
      * @MethodName checkJudgeResult
@@ -132,7 +128,6 @@ public class JudgeController {
         return CommonResult.successResponse(judgeService.checkContestJudgeResult(submitIdListDto));
     }
 
-
     /**
      * @param submitId
      * @MethodName getJudgeCase
@@ -141,7 +136,9 @@ public class JudgeController {
      * @Since 2020/10/29
      */
     @GetMapping("/get-all-case-result")
-    public CommonResult<List<JudgeCase>> getALLCaseResult(@RequestParam(value = "submitId", required = true) Long submitId) {
+    public CommonResult<List<JudgeCase>> getALLCaseResult(
+            @RequestParam(value = "submitId") Long submitId) {
         return CommonResult.successResponse(judgeService.getALLCaseResult(submitId));
     }
+
 }

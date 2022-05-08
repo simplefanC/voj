@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote.httpclient;
 
-
 public interface SimpleHttpResponseValidator {
 
     SimpleHttpResponseValidator DUMMY_VALIDATOR = new SimpleHttpResponseValidator() {
@@ -9,7 +8,6 @@ public interface SimpleHttpResponseValidator {
             // Validate nothing. Pass all the time.
         }
     };
-
 
     ///////////////////////////////////////////////////////////////
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "filepath")
 @Data
 public class FilePathProps {
+
     private String userAvatarFolder;
 
     /**
@@ -35,4 +36,5 @@ public class FilePathProps {
     private String fileDownloadTmpFolder;
 
     private String contestAcSubmissionTmpFolder;
+
 }

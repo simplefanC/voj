@@ -35,4 +35,5 @@ public class AdminSysNoticeVo {
     private Date gmtCreate;
 
     private Date gmtModified;
+
 }

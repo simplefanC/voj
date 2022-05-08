@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.dao.problem;
 
-
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 
@@ -10,4 +9,5 @@ import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
  * @Description:
  */
 public interface ProblemCaseEntityService extends IService<ProblemCase> {
+
 }

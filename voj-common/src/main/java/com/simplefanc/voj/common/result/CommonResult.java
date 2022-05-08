@@ -5,12 +5,11 @@ import lombok.Data;
 @Data
 public class CommonResult<T> {
 
-    private final Integer status;   // 状态码
+    private final Integer status; // 状态码
 
-    private final T data;   // 返回的数据
+    private final T data; // 返回的数据
 
-    private final String msg;    // 自定义信息
-
+    private final String msg; // 自定义信息
 
     /**
      * 成功的结果
@@ -21,7 +20,6 @@ public class CommonResult<T> {
     public static <T> CommonResult<T> successResponse(T data, String msg) {
         return new CommonResult<>(ResultStatus.SUCCESS.getStatus(), data, msg);
     }
-
 
     /**
      * 成功的结果
@@ -47,7 +45,6 @@ public class CommonResult<T> {
     public static <T> CommonResult<T> successResponse() {
         return new CommonResult<T>(ResultStatus.SUCCESS.getStatus(), null, "success");
     }
-
 
     /**
      * 失败的结果，无异常

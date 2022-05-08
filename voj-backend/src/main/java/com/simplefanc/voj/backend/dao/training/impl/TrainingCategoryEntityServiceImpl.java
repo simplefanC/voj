@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.training.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingCategoryMapper;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -14,7 +14,8 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
-public class TrainingCategoryEntityServiceImpl extends ServiceImpl<TrainingCategoryMapper, TrainingCategory> implements TrainingCategoryEntityService {
+public class TrainingCategoryEntityServiceImpl extends ServiceImpl<TrainingCategoryMapper, TrainingCategory>
+        implements TrainingCategoryEntityService {
 
     @Resource
     private TrainingCategoryMapper trainingCategoryMapper;
@@ -23,4 +24,5 @@ public class TrainingCategoryEntityServiceImpl extends ServiceImpl<TrainingCateg
     public TrainingCategory getTrainingCategoryByTrainingId(Long tid) {
         return trainingCategoryMapper.getTrainingCategoryByTrainingId(tid);
     }
+
 }

@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.ProblemFileService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ public class ProblemFileController {
     @Autowired
     private ProblemFileService problemFileService;
 
-
     /**
      * @param file
      * @MethodName importProblem
@@ -41,7 +39,6 @@ public class ProblemFileController {
         problemFileService.importProblem(file);
         return CommonResult.successResponse();
     }
-
 
     /**
      * @param pidList

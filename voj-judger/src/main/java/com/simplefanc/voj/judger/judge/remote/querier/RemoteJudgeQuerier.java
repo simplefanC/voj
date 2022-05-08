@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * @author chenfan
  */
@@ -26,20 +25,44 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class RemoteJudgeQuerier {
 
-    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
-    private final static Map<String, Future> FUTURE_TASK_MAP = new ConcurrentHashMap<>(Runtime.getRuntime().availableProcessors() * 2);
+    private final static ScheduledExecutorService SCHEDULER = Executors
+            .newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+
+    private final static Map<String, Future> FUTURE_TASK_MAP = new ConcurrentHashMap<>(
+            Runtime.getRuntime().availableProcessors() * 2);
+
     @Autowired
     private JudgeEntityService judgeEntityService;
+
     @Autowired
     private JudgeService judgeService;
+
     @Autowired
     private RemoteJudgeService remoteJudgeService;
+
+    public void process(SubmissionInfo info, RemoteAccount account) {
+        String key = UUID.randomUUID().toString() + info.submitId;
+
+        ScheduledFuture<?> beeperHandle = SCHEDULER.scheduleWithFixedDelay(new QueryTask(info, account, key), 0, 3,
+                TimeUnit.SECONDS);
+        FUTURE_TASK_MAP.put(key, beeperHandle);
+    }
+
+    private void releaseRemoteJudgeAccount(String remoteJudge, String username, String resultSubmitId) {
+        log.info("After Get Result,remote_judge:[{}],submit_id: [{}]! Begin to return the account to other task!",
+                remoteJudge, resultSubmitId);
+        // 将账号变为可用
+        remoteJudgeService.changeAccountStatus(remoteJudge, username);
+    }
 
     class QueryTask implements Runnable {
 
         AtomicInteger count = new AtomicInteger(0);
+
         SubmissionInfo info;
+
         RemoteAccount account;
+
         String key;
 
         public QueryTask(SubmissionInfo info, RemoteAccount account, String key) {
@@ -67,10 +90,10 @@ public class RemoteJudgeQuerier {
         }
 
         private void checkSubmissionResult(SubmissionRemoteStatus result) {
-            JudgeStatus status = result.getStatusType() != null ? result.getStatusType() : JudgeStatus.STATUS_SYSTEM_ERROR;
-            if (status != JudgeStatus.STATUS_PENDING &&
-                    status != JudgeStatus.STATUS_JUDGING &&
-                    status != JudgeStatus.STATUS_COMPILING) {
+            JudgeStatus status = result.getStatusType() != null ? result.getStatusType()
+                    : JudgeStatus.STATUS_SYSTEM_ERROR;
+            if (status != JudgeStatus.STATUS_PENDING && status != JudgeStatus.STATUS_JUDGING
+                    && status != JudgeStatus.STATUS_COMPILING) {
                 log.info("[{}] Get Result Successfully! Status:[{}]", info.remoteJudge, status);
 
                 releaseRemoteJudgeAccount(info.remoteJudge.getName(), account.accountId, info.remoteRunId);
@@ -88,18 +111,15 @@ public class RemoteJudgeQuerier {
 
         private Judge wrapResultToJudge(SubmissionRemoteStatus result, JudgeStatus status) {
             Judge judge = new Judge();
-            judge.setSubmitId(info.submitId)
-                    .setCid(info.cid)
-                    .setUid(info.uid)
-                    .setPid(info.pid)
-                    .setStatus(status.getStatus())
-                    .setTime(result.getExecutionTime())
+            judge.setSubmitId(info.submitId).setCid(info.cid).setUid(info.uid).setPid(info.pid)
+                    .setStatus(status.getStatus()).setTime(result.getExecutionTime())
                     .setMemory(result.getExecutionMemory());
 
             if (status == JudgeStatus.STATUS_COMPILE_ERROR) {
                 judge.setErrorMessage(result.getCompilationErrorInfo());
             } else if (status == JudgeStatus.STATUS_SYSTEM_ERROR) {
-                judge.setErrorMessage("There is something wrong with the " + info.remoteJudge + ", please try again later");
+                judge.setErrorMessage(
+                        "There is something wrong with the " + info.remoteJudge + ", please try again later");
             }
 
             // 如果是比赛题目，需要特别适配OI比赛的得分 除AC给100 其它结果给0分
@@ -111,8 +131,7 @@ public class RemoteJudgeQuerier {
 
         private void recordMidResult(JudgeStatus status) {
             Judge judge = new Judge();
-            judge.setSubmitId(info.submitId)
-                    .setStatus(status.getStatus());
+            judge.setSubmitId(info.submitId).setStatus(status.getStatus());
             // 写回数据库
             judgeEntityService.updateById(judge);
         }
@@ -120,8 +139,8 @@ public class RemoteJudgeQuerier {
         private void handleQueryFailure() {
             // 更新此次提交状态为提交失败！
             UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
-            judgeUpdateWrapper.set("status", JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus())
-                    .set("error_message", "Waiting for remote judge result exceeds the maximum number of times, please try submitting again!")
+            judgeUpdateWrapper.set("status", JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()).set("error_message",
+                    "Waiting for remote judge result exceeds the maximum number of times, please try submitting again!")
                     .eq("submit_id", info.submitId);
             judgeEntityService.update(judgeUpdateWrapper);
 
@@ -139,23 +158,7 @@ public class RemoteJudgeQuerier {
                 }
             }
         }
+
     }
-
-    public void process(SubmissionInfo info, RemoteAccount account) {
-        String key = UUID.randomUUID().toString() + info.submitId;
-
-        ScheduledFuture<?> beeperHandle = SCHEDULER.scheduleWithFixedDelay(
-                new QueryTask(info, account, key), 0, 3, TimeUnit.SECONDS);
-        FUTURE_TASK_MAP.put(key, beeperHandle);
-    }
-
-
-    private void releaseRemoteJudgeAccount(String remoteJudge, String username, String resultSubmitId) {
-        log.info("After Get Result,remote_judge:[{}],submit_id: [{}]! Begin to return the account to other task!",
-                remoteJudge, resultSubmitId);
-        // 将账号变为可用
-        remoteJudgeService.changeAccountStatus(remoteJudge, username);
-    }
-
 
 }

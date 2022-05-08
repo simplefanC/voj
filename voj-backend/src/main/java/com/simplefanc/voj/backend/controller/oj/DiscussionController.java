@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
+import com.simplefanc.voj.backend.service.oj.DiscussionService;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.pojo.entity.problem.Category;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
-import com.simplefanc.voj.backend.service.oj.DiscussionService;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,22 +26,23 @@ public class DiscussionController {
     @Autowired
     private DiscussionService discussionService;
 
-
     @GetMapping("/discussions")
-    public CommonResult<IPage<Discussion>> getDiscussionList(@RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
-                                                             @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
-                                                             @RequestParam(value = "cid", required = false) Integer categoryId,
-                                                             @RequestParam(value = "pid", required = false) String pid,
-                                                             @RequestParam(value = "onlyMine", required = false, defaultValue = "false") Boolean onlyMine,
-                                                             @RequestParam(value = "keyword", required = false) String keyword,
-                                                             @RequestParam(value = "admin", defaultValue = "false") Boolean admin) {
+    public CommonResult<IPage<Discussion>> getDiscussionList(
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage,
+            @RequestParam(value = "cid", required = false) Integer categoryId,
+            @RequestParam(value = "pid", required = false) String pid,
+            @RequestParam(value = "onlyMine", required = false, defaultValue = "false") Boolean onlyMine,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "admin", defaultValue = "false") Boolean admin) {
 
-        return CommonResult.successResponse(discussionService.getDiscussionList(limit, currentPage, categoryId, pid, onlyMine, keyword, admin));
+        return CommonResult.successResponse(
+                discussionService.getDiscussionList(limit, currentPage, categoryId, pid, onlyMine, keyword, admin));
 
     }
 
     @GetMapping("/discussion")
-    public CommonResult<DiscussionVo> getDiscussion(@RequestParam(value = "did", required = true) Integer did) {
+    public CommonResult<DiscussionVo> getDiscussion(@RequestParam(value = "did") Integer did) {
         return CommonResult.successResponse(discussionService.getDiscussion(did));
     }
 

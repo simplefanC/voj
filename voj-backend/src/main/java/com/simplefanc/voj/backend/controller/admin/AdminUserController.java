@@ -1,11 +1,10 @@
 package com.simplefanc.voj.backend.controller.admin;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * @Author: chenfan
@@ -26,7 +24,6 @@ public class AdminUserController {
 
     @Autowired
     private AdminUserService adminUserService;
-
 
     @GetMapping("/get-user-list")
     @RequiresAuthentication

@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
 import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
 import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
 import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,14 +19,12 @@ import java.util.List;
 
 public interface JudgeService {
 
-
     /**
      * @MethodName submitProblemJudge
      * @Description 核心方法 判题通过openfeign调用判题系统服务
      * @Since 2020/10/30
      */
     Judge submitProblemJudge(ToJudgeDto judgeDto);
-
 
     /**
      * @MethodName resubmit
@@ -42,7 +40,6 @@ public interface JudgeService {
      */
     SubmissionInfoVo getSubmission(Long submitId);
 
-
     /**
      * @MethodName updateSubmission
      * @Description 修改单个提交详情的分享权限
@@ -55,14 +52,8 @@ public interface JudgeService {
      * @Description 通用查询判题记录列表
      * @Since 2020/10/29
      */
-    IPage<JudgeVo> getJudgeList(Integer limit,
-                                Integer currentPage,
-                                Boolean onlyMine,
-                                String searchPid,
-                                Integer searchStatus,
-                                String searchUsername,
-                                Boolean completeProblemID);
-
+    IPage<JudgeVo> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
+                                Integer searchStatus, String searchUsername, Boolean completeProblemId);
 
     /**
      * @MethodName checkJudgeResult
@@ -84,4 +75,5 @@ public interface JudgeService {
      * @Since 2020/10/29
      */
     List<JudgeCase> getALLCaseResult(Long submitId);
+
 }

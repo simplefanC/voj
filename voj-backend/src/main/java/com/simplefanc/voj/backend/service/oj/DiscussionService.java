@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.pojo.entity.problem.Category;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
 
 import java.util.List;
 
@@ -16,14 +16,8 @@ import java.util.List;
 
 public interface DiscussionService {
 
-
-    IPage<Discussion> getDiscussionList(Integer limit,
-                                        Integer currentPage,
-                                        Integer categoryId,
-                                        String pid,
-                                        Boolean onlyMine,
-                                        String keyword,
-                                        Boolean admin);
+    IPage<Discussion> getDiscussionList(Integer limit, Integer currentPage, Integer categoryId, String pid,
+                                        Boolean onlyMine, String keyword, Boolean admin);
 
     DiscussionVo getDiscussion(Integer did);
 
@@ -38,4 +32,5 @@ public interface DiscussionService {
     List<Category> getDiscussionCategory();
 
     void addDiscussionReport(DiscussionReport discussionReport);
+
 }

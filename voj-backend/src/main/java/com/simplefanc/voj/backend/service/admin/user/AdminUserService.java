@@ -23,4 +23,5 @@ public interface AdminUserService {
     void insertBatchUser(List<List<String>> users);
 
     Map<Object, Object> generateUser(Map<String, Object> params);
+
 }

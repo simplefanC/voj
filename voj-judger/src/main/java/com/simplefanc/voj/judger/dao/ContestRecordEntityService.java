@@ -13,5 +13,7 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
  * @since 2020-10-23
  */
 public interface ContestRecordEntityService extends IService<ContestRecord> {
+
     void updateContestRecord(Judge judge);
+
 }

@@ -11,4 +11,5 @@ import java.io.IOException;
 public interface UserFileService {
 
     void generateUserExcel(String key, HttpServletResponse response) throws IOException;
+
 }

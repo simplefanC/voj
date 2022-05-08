@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.training;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
+import com.simplefanc.voj.common.pojo.entity.training.Training;
 
 /**
  * @Author: chenfan
@@ -10,6 +10,7 @@ import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
  * @Description:
  */
 public interface AdminTrainingService {
+
     IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword);
 
     TrainingDto getTraining(Long tid);
@@ -21,6 +22,5 @@ public interface AdminTrainingService {
     void updateTraining(TrainingDto trainingDto);
 
     void changeTrainingStatus(Long tid, String author, Boolean status);
-
 
 }

@@ -25,7 +25,8 @@
 
 
     <!-- 主查询  -->
-    <select id="getDiscussion" resultMap="map_DiscussionVo" resultType="com.simplefanc.voj.backend.pojo.vo.DiscussionVo">
+    <select id="getDiscussion" resultMap="map_DiscussionVo"
+            resultType="com.simplefanc.voj.backend.pojo.vo.DiscussionVo">
         SELECT d.*,c.id as category_id,c.name as category_name,
         (SELECT 1 FROM discussion_like dl WHERE dl.uid = #{uid} AND dl.did = #{did} LIMIT 1) as has_like
         FROM discussion d,category c

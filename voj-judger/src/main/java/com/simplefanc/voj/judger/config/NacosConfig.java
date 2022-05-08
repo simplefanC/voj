@@ -19,7 +19,6 @@ public class NacosConfig {
 
     private static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
 
-
     @Value("${voj-judge-server.max-task-num}")
     private Integer maxTaskNum;
 
@@ -37,7 +36,6 @@ public class NacosConfig {
 
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
-
 
     /**
      * 用于改变程序自动获取的本机ip

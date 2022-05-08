@@ -11,7 +11,6 @@ import java.io.IOException;
  */
 public interface ImportFpsProblemService {
 
-
     /**
      * @param file
      * @MethodName importFpsProblem
@@ -20,4 +19,5 @@ public interface ImportFpsProblemService {
      * @Since 2021/10/06
      */
     void importFPSProblem(MultipartFile file) throws IOException;
+
 }

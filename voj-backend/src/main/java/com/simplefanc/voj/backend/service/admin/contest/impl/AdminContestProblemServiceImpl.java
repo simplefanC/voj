@@ -2,14 +2,11 @@ package com.simplefanc.voj.backend.service.admin.contest.impl;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.constants.RemoteOj;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
@@ -22,12 +19,15 @@ import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.ProblemEnum;
+import com.simplefanc.voj.common.constants.RemoteOj;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
@@ -58,10 +58,12 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
-                                                  Long cid, Integer problemType, String oj) {
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+    public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Long cid,
+                                                  Integer problemType, String oj) {
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
         IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据cid在ContestProblem表中查询到对应pid集合
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
@@ -81,8 +83,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         if (problemType != null) {
             problemQueryWrapper
                     // vj题目不限制赛制
-                    .and(wrapper -> wrapper.eq("type", problemType)
-                            .or().eq("is_remote", true))
+                    .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
                     // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
                     .ne("auth", 2);
         }
@@ -103,9 +104,8 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             }
         }
 
-        if (!StringUtils.isEmpty(keyword)) {
-            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or()
-                    .like("problem_id", keyword).or()
+        if (!StrUtil.isEmpty(keyword)) {
+            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or().like("problem_id", keyword).or()
                     .like("author", keyword));
         }
 
@@ -119,19 +119,20 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         if (pidList.size() > 0 && problemType == null) {
             List<Problem> problemList = problemListPage.getRecords();
 
-            List<Problem> sortedProblemList = problemList.stream().sorted(Comparator.comparing(Problem::getId, (a, b) -> {
-                ContestProblem x = contestProblemMap.get(a);
-                ContestProblem y = contestProblemMap.get(b);
-                if (x == null && y != null) {
-                    return 1;
-                } else if (x != null && y == null) {
-                    return -1;
-                } else if (x == null) {
-                    return -1;
-                } else {
-                    return x.getDisplayId().compareTo(y.getDisplayId());
-                }
-            })).collect(Collectors.toList());
+            List<Problem> sortedProblemList = problemList.stream()
+                    .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
+                        ContestProblem x = contestProblemMap.get(a);
+                        ContestProblem y = contestProblemMap.get(b);
+                        if (x == null && y != null) {
+                            return 1;
+                        } else if (x != null && y == null) {
+                            return -1;
+                        } else if (x == null) {
+                            return -1;
+                        } else {
+                            return x.getDisplayId().compareTo(y.getDisplayId());
+                        }
+                    })).collect(Collectors.toList());
             problemListPage.setRecords(sortedProblemList);
         }
 
@@ -148,11 +149,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         if (problem != null) {
             // 获取当前登录的用户
-            Session session = SecurityUtils.getSubject().getSession();
-            UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
-            boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-            boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+            boolean isRoot = UserSessionUtil.isRoot();
+            boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
             // 只有超级管理员和题目管理员、题目创建者才能操作
             if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problem.getAuthor())) {
                 throw new StatusForbiddenException("对不起，你无权限查看题目！");
@@ -167,7 +167,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteProblem(Long pid, Long cid) {
-        //  比赛id不为null，表示就是从比赛列表移除而已
+        // 比赛id不为null，表示就是从比赛列表移除而已
         if (cid != null) {
             QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
             contestProblemQueryWrapper.eq("cid", cid).eq("pid", pid);
@@ -197,7 +197,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             throw new StatusFailException("该题目的Problem ID已存在，请更换！");
         }
         // 设置为比赛题目
-        problemDto.getProblem().setAuth(3);
+        problemDto.getProblem().setAuth(ProblemEnum.AUTH_CONTEST.getCode());
         boolean isOk = problemEntityService.adminAddProblem(problemDto);
         // 添加成功
         if (isOk) {
@@ -213,11 +213,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Transactional(rollbackFor = Exception.class)
     public void updateProblem(ProblemDto problemDto) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
+        boolean isRoot = UserSessionUtil.isRoot();
+        boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
         // 只有超级管理员和题目管理员、题目创建者才能操作
         if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problemDto.getProblem().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限修改题目！");
@@ -256,7 +255,8 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     public ContestProblem setContestProblem(ContestProblem contestProblem) {
         boolean isOk = contestProblemEntityService.saveOrUpdate(contestProblem);
         if (isOk) {
-            contestProblemEntityService.syncContestRecord(contestProblem.getPid(), contestProblem.getCid(), contestProblem.getDisplayId());
+            contestProblemEntityService.syncContestRecord(contestProblem.getPid(), contestProblem.getCid(),
+                    contestProblem.getDisplayId());
             return contestProblem;
         } else {
             throw new StatusFailException("更新失败");
@@ -273,9 +273,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
         contestProblemQueryWrapper.eq("cid", cid)
-                .and(wrapper -> wrapper.eq("pid", pid)
-                        .or()
-                        .eq("display_id", displayId));
+                .and(wrapper -> wrapper.eq("pid", pid).or().eq("display_id", displayId));
         ContestProblem contestProblem = contestProblemEntityService.getOne(contestProblemQueryWrapper, false);
         if (contestProblem != null) {
             throw new StatusFailException("添加失败，该题目已添加或者题目的比赛展示ID已存在！");
@@ -286,10 +284,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         String displayName = problem.getTitle();
 
         // 修改成比赛题目
-        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(3));
+        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(ProblemEnum.AUTH_CONTEST.getCode()));
 
-        boolean isOk = contestProblemEntityService.saveOrUpdate(new ContestProblem()
-                .setCid(cid).setPid(pid).setDisplayTitle(displayName).setDisplayId(displayId));
+        boolean isOk = contestProblemEntityService.saveOrUpdate(
+                new ContestProblem().setCid(cid).setPid(pid).setDisplayTitle(displayName).setDisplayId(displayId));
         if (!isOk || !updateProblem) {
             throw new StatusFailException("添加失败");
         }
@@ -304,10 +302,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         // 如果该题目不存在，需要先导入
         if (problem == null) {
-            Session session = SecurityUtils.getSubject().getSession();
-            UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
             try {
-                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
+                        .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {
@@ -324,23 +322,20 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
         Problem finalProblem = problem;
         contestProblemQueryWrapper.eq("cid", cid)
-                .and(wrapper -> wrapper.eq("pid", finalProblem.getId())
-                        .or()
-                        .eq("display_id", displayId));
+                .and(wrapper -> wrapper.eq("pid", finalProblem.getId()).or().eq("display_id", displayId));
         ContestProblem contestProblem = contestProblemEntityService.getOne(contestProblemQueryWrapper, false);
         if (contestProblem != null) {
             throw new StatusFailException("添加失败，该题目已添加或者题目的比赛展示ID已存在！");
         }
 
-
         // 比赛中题目显示默认为原标题
         String displayName = problem.getTitle();
 
         // 修改成比赛题目
-        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(3));
+        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(ProblemEnum.AUTH_CONTEST.getCode()));
 
-        boolean isOk = contestProblemEntityService.saveOrUpdate(new ContestProblem()
-                .setCid(cid).setPid(problem.getId()).setDisplayTitle(displayName).setDisplayId(displayId));
+        boolean isOk = contestProblemEntityService.saveOrUpdate(new ContestProblem().setCid(cid).setPid(problem.getId())
+                .setDisplayTitle(displayName).setDisplayId(displayId));
 
         if (!isOk || !updateProblem) {
             throw new StatusFailException("添加失败");

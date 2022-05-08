@@ -16,4 +16,5 @@ public class ResetPasswordDto {
     private String password;
 
     private String code;
+
 }

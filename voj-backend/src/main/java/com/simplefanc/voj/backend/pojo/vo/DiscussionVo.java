@@ -71,4 +71,5 @@ public class DiscussionVo {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

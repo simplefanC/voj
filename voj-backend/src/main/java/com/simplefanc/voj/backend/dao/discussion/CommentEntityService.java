@@ -2,9 +2,9 @@ package com.simplefanc.voj.backend.dao.discussion;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.simplefanc.voj.backend.pojo.vo.CommentVo;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
-import com.simplefanc.voj.backend.pojo.vo.CommentVo;
 
 import java.util.List;
 
@@ -25,4 +25,5 @@ public interface CommentEntityService extends IService<Comment> {
     void updateCommentMsg(String recipientId, String senderId, String content, Integer discussionId);
 
     void updateCommentLikeMsg(String recipientId, String senderId, Integer sourceId, String sourceType);
+
 }

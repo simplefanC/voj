@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * 未实现 RemoteOjAware.getOjInfo()
  */
 public abstract class RetentiveLoginer implements Loginer {
+
     /**
-     * 记录上次登录时间戳
-     * httpContext hashCode -> last login epoch millisecond
+     * 记录上次登录时间戳 httpContext hashCode -> last login epoch millisecond
      */
     private final static ConcurrentHashMap<Integer, Long> lastLoginTimeMap = new ConcurrentHashMap<Integer, Long>();
 

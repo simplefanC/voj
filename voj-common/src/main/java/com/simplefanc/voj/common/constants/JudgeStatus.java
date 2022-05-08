@@ -1,9 +1,14 @@
 package com.simplefanc.voj.common.constants;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * @Description 提交评测结果的状态码
  * @Since 2021/1/1
  */
+@Getter
+@AllArgsConstructor
 public enum JudgeStatus {
     STATUS_NOT_SUBMITTED(-10, "Not Submitted", null),
     STATUS_SUBMITTED_UNKNOWN_RESULT(-5, "Submitted Unknown Result", null),
@@ -26,24 +31,9 @@ public enum JudgeStatus {
     JUDGE_SERVER_SUBMIT_PREFIX(-1002, "Judge SubmitId-ServerId:", null);
 
     private final Integer status;
+
     private final String name;
+
     private final String columnName;
 
-    JudgeStatus(Integer status, String name, String columnName) {
-        this.status = status;
-        this.name = name;
-        this.columnName = columnName;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
 }

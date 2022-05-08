@@ -18,38 +18,31 @@ import java.util.Map;
 
 @Component
 public class TKOJQuerier implements Querier {
-    private static final String[] statusArray = new String[]{
-            "Pending",
-            "Pending Rejudging",
-            "Compiling",
-            "Running Judging",
-            "Accepted",
-            "Presentation Error",
-            "Wrong Answer",
-            "Time Limit Exceed",
-            "Memory Limit Exceed",
-            "Output Limit Exceed",
-            "Runtime Error",
-            "Compile Error",
-            "Compile OK",
-            "Runtime Finish"
+
+    private static final String[] statusArray = new String[]{"Pending", "Pending Rejudging", "Compiling",
+            "Running Judging", "Accepted", "Presentation Error", "Wrong Answer", "Time Limit Exceed",
+            "Memory Limit Exceed", "Output Limit Exceed", "Runtime Error", "Compile Error", "Compile OK",
+            "Runtime Finish"};
+
+    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {
+        {
+            put(0, JudgeStatus.STATUS_PENDING);
+            put(1, JudgeStatus.STATUS_JUDGING);
+            put(2, JudgeStatus.STATUS_COMPILING);
+            put(3, JudgeStatus.STATUS_JUDGING);
+            put(4, JudgeStatus.STATUS_ACCEPTED);
+            put(5, JudgeStatus.STATUS_PRESENTATION_ERROR);
+            put(6, JudgeStatus.STATUS_WRONG_ANSWER);
+            put(7, JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
+            put(8, JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
+            put(9, JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
+            put(10, JudgeStatus.STATUS_RUNTIME_ERROR);
+            put(11, JudgeStatus.STATUS_COMPILE_ERROR);
+            put(12, JudgeStatus.STATUS_JUDGING);
+            put(13, JudgeStatus.STATUS_JUDGING);
+        }
     };
-    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {{
-        put(0, JudgeStatus.STATUS_PENDING);
-        put(1, JudgeStatus.STATUS_JUDGING);
-        put(2, JudgeStatus.STATUS_COMPILING);
-        put(3, JudgeStatus.STATUS_JUDGING);
-        put(4, JudgeStatus.STATUS_ACCEPTED);
-        put(5, JudgeStatus.STATUS_PRESENTATION_ERROR);
-        put(6, JudgeStatus.STATUS_WRONG_ANSWER);
-        put(7, JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
-        put(8, JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
-        put(9, JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
-        put(10, JudgeStatus.STATUS_RUNTIME_ERROR);
-        put(11, JudgeStatus.STATUS_COMPILE_ERROR);
-        put(12, JudgeStatus.STATUS_JUDGING);
-        put(13, JudgeStatus.STATUS_JUDGING);
-    }};
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -61,7 +54,8 @@ public class TKOJQuerier implements Querier {
     @Override
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) throws Exception {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        String result = client.get("/status-ajax.php?solution_id=" + info.remoteRunId, HttpStatusValidator.SC_OK).getBody();
+        String result = client.get("/status-ajax.php?solution_id=" + info.remoteRunId, HttpStatusValidator.SC_OK)
+                .getBody();
         String[] results = result.split(",");
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = statusArray[Integer.parseInt(results[0])];
@@ -75,4 +69,5 @@ public class TKOJQuerier implements Querier {
         }
         return status;
     }
+
 }

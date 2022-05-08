@@ -12,9 +12,12 @@ public interface JudgeService {
 
     void remoteJudge(ToJudge toJudge);
 
-    Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError;
+    Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)
+            throws SystemError;
 
-    Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError;
+    Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles)
+            throws SystemError;
 
     void updateOtherTable(Judge judge);
+
 }

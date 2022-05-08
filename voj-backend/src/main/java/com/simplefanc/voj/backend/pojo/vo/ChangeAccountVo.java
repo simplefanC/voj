@@ -15,4 +15,5 @@ public class ChangeAccountVo {
     private String msg;
 
     private UserInfoVo userInfo;
+
 }

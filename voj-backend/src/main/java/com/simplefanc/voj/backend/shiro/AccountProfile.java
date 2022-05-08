@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Data
 public class AccountProfile implements Serializable {
+
     private String uid;
 
     private String username;
@@ -50,9 +51,11 @@ public class AccountProfile implements Serializable {
 
     /**
      * shiro登录用户实体默认主键获取方法要为getId
+     *
      * @return
      */
     public String getId() {
         return uid;
     }
+
 }

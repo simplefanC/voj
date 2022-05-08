@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.PidListDto;
 import com.simplefanc.voj.backend.pojo.vo.ProblemInfoVo;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.RandomProblemVo;
 import com.simplefanc.voj.backend.service.oj.ProblemService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
-
 
 /**
  * @Author: chenfan
@@ -46,7 +45,8 @@ public class ProblemController {
                                                         @RequestParam(value = "tagId", required = false) List<Long> tagId,
                                                         @RequestParam(value = "difficulty", required = false) Integer difficulty,
                                                         @RequestParam(value = "oj", required = false) String oj) {
-        return CommonResult.successResponse(problemService.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj));
+        return CommonResult
+                .successResponse(problemService.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj));
     }
 
     /**
@@ -81,9 +81,9 @@ public class ProblemController {
      * @Since 2020/10/27
      */
     @RequestMapping(value = "/get-problem", method = RequestMethod.GET)
-    public CommonResult<ProblemInfoVo> getProblemInfo(@RequestParam(value = "problemId", required = true) String problemId) {
+    public CommonResult<ProblemInfoVo> getProblemInfo(
+            @RequestParam(value = "problemId") String problemId) {
         return CommonResult.successResponse(problemService.getProblemInfo(problemId));
     }
-
 
 }

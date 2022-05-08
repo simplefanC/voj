@@ -20,23 +20,27 @@ import java.util.Map;
 
 @Component
 public class MXTQuerier implements Querier {
-    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {{
-        put(0, JudgeStatus.STATUS_PENDING);
-        put(1, JudgeStatus.STATUS_JUDGING);
-        put(2, JudgeStatus.STATUS_COMPILING);
-        put(3, JudgeStatus.STATUS_JUDGING);
-        put(4, JudgeStatus.STATUS_ACCEPTED);
-        put(5, JudgeStatus.STATUS_PRESENTATION_ERROR);
-        put(6, JudgeStatus.STATUS_WRONG_ANSWER);
-        put(7, JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
-        put(8, JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
-        put(9, JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
-        put(10, JudgeStatus.STATUS_RUNTIME_ERROR);
-        put(11, JudgeStatus.STATUS_COMPILE_ERROR);
-        put(12, JudgeStatus.STATUS_JUDGING);
-        put(13, JudgeStatus.STATUS_JUDGING);
-        put(14, JudgeStatus.STATUS_JUDGING);
-    }};
+
+    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {
+        {
+            put(0, JudgeStatus.STATUS_PENDING);
+            put(1, JudgeStatus.STATUS_JUDGING);
+            put(2, JudgeStatus.STATUS_COMPILING);
+            put(3, JudgeStatus.STATUS_JUDGING);
+            put(4, JudgeStatus.STATUS_ACCEPTED);
+            put(5, JudgeStatus.STATUS_PRESENTATION_ERROR);
+            put(6, JudgeStatus.STATUS_WRONG_ANSWER);
+            put(7, JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
+            put(8, JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
+            put(9, JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
+            put(10, JudgeStatus.STATUS_RUNTIME_ERROR);
+            put(11, JudgeStatus.STATUS_COMPILE_ERROR);
+            put(12, JudgeStatus.STATUS_JUDGING);
+            put(13, JudgeStatus.STATUS_JUDGING);
+            put(14, JudgeStatus.STATUS_JUDGING);
+        }
+    };
+
     private static final String[] statusArray = new String[]{
             // 0
             "Pending",
@@ -67,8 +71,8 @@ public class MXTQuerier implements Querier {
             // 13
             "Test Running Done",
             // 14
-            "Read"
-    };
+            "Read"};
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -99,4 +103,5 @@ public class MXTQuerier implements Querier {
         status.failCase = (int) (Double.parseDouble(jsonObject.getStr("pass_rate")) * 100);
         return status;
     }
+
 }

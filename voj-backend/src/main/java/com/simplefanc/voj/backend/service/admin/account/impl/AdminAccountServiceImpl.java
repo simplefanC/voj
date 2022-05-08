@@ -2,8 +2,6 @@ package com.simplefanc.voj.backend.service.admin.account.impl;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.simplefanc.voj.common.pojo.entity.user.Session;
-import com.simplefanc.voj.common.utils.IpUtil;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.JwtUtil;
@@ -12,6 +10,9 @@ import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.account.AdminAccountService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.user.Session;
+import com.simplefanc.voj.common.utils.IpUtil;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,15 +61,14 @@ public class AdminAccountServiceImpl implements AdminAccountService {
 
         // 查询用户角色
         List<String> rolesList = new LinkedList<>();
-        userRoles.getRoles().stream()
-                .forEach(role -> rolesList.add(role.getRole()));
+        userRoles.getRoles().forEach(role -> rolesList.add(role.getRole()));
 
-        // TODO 重复
         // 超级管理员或管理员、题目管理员
         if (rolesList.contains("admin") || rolesList.contains("root") || rolesList.contains("problem_admin")) {
             String jwt = jwtUtil.generateToken(userRoles.getUid());
 
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
             HttpServletRequest request = servletRequestAttributes.getRequest();
             HttpServletResponse response = servletRequestAttributes.getResponse();
 
@@ -76,22 +76,16 @@ public class AdminAccountServiceImpl implements AdminAccountService {
             response.setHeader("Authorization", jwt);
             response.setHeader("Access-Control-Expose-Headers", "Authorization");
             // 会话记录
-            sessionEntityService.save(new Session().setUid(userRoles.getUid())
-                    .setIp(IpUtil.getUserIpAddr(request)).setUserAgent(request.getHeader("User-Agent")));
+            sessionEntityService.save(new Session().setUid(userRoles.getUid()).setIp(IpUtil.getUserIpAddr(request))
+                    .setUserAgent(request.getHeader("User-Agent")));
             // 异步检查是否异地登录
             sessionEntityService.checkRemoteLogin(userRoles.getUid());
             // TODO put 键
-            return MapUtil.builder()
-                    .put("uid", userRoles.getUid())
-                    .put("username", userRoles.getUsername())
-                    .put("nickname", userRoles.getNickname())
-                    .put("avatar", userRoles.getAvatar())
-                    .put("email", userRoles.getEmail())
-                    .put("number", userRoles.getNumber())
-                    .put("school", userRoles.getSchool())
-                    .put("course", userRoles.getCourse())
-                    .put("signature", userRoles.getSignature())
-                    .put("realname", userRoles.getRealname())
+            return MapUtil.builder().put("uid", userRoles.getUid()).put("username", userRoles.getUsername())
+                    .put("nickname", userRoles.getNickname()).put("avatar", userRoles.getAvatar())
+                    .put("email", userRoles.getEmail()).put("number", userRoles.getNumber())
+                    .put("school", userRoles.getSchool()).put("course", userRoles.getCourse())
+                    .put("signature", userRoles.getSignature()).put("realname", userRoles.getRealname())
                     .put("roleList", rolesList)
                     .map();
         } else {
@@ -101,6 +95,7 @@ public class AdminAccountServiceImpl implements AdminAccountService {
 
     @Override
     public void logout() {
-        SecurityUtils.getSubject().logout();
+        UserSessionUtil.logout();
     }
+
 }

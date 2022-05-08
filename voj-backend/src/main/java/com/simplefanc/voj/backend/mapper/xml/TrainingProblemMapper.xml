@@ -27,7 +27,7 @@
     </resultMap>
 
     <select id="getTrainingProblemList" resultMap="map_TrainingProblemList">
-        SELECT p.id                                                                                   AS pid,
+        SELECT p.id                                                                             AS pid,
                p.problem_id,
                p.title,
                p.difficulty,

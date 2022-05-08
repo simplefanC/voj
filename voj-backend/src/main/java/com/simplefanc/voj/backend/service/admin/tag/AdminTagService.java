@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.service.admin.tag;
 
-
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 
 /**
@@ -10,9 +9,11 @@ import com.simplefanc.voj.common.pojo.entity.problem.Tag;
  */
 
 public interface AdminTagService {
+
     Tag addProblem(Tag tag);
 
     void updateTag(Tag tag);
 
     void deleteTag(Long tid);
+
 }

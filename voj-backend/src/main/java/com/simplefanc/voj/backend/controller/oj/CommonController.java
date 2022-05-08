@@ -1,12 +1,13 @@
 package com.simplefanc.voj.backend.controller.oj;
 
+import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
+import com.simplefanc.voj.backend.service.oj.CommonService;
+import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
-import com.simplefanc.voj.backend.service.oj.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,12 +29,10 @@ public class CommonController {
     @Autowired
     private CommonService commonService;
 
-
     @GetMapping("/captcha")
     public CommonResult<CaptchaVo> getCaptcha() {
         return CommonResult.successResponse(commonService.getCaptcha());
     }
-
 
     @GetMapping("/get-training-category")
     public CommonResult<List<TrainingCategory>> getTrainingCategory() {
@@ -41,7 +40,8 @@ public class CommonController {
     }
 
     @GetMapping("/get-all-problem-tags")
-    public CommonResult<List<Tag>> getAllProblemTagsList(@RequestParam(value = "oj", defaultValue = "LOCAL") String oj) {
+    public CommonResult<List<Tag>> getAllProblemTagsList(
+            @RequestParam(value = "oj", defaultValue = Constant.LOCAL) String oj) {
         return CommonResult.successResponse(commonService.getAllProblemTagsList(oj));
     }
 
@@ -49,7 +49,6 @@ public class CommonController {
     public CommonResult<Collection<Tag>> getProblemTags(Long pid) {
         return CommonResult.successResponse(commonService.getProblemTags(pid));
     }
-
 
     @GetMapping("/languages")
     public CommonResult<List<Language>> getLanguages(@RequestParam(value = "pid", required = false) Long pid,

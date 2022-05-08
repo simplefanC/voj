@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-
 @Slf4j(topic = "voj")
 @Data
 @Component
@@ -19,11 +18,17 @@ import java.util.Date;
 public class JwtUtil {
 
     private final static String TOKEN_KEY = "token-key:";
+
     private final static String TOKEN_REFRESH = "token-refresh:";
+
     private String secret;
+
     private long expire;
+
     private String header;
+
     private long checkRefreshExpire;
+
     @Autowired
     private RedisUtil redisUtil;
 
@@ -35,13 +40,8 @@ public class JwtUtil {
         // 过期时间
         Date expireDate = new Date(nowDate.getTime() + expire * 1000);
 
-        String token = Jwts.builder()
-                .setHeaderParam("type", "JWT")
-                .setSubject(userId)
-                .setIssuedAt(nowDate)
-                .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
+        String token = Jwts.builder().setHeaderParam("type", "JWT").setSubject(userId).setIssuedAt(nowDate)
+                .setExpiration(expireDate).signWith(SignatureAlgorithm.HS512, secret).compact();
         redisUtil.set(TOKEN_REFRESH + userId, token, checkRefreshExpire);
         redisUtil.set(TOKEN_KEY + userId, token, expire);
         return token;
@@ -49,10 +49,7 @@ public class JwtUtil {
 
     public Claims getClaimByToken(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(secret)
-                    .parseClaimsJws(token)
-                    .getBody();
+            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
         } catch (Exception e) {
             log.debug("validate is token error ", e);
             return null;
@@ -67,6 +64,5 @@ public class JwtUtil {
     public boolean isTokenExpired(Date expiration) {
         return expiration.before(new Date());
     }
-
 
 }

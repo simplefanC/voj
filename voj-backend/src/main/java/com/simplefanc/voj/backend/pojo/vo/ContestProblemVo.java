@@ -40,4 +40,5 @@ public class ContestProblemVo implements Serializable {
 
     @ApiModelProperty(value = "该题目的总提交数")
     private Integer total;
+
 }

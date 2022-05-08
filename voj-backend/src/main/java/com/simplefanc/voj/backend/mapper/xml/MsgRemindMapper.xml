@@ -6,23 +6,25 @@
             useCache="true">
         SELECT (SELECT COUNT(1)
                 FROM msg_remind
-                WHERE recipient_id = #{uid} AND state = 0 AND `action` = 'Discuss') AS 'comment', (SELECT COUNT(1)
-                                                                                                   FROM msg_remind
-                                                                                                   WHERE recipient_id = #{uid}
-                                                                                                     AND state = 0
-                                                                                                     AND `action` = 'Reply') AS 'reply', (SELECT COUNT(1)
-                                                                                                                                          FROM msg_remind
-                                                                                                                                          WHERE recipient_id = #{uid}
-                                                                                                                                            AND state = 0
-                                                                                                                                            AND `action` LIKE 'Like%') AS 'like', (SELECT COUNT(1)
-                                                                                                                                                                                   FROM user_sys_notice
-                                                                                                                                                                                   WHERE recipient_id = #{uid}
-                                                                                                                                                                                     AND state = 0
-                                                                                                                                                                                     AND `type` = 'Sys') AS 'sys', (SELECT COUNT(1)
-                                                                                                                                                                                                                    FROM user_sys_notice
-                                                                                                                                                                                                                    WHERE recipient_id = #{uid}
-                                                                                                                                                                                                                      AND state = 0
-                                                                                                                                                                                                                      AND `type` = 'Mine') AS 'mine'
+                WHERE recipient_id = #{uid}
+                  AND state = 0
+                  AND `action` = 'Discuss') AS 'comment', (SELECT COUNT(1)
+                                                           FROM msg_remind
+                                                           WHERE recipient_id = #{uid}
+                                                             AND state = 0
+                                                             AND `action` = 'Reply') AS 'reply', (SELECT COUNT(1)
+                                                                                                  FROM msg_remind
+                                                                                                  WHERE recipient_id = #{uid}
+                                                                                                    AND state = 0
+                                                                                                    AND `action` LIKE 'Like%') AS 'like', (SELECT COUNT(1)
+                                                                                                                                           FROM user_sys_notice
+                                                                                                                                           WHERE recipient_id = #{uid}
+                                                                                                                                             AND state = 0
+                                                                                                                                             AND `type` = 'Sys') AS 'sys', (SELECT COUNT(1)
+                                                                                                                                                                            FROM user_sys_notice
+                                                                                                                                                                            WHERE recipient_id = #{uid}
+                                                                                                                                                                              AND state = 0
+                                                                                                                                                                              AND `type` = 'Mine') AS 'mine'
     </select>
 
 

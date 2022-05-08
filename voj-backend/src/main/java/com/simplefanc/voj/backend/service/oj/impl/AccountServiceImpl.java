@@ -2,14 +2,10 @@ package com.simplefanc.voj.backend.service.oj.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.user.Role;
-import com.simplefanc.voj.common.pojo.entity.user.Session;
-import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
-import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
@@ -21,10 +17,14 @@ import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.AccountService;
-import org.apache.shiro.SecurityUtils;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.user.Role;
+import com.simplefanc.voj.common.pojo.entity.user.Session;
+import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
+import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,7 +61,6 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private SessionEntityService sessionEntityService;
 
-
     /**
      * @MethodName checkUsernameOrEmail
      * @Params * @param null
@@ -80,7 +79,7 @@ public class AccountServiceImpl implements AccountService {
 
         boolean rightUsername = false;
 
-        if (!StringUtils.isEmpty(email)) {
+        if (!StrUtil.isEmpty(email)) {
             email = email.trim();
             boolean isEmail = Validator.isEmail(email);
             if (!isEmail) {
@@ -96,7 +95,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        if (!StringUtils.isEmpty(username)) {
+        if (!StrUtil.isEmpty(username)) {
             username = username.trim();
             QueryWrapper<UserInfo> wrapper = new QueryWrapper<UserInfo>().eq("username", username);
             UserInfo user = userInfoEntityService.getOne(wrapper, false);
@@ -123,10 +122,9 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public UserHomeVo getUserHomeInfo(String uid, String username) {
 
-        org.apache.shiro.session.Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 如果没有uid和username，默认查询当前登录用户的
-        if (StringUtils.isEmpty(uid) && StringUtils.isEmpty(username)) {
+        if (StrUtil.isEmpty(uid) && StrUtil.isEmpty(username)) {
             if (userRolesVo != null) {
                 uid = userRolesVo.getUid();
             } else {
@@ -159,9 +157,7 @@ public class AccountServiceImpl implements AccountService {
 
         userHomeInfo.setSolvedList(disPlayIdList);
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
-        sessionQueryWrapper.eq("uid", userHomeInfo.getUid())
-                .orderByDesc("gmt_create")
-                .last("limit 1");
+        sessionQueryWrapper.eq("uid", userHomeInfo.getUid()).orderByDesc("gmt_create").last("limit 1");
 
         Session recentSession = sessionEntityService.getOne(sessionQueryWrapper, false);
         if (recentSession != null) {
@@ -169,7 +165,6 @@ public class AccountServiceImpl implements AccountService {
         }
         return userHomeInfo;
     }
-
 
     /**
      * @MethodName changePassword
@@ -183,15 +178,14 @@ public class AccountServiceImpl implements AccountService {
         String newPassword = changePasswordDto.getNewPassword();
 
         // 数据可用性判断
-        if (StringUtils.isEmpty(oldPassword) || StringUtils.isEmpty(newPassword)) {
+        if (StrUtil.isEmpty(oldPassword) || StrUtil.isEmpty(newPassword)) {
             throw new StatusFailException("错误：原始密码或新密码不能为空！");
         }
         if (newPassword.length() < 6 || newPassword.length() > 20) {
             throw new StatusFailException("新密码长度应该为6~20位！");
         }
         // 获取当前登录的用户
-        org.apache.shiro.session.Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
         String lockKey = AccountConstant.CODE_CHANGE_PASSWORD_LOCK + userRolesVo.getUid();
@@ -207,7 +201,8 @@ public class AccountServiceImpl implements AccountService {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             resp.setCode(403);
             Date afterDate = new Date(now.getTime() + expire * 1000);
-            String msg = "由于您多次修改密码失败，修改密码功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate) + ")再进行尝试！";
+            String msg = "由于您多次修改密码失败，修改密码功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate)
+                    + ")再进行尝试！";
             resp.setMsg(msg);
             return resp;
         }
@@ -216,8 +211,7 @@ public class AccountServiceImpl implements AccountService {
         if (userRolesVo.getPassword().equals(SecureUtil.md5(oldPassword))) {
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
             // 数据库用户密码全部用md5加密
-            updateWrapper.set("password", SecureUtil.md5(newPassword))
-                    .eq("uuid", userRolesVo.getUid());
+            updateWrapper.set("password", SecureUtil.md5(newPassword)).eq("uuid", userRolesVo.getUid());
             boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk) {
                 resp.setCode(200);
@@ -226,13 +220,14 @@ public class AccountServiceImpl implements AccountService {
                 redisUtil.del(countKey);
                 // 更新session
                 userRolesVo.setPassword(SecureUtil.md5(newPassword));
-                session.setAttribute("userInfo", userRolesVo);
+                UserSessionUtil.setUserInfo(userRolesVo);
                 return resp;
             } else {
                 throw new StatusSystemErrorException("系统错误：修改密码失败！");
             }
-        } else { // 如果不同，则进行记录，当失败次数达到5次，半个小时后才可重试
-            Integer count = (Integer) redisUtil.get(countKey);
+        } else {
+            // 如果不同，则进行记录，当失败次数达到5次，半个小时后才可重试
+            Integer count = redisUtil.get(countKey, Integer.class);
             if (count == null) {
                 // 三十分钟不尝试，该限制会自动清空消失
                 redisUtil.set(countKey, 1, 60 * 30);
@@ -265,15 +260,14 @@ public class AccountServiceImpl implements AccountService {
         String password = changeEmailDto.getPassword();
         String newEmail = changeEmailDto.getNewEmail();
         // 数据可用性判断
-        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(newEmail)) {
+        if (StrUtil.isEmpty(password) || StrUtil.isEmpty(newEmail)) {
             throw new StatusFailException("错误：密码或新邮箱不能为空！");
         }
         if (!Validator.isEmail(newEmail)) {
             throw new StatusFailException("邮箱格式错误！");
         }
         // 获取当前登录的用户
-        org.apache.shiro.session.Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
         String lockKey = AccountConstant.CODE_CHANGE_EMAIL_LOCK + userRolesVo.getUid();
@@ -289,7 +283,8 @@ public class AccountServiceImpl implements AccountService {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             resp.setCode(403);
             Date afterDate = new Date(now.getTime() + expire * 1000);
-            String msg = "由于您多次修改邮箱失败，修改邮箱功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate) + ")再进行尝试！";
+            String msg = "由于您多次修改邮箱失败，修改邮箱功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate)
+                    + ")再进行尝试！";
             resp.setMsg(msg);
             return resp;
         }
@@ -297,12 +292,10 @@ public class AccountServiceImpl implements AccountService {
         // 如果相同，则进行修改操作
         if (userRolesVo.getPassword().equals(SecureUtil.md5(password))) {
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.set("email", newEmail)
-                    .eq("uuid", userRolesVo.getUid());
+            updateWrapper.set("email", newEmail).eq("uuid", userRolesVo.getUid());
 
             boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk) {
-
                 UserInfoVo userInfoVo = new UserInfoVo();
                 BeanUtil.copyProperties(userRolesVo, userInfoVo, "roles");
                 userInfoVo.setRoleList(userRolesVo.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
@@ -314,14 +307,14 @@ public class AccountServiceImpl implements AccountService {
                 redisUtil.del(countKey);
                 // 更新session
                 userRolesVo.setEmail(newEmail);
-                session.setAttribute("userInfo", userRolesVo);
+                UserSessionUtil.setUserInfo(userRolesVo);
                 return resp;
             } else {
                 throw new StatusSystemErrorException("系统错误：修改邮箱失败！");
             }
         } else {
             // 如果不同，则进行记录，当失败次数达到5次，半个小时后才可重试
-            Integer count = (Integer) redisUtil.get(countKey);
+            Integer count = redisUtil.get(countKey, Integer.class);
             if (count == null) {
                 // 三十分钟不尝试，该限制会自动清空消失
                 redisUtil.set(countKey, 1, 60 * 30);
@@ -343,41 +336,32 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-
     @Override
     public UserInfoVo changeUserInfo(UserInfoVo userInfoVo) {
 
         // 获取当前登录的用户
-        org.apache.shiro.session.Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         String realname = userInfoVo.getRealname();
         String nickname = userInfoVo.getNickname();
-        if (!StringUtils.isEmpty(realname) && realname.length() > 50) {
+        if (!StrUtil.isEmpty(realname) && realname.length() > 50) {
             throw new StatusFailException("真实姓名的长度不能超过50位");
         }
-        if (!StringUtils.isEmpty(nickname) && nickname.length() > 20) {
+        if (!StrUtil.isEmpty(nickname) && nickname.length() > 20) {
             throw new StatusFailException("昵称的长度不能超过20位");
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUuid(userRolesVo.getUid())
-                .setCfUsername(userInfoVo.getCfUsername())
-                .setRealname(realname)
-                .setNickname(nickname)
-                .setSignature(userInfoVo.getSignature())
-                .setBlog(userInfoVo.getBlog())
-                .setGender(userInfoVo.getGender())
-                .setEmail(userRolesVo.getEmail())
-                .setGithub(userInfoVo.getGithub())
-                .setSchool(userInfoVo.getSchool())
-                .setNumber(userInfoVo.getNumber());
+        userInfo.setUuid(userRolesVo.getUid()).setCfUsername(userInfoVo.getCfUsername()).setRealname(realname)
+                .setNickname(nickname).setSignature(userInfoVo.getSignature()).setBlog(userInfoVo.getBlog())
+                .setGender(userInfoVo.getGender()).setEmail(userRolesVo.getEmail()).setGithub(userInfoVo.getGithub())
+                .setSchool(userInfoVo.getSchool()).setNumber(userInfoVo.getNumber());
 
         boolean isOk = userInfoEntityService.updateById(userInfo);
 
         if (isOk) {
             // 更新session
             UserRolesVo userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
-            session.setAttribute("userInfo", userRoles);
+            UserSessionUtil.setUserInfo(userRoles);
 
             UserInfoVo userInfoRes = new UserInfoVo();
             BeanUtil.copyProperties(userRoles, userInfoRes, "roles");
@@ -389,4 +373,5 @@ public class AccountServiceImpl implements AccountService {
         }
 
     }
+
 }

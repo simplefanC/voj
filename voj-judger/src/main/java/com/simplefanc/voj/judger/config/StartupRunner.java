@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 
-
 /**
  * @Author: chenfan
  * @Date: 2021/2/19 22:11
@@ -24,18 +23,25 @@ import java.util.HashMap;
 public class StartupRunner implements CommandLineRunner {
 
     private static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+
     @Value("${voj-judge-server.max-task-num}")
     private Integer maxTaskNum;
+
     @Value("${voj-judge-server.remote-judge.max-task-num}")
     private Integer maxRemoteTaskNum;
+
     @Value("${voj-judge-server.remote-judge.open}")
     private Boolean openRemoteJudge;
+
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
+
     @Value("${voj-judge-server.ip}")
     private String ip;
+
     @Value("${voj-judge-server.port}")
     private Integer port;
+
     @Autowired
     private JudgeServerEntityService judgeServerEntityService;
 
@@ -55,35 +61,25 @@ public class StartupRunner implements CommandLineRunner {
         UpdateWrapper<JudgeServer> judgeServerQueryWrapper = new UpdateWrapper<>();
         judgeServerQueryWrapper.eq("ip", ip).eq("port", port);
         judgeServerEntityService.remove(judgeServerQueryWrapper);
-        boolean isOk1 = judgeServerEntityService.save(new JudgeServer()
-                .setCpuCore(CPU_NUM)
-                .setIp(ip)
-                .setPort(port)
-                .setUrl(ip + ":" + port)
-                .setMaxTaskNumber(maxTaskNum)
-                .setIsRemote(false)
-                .setName(judgeServerName));
+        boolean isOk1 = judgeServerEntityService.save(new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port)
+                .setUrl(ip + ":" + port).setMaxTaskNumber(maxTaskNum).setIsRemote(false).setName(judgeServerName));
 
         boolean isOk2 = true;
         if (openRemoteJudge) {
             if (maxRemoteTaskNum == -1) {
                 maxRemoteTaskNum = CPU_NUM * 2 + 1;
             }
-            isOk2 = judgeServerEntityService.save(new JudgeServer()
-                    .setCpuCore(CPU_NUM)
-                    .setIp(ip)
-                    .setPort(port)
-                    .setUrl(ip + ":" + port)
-                    .setMaxTaskNumber(maxRemoteTaskNum)
-                    .setIsRemote(true)
-                    .setName(judgeServerName));
+            isOk2 = judgeServerEntityService
+                    .save(new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port).setUrl(ip + ":" + port)
+                            .setMaxTaskNumber(maxRemoteTaskNum).setIsRemote(true).setName(judgeServerName));
         }
 
         if (!isOk1 || !isOk2) {
             log.error("初始化判题机信息到数据库失败，请重新启动试试！");
         } else {
             HashMap<String, Object> judgeServerInfo = judgeServerEntityService.getJudgeServerInfo();
-            log.info("VOJ-JudgeServer had successfully started! The judge config and sandbox config Info: {}", judgeServerInfo);
+            log.info("VOJ-JudgeServer had successfully started! The judge config and sandbox config Info: {}",
+                    judgeServerInfo);
         }
 
     }

@@ -16,4 +16,5 @@ public class RegisterCodeVo {
 
     @ApiModelProperty(value = "注册邮件有效时间，单位秒")
     private Integer expire;
+
 }

@@ -17,4 +17,5 @@ public class ContestPrintDto {
 
     @NotBlank(message = "打印内容不能为空")
     private String content;
+
 }

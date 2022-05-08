@@ -1,24 +1,18 @@
 package com.simplefanc.voj.judger.controller;
 
-
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.judger.common.exception.SystemError;
-import com.simplefanc.voj.judger.dao.JudgeServerEntityService;
 import com.simplefanc.voj.judger.service.JudgeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashMap;
-
 
 /**
  * @Author: chenfan
@@ -38,14 +32,6 @@ public class JudgeController {
     @Value("${voj-judge-server.remote-judge.open}")
     private Boolean openRemoteJudge;
 
-    @Autowired
-    private JudgeServerEntityService judgeServerEntityService;
-
-    @RequestMapping("/version")
-    public CommonResult<HashMap<String, Object>> getVersion() {
-        return CommonResult.successResponse(judgeServerEntityService.getJudgeServerInfo(), "运行正常");
-    }
-
     @PostMapping(value = "/judge")
     public CommonResult<Void> submitProblemJudge(@RequestBody ToJudge toJudge) {
 
@@ -64,7 +50,6 @@ public class JudgeController {
         return CommonResult.successResponse("判题机评测完成！");
     }
 
-
     @PostMapping(value = "/compile-spj")
     public CommonResult<Void> compileSpj(@RequestBody CompileDTO compileDTO) {
 
@@ -73,7 +58,8 @@ public class JudgeController {
         }
 
         try {
-            judgeService.compileSpj(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(), compileDTO.getExtraFiles());
+            judgeService.compileSpj(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(),
+                    compileDTO.getExtraFiles());
             return CommonResult.successResponse(null, "编译成功！");
         } catch (SystemError systemError) {
             return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
@@ -88,7 +74,8 @@ public class JudgeController {
         }
 
         try {
-            judgeService.compileInteractive(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(), compileDTO.getExtraFiles());
+            judgeService.compileInteractive(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(),
+                    compileDTO.getExtraFiles());
             return CommonResult.successResponse(null, "编译成功！");
         } catch (SystemError systemError) {
             return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
@@ -114,4 +101,5 @@ public class JudgeController {
 
         return CommonResult.successResponse("提交成功");
     }
+
 }

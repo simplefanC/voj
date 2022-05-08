@@ -1,20 +1,20 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.common.constants.ContestConstant;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
+import com.simplefanc.voj.common.constants.ContestConstant;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -37,37 +37,16 @@ public class ContestCalculateRankService {
     @Resource
     private ContestRecordEntityService contestRecordEntityService;
 
-
-    public List<ACMContestRankVo> calcACMRank(boolean isOpenSealRank,
-                                              boolean removeStar,
-                                              Contest contest,
-                                              String currentUserId,
-                                              List<String> concernedList) {
-        return calcACMRank(isOpenSealRank,
-                removeStar,
-                contest,
-                currentUserId,
-                concernedList,
-                false,
-                null);
+    public List<ACMContestRankVo> calculateACMRank(boolean isOpenSealRank, boolean removeStar, Contest contest,
+                                                   String currentUserId, List<String> concernedList) {
+        return calculateACMRank(isOpenSealRank, removeStar, contest, currentUserId, concernedList, false, null);
     }
 
+    public List<OIContestRankVo> calculateOIRank(Boolean isOpenSealRank, Boolean removeStar, Contest contest,
+                                                 String currentUserId, List<String> concernedList) {
 
-    public List<OIContestRankVo> calcOIRank(Boolean isOpenSealRank,
-                                            Boolean removeStar,
-                                            Contest contest,
-                                            String currentUserId,
-                                            List<String> concernedList) {
-
-        return calcOIRank(isOpenSealRank,
-                removeStar,
-                contest,
-                currentUserId,
-                concernedList,
-                false,
-                null);
+        return calculateOIRank(isOpenSealRank, removeStar, contest, currentUserId, concernedList, false, null);
     }
-
 
     /**
      * @param isOpenSealRank 是否是查询封榜后的数据
@@ -78,17 +57,12 @@ public class ContestCalculateRankService {
      * @param useCache       是否对初始排序计算的结果进行缓存
      * @param cacheTime      缓存的时间 单位秒
      * @MethodName calcACMRank
-     * @Description TODO
+     * @Description
      * @Return
      * @Since 2021/12/10
      */
-    public List<ACMContestRankVo> calcACMRank(boolean isOpenSealRank,
-                                              boolean removeStar,
-                                              Contest contest,
-                                              String currentUserId,
-                                              List<String> concernedList,
-                                              boolean useCache,
-                                              Long cacheTime) {
+    public List<ACMContestRankVo> calculateACMRank(boolean isOpenSealRank, boolean removeStar, Contest contest,
+                                                   String currentUserId, List<String> concernedList, boolean useCache, Long cacheTime) {
 
         List<ACMContestRankVo> orderResultList;
         if (useCache) {
@@ -142,8 +116,7 @@ public class ContestCalculateRankService {
                 rankNum++;
             }
 
-            if (!StringUtils.isEmpty(currentUserId) &&
-                    currentACMRankVo.getUid().equals(currentUserId)) {
+            if (!StrUtil.isEmpty(currentUserId) && currentACMRankVo.getUid().equals(currentUserId)) {
                 topACMRankVoList.add(currentACMRankVo);
             }
 
@@ -158,12 +131,11 @@ public class ContestCalculateRankService {
         return topACMRankVoList;
     }
 
-
     // TODO 行数过多
     private List<ACMContestRankVo> getACMOrderRank(Contest contest, Boolean isOpenSealRank) {
 
-
-        List<ContestRecordVo> contestRecordList = contestRecordEntityService.getACMContestRecord(contest.getAuthor(), contest.getId());
+        List<ContestRecordVo> contestRecordList = contestRecordEntityService.getACMContestRecord(contest.getAuthor(),
+                contest.getId());
 
         List<String> superAdminUidList = getSuperAdminUidList();
 
@@ -209,7 +181,8 @@ public class ContestCalculateRankService {
                 ACMContestRankVo = result.get(uidMapIndex.get(contestRecord.getUid()));
             }
             // TODO put 键
-            HashMap<String, Object> problemSubmissionInfo = ACMContestRankVo.getSubmissionInfo().get(contestRecord.getDisplayId());
+            HashMap<String, Object> problemSubmissionInfo = ACMContestRankVo.getSubmissionInfo()
+                    .get(contestRecord.getDisplayId());
 
             if (problemSubmissionInfo == null) {
                 problemSubmissionInfo = new HashMap<>();
@@ -223,9 +196,7 @@ public class ContestCalculateRankService {
 
                 int tryNum = (int) problemSubmissionInfo.getOrDefault("tryNum", 0);
                 problemSubmissionInfo.put("tryNum", tryNum + 1);
-
             } else {
-
                 // 如果该题目已经AC过了，其它都不记录了
                 if ((Boolean) problemSubmissionInfo.getOrDefault("isAC", false)) {
                     continue;
@@ -258,7 +229,8 @@ public class ContestCalculateRankService {
                     problemSubmissionInfo.put("errorNum", errorNumber);
 
                     // 同时计算总耗时，总耗时加上 该题目未AC前的错误次数*20*60+题目AC耗时
-                    ACMContestRankVo.setTotalTime(ACMContestRankVo.getTotalTime() + errorNumber * 20 * 60 + contestRecord.getTime());
+                    ACMContestRankVo.setTotalTime(
+                            ACMContestRankVo.getTotalTime() + errorNumber * 20 * 60 + contestRecord.getTime());
 
                     // 未通过同时需要记录罚时次数
                 } else if (contestRecord.getStatus().intValue() == ContestEnum.RECORD_NOT_AC_PENALTY.getCode()) {
@@ -274,13 +246,13 @@ public class ContestCalculateRankService {
             ACMContestRankVo.getSubmissionInfo().put(contestRecord.getDisplayId(), problemSubmissionInfo);
         }
 
-        List<ACMContestRankVo> orderResultList = result.stream().sorted(Comparator.comparing(ACMContestRankVo::getAc, Comparator.reverseOrder()) // 先以总ac数降序
-                .thenComparing(ACMContestRankVo::getTotalTime) //再以总耗时升序
-        ).collect(Collectors.toList());
-
-        return orderResultList;
+        return result.stream()
+                // 再以总耗时升序
+                // 先以总ac数降序
+                .sorted(Comparator.comparing(ACMContestRankVo::getAc, Comparator.reverseOrder())
+                        .thenComparing(ACMContestRankVo::getTotalTime))
+                .collect(Collectors.toList());
     }
-
 
     /**
      * @param isOpenSealRank 是否是查询封榜后的数据
@@ -291,17 +263,12 @@ public class ContestCalculateRankService {
      * @param useCache       是否对初始排序计算的结果进行缓存
      * @param cacheTime      缓存的时间 单位秒
      * @MethodName calcOIRank
-     * @Description TODO
+     * @Description
      * @Return
      * @Since 2021/12/10
      */
-    public List<OIContestRankVo> calcOIRank(boolean isOpenSealRank,
-                                            boolean removeStar,
-                                            Contest contest,
-                                            String currentUserId,
-                                            List<String> concernedList,
-                                            boolean useCache,
-                                            Long cacheTime) {
+    public List<OIContestRankVo> calculateOIRank(boolean isOpenSealRank, boolean removeStar, Contest contest,
+                                                 String currentUserId, List<String> concernedList, boolean useCache, Long cacheTime) {
 
         List<OIContestRankVo> orderResultList;
         if (useCache) {
@@ -356,8 +323,7 @@ public class ContestCalculateRankService {
                 rankNum++;
             }
 
-            if (!StringUtils.isEmpty(currentUserId) &&
-                    currentOIRankVo.getUid().equals(currentUserId)) {
+            if (!StrUtil.isEmpty(currentUserId) && currentOIRankVo.getUid().equals(currentUserId)) {
                 topOIRankVoList.add(currentOIRankVo);
             }
 
@@ -417,19 +383,16 @@ public class ContestCalculateRankService {
             // 如果该用户信息没还记录
             if (!uidMapIndex.containsKey(contestRecord.getUid())) {
                 // 初始化参数
-                oiContestRankVo = new OIContestRankVo();
-                oiContestRankVo.setRealname(contestRecord.getRealname())
+                oiContestRankVo = new OIContestRankVo()
+                        .setRealname(contestRecord.getRealname())
                         .setUid(contestRecord.getUid())
                         .setUsername(contestRecord.getUsername())
                         .setSchool(contestRecord.getSchool())
                         .setAvatar(contestRecord.getAvatar())
                         .setGender(contestRecord.getGender())
                         .setNickname(contestRecord.getNickname())
-                        .setTotalScore(0);
-
-
-                HashMap<String, Integer> submissionInfo = new HashMap<>();
-                oiContestRankVo.setSubmissionInfo(submissionInfo);
+                        .setTotalScore(0)
+                        .setSubmissionInfo(new HashMap<>());
 
                 result.add(oiContestRankVo);
                 uidMapIndex.put(contestRecord.getUid(), index);
@@ -461,7 +424,6 @@ public class ContestCalculateRankService {
 
         }
 
-
         for (OIContestRankVo oiContestRankVo : result) {
             HashMap<String, Integer> pidMapTime = uidMapTime.get(oiContestRankVo.getUid());
             int sumTime = 0;
@@ -482,7 +444,6 @@ public class ContestCalculateRankService {
                 .collect(Collectors.toList());
     }
 
-
     private List<String> getSuperAdminUidList() {
         return userInfoEntityService.getSuperAdminUidList();
     }
@@ -492,17 +453,18 @@ public class ContestCalculateRankService {
     }
 
     private HashMap<String, Boolean> starAccountToMap(String starAccountStr) {
-        if (StringUtils.isEmpty(starAccountStr)) {
+        if (StrUtil.isEmpty(starAccountStr)) {
             return new HashMap<>();
         }
         JSONObject jsonObject = JSONUtil.parseObj(starAccountStr);
         List<String> list = jsonObject.get("star_account", List.class);
         HashMap<String, Boolean> res = new HashMap<>();
         for (String str : list) {
-            if (!StringUtils.isEmpty(str)) {
+            if (!StrUtil.isEmpty(str)) {
                 res.put(str, true);
             }
         }
         return res;
     }
+
 }

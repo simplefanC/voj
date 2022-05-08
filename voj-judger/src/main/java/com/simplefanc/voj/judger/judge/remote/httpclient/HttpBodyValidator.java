@@ -1,10 +1,11 @@
 package com.simplefanc.voj.judger.judge.remote.httpclient;
 
-import org.apache.commons.lang.Validate;
+import cn.hutool.core.lang.Assert;
 
 public class HttpBodyValidator implements SimpleHttpResponseValidator {
 
     private String subString;
+
     private boolean negate;
 
     public HttpBodyValidator(String subString) {
@@ -19,7 +20,7 @@ public class HttpBodyValidator implements SimpleHttpResponseValidator {
     @Override
     public void validate(SimpleHttpResponse response) throws Exception {
         try {
-            Validate.isTrue(response.getBody().contains(subString) ^ negate);
+            Assert.isTrue(response.getBody().contains(subString) ^ negate);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

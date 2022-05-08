@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,7 +30,8 @@ public class ContestScoreboardController {
      * @Since 2021/12/8
      */
     @GetMapping("/get-contest-outsize-info")
-    public CommonResult<ContestOutsideInfo> getContestOutsideInfo(@RequestParam(value = "cid", required = true) Long cid) {
+    public CommonResult<ContestOutsideInfo> getContestOutsideInfo(
+            @RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestScoreboardService.getContestOutsideInfo(cid));
     }
 
@@ -44,4 +45,5 @@ public class ContestScoreboardController {
     public CommonResult<List> getContestOutsideScoreboard(@RequestBody ContestRankDto contestRankDto) {
         return CommonResult.successResponse(contestScoreboardService.getContestOutsideScoreboard(contestRankDto));
     }
+
 }

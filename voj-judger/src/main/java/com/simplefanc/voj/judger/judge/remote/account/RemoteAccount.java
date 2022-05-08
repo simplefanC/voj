@@ -12,8 +12,11 @@ import org.apache.http.protocol.HttpContext;
 public class RemoteAccount {
 
     public final String accountId;
+
     public final String password;
+
     private final RemoteOj remoteOj;
+
     private final HttpContext context;
 
     public RemoteAccount(RemoteOj remoteOj, String accountId, String password) {
@@ -29,4 +32,5 @@ public class RemoteAccount {
         context.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
         return context;
     }
+
 }

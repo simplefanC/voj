@@ -1,6 +1,12 @@
 package com.simplefanc.voj.common.constants;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum RemoteOj {
+
     HDU("HDU"),
 
     CF("CF"),
@@ -14,19 +20,13 @@ public enum RemoteOj {
     TKOJ("TKOJ"),
 
     EOJ("EOJ"),
-
-    HDU_REMOTERemoteOj_ACCOUNT("Hdu Remote Judge Account"),
-
-    CF_REMOTERemoteOj_ACCOUNT("Codeforces Remote Judge Account");
+    ;
 
     private final String name;
 
-    RemoteOj(String remoteJudgeName) {
-        this.name = remoteJudgeName;
-    }
-
     public static RemoteOj getTypeByName(String judgeName) {
-        if (judgeName == null) return null;
+        if (judgeName == null)
+            return null;
         for (RemoteOj remoteJudge : RemoteOj.values()) {
             if (remoteJudge.getName().equals(judgeName)) {
                 return remoteJudge;
@@ -43,9 +43,5 @@ public enum RemoteOj {
         }
         return false;
 
-    }
-
-    public String getName() {
-        return name;
     }
 }

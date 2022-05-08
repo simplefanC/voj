@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.service.admin.rejudge;
 
-
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 
 /**

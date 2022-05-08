@@ -27,4 +27,5 @@ public interface FileConstant {
     String FILE_DOWNLOAD_TMP_FOLDER = "/voj/file/zip/download";
 
     String CONTEST_AC_SUBMISSION_TMP_FOLDER = "/voj/file/zip/contest_ac";
+
 }

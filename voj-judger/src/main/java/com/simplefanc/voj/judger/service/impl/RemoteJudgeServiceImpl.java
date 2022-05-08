@@ -24,8 +24,7 @@ public class RemoteJudgeServiceImpl implements RemoteJudgeService {
     public void changeAccountStatus(String remoteJudge, String username) {
         log.info("changeAccountStatus");
         UpdateWrapper<RemoteJudgeAccount> remoteJudgeAccountUpdateWrapper = new UpdateWrapper<>();
-        remoteJudgeAccountUpdateWrapper.set("status", true)
-                .eq("username", username);
+        remoteJudgeAccountUpdateWrapper.set("status", true).eq("username", username);
         remoteJudgeAccountUpdateWrapper.eq("oj", remoteJudge);
 
         boolean isOk = remoteJudgeAccountEntityService.update(remoteJudgeAccountUpdateWrapper);
@@ -36,7 +35,8 @@ public class RemoteJudgeServiceImpl implements RemoteJudgeService {
         }
     }
 
-    private void tryAgainUpdateAccount(UpdateWrapper<RemoteJudgeAccount> updateWrapper, String remoteJudge, String username) {
+    private void tryAgainUpdateAccount(UpdateWrapper<RemoteJudgeAccount> updateWrapper, String remoteJudge,
+                                       String username) {
         boolean retryable;
         int attemptNumber = 0;
         do {
@@ -47,7 +47,8 @@ public class RemoteJudgeServiceImpl implements RemoteJudgeService {
                 attemptNumber++;
                 retryable = attemptNumber < 8;
                 if (attemptNumber == 8) {
-                    log.error("Remote Judge：Change Account status to `true` Failed ----------->{}", "oj:" + remoteJudge + ",username:" + username);
+                    log.error("Remote Judge：Change Account status to `true` Failed ----------->{}",
+                            "oj:" + remoteJudge + ",username:" + username);
                     break;
                 }
                 try {
@@ -56,6 +57,8 @@ public class RemoteJudgeServiceImpl implements RemoteJudgeService {
                     e.printStackTrace();
                 }
             }
-        } while (retryable);
+        }
+        while (retryable);
     }
+
 }

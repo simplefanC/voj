@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.problem.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.backend.dao.problem.CodeTemplateEntityService;
 import com.simplefanc.voj.backend.mapper.CodeTemplateMapper;
+import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class CodeTemplateEntityServiceImpl extends ServiceImpl<CodeTemplateMapper, CodeTemplate> implements CodeTemplateEntityService {
+public class CodeTemplateEntityServiceImpl extends ServiceImpl<CodeTemplateMapper, CodeTemplate>
+        implements CodeTemplateEntityService {
+
 }

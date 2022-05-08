@@ -2,13 +2,13 @@ package com.simplefanc.voj.backend.dao.contest.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestProblemMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestProblemVo;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,8 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
-public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemMapper, ContestProblem> implements ContestProblemEntityService {
+public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemMapper, ContestProblem>
+        implements ContestProblemEntityService {
 
     @Autowired
     private ContestProblemMapper contestProblemMapper;
@@ -37,12 +38,14 @@ public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemM
     private ContestRecordEntityService contestRecordEntityService;
 
     @Override
-    public List<ContestProblemVo> getContestProblemList(Long cid, Date startTime, Date endTime, Date sealTime, Boolean isAdmin, String contestAuthorUid) {
+    public List<ContestProblemVo> getContestProblemList(Long cid, Date startTime, Date endTime, Date sealTime,
+                                                        Boolean isAdmin, String contestAuthorUid) {
         // 筛去 比赛管理员和超级管理员的提交
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
         superAdminUidList.add(contestAuthorUid);
 
-        return contestProblemMapper.getContestProblemList(cid, startTime, endTime, sealTime, isAdmin, superAdminUidList);
+        return contestProblemMapper.getContestProblemList(cid, startTime, endTime, sealTime, isAdmin,
+                superAdminUidList);
     }
 
     @Async
@@ -50,9 +53,8 @@ public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemM
     public void syncContestRecord(Long pid, Long cid, String displayId) {
 
         UpdateWrapper<ContestRecord> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("pid", pid)
-                .eq("cid", cid)
-                .set("display_id", displayId);
+        updateWrapper.eq("pid", pid).eq("cid", cid).set("display_id", displayId);
         contestRecordEntityService.update(updateWrapper);
     }
+
 }

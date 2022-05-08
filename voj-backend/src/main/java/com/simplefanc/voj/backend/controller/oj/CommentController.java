@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
-import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.ReplyDto;
 import com.simplefanc.voj.backend.pojo.vo.CommentListVo;
 import com.simplefanc.voj.backend.pojo.vo.CommentVo;
 import com.simplefanc.voj.backend.service.oj.CommentService;
+import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
+import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,6 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-
     @GetMapping("/comments")
     public CommonResult<CommentListVo> getComments(@RequestParam(value = "cid", required = false) Long cid,
                                                    @RequestParam(value = "did", required = false) Integer did,
@@ -34,7 +33,6 @@ public class CommentController {
                                                    @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage) {
         return CommonResult.successResponse(commentService.getComments(cid, did, limit, currentPage));
     }
-
 
     @PostMapping("/comment")
     @RequiresPermissions("comment_add")
@@ -53,8 +51,7 @@ public class CommentController {
     @GetMapping("/comment-like")
     @RequiresAuthentication
     public CommonResult<Void> addDiscussionLike(@RequestParam("cid") Integer cid,
-                                                @RequestParam("toLike") Boolean toLike,
-                                                @RequestParam("sourceId") Integer sourceId,
+                                                @RequestParam("toLike") Boolean toLike, @RequestParam("sourceId") Integer sourceId,
                                                 @RequestParam("sourceType") String sourceType) {
         commentService.addDiscussionLike(cid, toLike, sourceId, sourceType);
         return CommonResult.successResponse();

@@ -8,4 +8,5 @@ import java.util.HashMap;
 public interface JudgeServerEntityService extends IService<JudgeServer> {
 
     HashMap<String, Object> getJudgeServerInfo();
+
 }

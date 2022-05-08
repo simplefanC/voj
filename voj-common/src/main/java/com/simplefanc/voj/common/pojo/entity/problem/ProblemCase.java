@@ -22,6 +22,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @ApiModel(value = "Case对象", description = "题目测试样例")
 public class ProblemCase {
+
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
@@ -47,4 +48,5 @@ public class ProblemCase {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

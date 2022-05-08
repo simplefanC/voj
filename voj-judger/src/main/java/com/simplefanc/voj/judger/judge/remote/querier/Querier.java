@@ -6,5 +6,7 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 
 public interface Querier extends RemoteOjAware {
+
     SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) throws Exception;
+
 }

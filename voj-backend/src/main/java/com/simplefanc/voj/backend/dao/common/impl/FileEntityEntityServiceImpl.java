@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.dao.common.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.common.File;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.mapper.FileMapper;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
+import com.simplefanc.voj.common.pojo.entity.common.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,7 @@ import java.util.List;
  */
 @Service
 public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> implements FileEntityService {
+
     @Autowired
     private FileMapper fileMapper;
 
@@ -39,7 +40,7 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
     }
 
     @Override
-    public List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIDList, Boolean isACM) {
+    public List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIdList, Boolean isACM) {
         List<List<String>> headList = new LinkedList<>();
 
         List<String> head0 = new LinkedList<>();
@@ -76,9 +77,9 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
         }
 
         // 添加题目头
-        for (String displayID : contestProblemDisplayIDList) {
+        for (String displayId : contestProblemDisplayIdList) {
             List<String> tmp = new LinkedList<>();
-            tmp.add(displayID);
+            tmp.add(displayId);
             headList.add(tmp);
         }
         return headList;
@@ -86,8 +87,7 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
 
     @Override
     public List<List<Object>> changeACMContestRankToExcelRowList(List<ACMContestRankVo> acmContestRankVoList,
-                                                                 List<String> contestProblemDisplayIDList,
-                                                                 String rankShowName) {
+                                                                 List<String> contestProblemDisplayIdList, String rankShowName) {
         List<List<Object>> allRowDataList = new LinkedList<>();
         for (ACMContestRankVo acmContestRankVo : acmContestRankVoList) {
             List<Object> rowData = new LinkedList<>();
@@ -108,8 +108,8 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
             rowData.add(acmContestRankVo.getTotal());
             rowData.add(acmContestRankVo.getTotalTime());
             HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVo.getSubmissionInfo();
-            for (String displayID : contestProblemDisplayIDList) {
-                HashMap<String, Object> problemInfo = submissionInfo.getOrDefault(displayID, null);
+            for (String displayId : contestProblemDisplayIdList) {
+                HashMap<String, Object> problemInfo = submissionInfo.getOrDefault(displayId, null);
                 // 如果是有提交记录的
                 if (problemInfo != null) {
                     boolean isAC = (boolean) problemInfo.getOrDefault("isAC", false);
@@ -142,9 +142,8 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
     }
 
     @Override
-    public List<List<Object>> changOIContestRankToExcelRowList(List<OIContestRankVo> oiContestRankVoList,
-                                                               List<String> contestProblemDisplayIDList,
-                                                               String rankShowName) {
+    public List<List<Object>> changeOIContestRankToExcelRowList(List<OIContestRankVo> oiContestRankVoList,
+                                                                List<String> contestProblemDisplayIdList, String rankShowName) {
         List<List<Object>> allRowDataList = new LinkedList<>();
         for (OIContestRankVo oiContestRankVo : oiContestRankVoList) {
             List<Object> rowData = new LinkedList<>();
@@ -163,9 +162,10 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
             rowData.add(oiContestRankVo.getSchool());
             rowData.add(oiContestRankVo.getTotalScore());
             HashMap<String, Integer> submissionInfo = oiContestRankVo.getSubmissionInfo();
-            for (String displayID : contestProblemDisplayIDList) {
-                Integer score = submissionInfo.getOrDefault(displayID, null);
-                if (score != null) { // 如果是有提交记录的就写最后一次提交的分数，没有的就写空
+            for (String displayId : contestProblemDisplayIdList) {
+                Integer score = submissionInfo.getOrDefault(displayId, null);
+                // 如果是有提交记录的就写最后一次提交的分数，没有的就写空
+                if (score != null) {
                     rowData.add(score);
                 } else {
                     rowData.add("");
@@ -175,6 +175,5 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
         }
         return allRowDataList;
     }
-
 
 }

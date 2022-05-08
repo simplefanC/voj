@@ -45,14 +45,8 @@ public class JudgeRun {
 
     // TODO 参数过多
     // TODO 行数过多
-    public List<JSONObject> judgeAllCase(Long submitId,
-                                         Problem problem,
-                                         String judgeLanguage,
-                                         String testCasesDir,
-                                         JSONObject testCasesInfo,
-                                         String userFileId,
-                                         String userFileSrc,
-                                         Boolean getUserOutput)
+    public List<JSONObject> judgeAllCase(Long submitId, Problem problem, String judgeLanguage, String testCasesDir,
+                                         JSONObject testCasesInfo, String userFileId, String userFileSrc, Boolean getUserOutput)
             throws SystemError, ExecutionException, InterruptedException {
 
         if (testCasesInfo == null) {
@@ -68,7 +62,8 @@ public class JudgeRun {
         JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
 
         if (judgeMode == null) {
-            throw new RuntimeException("The judge mode of problem " + problem.getProblemId() + " error:" + problem.getJudgeMode());
+            throw new RuntimeException(
+                    "The judge mode of problem " + problem.getProblemId() + " error:" + problem.getJudgeMode());
         }
 
         // 用户输出的文件夹
@@ -78,24 +73,13 @@ public class JudgeRun {
         RunConfig spjConfig = RunConfig.getRunnerByLanguage("SPJ-" + problem.getSpjLanguage());
         RunConfig interactiveConfig = RunConfig.getRunnerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
 
-        JudgeGlobalDTO judgeGlobalDTO = JudgeGlobalDTO.builder()
-                .problemId(problem.getId())
-                .judgeMode(judgeMode)
-                .userFileId(userFileId)
-                .userFileSrc(userFileSrc)
-                .runDir(runDir)
-                .testTime(testTime)
-                .maxMemory((long) problem.getMemoryLimit())
-                .maxTime((long) problem.getTimeLimit())
-                .maxStack(problem.getStackLimit())
-                .testCaseInfo(testCasesInfo)
-                .judgeExtraFiles(JudgeUtil.getProblemExtraFileMap(problem, "judge"))
-                .runConfig(runConfig)
-                .spjRunConfig(spjConfig)
-                .interactiveRunConfig(interactiveConfig)
-                .needUserOutputFile(getUserOutput)
-                .removeEOLBlank(problem.getIsRemoveEndBlank())
-                .build();
+        JudgeGlobalDTO judgeGlobalDTO = JudgeGlobalDTO.builder().problemId(problem.getId()).judgeMode(judgeMode)
+                .userFileId(userFileId).userFileSrc(userFileSrc).runDir(runDir).testTime(testTime)
+                .maxMemory((long) problem.getMemoryLimit()).maxTime((long) problem.getTimeLimit())
+                .maxStack(problem.getStackLimit()).testCaseInfo(testCasesInfo)
+                .judgeExtraFiles(JudgeUtil.getProblemExtraFileMap(problem, "judge")).runConfig(runConfig)
+                .spjRunConfig(spjConfig).interactiveRunConfig(interactiveConfig).needUserOutputFile(getUserOutput)
+                .removeEOLBlank(problem.getIsRemoveEndBlank()).build();
 
         for (int index = 0; index < testcaseList.size(); index++) {
             JSONObject testcase = (JSONObject) testcaseList.get(index);
@@ -116,14 +100,11 @@ public class JudgeRun {
 
             final Long maxOutputSize = Math.max(testcase.getLong("outputSize", 0L) * 2, 16 * 1024 * 1024L);
 
-            JudgeDTO judgeDTO = JudgeDTO.builder()
-                    .testCaseId(testCaseId)
-                    .testCaseInputPath(testCaseInputPath)
-                    .testCaseOutputPath(testCaseOutputPath)
-                    .maxOutputSize(maxOutputSize)
-                    .build();
+            JudgeDTO judgeDTO = JudgeDTO.builder().testCaseId(testCaseId).testCaseInputPath(testCaseInputPath)
+                    .testCaseOutputPath(testCaseOutputPath).maxOutputSize(maxOutputSize).build();
 
-            futureTasks.add(new FutureTask<>(new JudgeTask(judgeMode, judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
+            futureTasks.add(new FutureTask<>(
+                    new JudgeTask(judgeMode, judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
         }
 
         // 提交到线程池进行执行
@@ -152,15 +133,23 @@ public class JudgeRun {
     }
 
     class JudgeTask implements Callable<JSONObject> {
+
         JudgeMode judgeMode;
+
         JudgeDTO judgeDTO;
+
         JudgeGlobalDTO judgeGlobalDTO;
+
         Long caseId;
+
         Integer score;
+
         String inputFileName;
+
         String outputFileName;
 
-        public JudgeTask(JudgeMode judgeMode, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, Long caseId, Integer score, String inputFileName, String outputFileName) {
+        public JudgeTask(JudgeMode judgeMode, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, Long caseId,
+                         Integer score, String inputFileName, String outputFileName) {
             this.judgeMode = judgeMode;
             this.judgeDTO = judgeDTO;
             this.judgeGlobalDTO = judgeGlobalDTO;
@@ -192,6 +181,7 @@ public class JudgeRun {
             result.set("outputFileName", outputFileName);
             return result;
         }
+
     }
 
 }

@@ -10,8 +10,6 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.*;
-import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
@@ -23,9 +21,11 @@ import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ProblemFileService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.Constant;
+import com.simplefanc.voj.common.pojo.entity.problem.*;
+import com.simplefanc.voj.common.result.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +45,7 @@ import java.util.concurrent.*;
 @Service
 @Slf4j(topic = "voj")
 public class ProblemFileServiceImpl implements ProblemFileService {
+
     @Autowired
     private LanguageEntityService languageEntityService;
 
@@ -95,7 +96,6 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         // 删除zip文件
         FileUtil.del(filePath);
 
-
         // 检查文件是否存在
         File testCaseFileList = new File(fileDir);
         File[] files = testCaseFileList.listFiles();
@@ -103,7 +103,6 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             FileUtil.del(fileDir);
             throw new StatusFailException("评测数据压缩包里文件不能为空！");
         }
-
 
         HashMap<String, File> problemInfo = new HashMap<>();
         HashMap<String, File> testcaseInfo = new HashMap<>();
@@ -142,7 +141,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         }
 
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-        languageQueryWrapper.eq("oj", "LOCAL");
+        languageQueryWrapper.eq("oj", Constant.LOCAL);
         List<Language> languageList = languageEntityService.list(languageQueryWrapper);
 
         HashMap<String, Long> languageMap = new HashMap<>();
@@ -151,11 +150,10 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         List<ProblemDto> problemDtos = new LinkedList<>();
-        List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", "LOCAL"));
+        List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", Constant.LOCAL));
         HashMap<String, Tag> tagMap = new HashMap<>();
         for (Tag tag : tagList) {
             tagMap.put(tag.getName().toUpperCase(), tag);
@@ -191,7 +189,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             for (String tagStr : importProblemVo.getTags()) {
                 Tag tag = tagMap.getOrDefault(tagStr.toUpperCase(), null);
                 if (tag == null) {
-                    tags.add(new Tag().setName(tagStr).setOj("LOCAL"));
+                    tags.add(new Tag().setName(tagStr).setOj(Constant.LOCAL));
                 } else {
                     tags.add(tag);
                 }
@@ -217,16 +215,10 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 problem.setJudgeExtraFile(judgeExtraFileJson.toString());
             }
 
-
             ProblemDto problemDto = new ProblemDto();
-            problemDto.setJudgeMode(importProblemVo.getJudgeMode())
-                    .setProblem(problem)
-                    .setCodeTemplates(codeTemplates)
-                    .setTags(tags)
-                    .setLanguages(languages)
-                    .setUploadTestcaseDir(fileDir + File.separator + key)
-                    .setIsUploadTestCase(true)
-                    .setSamples(problemCaseList);
+            problemDto.setJudgeMode(importProblemVo.getJudgeMode()).setProblem(problem).setCodeTemplates(codeTemplates)
+                    .setTags(tags).setLanguages(languages).setUploadTestcaseDir(fileDir + File.separator + key)
+                    .setIsUploadTestCase(true).setSamples(problemCaseList);
 
             problemDtos.add(problemDto);
         }
@@ -234,7 +226,6 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             problemEntityService.adminAddProblem(problemDto);
         }
     }
-
 
     /**
      * @param pidList
@@ -249,8 +240,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
     public void exportProblem(List<Long> pidList, HttpServletResponse response) {
 
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-        // TODO 魔法
-        languageQueryWrapper.eq("oj", "LOCAL");
+        languageQueryWrapper.eq("oj", Constant.LOCAL);
         List<Language> languageList = languageEntityService.list(languageQueryWrapper);
 
         HashMap<Long, String> languageMap = new HashMap<>();
@@ -278,79 +268,13 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 // 结束线程时间单位
                 TimeUnit.SECONDS,
                 // 阻塞队列，限制等候线程数
-                new LinkedBlockingDeque<>(200),
-                Executors.defaultThreadFactory(),
-                //队列满了，尝试去和最早的竞争，也不会抛出异常！
+                new LinkedBlockingDeque<>(200), Executors.defaultThreadFactory(),
+                // 队列满了，尝试去和最早的竞争，也不会抛出异常！
                 new ThreadPoolExecutor.DiscardOldestPolicy());
 
         List<FutureTask<Void>> futureTasks = new ArrayList<>();
-
         for (Long pid : pidList) {
-
-            futureTasks.add(new FutureTask<>(new Callable<Void>() {
-                @Override
-                public Void call() {
-                    String testcaseWorkDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
-                    File file = new File(testcaseWorkDir);
-
-                    List<HashMap<String, Object>> problemCases = new LinkedList<>();
-                    // 本地为空 尝试去数据库查找
-                    if (!file.exists() || file.listFiles() == null) {
-                        QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
-                        problemCaseQueryWrapper.eq("pid", pid);
-                        List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
-                        FileUtil.mkdir(testcaseWorkDir);
-                        // 写入本地
-                        for (int i = 0; i < problemCaseList.size(); i++) {
-                            String filePreName = testcaseWorkDir + File.separator + (i + 1);
-                            String inputName = filePreName + ".in";
-                            String outputName = filePreName + ".out";
-                            FileWriter infileWriter = new FileWriter(inputName);
-                            infileWriter.write(problemCaseList.get(i).getInput());
-                            FileWriter outfileWriter = new FileWriter(outputName);
-                            outfileWriter.write(problemCaseList.get(i).getOutput());
-
-                            ProblemCase problemCase = problemCaseList.get(i).setPid(null)
-                                    .setInput(inputName)
-                                    .setOutput(outputName)
-                                    .setGmtCreate(null)
-                                    .setStatus(null)
-                                    .setId(null)
-                                    .setGmtModified(null);
-                            HashMap<String, Object> problemCaseMap = new HashMap<>();
-                            BeanUtil.beanToMap(problemCase, problemCaseMap, false, true);
-                            problemCases.add(problemCaseMap);
-                        }
-                        FileUtil.copy(testcaseWorkDir, workDir, true);
-
-                    } else {
-                        String infoPath = testcaseWorkDir + File.separator + "info";
-                        if (FileUtil.exist(infoPath)) {
-                            FileReader reader = new FileReader(infoPath);
-                            JSONObject jsonObject = JSONUtil.parseObj(reader.readString());
-                            JSONArray testCases = jsonObject.getJSONArray("testCases");
-                            for (int i = 0; i < testCases.size(); i++) {
-                                JSONObject jsonObject1 = testCases.get(i, JSONObject.class);
-                                HashMap<String, Object> problemCaseMap = new HashMap<>();
-                                problemCaseMap.put("input", jsonObject1.getStr("inputName"));
-                                problemCaseMap.put("output", jsonObject1.getStr("outputName"));
-                                Integer score = jsonObject1.getInt("score");
-                                if (score != null && score > 0) {
-                                    problemCaseMap.put("score", score);
-                                }
-                                problemCases.add(problemCaseMap);
-                            }
-                        }
-                        FileUtil.copy(testcaseWorkDir, workDir, true);
-                    }
-                    ImportProblemVo importProblemVo = problemEntityService.buildExportProblem(pid, problemCases, languageMap, tagMap);
-                    String content = JSONUtil.toJsonStr(importProblemVo);
-                    FileWriter fileWriter = new FileWriter(workDir + File.separator + "problem_" + pid + ".json");
-                    fileWriter.write(content);
-                    return null;
-                }
-            }));
-
+            futureTasks.add(new FutureTask<>(new ExportProblemTask(workDir, pid, languageMap, tagMap)));
         }
         // 提交到线程池进行执行
         for (FutureTask<Void> futureTask : futureTasks) {
@@ -418,6 +342,79 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             // 清空临时文件
             FileUtil.del(workDir);
             FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
+        }
+    }
+
+    class ExportProblemTask implements Callable<Void> {
+        String workDir;
+        Long pid;
+        HashMap<Long, String> languageMap;
+        HashMap<Long, String> tagMap;
+
+        public ExportProblemTask(String workDir, Long pid, HashMap<Long, String> languageMap, HashMap<Long, String> tagMap) {
+            this.workDir = workDir;
+            this.pid = pid;
+            this.languageMap = languageMap;
+            this.tagMap = tagMap;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            String testcaseWorkDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
+            File file = new File(testcaseWorkDir);
+
+            List<HashMap<String, Object>> problemCases = new LinkedList<>();
+            // 本地为空 尝试去数据库查找
+            if (!file.exists() || file.listFiles() == null) {
+                QueryWrapper<ProblemCase> problemCaseQueryWrapper = new QueryWrapper<>();
+                problemCaseQueryWrapper.eq("pid", pid);
+                List<ProblemCase> problemCaseList = problemCaseEntityService.list(problemCaseQueryWrapper);
+                FileUtil.mkdir(testcaseWorkDir);
+                // 写入本地
+                for (int i = 0; i < problemCaseList.size(); i++) {
+                    String filePreName = testcaseWorkDir + File.separator + (i + 1);
+                    String inputName = filePreName + ".in";
+                    String outputName = filePreName + ".out";
+                    FileWriter infileWriter = new FileWriter(inputName);
+                    infileWriter.write(problemCaseList.get(i).getInput());
+                    FileWriter outfileWriter = new FileWriter(outputName);
+                    outfileWriter.write(problemCaseList.get(i).getOutput());
+
+                    ProblemCase problemCase = problemCaseList.get(i).setPid(null).setInput(inputName)
+                            .setOutput(outputName).setGmtCreate(null).setStatus(null).setId(null)
+                            .setGmtModified(null);
+                    HashMap<String, Object> problemCaseMap = new HashMap<>();
+                    BeanUtil.beanToMap(problemCase, problemCaseMap, false, true);
+                    problemCases.add(problemCaseMap);
+                }
+                FileUtil.copy(testcaseWorkDir, workDir, true);
+
+            } else {
+                String infoPath = testcaseWorkDir + File.separator + "info";
+                if (FileUtil.exist(infoPath)) {
+                    FileReader reader = new FileReader(infoPath);
+                    JSONObject jsonObject = JSONUtil.parseObj(reader.readString());
+                    JSONArray testCases = jsonObject.getJSONArray("testCases");
+                    for (int i = 0; i < testCases.size(); i++) {
+                        JSONObject jsonObject1 = testCases.get(i, JSONObject.class);
+                        HashMap<String, Object> problemCaseMap = new HashMap<>();
+                        problemCaseMap.put("input", jsonObject1.getStr("inputName"));
+                        problemCaseMap.put("output", jsonObject1.getStr("outputName"));
+                        Integer score = jsonObject1.getInt("score");
+                        if (score != null && score > 0) {
+                            problemCaseMap.put("score", score);
+                        }
+                        problemCases.add(problemCaseMap);
+                    }
+                }
+                FileUtil.copy(testcaseWorkDir, workDir, true);
+            }
+            ImportProblemVo importProblemVo = problemEntityService.buildExportProblem(pid, problemCases,
+                    languageMap, tagMap);
+            String content = JSONUtil.toJsonStr(importProblemVo);
+            FileWriter fileWriter = new FileWriter(workDir + File.separator + "problem_" + pid + ".json");
+            fileWriter.write(content);
+            return null;
         }
     }
 

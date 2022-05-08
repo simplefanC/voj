@@ -38,4 +38,5 @@ public class Session {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

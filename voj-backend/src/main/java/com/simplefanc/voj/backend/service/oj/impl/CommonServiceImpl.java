@@ -2,13 +2,14 @@ package com.simplefanc.voj.backend.service.oj.impl;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.*;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
 import com.simplefanc.voj.backend.service.oj.CommonService;
+import com.simplefanc.voj.common.constants.Constant;
+import com.simplefanc.voj.common.pojo.entity.problem.*;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.base.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,6 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     private TrainingCategoryEntityService trainingCategoryEntityService;
 
-
     @Override
     public CaptchaVo getCaptcha() {
         SpecCaptcha specCaptcha = new SpecCaptcha(90, 30, 4);
@@ -67,7 +67,6 @@ public class CommonServiceImpl implements CommonService {
         captchaVo.setCaptchaKey(key);
         return captchaVo;
     }
-
 
     @Override
     public List<TrainingCategory> getTrainingCategory() {
@@ -88,23 +87,18 @@ public class CommonServiceImpl implements CommonService {
         return tagList;
     }
 
-
     @Override
     public Collection<Tag> getProblemTags(Long pid) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
-        List<Long> tidList = problemTagEntityService.listByMap(map)
-                .stream()
-                .map(ProblemTag::getTid)
+        List<Long> tidList = problemTagEntityService.listByMap(map).stream().map(ProblemTag::getTid)
                 .collect(Collectors.toList());
         return tagEntityService.listByIds(tidList);
     }
 
-
     @Override
     public List<Language> getLanguages(Long pid, Boolean all) {
-        // TODO 魔法值
-        String oj = "LOCAL";
+        String oj = Constant.LOCAL;
         if (pid != null) {
             Problem problem = problemEntityService.getById(pid);
             if (problem.getIsRemote()) {
@@ -122,8 +116,8 @@ public class CommonServiceImpl implements CommonService {
     public Collection<Language> getProblemLanguages(Long pid) {
         QueryWrapper<ProblemLanguage> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", pid).select("lid");
-        List<Long> idList = problemLanguageEntityService.list(queryWrapper)
-                .stream().map(ProblemLanguage::getLid).collect(Collectors.toList());
+        List<Long> idList = problemLanguageEntityService.list(queryWrapper).stream().map(ProblemLanguage::getLid)
+                .collect(Collectors.toList());
         return languageEntityService.listByIds(idList);
 
     }

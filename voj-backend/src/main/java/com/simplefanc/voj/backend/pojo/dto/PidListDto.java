@@ -15,6 +15,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 public class PidListDto {
+
     @NotEmpty(message = "查询的题目id列表不能为空")
     private List<Long> pidList;
 
@@ -22,4 +23,5 @@ public class PidListDto {
     private Boolean isContestProblemList;
 
     private Long cid;
+
 }

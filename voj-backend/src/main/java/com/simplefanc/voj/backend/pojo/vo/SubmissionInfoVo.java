@@ -17,4 +17,5 @@ public class SubmissionInfoVo {
 
     @ApiModelProperty(value = "提交者是否可以分享该代码")
     private Boolean codeShare;
+
 }

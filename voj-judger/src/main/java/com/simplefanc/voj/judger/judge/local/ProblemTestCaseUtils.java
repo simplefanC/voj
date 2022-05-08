@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -16,7 +17,6 @@ import com.simplefanc.voj.judger.dao.ProblemCaseEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -35,9 +35,15 @@ public class ProblemTestCaseUtils {
     @Autowired
     private ProblemCaseEntityService problemCaseEntityService;
 
-    // 去除每行末尾的空白符
+    /**
+     * 去除每行末尾的空白符
+     *
+     * @param value
+     * @return
+     */
     public static String rtrim(String value) {
-        if (value == null) return null;
+        if (value == null)
+            return null;
         StringBuilder sb = new StringBuilder();
         String[] strArr = value.split("\n");
         for (String str : strArr) {
@@ -57,10 +63,8 @@ public class ProblemTestCaseUtils {
      * @throws SystemError
      * @throws UnsupportedEncodingException
      */
-    public JSONObject initTestCase(List<HashMap<String, Object>> testCases,
-                                   Long problemId,
-                                   String version,
-                                   String mode) throws SystemError, UnsupportedEncodingException {
+    public JSONObject initTestCase(List<HashMap<String, Object>> testCases, Long problemId, String version, String mode)
+            throws SystemError, UnsupportedEncodingException {
         // TODO 参数
         if (testCases == null || testCases.size() == 0) {
             throw new SystemError("题号为：" + problemId + "的评测数据为空！", null, "The test cases does not exist.");
@@ -103,7 +107,8 @@ public class ProblemTestCaseUtils {
                 // 原数据大小
                 jsonObject.set("outputSize", outputData.getBytes("utf-8").length);
                 // 去掉全部空格的MD5，用来判断pe
-                jsonObject.set("allStrippedOutputMd5", DigestUtils.md5DigestAsHex(outputData.replaceAll("\\s+", "").getBytes()));
+                jsonObject.set("allStrippedOutputMd5",
+                        DigestUtils.md5DigestAsHex(outputData.replaceAll("\\s+", "").getBytes()));
                 // 默认去掉文末空格的MD5
                 jsonObject.set("EOFStrippedOutputMd5", DigestUtils.md5DigestAsHex(rtrim(outputData).getBytes()));
             }
@@ -120,9 +125,7 @@ public class ProblemTestCaseUtils {
     }
 
     // 本地有文件，进行数据初始化 生成json文件
-    public JSONObject initLocalTestCase(String mode,
-                                        String version,
-                                        String testCasesDir,
+    public JSONObject initLocalTestCase(String mode, String version, String testCasesDir,
                                         List<ProblemCase> problemCaseList) {
 
         JSONObject result = new JSONObject();
@@ -131,7 +134,6 @@ public class ProblemTestCaseUtils {
         result.set("testCasesSize", problemCaseList.size());
         result.set("testCases", new JSONArray());
 
-
         for (ProblemCase problemCase : problemCaseList) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.set("caseId", problemCase.getId());
@@ -139,7 +141,8 @@ public class ProblemTestCaseUtils {
             jsonObject.set("inputName", problemCase.getInput());
             jsonObject.set("outputName", problemCase.getOutput());
             // 读取输出文件
-            FileReader readFile = new FileReader(testCasesDir + File.separator + problemCase.getOutput(), CharsetUtil.UTF_8);
+            FileReader readFile = new FileReader(testCasesDir + File.separator + problemCase.getOutput(),
+                    CharsetUtil.UTF_8);
             String output = readFile.readString().replaceAll("\r\n", "\n");
 
             // spj或interactive是根据特判程序输出判断结果，所以无需初始化测试数据
@@ -149,7 +152,8 @@ public class ProblemTestCaseUtils {
                 // 原数据大小
                 jsonObject.set("outputSize", output.getBytes().length);
                 // 去掉全部空格的MD5，用来判断pe
-                jsonObject.set("allStrippedOutputMd5", DigestUtils.md5DigestAsHex(output.replaceAll("\\s+", "").getBytes()));
+                jsonObject.set("allStrippedOutputMd5",
+                        DigestUtils.md5DigestAsHex(output.replaceAll("\\s+", "").getBytes()));
                 // 默认去掉文末空格的MD5
                 jsonObject.set("EOFStrippedOutputMd5", DigestUtils.md5DigestAsHex(rtrim(output).getBytes()));
             }
@@ -165,7 +169,8 @@ public class ProblemTestCaseUtils {
     }
 
     // 获取指定题目的info数据
-    public JSONObject loadTestCaseInfo(Long problemId, String testCasesDir, String version, String mode) throws SystemError, UnsupportedEncodingException {
+    public JSONObject loadTestCaseInfo(Long problemId, String testCasesDir, String version, String mode)
+            throws SystemError, UnsupportedEncodingException {
         if (FileUtil.exist(testCasesDir + File.separator + "info")) {
             FileReader fileReader = new FileReader(testCasesDir + File.separator + "info", CharsetUtil.UTF_8);
             String infoStr = fileReader.readString();
@@ -181,7 +186,8 @@ public class ProblemTestCaseUtils {
     }
 
     // 若没有测试数据，则尝试从数据库获取并且初始化到本地，如果数据库中该题目测试数据为空，rsync同步也出了问题，则直接判系统错误
-    public JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode) throws SystemError, UnsupportedEncodingException {
+    public JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
+            throws SystemError, UnsupportedEncodingException {
 
         QueryWrapper<ProblemCase> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", problemId);
@@ -192,13 +198,11 @@ public class ProblemTestCaseUtils {
         }
 
         // 可能是zip上传记录的是文件名，
-        if (StringUtils.isEmpty(problemCases.get(0).getInput())
-                || StringUtils.isEmpty(problemCases.get(0).getOutput())
-                || (problemCases.get(0).getInput().endsWith(".in")
-                && (problemCases.get(0).getOutput().endsWith(".out")
+        if (StrUtil.isEmpty(problemCases.get(0).getInput()) || StrUtil.isEmpty(problemCases.get(0).getOutput())
+                || (problemCases.get(0).getInput().endsWith(".in") && (problemCases.get(0).getOutput().endsWith(".out")
                 || problemCases.get(0).getOutput().endsWith(".ans")))) {
-
-            if (FileUtil.isEmpty(new File(testCasesDir))) { //如果本地对应文件夹也为空，说明文件丢失了
+            // 如果本地对应文件夹也为空，说明文件丢失了
+            if (FileUtil.isEmpty(new File(testCasesDir))) {
                 throw new SystemError("problemID:[" + problemId + "] test case has not found.", null, null);
             } else {
                 return initLocalTestCase(mode, version, testCasesDir, problemCases);
@@ -218,4 +222,5 @@ public class ProblemTestCaseUtils {
             return initTestCase(testCases, problemId, version, mode);
         }
     }
+
 }

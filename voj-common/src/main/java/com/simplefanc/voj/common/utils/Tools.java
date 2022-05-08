@@ -14,7 +14,9 @@ import java.util.Set;
  * @author Administrator
  */
 public class Tools {
-    public static <T> List<Class<? extends T>> findSubClasses(String packagePath, Class<T> parentClass) throws ClassNotFoundException {
+
+    public static <T> List<Class<? extends T>> findSubClasses(String packagePath, Class<T> parentClass)
+            throws ClassNotFoundException {
         List<Class<? extends T>> result = new ArrayList<Class<? extends T>>();
 
         ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
@@ -27,4 +29,5 @@ public class Tools {
         }
         return result;
     }
+
 }

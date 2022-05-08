@@ -22,6 +22,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @ApiModel(value = "AdminSysNotice", description = "")
 public class AdminSysNotice {
+
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)

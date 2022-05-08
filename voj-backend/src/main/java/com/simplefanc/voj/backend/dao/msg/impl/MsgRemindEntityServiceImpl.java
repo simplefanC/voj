@@ -1,18 +1,16 @@
 package com.simplefanc.voj.backend.dao.msg.impl;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.mapper.MsgRemindMapper;
 import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
 import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
+import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
 
 /**
  * @Author: chenfan
@@ -20,7 +18,8 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
-public class MsgRemindEntityServiceImpl extends ServiceImpl<MsgRemindMapper, MsgRemind> implements MsgRemindEntityService {
+public class MsgRemindEntityServiceImpl extends ServiceImpl<MsgRemindMapper, MsgRemind>
+        implements MsgRemindEntityService {
 
     @Resource
     private MsgRemindMapper msgRemindMapper;

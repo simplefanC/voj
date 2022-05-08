@@ -17,15 +17,14 @@ import java.util.List;
 
 public interface ProblemService {
 
-
     /**
      * @MethodName getProblemList
      * @Params * @param null
      * @Description 获取题目列表分页
      * @Since 2020/10/27
      */
-    Page<ProblemVo> getProblemList(Integer limit, Integer currentPage,
-                                   String keyword, List<Long> tagId, Integer difficulty, String oj);
+    Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId,
+                                   Integer difficulty, String oj);
 
     /**
      * @MethodName getRandomProblem
@@ -47,4 +46,5 @@ public interface ProblemService {
      * @Since 2020/10/27
      */
     ProblemInfoVo getProblemInfo(String problemId);
+
 }

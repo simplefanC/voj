@@ -3,10 +3,8 @@ package com.simplefanc.voj.judger.judge.local;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
+import com.simplefanc.voj.judger.common.constants.JudgeLanguage;
 import com.simplefanc.voj.judger.common.exception.SystemError;
-import com.simplefanc.voj.judger.dao.ContestRecordEntityService;
-import com.simplefanc.voj.judger.dao.UserAcproblemEntityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +22,9 @@ public class JudgeContext {
     private JudgeStrategy judgeStrategy;
 
     public Judge judge(Problem problem, Judge judge) {
-        // TODO 魔数
         // c和c++为一倍时间和空间，其它语言为2倍时间和空间
-        if (!judge.getLanguage().equals("C++") && !judge.getLanguage().equals("C") &&
-                !judge.getLanguage().equals("C++ With O2") && !judge.getLanguage().equals("C With O2")) {
+        if (!JudgeLanguage.CPP.getLanguage().equals(judge.getLanguage()) && !JudgeLanguage.C.getLanguage().equals(judge.getLanguage())
+                && !JudgeLanguage.CPPWithO2.getLanguage().equals(judge.getLanguage()) && !JudgeLanguage.CWithO2.getLanguage().equals(judge.getLanguage())) {
             problem.setTimeLimit(problem.getTimeLimit() * 2);
             problem.setMemoryLimit(problem.getMemoryLimit() * 2);
         }
@@ -35,10 +32,10 @@ public class JudgeContext {
         HashMap<String, Object> judgeResult = judgeStrategy.judge(problem, judge);
 
         // 如果是编译失败、提交错误或者系统错误就有错误提醒
-        if (judgeResult.get("code") == JudgeStatus.STATUS_COMPILE_ERROR.getStatus() ||
-                judgeResult.get("code") == JudgeStatus.STATUS_SYSTEM_ERROR.getStatus() ||
-                judgeResult.get("code") == JudgeStatus.STATUS_RUNTIME_ERROR.getStatus() ||
-                judgeResult.get("code") == JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
+        if (judgeResult.get("code") == JudgeStatus.STATUS_COMPILE_ERROR.getStatus()
+                || judgeResult.get("code") == JudgeStatus.STATUS_SYSTEM_ERROR.getStatus()
+                || judgeResult.get("code") == JudgeStatus.STATUS_RUNTIME_ERROR.getStatus()
+                || judgeResult.get("code") == JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
             judge.setErrorMessage((String) judgeResult.getOrDefault("errMsg", ""));
         }
         // 设置最终结果状态码
@@ -58,11 +55,14 @@ public class JudgeContext {
         return judge;
     }
 
-    public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles) throws SystemError {
+    public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)
+            throws SystemError {
         return Compiler.compileSpj(code, pid, spjLanguage, extraFiles);
     }
 
-    public Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles) throws SystemError {
+    public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
+                                      HashMap<String, String> extraFiles) throws SystemError {
         return Compiler.compileInteractive(code, pid, interactiveLanguage, extraFiles);
     }
+
 }

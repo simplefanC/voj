@@ -17,6 +17,7 @@ import java.util.List;
 @ToString
 @Accessors(chain = true)
 public class QDOJProblemDto implements Serializable {
+
     private Problem problem;
 
     private List<String> languages;
@@ -76,4 +77,5 @@ public class QDOJProblemDto implements Serializable {
     public void setIsSpj(Boolean spj) {
         isSpj = spj;
     }
+
 }

@@ -1,12 +1,13 @@
 package com.simplefanc.voj.backend.judge.remote.crawler;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.ProblemEnum;
+import com.simplefanc.voj.common.constants.ProblemLevelEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.backend.common.utils.JsoupUtil;
-import org.jsoup.Connection;
-import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -19,9 +20,16 @@ import java.util.regex.Pattern;
  **/
 @Component
 public class JSKProblemCrawler extends ProblemCrawler {
+
     public static final String JUDGE_NAME = "JSK";
+
     public static final String HOST = "https://nanti.jisuanke.com";
+
     public static final String PROBLEM_URL = "/t/%s";
+
+    private Pattern compile1 = Pattern.compile("([\\s\\S]*?)<h4>输入格式</h4><p>([\\s\\S]*?)</p><h4>输出格式</h4><p>([\\s\\S]*?)</p>");
+    private Pattern compile2 = Pattern.compile("([\\s\\S]*?)输入格式([\\s\\S]*?)输出格式([\\s\\S]*)");
+    private Pattern compile3 = Pattern.compile("([\\s\\S]*?)输入([\\s\\S]*?)输出([\\s\\S]*)");
 
     /**
      * @param problemId String的原因是因为某些题库题号不是纯数字
@@ -35,10 +43,7 @@ public class JSKProblemCrawler extends ProblemCrawler {
         Assert.isTrue(problemId.matches("[TAta]\\d{4}"), "JSK题号格式错误！");
         Problem info = new Problem();
         String url = HOST + String.format(PROBLEM_URL, problemId);
-        // 获取连接
-        Connection connection = JsoupUtil.getConnectionFromUrl(url, null, null);
-        Document document = JsoupUtil.getDocument(connection, null);
-        String html = document.html();
+        String html = HttpUtil.get(url);
         html = html.replaceAll("<br>", "\n");
         String problem = ReUtil.get("var problem=(\\{[\\s\\S]*?\\});", html, 1);
         JSONObject jsonObject = JSONUtil.parseObj(problem);
@@ -51,20 +56,20 @@ public class JSKProblemCrawler extends ProblemCrawler {
         String description = jsonObject.getStr("description");
         Matcher matcher;
         if (problemId.toUpperCase().charAt(0) == 'T') {
-            matcher = Pattern.compile("([\\s\\S]*?)<h4>输入格式</h4><p>([\\s\\S]*?)</p><h4>输出格式</h4><p>([\\s\\S]*?)</p>").matcher(description);
+            matcher = compile1.matcher(description);
             if (matcher.find()) {
                 info.setDescription(matcher.group(1));
                 info.setInput(matcher.group(2));
                 info.setOutput(matcher.group(3));
             }
         } else {
-            matcher = Pattern.compile("([\\s\\S]*?)输入格式([\\s\\S]*?)输出格式([\\s\\S]*)").matcher(description);
+            matcher = compile2.matcher(description);
             if (matcher.find()) {
                 info.setDescription(matcher.group(1));
                 info.setInput(matcher.group(2));
                 info.setOutput(matcher.group(3));
             } else {
-                matcher = Pattern.compile("([\\s\\S]*?)输入([\\s\\S]*?)输出([\\s\\S]*)").matcher(description);
+                matcher = compile3.matcher(description);
                 if (matcher.find()) {
                     info.setDescription(matcher.group(1));
                     info.setInput(matcher.group(2));
@@ -73,22 +78,20 @@ public class JSKProblemCrawler extends ProblemCrawler {
             }
         }
 
-        StringBuilder sb = new StringBuilder("<input>")
-                .append(jsonObject.getStr("sample_input"))
-                .append("</input><output>")
-                .append(jsonObject.getStr("sample_output"))
-                .append("</output>");
-        info.setExamples(sb.toString());
+        String sb = "<input>" + jsonObject.getStr("sample_input") +
+                "</input><output>" + jsonObject.getStr("sample_output") + "</output>";
+        info.setExamples(sb);
 
         info.setHint(jsonObject.getStr("hint"));
         info.setIsRemote(true);
-        info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>", problemId, JUDGE_NAME + "-" + problemId));
-        info.setType(0)
-                .setAuth(1)
+        info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>",
+                problemId, JUDGE_NAME + "-" + problemId));
+        info.setType(ContestEnum.TYPE_ACM.getCode())
+                .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
                 .setAuthor(author)
                 .setOpenCaseResult(false)
                 .setIsRemoveEndBlank(false)
-                .setDifficulty(1);
+                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode());
         return new RemoteProblemInfo().setProblem(info).setTagList(null);
     }
 
@@ -96,4 +99,5 @@ public class JSKProblemCrawler extends ProblemCrawler {
     public String getOjInfo() {
         return JUDGE_NAME;
     }
+
 }

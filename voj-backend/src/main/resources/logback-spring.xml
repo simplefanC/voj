@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
     <!-- 属性文件:在properties文件中找到对应的配置项 -->
-    <springProperty scope="context" name="filepath" source="voj.logging.filepath"/>
-    <!--    <property name="filepath" value="/voj/log/backend"/>-->
-    <contextName>voj</contextName>
+    <springProperty scope="context" name="logging.file.path" source="logging.file.path"/>
+    <springProperty scope="context" name="spring.application.name" source="spring.application.name"/>
 
     <!--控制台打印-->
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
@@ -32,7 +31,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--按时间保存日志 修改格式可以按小时、按天、月来保存-->
-            <fileNamePattern>${filepath}/backend.info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${logging.file.path}/${spring.application.name}.info.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!--保存时长-->
             <maxHistory>7</maxHistory>
             <!-- 单个文件最大-->
@@ -55,7 +54,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${filepath}/backend.error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${logging.file.path}/${spring.application.name}.error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <!--保存时长-->
             <maxHistory>7</maxHistory>
             <!-- 单个文件最大-->

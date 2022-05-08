@@ -1,21 +1,19 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.common.Announcement;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.ContestPrintDto;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
 import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.ContestService;
+import com.simplefanc.voj.common.pojo.entity.common.Announcement;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 /**
  * @Author: chenfan
@@ -28,7 +26,6 @@ public class ContestController {
 
     @Autowired
     private ContestService contestService;
-
 
     /**
      * @MethodName getContestList
@@ -54,7 +51,7 @@ public class ContestController {
      */
     @GetMapping("/get-contest-info")
     @RequiresAuthentication
-    public CommonResult<ContestVo> getContestInfo(@RequestParam(value = "cid", required = true) Long cid) {
+    public CommonResult<ContestVo> getContestInfo(@RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestService.getContestInfo(cid));
     }
 
@@ -83,7 +80,6 @@ public class ContestController {
         return CommonResult.successResponse(contestService.getContestAccess(cid));
     }
 
-
     /**
      * @MethodName getContestProblem
      * @Description 获得指定比赛的题目列表
@@ -92,41 +88,34 @@ public class ContestController {
      */
     @GetMapping("/get-contest-problem")
     @RequiresAuthentication
-    public CommonResult<List<ContestProblemVo>> getContestProblem(@RequestParam(value = "cid", required = true) Long cid) {
+    public CommonResult<List<ContestProblemVo>> getContestProblem(
+            @RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestService.getContestProblem(cid));
     }
 
     @GetMapping("/get-contest-problem-details")
     @RequiresAuthentication
-    public CommonResult<ProblemInfoVo> getContestProblemDetails(@RequestParam(value = "cid", required = true) Long cid,
-                                                                @RequestParam(value = "displayId", required = true) String displayId) {
+    public CommonResult<ProblemInfoVo> getContestProblemDetails(@RequestParam(value = "cid") Long cid,
+                                                                @RequestParam(value = "displayId") String displayId) {
         return CommonResult.successResponse(contestService.getContestProblemDetails(cid, displayId));
     }
 
-
     @GetMapping("/contest-submissions")
     @RequiresAuthentication
-    public CommonResult<IPage<JudgeVo>> getContestSubmissionList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                 @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                 @RequestParam(value = "onlyMine", required = false) Boolean onlyMine,
-                                                                 @RequestParam(value = "problemID", required = false) String displayId,
-                                                                 @RequestParam(value = "status", required = false) Integer searchStatus,
-                                                                 @RequestParam(value = "username", required = false) String searchUsername,
-                                                                 @RequestParam(value = "contestID", required = true) Long searchCid,
-                                                                 @RequestParam(value = "beforeContestSubmit", required = true) Boolean beforeContestSubmit,
-                                                                 @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemID) {
+    public CommonResult<IPage<JudgeVo>> getContestSubmissionList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "onlyMine", required = false) Boolean onlyMine,
+            @RequestParam(value = "problemID", required = false) String displayId,
+            @RequestParam(value = "status", required = false) Integer searchStatus,
+            @RequestParam(value = "username", required = false) String searchUsername,
+            @RequestParam(value = "contestID") Long searchCid,
+            @RequestParam(value = "beforeContestSubmit") Boolean beforeContestSubmit,
+            @RequestParam(value = "completeProblemID", defaultValue = "false") Boolean completeProblemId) {
         // TODO 参数过多
-        return CommonResult.successResponse(contestService.getContestSubmissionList(limit,
-                currentPage,
-                onlyMine,
-                displayId,
-                searchStatus,
-                searchUsername,
-                searchCid,
-                beforeContestSubmit,
-                completeProblemID));
+        return CommonResult.successResponse(contestService.getContestSubmissionList(limit, currentPage, onlyMine,
+                displayId, searchStatus, searchUsername, searchCid, beforeContestSubmit, completeProblemId));
     }
-
 
     /**
      * @MethodName getContestRank
@@ -140,7 +129,6 @@ public class ContestController {
         return CommonResult.successResponse(contestService.getContestRank(contestRankDto));
     }
 
-
     /**
      * @MethodName getContestAnnouncement
      * @Description 获得比赛的通知列表
@@ -149,12 +137,12 @@ public class ContestController {
      */
     @GetMapping("/get-contest-announcement")
     @RequiresAuthentication
-    public CommonResult<IPage<AnnouncementVo>> getContestAnnouncement(@RequestParam(value = "cid", required = true) Long cid,
-                                                                      @RequestParam(value = "limit", required = false) Integer limit,
-                                                                      @RequestParam(value = "currentPage", required = false) Integer currentPage) {
+    public CommonResult<IPage<AnnouncementVo>> getContestAnnouncement(
+            @RequestParam(value = "cid") Long cid,
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(contestService.getContestAnnouncement(cid, limit, currentPage));
     }
-
 
     /**
      * @param userReadContestAnnouncementDto
@@ -165,10 +153,11 @@ public class ContestController {
      */
     @PostMapping("/get-contest-not-read-announcement")
     @RequiresAuthentication
-    public CommonResult<List<Announcement>> getContestUserNotReadAnnouncement(@RequestBody UserReadContestAnnouncementDto userReadContestAnnouncementDto) {
-        return CommonResult.successResponse(contestService.getContestUserNotReadAnnouncement(userReadContestAnnouncementDto));
+    public CommonResult<List<Announcement>> getContestUserNotReadAnnouncement(
+            @RequestBody UserReadContestAnnouncementDto userReadContestAnnouncementDto) {
+        return CommonResult
+                .successResponse(contestService.getContestUserNotReadAnnouncement(userReadContestAnnouncementDto));
     }
-
 
     /**
      * @param contestPrintDto
@@ -183,6 +172,5 @@ public class ContestController {
         contestService.submitPrintText(contestPrintDto);
         return CommonResult.successResponse();
     }
-
 
 }

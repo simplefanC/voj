@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.admin.problem;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.*;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.judge.remote.crawler.CrawlersHolder;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
+import com.simplefanc.voj.common.pojo.entity.problem.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +36,8 @@ public class RemoteProblemService {
     @Autowired
     private ProblemLanguageEntityService problemLanguageEntityService;
 
-
-    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId, String author) throws Exception {
+    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId, String author)
+            throws Exception {
         return CrawlersHolder.getCrawler(ojName).getProblemInfo(problemId, author);
     }
 
@@ -98,8 +98,8 @@ public class RemoteProblemService {
                 OJNameTag.setName(OJName);
                 tagEntityService.saveOrUpdate(OJNameTag);
             }
-            addProblemTagResult = problemTagEntityService.saveOrUpdate(new ProblemTag().setTid(OJNameTag.getId())
-                    .setPid(problem.getId()));
+            addProblemTagResult = problemTagEntityService
+                    .saveOrUpdate(new ProblemTag().setTid(OJNameTag.getId()).setPid(problem.getId()));
         }
 
         if (addProblemResult && addProblemTagResult && addProblemLanguageResult) {
@@ -108,4 +108,5 @@ public class RemoteProblemService {
             return null;
         }
     }
+
 }

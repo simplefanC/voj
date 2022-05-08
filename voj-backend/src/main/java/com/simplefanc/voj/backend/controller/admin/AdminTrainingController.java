@@ -1,13 +1,13 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.training.Training;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
 import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingService;
+import com.simplefanc.voj.common.pojo.entity.training.Training;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -30,7 +30,6 @@ public class AdminTrainingController {
 
     @Resource
     private AdminTrainingProblemService adminTrainingProblemService;
-
 
     @GetMapping("/list")
     @RequiresAuthentication
@@ -73,13 +72,12 @@ public class AdminTrainingController {
         return CommonResult.successResponse();
     }
 
-
     @PutMapping("/change-training-status")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> changeTrainingStatus(@RequestParam(value = "tid", required = true) Long tid,
-                                                   @RequestParam(value = "author", required = true) String author,
-                                                   @RequestParam(value = "status", required = true) Boolean status) {
+    public CommonResult<Void> changeTrainingStatus(@RequestParam(value = "tid") Long tid,
+                                                   @RequestParam(value = "author") String author,
+                                                   @RequestParam(value = "status") Boolean status) {
         adminTrainingService.changeTrainingStatus(tid, author, status);
         return CommonResult.successResponse();
     }
@@ -87,15 +85,16 @@ public class AdminTrainingController {
     @GetMapping("/get-problem-list")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<HashMap<String, Object>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                @RequestParam(value = "keyword", required = false) String keyword,
-                                                                @RequestParam(value = "queryExisted", defaultValue = "false") Boolean queryExisted,
-                                                                @RequestParam(value = "tid", required = true) Long tid) {
-        HashMap<String, Object> problemMap = adminTrainingProblemService.getProblemList(limit, currentPage, keyword, queryExisted, tid);
+    public CommonResult<HashMap<String, Object>> getProblemList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "queryExisted", defaultValue = "false") Boolean queryExisted,
+            @RequestParam(value = "tid") Long tid) {
+        HashMap<String, Object> problemMap = adminTrainingProblemService.getProblemList(limit, currentPage, keyword,
+                queryExisted, tid);
         return CommonResult.successResponse(problemMap);
     }
-
 
     @PutMapping("/problem")
     @RequiresAuthentication
@@ -126,8 +125,7 @@ public class AdminTrainingController {
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> importTrainingRemoteOJProblem(@RequestParam("name") String name,
-                                                            @RequestParam("problemId") String problemId,
-                                                            @RequestParam("tid") Long tid) {
+                                                            @RequestParam("problemId") String problemId, @RequestParam("tid") Long tid) {
         adminTrainingProblemService.importTrainingRemoteOJProblem(name, problemId, tid);
         return CommonResult.successResponse();
     }

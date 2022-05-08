@@ -16,4 +16,5 @@ public class CaptchaVo {
 
     @ApiModelProperty(value = "验证码key")
     private String captchaKey;
+
 }

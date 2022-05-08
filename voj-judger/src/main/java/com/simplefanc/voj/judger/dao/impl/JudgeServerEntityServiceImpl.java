@@ -4,6 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
+import com.simplefanc.voj.judger.common.constants.JudgeServerConstant;
 import com.simplefanc.voj.judger.dao.JudgeServerEntityService;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
 import com.simplefanc.voj.judger.mapper.JudgeServerMapper;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @Author: chenfan
@@ -24,8 +26,8 @@ import java.util.HashMap;
 @Service
 @Slf4j(topic = "voj")
 @RefreshScope
-public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper, JudgeServer> implements JudgeServerEntityService {
-
+public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper, JudgeServer>
+        implements JudgeServerEntityService {
 
     @Value("${voj-judge-server.max-task-num}")
     private Integer maxTaskNum;
@@ -43,16 +45,11 @@ public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper,
     public HashMap<String, Object> getJudgeServerInfo() {
 
         HashMap<String, Object> res = new HashMap<>();
-
-        res.put("version", "20220306");
+        res.put("version", JudgeServerConstant.VERSION);
         res.put("currentTime", new Date());
         res.put("judgeServerName", name);
         res.put("cpu", Runtime.getRuntime().availableProcessors());
-        // TODO
-        res.put("languages", Arrays.asList("G++ 7.5.0", "GCC 7.5.0", "Python 3.7.5",
-                "Python 2.7.17", "OpenJDK 1.8", "Golang 1.16", "C# Mono 4.6.2",
-                "PHP 7.3.33", "JavaScript Node 14.19.0", "JavaScript V8 8.4.109",
-                "PyPy 2.7.18 (7.3.8)", "PyPy 3.8.12 (7.3.8)"));
+        res.put("languages", JudgeServerConstant.LANGUAGE_LIST);
 
         if (maxTaskNum == -1) {
             res.put("maxTaskNum", Runtime.getRuntime().availableProcessors() + 1);
@@ -71,7 +68,8 @@ public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper,
         String versionResp;
 
         try {
-            versionResp = SandboxRun.getRestTemplate().getForObject(SandboxRun.getSandboxBaseUrl() + "/version", String.class);
+            versionResp = SandboxRun.getRestTemplate().getForObject(SandboxRun.getSandboxBaseUrl() + "/version",
+                    String.class);
         } catch (Exception e) {
             res.put("SandBoxMsg", MapUtil.builder().put("error", e.getMessage()).map());
             return res;
@@ -80,4 +78,5 @@ public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper,
         res.put("SandBoxMsg", JSONUtil.parseObj(versionResp));
         return res;
     }
+
 }

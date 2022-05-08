@@ -9,8 +9,10 @@ import lombok.Data;
  */
 @Data
 public class TestEmailDto {
+
     /**
      * 发送的测试邮箱
      */
     private String email;
+
 }

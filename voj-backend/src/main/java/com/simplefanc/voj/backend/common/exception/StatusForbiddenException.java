@@ -22,7 +22,9 @@ public class StatusForbiddenException extends RuntimeException {
         super(cause);
     }
 
-    public StatusForbiddenException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public StatusForbiddenException(String message, Throwable cause, boolean enableSuppression,
+                                    boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

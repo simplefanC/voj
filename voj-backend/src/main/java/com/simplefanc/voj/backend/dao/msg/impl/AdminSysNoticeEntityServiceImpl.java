@@ -3,10 +3,10 @@ package com.simplefanc.voj.backend.dao.msg.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.AdminSysNoticeMapper;
 import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
+import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,7 +17,8 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
-public class AdminSysNoticeEntityServiceImpl extends ServiceImpl<AdminSysNoticeMapper, AdminSysNotice> implements AdminSysNoticeEntityService {
+public class AdminSysNoticeEntityServiceImpl extends ServiceImpl<AdminSysNoticeMapper, AdminSysNotice>
+        implements AdminSysNoticeEntityService {
 
     @Resource
     private AdminSysNoticeMapper adminSysNoticeMapper;
@@ -27,4 +28,5 @@ public class AdminSysNoticeEntityServiceImpl extends ServiceImpl<AdminSysNoticeM
         Page<AdminSysNoticeVo> page = new Page<>(currentPage, limit);
         return adminSysNoticeMapper.getAdminSysNotice(page, type);
     }
+
 }

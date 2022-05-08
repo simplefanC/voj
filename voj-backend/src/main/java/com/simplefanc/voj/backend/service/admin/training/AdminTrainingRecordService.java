@@ -1,17 +1,17 @@
 package com.simplefanc.voj.backend.service.admin.training;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.training.Training;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
 import com.simplefanc.voj.backend.common.constants.TrainingEnum;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingRecordEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingRegisterEntityService;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.training.Training;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -57,11 +57,9 @@ public class AdminTrainingRecordService {
         }
         if (!CollectionUtils.isEmpty(pidList)) {
             QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-            judgeQueryWrapper.in("pid", pidList)
-                    .eq("cid", 0)
+            judgeQueryWrapper.in("pid", pidList).eq("cid", 0)
                     // 只同步ac的提交
-                    .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus())
-                    .eq("uid", uid);
+                    .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus()).eq("uid", uid);
             List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
             saveBatchNewRecordByJudgeList(judgeList, tid, null, pidMapTPid);
         }
@@ -76,7 +74,6 @@ public class AdminTrainingRecordService {
         List<String> uidList = trainingRegisterEntityService.getAlreadyRegisterUidList(tid);
         syncNewProblemUserSubmissionToRecord(pid, tpId, tid, uidList);
     }
-
 
     @Async
     public void checkSyncRecord(Training training) {
@@ -95,16 +92,13 @@ public class AdminTrainingRecordService {
     private void syncNewProblemUserSubmissionToRecord(Long pid, Long tpId, Long tid, List<String> uidList) {
         if (!CollectionUtils.isEmpty(uidList)) {
             QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-            judgeQueryWrapper.eq("pid", pid)
-                    .eq("cid", 0)
+            judgeQueryWrapper.eq("pid", pid).eq("cid", 0)
                     // 只同步ac的提交
-                    .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus())
-                    .in("uid", uidList);
+                    .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus()).in("uid", uidList);
             List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
             saveBatchNewRecordByJudgeList(judgeList, tid, tpId, null);
         }
     }
-
 
     private void syncAllUserProblemRecord(Long tid) {
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
@@ -125,25 +119,20 @@ public class AdminTrainingRecordService {
             return;
         }
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.in("pid", pidList)
-                .eq("cid", 0)
+        judgeQueryWrapper.in("pid", pidList).eq("cid", 0)
                 // 只同步ac的提交
-                .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus())
-                .in("uid", uidList);
+                .eq("status", JudgeStatus.STATUS_ACCEPTED.getStatus()).in("uid", uidList);
         List<Judge> judgeList = judgeEntityService.list(judgeQueryWrapper);
         saveBatchNewRecordByJudgeList(judgeList, tid, null, pidMapTPid);
     }
 
-
-    private void saveBatchNewRecordByJudgeList(List<Judge> judgeList, Long tid, Long tpId, HashMap<Long, Long> pidMapTPid) {
+    private void saveBatchNewRecordByJudgeList(List<Judge> judgeList, Long tid, Long tpId,
+                                               HashMap<Long, Long> pidMapTPid) {
         if (!CollectionUtils.isEmpty(judgeList)) {
             List<TrainingRecord> trainingRecordList = new ArrayList<>();
             for (Judge judge : judgeList) {
-                TrainingRecord trainingRecord = new TrainingRecord()
-                        .setPid(judge.getPid())
-                        .setSubmitId(judge.getSubmitId())
-                        .setTid(tid)
-                        .setUid(judge.getUid());
+                TrainingRecord trainingRecord = new TrainingRecord().setPid(judge.getPid())
+                        .setSubmitId(judge.getSubmitId()).setTid(tid).setUid(judge.getUid());
                 if (pidMapTPid != null) {
                     trainingRecord.setTpid(pidMapTPid.get(judge.getPid()));
                 }

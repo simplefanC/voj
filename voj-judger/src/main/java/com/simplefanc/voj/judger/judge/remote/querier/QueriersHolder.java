@@ -18,7 +18,8 @@ public class QueriersHolder {
             synchronized (queriers) {
                 if (!queriers.containsKey(remoteOj)) {
                     try {
-                        List<Class<? extends Querier>> querierClasses = Tools.findSubClasses("com.simplefanc.voj.judger.judge.remote", Querier.class);
+                        List<Class<? extends Querier>> querierClasses = Tools
+                                .findSubClasses("com.simplefanc.voj.judger.judge.remote", Querier.class);
                         for (Class<? extends Querier> querierClass : querierClasses) {
                             Querier querier = SpringUtil.getBean(querierClass);
                             queriers.put(querier.getOjInfo().remoteOj, querier);

@@ -1,16 +1,15 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.common.Announcement;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.announcement.AdminAnnouncementService;
+import com.simplefanc.voj.common.pojo.entity.common.Announcement;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 
 /**
  * @Author: chenfan
@@ -26,8 +25,9 @@ public class AnnouncementController {
 
     @GetMapping("/api/admin/announcement")
     @RequiresPermissions("announcement_admin")
-    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                   @RequestParam(value = "currentPage", required = false) Integer currentPage) {
+    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(adminAnnouncementService.getAnnouncementList(limit, currentPage));
     }
 
@@ -39,7 +39,7 @@ public class AnnouncementController {
     }
 
     @PostMapping("/api/admin/announcement")
-    @RequiresRoles("root")  // 只有超级管理员能操作
+    @RequiresRoles("root") // 只有超级管理员能操作
     @RequiresPermissions("announcement_admin")
     public CommonResult<Void> addAnnouncement(@RequestBody Announcement announcement) {
         adminAnnouncementService.addAnnouncement(announcement);
@@ -52,4 +52,5 @@ public class AnnouncementController {
         adminAnnouncementService.updateAnnouncement(announcement);
         return CommonResult.successResponse();
     }
+
 }

@@ -14,6 +14,6 @@ public interface TestCaseService {
 
     Map<Object, Object> uploadTestcaseZip(MultipartFile file);
 
-
     void downloadTestcase(Long pid, HttpServletResponse response);
+
 }

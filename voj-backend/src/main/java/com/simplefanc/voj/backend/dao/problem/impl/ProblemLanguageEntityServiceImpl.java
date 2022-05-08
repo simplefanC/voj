@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.problem.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.problem.ProblemLanguage;
 import com.simplefanc.voj.backend.dao.problem.ProblemLanguageEntityService;
 import com.simplefanc.voj.backend.mapper.ProblemLanguageMapper;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemLanguage;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class ProblemLanguageEntityServiceImpl extends ServiceImpl<ProblemLanguageMapper, ProblemLanguage> implements ProblemLanguageEntityService {
+public class ProblemLanguageEntityServiceImpl extends ServiceImpl<ProblemLanguageMapper, ProblemLanguage>
+        implements ProblemLanguageEntityService {
+
 }

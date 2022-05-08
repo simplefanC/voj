@@ -1,11 +1,10 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.training.*;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
@@ -15,12 +14,12 @@ import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
 import com.simplefanc.voj.backend.service.oj.TrainingService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.TrainingValidator;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.training.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -70,14 +69,16 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public IPage<TrainingVo> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId, String auth) {
+    public IPage<TrainingVo> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId,
+                                             String auth) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 30;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 30;
         return trainingEntityService.getTrainingList(limit, currentPage, categoryId, auth, keyword);
     }
-
 
     /**
      * @param tid
@@ -87,11 +88,11 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public TrainingVo getTraining(Long tid) throws StatusFailException, StatusAccessDeniedException, StatusForbiddenException {
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+    public TrainingVo getTraining(Long tid)
+            throws StatusFailException, StatusAccessDeniedException, StatusForbiddenException {
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -99,14 +100,16 @@ public class TrainingServiceImpl implements TrainingService {
         }
 
         TrainingVo trainingVo = BeanUtil.copyProperties(training, TrainingVo.class);
-        TrainingCategory trainingCategory = trainingCategoryEntityService.getTrainingCategoryByTrainingId(training.getId());
+        TrainingCategory trainingCategory = trainingCategoryEntityService
+                .getTrainingCategoryByTrainingId(training.getId());
         trainingVo.setCategoryName(trainingCategory.getName());
         trainingVo.setCategoryColor(trainingCategory.getColor());
         List<Long> trainingProblemIdList = trainingProblemEntityService.getTrainingProblemIdList(training.getId());
         trainingVo.setProblemCount(trainingProblemIdList.size());
 
         if (userRolesVo != null && trainingValidator.isInTrainingOrAdmin(training, userRolesVo)) {
-            Integer userTrainingACProblemCount = trainingProblemEntityService.getUserTrainingACProblemCount(userRolesVo.getUid(), trainingProblemIdList);
+            Integer userTrainingACProblemCount = trainingProblemEntityService
+                    .getUserTrainingACProblemCount(userRolesVo.getUid(), trainingProblemIdList);
             trainingVo.setAcCount(userTrainingACProblemCount);
         } else {
             trainingVo.setAcCount(0);
@@ -123,10 +126,8 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public List<ProblemVo> getTrainingProblemList(Long tid) throws StatusAccessDeniedException,
-            StatusForbiddenException, StatusFailException {
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+    public List<ProblemVo> getTrainingProblemList(Long tid)
+            throws StatusAccessDeniedException, StatusForbiddenException, StatusFailException {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -147,12 +148,13 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public void toRegisterTraining(RegisterTrainingDto registerTrainingDto) throws StatusFailException, StatusForbiddenException {
+    public void toRegisterTraining(RegisterTrainingDto registerTrainingDto)
+            throws StatusFailException, StatusForbiddenException {
 
         Long tid = registerTrainingDto.getTid();
         String password = registerTrainingDto.getPassword();
 
-        if (tid == null || StringUtils.isEmpty(password)) {
+        if (tid == null || StrUtil.isEmpty(password)) {
             throw new StatusFailException("请求参数不能为空！");
         }
 
@@ -162,13 +164,12 @@ public class TrainingServiceImpl implements TrainingService {
             throw new StatusFailException("对不起，该训练不存在或不允许显示!");
         }
 
-        if (!training.getPrivatePwd().equals(password)) { // 密码不对
+        if (!training.getPrivatePwd().equals(password)) {
             throw new StatusFailException("训练密码错误，请重新输入！");
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         QueryWrapper<TrainingRegister> registerQueryWrapper = new QueryWrapper<>();
         registerQueryWrapper.eq("tid", tid).eq("uid", userRolesVo.getUid());
@@ -176,9 +177,8 @@ public class TrainingServiceImpl implements TrainingService {
             throw new StatusFailException("您已注册过该训练，请勿重复注册！");
         }
 
-        boolean isOk = trainingRegisterEntityService.save(new TrainingRegister()
-                .setTid(tid)
-                .setUid(userRolesVo.getUid()));
+        boolean isOk = trainingRegisterEntityService
+                .save(new TrainingRegister().setTid(tid).setUid(userRolesVo.getUid()));
 
         if (!isOk) {
             throw new StatusFailException("校验训练密码失败，请稍后再试");
@@ -186,7 +186,6 @@ public class TrainingServiceImpl implements TrainingService {
             adminTrainingRecordService.syncUserSubmissionToRecordByTid(tid, userRolesVo.getUid());
         }
     }
-
 
     /**
      * @param tid
@@ -199,8 +198,7 @@ public class TrainingServiceImpl implements TrainingService {
     public AccessVo getTrainingAccess(Long tid) throws StatusFailException {
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         QueryWrapper<TrainingRegister> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tid", tid).eq("uid", userRolesVo.getUid());
@@ -220,7 +218,6 @@ public class TrainingServiceImpl implements TrainingService {
         return accessVo;
     }
 
-
     /**
      * @param tid
      * @param limit
@@ -231,8 +228,8 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/22
      */
     @Override
-    public IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage) throws
-            StatusAccessDeniedException, StatusForbiddenException, StatusFailException {
+    public IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage)
+            throws StatusAccessDeniedException, StatusForbiddenException, StatusFailException {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -242,8 +239,10 @@ public class TrainingServiceImpl implements TrainingService {
         trainingValidator.validateTrainingAuth(training);
 
         // 页数，每页数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 30;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 30;
 
         return getTrainingRank(tid, training.getAuthor(), currentPage, limit);
     }
@@ -271,15 +270,10 @@ public class TrainingServiceImpl implements TrainingService {
             Integer index = uidMapIndex.get(trainingRecordVo.getUid());
             if (index == null) {
                 trainingRankVo = new TrainingRankVo();
-                trainingRankVo.setRealname(trainingRecordVo.getRealname())
-                        .setAvatar(trainingRecordVo.getAvatar())
-                        .setSchool(trainingRecordVo.getSchool())
-                        .setGender(trainingRecordVo.getGender())
-                        .setUid(trainingRecordVo.getUid())
-                        .setUsername(trainingRecordVo.getUsername())
-                        .setNickname(trainingRecordVo.getNickname())
-                        .setAc(0)
-                        .setTotalRunTime(0);
+                trainingRankVo.setRealname(trainingRecordVo.getRealname()).setAvatar(trainingRecordVo.getAvatar())
+                        .setSchool(trainingRecordVo.getSchool()).setGender(trainingRecordVo.getGender())
+                        .setUid(trainingRecordVo.getUid()).setUsername(trainingRecordVo.getUsername())
+                        .setNickname(trainingRecordVo.getNickname()).setAc(0).setTotalRunTime(0);
                 HashMap<String, HashMap<String, Object>> submissionInfo = new HashMap<>();
                 trainingRankVo.setSubmissionInfo(submissionInfo);
 
@@ -291,16 +285,16 @@ public class TrainingServiceImpl implements TrainingService {
             }
             String displayId = tpIdMapDisplayId.get(trainingRecordVo.getTpid());
             // TODO 键名
-            HashMap<String, Object> problemSubmissionInfo = trainingRankVo
-                    .getSubmissionInfo()
-                    .getOrDefault(displayId, new HashMap<>());
+            HashMap<String, Object> problemSubmissionInfo = trainingRankVo.getSubmissionInfo().getOrDefault(displayId,
+                    new HashMap<>());
 
             // 如果该题目已经AC过了，只比较运行时间取最小
             if ((Boolean) problemSubmissionInfo.getOrDefault("isAC", false)) {
                 if (trainingRecordVo.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
                     int runTime = (int) problemSubmissionInfo.getOrDefault("runTime", 0);
                     if (runTime > trainingRecordVo.getUseTime()) {
-                        trainingRankVo.setTotalRunTime(trainingRankVo.getTotalRunTime() - runTime + trainingRecordVo.getUseTime());
+                        trainingRankVo.setTotalRunTime(
+                                trainingRankVo.getTotalRunTime() - runTime + trainingRecordVo.getUseTime());
                         problemSubmissionInfo.put("runTime", trainingRecordVo.getUseTime());
                     }
                 }
@@ -348,7 +342,8 @@ public class TrainingServiceImpl implements TrainingService {
         QueryWrapper<TrainingProblem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tid", tid);
         List<TrainingProblem> trainingProblemList = trainingProblemEntityService.list(queryWrapper);
-        return trainingProblemList.stream().collect(Collectors.toMap(TrainingProblem::getId, TrainingProblem::getDisplayId));
+        return trainingProblemList.stream()
+                .collect(Collectors.toMap(TrainingProblem::getId, TrainingProblem::getDisplayId));
     }
 
     /**
@@ -367,8 +362,7 @@ public class TrainingServiceImpl implements TrainingService {
             trainingRecord.setPid(pid)
                     .setTid(trainingProblem.getTid())
                     .setTpid(trainingProblem.getId())
-                    .setSubmitId(submitId)
-                    .setUid(uid);
+                    .setSubmitId(submitId).setUid(uid);
             trainingRecordList.add(trainingRecord);
         }
         if (trainingRecordList.size() > 0) {

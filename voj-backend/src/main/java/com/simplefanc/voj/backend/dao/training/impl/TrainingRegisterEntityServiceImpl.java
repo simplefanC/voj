@@ -2,9 +2,9 @@ package com.simplefanc.voj.backend.dao.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
 import com.simplefanc.voj.backend.dao.training.TrainingRegisterEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingRegisterMapper;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,17 +17,18 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
-public class TrainingRegisterEntityServiceImpl extends ServiceImpl<TrainingRegisterMapper, TrainingRegister> implements TrainingRegisterEntityService {
+public class TrainingRegisterEntityServiceImpl extends ServiceImpl<TrainingRegisterMapper, TrainingRegister>
+        implements TrainingRegisterEntityService {
 
     @Resource
     private TrainingRegisterMapper trainingRegisterMapper;
-
 
     @Override
     public List<String> getAlreadyRegisterUidList(Long tid) {
         QueryWrapper<TrainingRegister> trainingRegisterQueryWrapper = new QueryWrapper<>();
         trainingRegisterQueryWrapper.eq("tid", tid);
-        return trainingRegisterMapper.selectList(trainingRegisterQueryWrapper).stream().map(TrainingRegister::getUid).collect(Collectors.toList());
+        return trainingRegisterMapper.selectList(trainingRegisterQueryWrapper).stream().map(TrainingRegister::getUid)
+                .collect(Collectors.toList());
     }
 
 }

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-
 /**
  * @Author: chenfan
  * @Date: 2020/12/2 21:30
@@ -15,7 +14,10 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 public class ConfigVo {
-    // 数据库配置
+
+    /**
+     * 数据库配置
+     */
     @Value("${voj.db.username}")
     private String mysqlUsername;
 
@@ -23,7 +25,7 @@ public class ConfigVo {
     private String mysqlPassword;
 
     @Value("${voj.db.name}")
-    private String mysqlDBName;
+    private String mysqlDbName;
 
     @Value("${voj.db.host}")
     private String mysqlHost;
@@ -34,11 +36,15 @@ public class ConfigVo {
     @Value("${voj.db.port}")
     private Integer mysqlPort;
 
-    // 判题服务token
+    /**
+     * 判题服务token
+     */
     @Value("${voj.judge.token}")
     private String judgeToken;
 
-    // 缓存配置
+    /**
+     * 缓存配置
+     */
     @Value("${voj.redis.host}")
     private String redisHost;
 
@@ -48,7 +54,9 @@ public class ConfigVo {
     @Value("${voj.redis.password}")
     private String redisPassword;
 
-    // jwt配置
+    /**
+     * jwt配置
+     */
     @Value("${voj.jwt.secret}")
     private String tokenSecret;
 
@@ -58,7 +66,9 @@ public class ConfigVo {
     @Value("${voj.jwt.checkRefreshExpire}")
     private String checkRefreshExpire;
 
-    // 邮箱配置
+    /**
+     * 邮箱配置
+     */
     @Value("${voj.mail.username}")
     private String emailUsername;
 
@@ -74,7 +84,9 @@ public class ConfigVo {
     @Value("${voj.mail.ssl}")
     private Boolean emailSsl;
 
-    // 网站前端显示配置
+    /**
+     * 网站前端显示配置
+     */
     @Value("${voj.web-config.base-url}")
     private String baseUrl;
 

@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.controller.admin;
 
+import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -19,7 +19,6 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/api/admin/tag")
 public class AdminTagController {
-
 
     @Resource
     private AdminTagService adminTagService;

@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.admin.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingCategoryService;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,7 +24,8 @@ public class AdminTrainingCategoryServiceImpl implements AdminTrainingCategorySe
     public TrainingCategory addTrainingCategory(TrainingCategory trainingCategory) {
         QueryWrapper<TrainingCategory> trainingCategoryQueryWrapper = new QueryWrapper<>();
         trainingCategoryQueryWrapper.eq("name", trainingCategory.getName());
-        TrainingCategory existedTrainingCategory = trainingCategoryEntityService.getOne(trainingCategoryQueryWrapper, false);
+        TrainingCategory existedTrainingCategory = trainingCategoryEntityService.getOne(trainingCategoryQueryWrapper,
+                false);
 
         if (existedTrainingCategory != null) {
             throw new StatusFailException("该分类名称已存在！请勿重复添加！");
@@ -51,6 +52,5 @@ public class AdminTrainingCategoryServiceImpl implements AdminTrainingCategorySe
             throw new StatusFailException("删除失败！");
         }
     }
-
 
 }

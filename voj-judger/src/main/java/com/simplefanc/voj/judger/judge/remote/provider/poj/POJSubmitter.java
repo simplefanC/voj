@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote.provider.poj;
 
-
 import cn.hutool.core.util.ReUtil;
 import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
@@ -21,15 +20,19 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class POJSubmitter implements Submitter {
-    private static final Map<String, String> LANGUAGE_MAP = new HashMap<String, String>() {{
-        put("G++", "0");
-        put("GCC", "1");
-        put("Java", "2");
-        put("Pascal", "3");
-        put("C++", "4");
-        put("C", "5");
-        put("Fortran", "6");
-    }};
+
+    private static final Map<String, String> LANGUAGE_MAP = new HashMap<String, String>() {
+        {
+            put("G++", "0");
+            put("GCC", "1");
+            put("Java", "2");
+            put("Pascal", "3");
+            put("C++", "4");
+            put("C", "5");
+            put("Fortran", "6");
+        }
+    };
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -46,13 +49,9 @@ public class POJSubmitter implements Submitter {
     @Override
     public void submit(SubmissionInfo info, RemoteAccount account) throws Exception {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "language", LANGUAGE_MAP.get(info.language),
-                "problem_id", info.remotePid,
-                "source", new String(Base64.encodeBase64(info.userCode.getBytes())),
-                "encoded", "1",
-                "submit", "Submit"
-        );
+        HttpEntity entity = SimpleNameValueEntityFactory.create("language", LANGUAGE_MAP.get(info.language),
+                "problem_id", info.remotePid, "source", new String(Base64.encodeBase64(info.userCode.getBytes())),
+                "encoded", "1", "submit", "Submit");
         client.post("/submit", entity, HttpStatusValidator.SC_MOVED_TEMPORARILY);
         if ((info.remoteRunId = getRunId(info, client)) == null) {
             // 等待2s再次查询，如果还是失败，则表明提交失败了
@@ -60,4 +59,5 @@ public class POJSubmitter implements Submitter {
             info.remoteRunId = getRunId(info, client);
         }
     }
+
 }

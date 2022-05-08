@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.dao.impl;
 
-
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -24,14 +23,13 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
-public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord> implements ContestRecordEntityService {
+public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord>
+        implements ContestRecordEntityService {
 
-    private static final List<Integer> penaltyStatus = Arrays.asList(
-            JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus(),
-            JudgeStatus.STATUS_WRONG_ANSWER.getStatus(),
-            JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus(),
-            JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus(),
-            JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+    private static final List<Integer> penaltyStatus = Arrays.asList(JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus(),
+            JudgeStatus.STATUS_WRONG_ANSWER.getStatus(), JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus(),
+            JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus(), JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+
     @Autowired
     private ContestRecordMapper contestRecordMapper;
 
@@ -58,9 +56,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
         updateWrapper.set("use_time", judge.getTime());
         // submit_id一定只有一个
-        updateWrapper.eq("submit_id", judge.getSubmitId())
-                .eq("cid", judge.getCid())
-                .eq("uid", judge.getUid());
+        updateWrapper.eq("submit_id", judge.getSubmitId()).eq("cid", judge.getCid()).eq("uid", judge.getUid());
         boolean result = contestRecordMapper.update(null, updateWrapper) > 0;
         if (!result) {
             tryAgainUpdate(updateWrapper);
@@ -88,6 +84,8 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
                     log.error(e.getMessage());
                 }
             }
-        } while (retryable);
+        }
+        while (retryable);
     }
+
 }

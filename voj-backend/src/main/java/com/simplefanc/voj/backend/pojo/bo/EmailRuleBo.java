@@ -28,11 +28,14 @@ import java.util.Properties;
 public class EmailRuleBo {
 
     private List<String> blackList;
+
 }
 
 class CompositePropertySourceFactory extends DefaultPropertySourceFactory {
+
     @Override
-    public org.springframework.core.env.PropertySource<?> createPropertySource(@Nullable String name, EncodedResource resource) throws IOException {
+    public org.springframework.core.env.PropertySource<?> createPropertySource(@Nullable String name,
+                                                                               EncodedResource resource) throws IOException {
         String sourceName = Optional.ofNullable(name).orElse(resource.getResource().getFilename());
         if (!resource.getResource().exists()) {
             // return an empty Properties
@@ -58,4 +61,5 @@ class CompositePropertySourceFactory extends DefaultPropertySourceFactory {
         factory.afterPropertiesSet();
         return factory.getObject();
     }
+
 }

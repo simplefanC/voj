@@ -9,7 +9,9 @@ import lombok.Data;
  */
 @Data
 public class RuntimeError extends Exception {
+
     private String stdout;
+
     private String stderr;
 
     public RuntimeError(String message, String stdout, String stderr) {
@@ -17,4 +19,5 @@ public class RuntimeError extends Exception {
         this.stdout = stdout;
         this.stderr = stderr;
     }
+
 }

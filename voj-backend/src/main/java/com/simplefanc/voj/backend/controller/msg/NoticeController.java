@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,11 +31,11 @@ public class NoticeController {
         return CommonResult.successResponse(noticeService.getSysNotice(limit, currentPage));
     }
 
-
     @RequestMapping(value = "/mine", method = RequestMethod.GET)
     @RequiresAuthentication
     public CommonResult<IPage<SysMsgVo>> getMineNotice(@RequestParam(value = "limit", required = false) Integer limit,
                                                        @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(noticeService.getMineNotice(limit, currentPage));
     }
+
 }

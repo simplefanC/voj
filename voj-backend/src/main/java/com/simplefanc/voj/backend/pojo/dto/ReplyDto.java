@@ -20,4 +20,5 @@ public class ReplyDto {
     private Integer quoteId;
 
     private String quoteType;
+
 }

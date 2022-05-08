@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
+import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +26,10 @@ public class AdminNoticeController {
     @GetMapping("/notice")
     @RequiresAuthentication
     @RequiresRoles("root")
-    public CommonResult<IPage<AdminSysNoticeVo>> getSysNotice(@RequestParam(value = "limit", required = false) Integer limit,
-                                                              @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                              @RequestParam(value = "type", required = false) String type) {
+    public CommonResult<IPage<AdminSysNoticeVo>> getSysNotice(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "type", required = false) String type) {
         return CommonResult.successResponse(adminNoticeService.getSysNotice(limit, currentPage, type));
     }
 
@@ -40,7 +41,6 @@ public class AdminNoticeController {
         return CommonResult.successResponse();
     }
 
-
     @DeleteMapping("/notice")
     @RequiresAuthentication
     @RequiresRoles("root")
@@ -49,7 +49,6 @@ public class AdminNoticeController {
         return CommonResult.successResponse();
     }
 
-
     @PutMapping("/notice")
     @RequiresAuthentication
     @RequiresRoles("root")
@@ -57,4 +56,5 @@ public class AdminNoticeController {
         adminNoticeService.updateSysNotice(adminSysNotice);
         return CommonResult.successResponse();
     }
+
 }

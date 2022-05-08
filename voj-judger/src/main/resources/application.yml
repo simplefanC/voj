@@ -12,6 +12,25 @@ server:
   port: ${voj-judge-server.port}
 
 spring:
+  application:
+    name: @artifactId@
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_URL:127.0.0.1:8848}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+      config:
+        group: DEFAULT_GROUP
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+  config:
+    import:
+      - nacos:voj-${spring.profiles.active}.yml
+  profiles:
+    active: @profiles.active@
+
   datasource:
     username: ${voj.db.username}
     password: ${voj.db.password}
@@ -47,13 +66,13 @@ mybatis-plus:
   global-config:
     banner: false
 
-
 logging:
-  config: classpath:logback-spring.xml
   level:
-    root: error
     com.alibaba.nacos: error
-    com.gargoylesoftware: off
+    root: error
+  #  config: classpath:logback-spring.xml
+  file:
+    path: ./log
 
 # 暴露监控
 management:
@@ -63,8 +82,6 @@ management:
         include: '*'
 
 voj:
-  logging:
-    filepath: ./log
   judgedir:
     run-workplace-dir: "/judge/run"
     test-case-dir: "/judge/testcase"

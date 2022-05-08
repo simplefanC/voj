@@ -1,13 +1,11 @@
 package com.simplefanc.voj.backend.service.admin.training.impl;
 
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.training.Training;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
@@ -19,12 +17,13 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.training.Training;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -58,9 +57,12 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     private FilePathProps filePathProps;
 
     @Override
-    public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Boolean queryExisted, Long tid) {
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+    public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
+                                                  Boolean queryExisted, Long tid) {
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
 
         IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据tid在TrainingProblem表中查询到对应pid集合
@@ -95,9 +97,8 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
         }
 
-        if (!StringUtils.isEmpty(keyword)) {
-            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or()
-                    .like("problem_id", keyword).or()
+        if (!StrUtil.isEmpty(keyword)) {
+            problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or().like("problem_id", keyword).or()
                     .like("author", keyword));
         }
 
@@ -105,8 +106,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
         if (queryExisted) {
             List<Problem> problemListPagerRecords = problemListPager.getRecords();
-            List<Problem> sortProblemList = problemListPagerRecords
-                    .stream()
+            List<Problem> sortProblemList = problemListPagerRecords.stream()
                     .sorted(Comparator.comparingInt(problem -> trainingProblemMap.get(problem.getId()).getRank()))
                     .collect(Collectors.toList());
             problemListPager.setRecords(sortProblemList);
@@ -128,7 +128,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     @Override
     public void deleteProblem(Long pid, Long tid) {
         boolean isOk;
-        //  训练id不为null，表示就是从比赛列表移除而已
+        // 训练id不为null，表示就是从比赛列表移除而已
         if (tid != null) {
             QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
             trainingProblemQueryWrapper.eq("tid", tid).eq("pid", pid);
@@ -145,8 +145,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
-            trainingUpdateWrapper.set("gmt_modified", new Date())
-                    .eq("id", tid);
+            trainingUpdateWrapper.set("gmt_modified", new Date()).eq("id", tid);
             trainingEntityService.update(trainingUpdateWrapper);
 
         } else {
@@ -163,22 +162,19 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
         trainingProblemQueryWrapper.eq("tid", tid)
-                .and(wrapper -> wrapper.eq("pid", pid)
-                        .or()
-                        .eq("display_id", displayId));
+                .and(wrapper -> wrapper.eq("pid", pid).or().eq("display_id", displayId));
         TrainingProblem trainingProblem = trainingProblemEntityService.getOne(trainingProblemQueryWrapper, false);
         if (trainingProblem != null) {
             throw new StatusFailException("添加失败，该题目已添加或者题目的训练展示ID已存在！");
         }
 
         TrainingProblem newTProblem = new TrainingProblem();
-        boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
-                .setTid(tid).setPid(pid).setDisplayId(displayId));
+        boolean isOk = trainingProblemEntityService
+                .saveOrUpdate(newTProblem.setTid(tid).setPid(pid).setDisplayId(displayId));
         if (isOk) {
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
-            trainingUpdateWrapper.set("gmt_modified", new Date())
-                    .eq("id", tid);
+            trainingUpdateWrapper.set("gmt_modified", new Date()).eq("id", tid);
             trainingEntityService.update(trainingUpdateWrapper);
 
             // 异步地同步用户对该题目的提交数据
@@ -197,10 +193,10 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
         // 如果该题目不存在，需要先导入
         if (problem == null) {
-            Session session = SecurityUtils.getSubject().getSession();
-            UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
             try {
-                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService.getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
+                        .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {
@@ -216,24 +212,21 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
         Problem finalProblem = problem;
-        trainingProblemQueryWrapper.eq("tid", tid)
-                .and(wrapper -> wrapper.eq("pid", finalProblem.getId())
-                        .or()
-                        .eq("display_id", finalProblem.getProblemId()));
+        trainingProblemQueryWrapper.eq("tid", tid).and(
+                wrapper -> wrapper.eq("pid", finalProblem.getId()).or().eq("display_id", finalProblem.getProblemId()));
         TrainingProblem trainingProblem = trainingProblemEntityService.getOne(trainingProblemQueryWrapper, false);
         if (trainingProblem != null) {
             throw new StatusFailException("添加失败，该题目已添加或者题目的训练展示ID已存在！");
         }
 
         TrainingProblem newTProblem = new TrainingProblem();
-        boolean isOk = trainingProblemEntityService.saveOrUpdate(newTProblem
-                .setTid(tid).setPid(problem.getId()).setDisplayId(problem.getProblemId()));
+        boolean isOk = trainingProblemEntityService
+                .saveOrUpdate(newTProblem.setTid(tid).setPid(problem.getId()).setDisplayId(problem.getProblemId()));
         // 添加成功
         if (isOk) {
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
-            trainingUpdateWrapper.set("gmt_modified", new Date())
-                    .eq("id", tid);
+            trainingUpdateWrapper.set("gmt_modified", new Date()).eq("id", tid);
             trainingEntityService.update(trainingUpdateWrapper);
 
             // 异步地同步用户对该题目的提交数据
@@ -242,4 +235,5 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             throw new StatusFailException("添加失败！");
         }
     }
+
 }

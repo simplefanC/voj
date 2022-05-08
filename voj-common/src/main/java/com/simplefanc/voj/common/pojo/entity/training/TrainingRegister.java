@@ -43,4 +43,5 @@ public class TrainingRegister implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

@@ -1,7 +1,6 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.common.File;
 import com.simplefanc.voj.backend.common.constants.ScheduleConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
@@ -14,6 +13,7 @@ import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.service.oj.HomeService;
+import com.simplefanc.voj.common.pojo.entity.common.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +64,6 @@ public class HomeServiceImpl implements HomeService {
         return contestEntityService.getWithinNext14DaysContests();
     }
 
-
     /**
      * @MethodName getHomeCarousel
      * @Params
@@ -85,7 +84,6 @@ public class HomeServiceImpl implements HomeService {
         return apiList;
     }
 
-
     /**
      * @MethodName getRecentSevenACRank
      * @Params * @param null
@@ -97,7 +95,6 @@ public class HomeServiceImpl implements HomeService {
     public List<ACMRankVo> getRecentSevenACRank() {
         return userRecordEntityService.getRecent7ACRank();
     }
-
 
     /**
      * @MethodName getRecentOtherContest
@@ -113,7 +110,6 @@ public class HomeServiceImpl implements HomeService {
         return (ArrayList<HashMap<String, Object>>) redisUtil.get(redisKey);
     }
 
-
     /**
      * @MethodName getCommonAnnouncement
      * @Params * @param null
@@ -123,8 +119,11 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage) {
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
         return announcementEntityService.getAnnouncementList(limit, currentPage, true);
     }
+
 }

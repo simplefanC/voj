@@ -16,12 +16,16 @@ import org.apache.http.protocol.HttpContext;
 public class DedicatedHttpClient {
 
     protected HttpHost host;
+
     protected HttpContext context;
+
     protected String charset;
+
     /**
      * CloseableHttpClient
      */
     protected HttpClient client;
+
     protected AnonymousHttpContextRepository contextRepository;
 
     protected DedicatedHttpClient() {
@@ -32,7 +36,8 @@ public class DedicatedHttpClient {
     public <T> T execute(final HttpRequest request, final SimpleHttpResponseMapper<T> mapper) {
         HttpContext _context = context != null ? context : contextRepository.acquire();
         try {
-            // public <T> T execute(HttpHost target, HttpRequest request, ResponseHandler<? extends T> responseHandler, HttpContext context)
+            // public <T> T execute(HttpHost target, HttpRequest request,
+            // ResponseHandler<? extends T> responseHandler, HttpContext context)
             return client.execute(host, request, new ResponseHandler<T>() {
                 @Override
                 public T handleResponse(HttpResponse response) {
@@ -57,7 +62,8 @@ public class DedicatedHttpClient {
         return execute(request, new SimpleHttpResponseMapper<SimpleHttpResponse>() {
             @Override
             public SimpleHttpResponse map(SimpleHttpResponse response) throws Exception {
-                request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36");
+                request.setHeader("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36");
                 request.setHeader("Accept-Language", "en-GB,en;q=0.8");
                 for (SimpleHttpResponseValidator validator : validators) {
                     if (validator != null) {

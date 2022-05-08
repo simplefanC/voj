@@ -80,4 +80,5 @@ public class JudgeVo {
 
     @ApiModelProperty(value = "提交者所在ip")
     private String ip;
+
 }

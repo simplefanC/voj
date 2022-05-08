@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.problem.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.mapper.ProblemCaseMapper;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class ProblemCaseEntityServiceImpl extends ServiceImpl<ProblemCaseMapper, ProblemCase> implements ProblemCaseEntityService {
+public class ProblemCaseEntityServiceImpl extends ServiceImpl<ProblemCaseMapper, ProblemCase>
+        implements ProblemCaseEntityService {
+
 }

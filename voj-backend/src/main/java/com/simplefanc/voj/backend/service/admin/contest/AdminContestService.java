@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.contest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 
 /**
  * @Author: chenfan
@@ -23,4 +23,5 @@ public interface AdminContestService {
     void updateContest(AdminContestVo adminContestVo);
 
     void changeContestVisible(Long cid, String uid, Boolean visible);
+
 }

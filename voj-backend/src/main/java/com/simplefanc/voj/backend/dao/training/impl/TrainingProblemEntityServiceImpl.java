@@ -2,12 +2,12 @@ package com.simplefanc.voj.backend.dao.training.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingProblemMapper;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -25,7 +25,8 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
-public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProblemMapper, TrainingProblem> implements TrainingProblemEntityService {
+public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProblemMapper, TrainingProblem>
+        implements TrainingProblemEntityService {
 
     @Resource
     private TrainingProblemMapper trainingProblemMapper;
@@ -55,11 +56,7 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
             return 0;
         }
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.select("DISTINCT pid")
-                .in("pid", pidList)
-                .eq("cid", 0)
-                .eq("uid", uid)
-                .eq("status", 0);
+        judgeQueryWrapper.select("DISTINCT pid").in("pid", pidList).eq("cid", 0).eq("uid", uid).eq("status", 0);
         return judgeEntityService.count(judgeQueryWrapper);
     }
 

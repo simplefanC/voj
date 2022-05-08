@@ -4,13 +4,13 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.common.pojo.entity.user.*;
-import com.simplefanc.voj.common.utils.IpUtil;
 import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.constants.EmailConstant;
+import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
@@ -32,9 +32,10 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.backend.service.oj.PassportService;
+import com.simplefanc.voj.common.pojo.entity.user.*;
+import com.simplefanc.voj.common.utils.IpUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -73,7 +74,6 @@ public class PassportServiceImpl implements PassportService {
     @Resource
     private SessionEntityService sessionEntityService;
 
-
     @Resource
     private EmailService emailService;
 
@@ -94,7 +94,7 @@ public class PassportServiceImpl implements PassportService {
 
         String userIpAddr = IpUtil.getUserIpAddr(request);
         String key = AccountConstant.TRY_LOGIN_NUM + loginDto.getUsername() + "_" + userIpAddr;
-        Integer tryLoginCount = (Integer) redisUtil.get(key);
+        Integer tryLoginCount = redisUtil.get(key, Integer.class);
 
         if (tryLoginCount != null && tryLoginCount >= 20) {
             throw new StatusFailException("对不起！登录失败次数过多！您的账号有风险，半个小时内暂时无法登录！");
@@ -121,14 +121,12 @@ public class PassportServiceImpl implements PassportService {
         }
 
         String jwt = jwtUtil.generateToken(userRolesVo.getUid());
-        //放到信息头部
+        // 放到信息头部
         response.setHeader("Authorization", jwt);
         response.setHeader("Access-Control-Expose-Headers", "Authorization");
 
         // 会话记录
-        sessionEntityService.save(new Session()
-                .setUid(userRolesVo.getUid())
-                .setIp(IpUtil.getUserIpAddr(request))
+        sessionEntityService.save(new Session().setUid(userRolesVo.getUid()).setIp(IpUtil.getUserIpAddr(request))
                 .setUserAgent(request.getHeader("User-Agent")));
 
         // 登录成功，清除锁定限制
@@ -144,7 +142,6 @@ public class PassportServiceImpl implements PassportService {
         userInfoVo.setRoleList(userRolesVo.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
         return userInfoVo;
     }
-
 
     @Override
     public RegisterCodeVo getRegisterCode(String email) {
@@ -194,7 +191,6 @@ public class PassportServiceImpl implements PassportService {
         return registerCodeVo;
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void register(RegisterDto registerDto) {
@@ -232,7 +228,7 @@ public class PassportServiceImpl implements PassportService {
         boolean addUser = userInfoEntityService.addUser(registerDto);
 
         // 往user_role表插入数据
-        boolean addUserRole = userRoleEntityService.save(new UserRole().setRoleId(1002L).setUid(uuid));
+        boolean addUserRole = userRoleEntityService.save(new UserRole().setRoleId(RoleEnum.DEFAULT_USER.getId()).setUid(uuid));
 
         // 往user_record表插入数据
         boolean addUserRecord = userRecordEntityService.save(new UserRecord().setUid(uuid));
@@ -245,7 +241,6 @@ public class PassportServiceImpl implements PassportService {
         }
     }
 
-
     @Override
     public void applyResetPassword(ApplyResetPasswordDto applyResetPasswordDto) {
 
@@ -253,7 +248,7 @@ public class PassportServiceImpl implements PassportService {
         String captchaKey = applyResetPasswordDto.getCaptchaKey();
         String email = applyResetPasswordDto.getEmail();
 
-        if (StringUtils.isEmpty(captcha) || StringUtils.isEmpty(email) || StringUtils.isEmpty(captchaKey)) {
+        if (StrUtil.isEmpty(captcha) || StrUtil.isEmpty(email) || StrUtil.isEmpty(captchaKey)) {
             throw new StatusFailException("邮箱或验证码不能为空");
         }
 
@@ -267,7 +262,7 @@ public class PassportServiceImpl implements PassportService {
         }
 
         // 获取redis中的验证码
-        String redisCode = (String) redisUtil.get(captchaKey);
+        String redisCode = redisUtil.get(captchaKey, String.class);
         if (!redisCode.equals(captcha.trim().toLowerCase())) {
             throw new StatusFailException("验证码不正确");
         }
@@ -287,14 +282,13 @@ public class PassportServiceImpl implements PassportService {
         redisUtil.set(lockKey, 0, 90);
     }
 
-
     @Override
     public void resetPassword(ResetPasswordDto resetPasswordDto) {
         String username = resetPasswordDto.getUsername();
         String password = resetPasswordDto.getPassword();
         String code = resetPasswordDto.getCode();
 
-        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(username) || StringUtils.isEmpty(code)) {
+        if (StrUtil.isEmpty(password) || StrUtil.isEmpty(username) || StrUtil.isEmpty(code)) {
             throw new StatusFailException("用户名、新密码或验证码不能为空");
         }
 
@@ -319,4 +313,5 @@ public class PassportServiceImpl implements PassportService {
         }
         redisUtil.del(codeKey);
     }
+
 }

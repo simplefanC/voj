@@ -76,4 +76,5 @@ public class UserRolesVo implements Serializable {
 
     @ApiModelProperty(value = "角色列表")
     private List<Role> roles;
+
 }

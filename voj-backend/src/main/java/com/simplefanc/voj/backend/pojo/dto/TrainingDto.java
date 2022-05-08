@@ -17,4 +17,5 @@ public class TrainingDto {
     private Training training;
 
     private TrainingCategory trainingCategory;
+
 }

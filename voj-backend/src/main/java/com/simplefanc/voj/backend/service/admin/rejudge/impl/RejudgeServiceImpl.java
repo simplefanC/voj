@@ -2,12 +2,6 @@ package com.simplefanc.voj.backend.service.admin.rejudge.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeCaseEntityService;
@@ -17,6 +11,12 @@ import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
 import com.simplefanc.voj.backend.judge.local.JudgeDispatcher;
 import com.simplefanc.voj.backend.judge.remote.RemoteJudgeDispatcher;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,15 +87,9 @@ public class RejudgeServiceImpl implements RejudgeService {
         // 开始进入判题队列
         judge.setStatus(JudgeStatus.STATUS_PENDING.getStatus());
         judge.setVersion(judge.getVersion() + 1);
-        judge.setJudger("")
-                .setTime(null)
-                .setMemory(null)
-                .setErrorMessage(null)
-                .setOiRankScore(null)
-                .setScore(null);
+        judge.setJudger("").setTime(null).setMemory(null).setErrorMessage(null).setOiRankScore(null).setScore(null);
 
         boolean result = judgeEntityService.updateById(judge);
-
 
         if (result && resetContestRecordResult) {
             // 调用判题服务
@@ -131,12 +125,7 @@ public class RejudgeServiceImpl implements RejudgeService {
             // 开始进入判题队列
             judge.setStatus(JudgeStatus.STATUS_PENDING.getStatus());
             judge.setVersion(judge.getVersion() + 1);
-            judge.setJudger("")
-                    .setTime(null)
-                    .setMemory(null)
-                    .setErrorMessage(null)
-                    .setOiRankScore(null)
-                    .setScore(null);
+            judge.setJudger("").setTime(null).setMemory(null).setErrorMessage(null).setOiRankScore(null).setScore(null);
             submitIdList.add(judge.getSubmitId());
         }
         boolean resetJudgeResult = judgeEntityService.updateBatchById(rejudgeList);
@@ -168,4 +157,5 @@ public class RejudgeServiceImpl implements RejudgeService {
             throw new StatusFailException("重判失败！请重新尝试！");
         }
     }
+
 }

@@ -34,5 +34,4 @@ public class SysMsgVo {
 
     private Date gmtCreate;
 
-
 }

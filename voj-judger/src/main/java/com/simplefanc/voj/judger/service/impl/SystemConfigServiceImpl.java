@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.service.impl;
 
-
 import cn.hutool.system.oshi.OshiUtil;
 import com.simplefanc.voj.judger.service.SystemConfigService;
 import org.springframework.stereotype.Service;

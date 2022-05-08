@@ -8,13 +8,6 @@ import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.result.ResultStatus;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
@@ -29,16 +22,23 @@ import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ContestFileService;
 import com.simplefanc.voj.backend.service.oj.ContestCalculateRankService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.result.ResultStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,22 +61,31 @@ public class ContestFileServiceImpl implements ContestFileService {
             return new SimpleDateFormat("yyyyMMddHHmmss");
         }
     };
+
     @Autowired
     private ContestEntityService contestEntityService;
+
     @Autowired
     private ContestProblemEntityService contestProblemEntityService;
+
     @Autowired
     private ContestPrintEntityService contestPrintEntityService;
+
     @Autowired
     private FileEntityService fileEntityService;
+
     @Autowired
     private JudgeEntityService judgeEntityService;
+
     @Autowired
     private UserInfoEntityService userInfoEntityService;
+
     @Autowired
     private ContestCalculateRankService contestCalculateRankService;
+
     @Autowired
     private ContestValidator contestValidator;
+
     @Autowired
     private FilePathProps filePathProps;
 
@@ -137,10 +146,10 @@ public class ContestFileServiceImpl implements ContestFileService {
     }
 
     @Override
-    public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response) throws IOException {
+    public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response)
+            throws IOException {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
@@ -150,56 +159,50 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
 
         // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
 
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
             throw new StatusForbiddenException("错误：您并非该比赛的管理员，无权下载榜单！");
         }
 
         // 检查是否需要开启封榜模式
-        Boolean isOpenSealRank = contestValidator.isSealRank(userRolesVo.getUid(), contest, forceRefresh, isRoot);
+        boolean isOpenSealRank = contestValidator.isSealRank(userRolesVo.getUid(), contest, forceRefresh, isRoot);
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码
-        String fileName = URLEncoder.encode("contest_" + contest.getId() + "_rank", "UTF-8");
+        String fileName = URLEncoder.encode("contest_" + contest.getId() + "_rank", StandardCharsets.UTF_8);
         response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
         response.setHeader("Content-Type", "application/xlsx");
 
         // 获取题目displayID列表
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
         contestProblemQueryWrapper.eq("cid", contest.getId()).select("display_id").orderByAsc("display_id");
-        List<String> contestProblemDisplayIDList = contestProblemEntityService.list(contestProblemQueryWrapper)
-                .stream().map(ContestProblem::getDisplayId).collect(Collectors.toList());
+        List<String> contestProblemDisplayIdList = contestProblemEntityService.list(contestProblemQueryWrapper).stream()
+                .map(ContestProblem::getDisplayId).collect(Collectors.toList());
 
-        if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) { // ACM比赛
+        // ACM比赛
+        if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
 
-            List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calcACMRank(
-                    isOpenSealRank,
-                    removeStar,
-                    contest,
-                    null,
-                    null);
+            List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calculateACMRank(isOpenSealRank,
+                    removeStar, contest, null, null);
             EasyExcel.write(response.getOutputStream())
-                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIDList, true))
-                    .sheet("rank")
-                    .doWrite(fileEntityService.changeACMContestRankToExcelRowList(acmContestRankVoList, contestProblemDisplayIDList, contest.getRankShowName()));
+                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIdList, true)).sheet("rank")
+                    .doWrite(fileEntityService.changeACMContestRankToExcelRowList(acmContestRankVoList,
+                            contestProblemDisplayIdList, contest.getRankShowName()));
         } else {
-            List<OIContestRankVo> oiContestRankVoList = contestCalculateRankService.calcOIRank(
-                    isOpenSealRank,
-                    removeStar,
-                    contest,
-                    null,
-                    null);
+            List<OIContestRankVo> oiContestRankVoList = contestCalculateRankService.calculateOIRank(isOpenSealRank,
+                    removeStar, contest, null, null);
             EasyExcel.write(response.getOutputStream())
-                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIDList, false))
-                    .sheet("rank")
-                    .doWrite(fileEntityService.changOIContestRankToExcelRowList(oiContestRankVoList, contestProblemDisplayIDList, contest.getRankShowName()));
+                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIdList, false)).sheet("rank")
+                    .doWrite(fileEntityService.changeOIContestRankToExcelRowList(oiContestRankVoList,
+                            contestProblemDisplayIdList, contest.getRankShowName()));
         }
     }
 
     // TODO 行数过多
     @Override
-    public void downloadContestACSubmission(Long cid, Boolean excludeAdmin, String splitType, HttpServletResponse response) throws StatusForbiddenException, StatusFailException {
+    public void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, String splitType,
+                                            HttpServletResponse response) throws StatusForbiddenException, StatusFailException {
 
         Contest contest = contestEntityService.getById(cid);
 
@@ -208,9 +211,8 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        boolean isRoot = UserSessionUtil.isRoot();
 
         // 除非是root 其它管理员只能下载自己的比赛ac记录
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
@@ -226,11 +228,9 @@ public class ContestFileServiceImpl implements ContestFileService {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
 
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.eq("cid", cid)
-                .eq(isACM, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
+        judgeQueryWrapper.eq("cid", cid).eq(isACM, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
                 // OI模式取得分不为null的
-                .isNotNull(!isACM, "score")
-                .between("submit_time", contest.getStartTime(), contest.getEndTime())
+                .isNotNull(!isACM, "score").between("submit_time", contest.getStartTime(), contest.getEndTime())
                 // 排除比赛创建者和root
                 .ne(excludeAdmin, "uid", contest.getUid())
                 .notIn(excludeAdmin && superAdminUidList.size() > 0, "uid", superAdminUidList)
@@ -244,95 +244,9 @@ public class ContestFileServiceImpl implements ContestFileService {
 
         HashMap<String, Boolean> recordMap = new HashMap<>();
         if ("user".equals(splitType)) {
-            /**
-             * 以用户来分割提交的代码
-             */
-            List<String> usernameList = judgeList.stream()
-                    // 根据用户名过滤唯一
-                    .filter(distinctByKey(Judge::getUsername))
-                    // 映射出用户名列表
-                    .map(Judge::getUsername).collect(Collectors.toList());
-
-
-            HashMap<Long, String> cpIdMap = new HashMap<>();
-            for (ContestProblem contestProblem : contestProblemList) {
-                cpIdMap.put(contestProblem.getId(), contestProblem.getDisplayId());
-            }
-
-            for (String username : usernameList) {
-                // 对于每个用户生成对应的文件夹
-                String userDir = tmpFilesDir + File.separator + username;
-                FileUtil.mkdir(userDir);
-                // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> A_(666666).c
-                // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> A_(666666)_100.c
-                List<Judge> userSubmissionList = judgeList.stream()
-                        // 过滤出对应用户的提交
-                        .filter(judge -> judge.getUsername().equals(username))
-                        // 根据提交时间进行降序
-                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed())
-                        .collect(Collectors.toList());
-
-                for (Judge judge : userSubmissionList) {
-                    String filePath = userDir + File.separator + cpIdMap.getOrDefault(judge.getCpid(), "null");
-
-                    // OI模式只取最后一次提交
-                    if (!isACM) {
-                        String key = judge.getUsername() + "_" + judge.getPid();
-                        if (!recordMap.containsKey(key)) {
-                            filePath += "_" + judge.getScore() + "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
-                                    + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                            FileWriter fileWriter = new FileWriter(filePath);
-                            fileWriter.write(judge.getCode());
-                            recordMap.put(key, true);
-                        }
-
-                    } else {
-                        filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
-                                + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                        FileWriter fileWriter = new FileWriter(filePath);
-                        fileWriter.write(judge.getCode());
-                    }
-
-                }
-            }
+            splitCodeByUser(isACM, contestProblemList, judgeList, tmpFilesDir, recordMap);
         } else if ("problem".equals(splitType)) {
-            /**
-             * 以比赛题目编号来分割提交的代码
-             */
-
-            for (ContestProblem contestProblem : contestProblemList) {
-                // 对于每题目生成对应的文件夹
-                String problemDir = tmpFilesDir + File.separator + contestProblem.getDisplayId();
-                FileUtil.mkdir(problemDir);
-                // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> username_(666666).c
-                // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> username_(666666)_100.c
-                List<Judge> problemSubmissionList = judgeList.stream()
-                        // 过滤出对应题目的提交
-                        .filter(judge -> judge.getPid().equals(contestProblem.getPid()))
-                        // 根据提交时间进行降序
-                        .sorted(Comparator.comparing(Judge::getSubmitTime).reversed())
-                        .collect(Collectors.toList());
-
-                for (Judge judge : problemSubmissionList) {
-                    String filePath = problemDir + File.separator + judge.getUsername();
-                    if (!isACM) {
-                        String key = judge.getUsername() + "_" + contestProblem.getDisplayId();
-                        // OI模式只取最后一次提交
-                        if (!recordMap.containsKey(key)) {
-                            filePath += "_" + judge.getScore() + "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
-                                    + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                            FileWriter fileWriter = new FileWriter(filePath);
-                            fileWriter.write(judge.getCode());
-                            recordMap.put(key, true);
-                        }
-                    } else {
-                        filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
-                                + languageToFileSuffix(judge.getLanguage().toLowerCase());
-                        FileWriter fileWriter = new FileWriter(filePath);
-                        fileWriter.write(judge.getCode());
-                    }
-                }
-            }
+            splitByProblem(isACM, contestProblemList, judgeList, tmpFilesDir, recordMap);
         }
 
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
@@ -352,7 +266,7 @@ public class ContestFileServiceImpl implements ContestFileService {
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(zipFileName, "UTF-8"));
             int bytesRead = 0;
             byte[] buffer = new byte[1024 * 10];
-            //开始向网络传输文件流
+            // 开始向网络传输文件流
             while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
                 bouts.write(buffer, 0, bytesRead);
             }
@@ -391,6 +305,99 @@ public class ContestFileServiceImpl implements ContestFileService {
 
     }
 
+    /**
+     * 以比赛题目编号来分割提交的代码
+     */
+    private void splitByProblem(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir, HashMap<String, Boolean> recordMap) {
+        for (ContestProblem contestProblem : contestProblemList) {
+            // 对于每题目生成对应的文件夹
+            String problemDir = tmpFilesDir + File.separator + contestProblem.getDisplayId();
+            FileUtil.mkdir(problemDir);
+            // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> username_(666666).c
+            // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> username_(666666)_100.c
+            List<Judge> problemSubmissionList = judgeList.stream()
+                    // 过滤出对应题目的提交
+                    .filter(judge -> judge.getPid().equals(contestProblem.getPid()))
+                    // 根据提交时间进行降序
+                    .sorted(Comparator.comparing(Judge::getSubmitTime).reversed()).collect(Collectors.toList());
+
+            for (Judge judge : problemSubmissionList) {
+                String filePath = problemDir + File.separator + judge.getUsername();
+                if (!isACM) {
+                    String key = judge.getUsername() + "_" + contestProblem.getDisplayId();
+                    // OI模式只取最后一次提交
+                    if (!recordMap.containsKey(key)) {
+                        filePath += "_" + judge.getScore() + "_("
+                                + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                                + languageToFileSuffix(judge.getLanguage().toLowerCase());
+                        FileWriter fileWriter = new FileWriter(filePath);
+                        fileWriter.write(judge.getCode());
+                        recordMap.put(key, true);
+                    }
+                } else {
+                    filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                            + languageToFileSuffix(judge.getLanguage().toLowerCase());
+                    FileWriter fileWriter = new FileWriter(filePath);
+                    fileWriter.write(judge.getCode());
+                }
+            }
+        }
+    }
+
+    /**
+     * 以用户来分割提交的代码
+     */
+    private void splitCodeByUser(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir, HashMap<String, Boolean> recordMap) {
+        List<String> usernameList = judgeList.stream()
+                // 根据用户名过滤唯一
+                .filter(distinctByKey(Judge::getUsername))
+                // 映射出用户名列表
+                .map(Judge::getUsername)
+                .collect(Collectors.toList());
+
+        HashMap<Long, String> cpIdMap = new HashMap<>();
+        for (ContestProblem contestProblem : contestProblemList) {
+            cpIdMap.put(contestProblem.getId(), contestProblem.getDisplayId());
+        }
+
+        for (String username : usernameList) {
+            // 对于每个用户生成对应的文件夹
+            String userDir = tmpFilesDir + File.separator + username;
+            FileUtil.mkdir(userDir);
+            // 如果是ACM模式，则所有提交代码都要生成，如果同一题多次提交AC，加上提交时间秒后缀 ---> A_(666666).c
+            // 如果是OI模式就生成最近一次提交即可，且带上分数 ---> A_(666666)_100.c
+            List<Judge> userSubmissionList = judgeList.stream()
+                    // 过滤出对应用户的提交
+                    .filter(judge -> judge.getUsername().equals(username))
+                    // 根据提交时间进行降序
+                    .sorted(Comparator.comparing(Judge::getSubmitTime).reversed()).collect(Collectors.toList());
+
+            for (Judge judge : userSubmissionList) {
+                String filePath = userDir + File.separator + cpIdMap.getOrDefault(judge.getCpid(), "null");
+
+                // OI模式只取最后一次提交
+                if (!isACM) {
+                    String key = judge.getUsername() + "_" + judge.getPid();
+                    if (!recordMap.containsKey(key)) {
+                        filePath += "_" + judge.getScore() + "_("
+                                + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                                + languageToFileSuffix(judge.getLanguage().toLowerCase());
+                        FileWriter fileWriter = new FileWriter(filePath);
+                        fileWriter.write(judge.getCode());
+                        recordMap.put(key, true);
+                    }
+
+                } else {
+                    filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                            + languageToFileSuffix(judge.getLanguage().toLowerCase());
+                    FileWriter fileWriter = new FileWriter(filePath);
+                    fileWriter.write(judge.getCode());
+                }
+
+            }
+        }
+    }
+
     @Override
     public void downloadContestPrintText(Long id, HttpServletResponse response) {
         ContestPrint contestPrint = contestPrintEntityService.getById(id);
@@ -403,17 +410,19 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
 
         FileReader zipFileReader = new FileReader(filePath);
-        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());//放到缓冲流里面
-        OutputStream outs = null;//获取文件输出IO流
+        // 放到缓冲流里面
+        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());
+        // 获取文件输出IO流
+        OutputStream outs = null;
         BufferedOutputStream bouts = null;
         try {
             outs = response.getOutputStream();
             bouts = new BufferedOutputStream(outs);
             response.setContentType("application/x-download");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
             int bytesRead = 0;
             byte[] buffer = new byte[1024 * 10];
-            //开始向网络传输文件流
+            // 开始向网络传输文件流
             while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
                 bouts.write(buffer, 0, bytesRead);
             }

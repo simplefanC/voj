@@ -14,4 +14,5 @@ public interface DashboardService {
     Session getRecentSession();
 
     Map<Object, Object> getDashboardInfo();
+
 }

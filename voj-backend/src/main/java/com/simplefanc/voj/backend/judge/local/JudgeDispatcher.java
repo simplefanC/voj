@@ -2,11 +2,11 @@ package com.simplefanc.voj.backend.judge.local;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,11 +48,9 @@ public class JudgeDispatcher {
                 isOk = redisUtil.llPush(QueueConstant.GENERAL_JUDGE_WAITING, JSONUtil.toJsonStr(task));
             }
             if (!isOk) {
-                judgeEntityService.updateById(new Judge()
-                        .setSubmitId(judge.getSubmitId())
+                judgeEntityService.updateById(new Judge().setSubmitId(judge.getSubmitId())
                         .setStatus(JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus())
-                        .setErrorMessage("Please try to submit again!")
-                );
+                        .setErrorMessage("Please try to submit again!"));
             }
             // 调用判题任务处理
             judgeReceiver.processWaitingTask();
@@ -61,4 +59,5 @@ public class JudgeDispatcher {
             judgeEntityService.failToUseRedisPublishJudge(judge.getSubmitId(), judge.getPid(), isContest);
         }
     }
+
 }

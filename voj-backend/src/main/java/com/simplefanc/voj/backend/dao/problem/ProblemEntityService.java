@@ -2,14 +2,13 @@ package com.simplefanc.voj.backend.dao.problem;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 
 import java.util.HashMap;
 import java.util.List;
-
 
 /**
  * <p>
@@ -21,12 +20,15 @@ import java.util.List;
  */
 
 public interface ProblemEntityService extends IService<Problem> {
-    Page<ProblemVo> getProblemList(int limit, int currentPage, Long pid, String title,
-                                   Integer difficulty, List<Long> tid, String oj);
+
+    Page<ProblemVo> getProblemList(int limit, int currentPage, Long pid, String title, Integer difficulty,
+                                   List<Long> tid, String oj);
 
     boolean adminUpdateProblem(ProblemDto problemDto);
 
     boolean adminAddProblem(ProblemDto problemDto);
 
-    ImportProblemVo buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList, HashMap<Long, String> languageMap, HashMap<Long, String> tagMap);
+    ImportProblemVo buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList,
+                                       HashMap<Long, String> languageMap, HashMap<Long, String> tagMap);
+
 }

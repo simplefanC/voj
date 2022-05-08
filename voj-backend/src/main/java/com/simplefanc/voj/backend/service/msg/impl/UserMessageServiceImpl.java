@@ -3,12 +3,6 @@ package com.simplefanc.voj.backend.service.msg.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
-import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
-import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
-import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
-import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.discussion.CommentEntityService;
@@ -20,8 +14,13 @@ import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
 import com.simplefanc.voj.backend.service.msg.UserMessageService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
+import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
+import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
+import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
+import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -64,8 +63,7 @@ public class UserMessageServiceImpl implements UserMessageService {
     @Override
     public UserUnreadMsgCountVo getUnreadMsgCount() {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         UserUnreadMsgCountVo userUnreadMsgCount = msgRemindEntityService.getUserUnreadMsgCount(userRolesVo.getUid());
         if (userUnreadMsgCount == null) {
             userUnreadMsgCount = new UserUnreadMsgCountVo(0, 0, 0, 0, 0);
@@ -73,63 +71,58 @@ public class UserMessageServiceImpl implements UserMessageService {
         return userUnreadMsgCount;
     }
 
-
     @Override
     public void cleanMsg(String type, Long id) {
-
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         boolean isOk = cleanMsgByType(type, id, userRolesVo.getUid());
         if (!isOk) {
             throw new StatusFailException("清空失败");
         }
     }
 
-
     @Override
     public IPage<UserMsgVo> getCommentMsg(Integer limit, Integer currentPage) {
-
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 5;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 5;
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         return getUserMsgList(userRolesVo.getUid(), "Discuss", limit, currentPage);
     }
-
 
     @Override
     public IPage<UserMsgVo> getReplyMsg(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 5;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 5;
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         return getUserMsgList(userRolesVo.getUid(), "Reply", limit, currentPage);
     }
-
 
     @Override
     public IPage<UserMsgVo> getLikeMsg(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 5;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 5;
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         return getUserMsgList(userRolesVo.getUid(), "Like", limit, currentPage);
     }
-
 
     private boolean cleanMsgByType(String type, Long id, String uid) {
 
@@ -138,21 +131,16 @@ public class UserMessageServiceImpl implements UserMessageService {
             case "Discuss":
             case "Reply":
                 UpdateWrapper<MsgRemind> updateWrapper1 = new UpdateWrapper<>();
-                updateWrapper1
-                        .eq(id != null, "id", id)
-                        .eq("recipient_id", uid);
+                updateWrapper1.eq(id != null, "id", id).eq("recipient_id", uid);
                 return msgRemindEntityService.remove(updateWrapper1);
             case "Sys":
             case "Mine":
                 UpdateWrapper<UserSysNotice> updateWrapper2 = new UpdateWrapper<>();
-                updateWrapper2
-                        .eq(id != null, "id", id)
-                        .eq("recipient_id", uid);
+                updateWrapper2.eq(id != null, "id", id).eq("recipient_id", uid);
                 return userSysNoticeEntityService.remove(updateWrapper2);
         }
         return false;
     }
-
 
     private IPage<UserMsgVo> getUserMsgList(String uid, String action, int limit, int currentPage) {
         Page<UserMsgVo> page = new Page<>(currentPage, limit);
@@ -175,12 +163,9 @@ public class UserMessageServiceImpl implements UserMessageService {
         }
     }
 
-
     private IPage<UserMsgVo> getUserDiscussMsgList(IPage<UserMsgVo> userMsgList) {
 
-        List<Integer> discussionIds = userMsgList.getRecords()
-                .stream()
-                .map(UserMsgVo::getSourceId)
+        List<Integer> discussionIds = userMsgList.getRecords().stream().map(UserMsgVo::getSourceId)
                 .collect(Collectors.toList());
         Collection<Discussion> discussions = discussionEntityService.listByIds(discussionIds);
         for (Discussion discussion : discussions) {
@@ -219,12 +204,10 @@ public class UserMessageServiceImpl implements UserMessageService {
                 if (comment != null) {
                     String content;
                     if (comment.getContent().length() < 100) {
-                        content = comment.getFromName() + " : "
-                                + comment.getContent();
+                        content = comment.getFromName() + " : " + comment.getContent();
 
                     } else {
-                        content = comment.getFromName() + " : "
-                                + comment.getContent().substring(0, 100) + "...";
+                        content = comment.getFromName() + " : " + comment.getContent().substring(0, 100) + "...";
                     }
                     userMsgVo.setQuoteContent(content);
                 } else {
@@ -236,8 +219,7 @@ public class UserMessageServiceImpl implements UserMessageService {
                 if (reply != null) {
                     String content;
                     if (reply.getContent().length() < 100) {
-                        content = reply.getFromName() + " : @" + reply.getToName() + "："
-                                + reply.getContent();
+                        content = reply.getFromName() + " : @" + reply.getToName() + "：" + reply.getContent();
 
                     } else {
                         content = reply.getFromName() + " : @" + reply.getToName() + "："
@@ -277,20 +259,16 @@ public class UserMessageServiceImpl implements UserMessageService {
         return userMsgList;
     }
 
-
     @Override
     @Async
     public void updateUserMsgRead(IPage<UserMsgVo> userMsgList) {
-        List<Long> idList = userMsgList.getRecords().stream()
-                .filter(userMsgVo -> !userMsgVo.getState())
-                .map(UserMsgVo::getId)
-                .collect(Collectors.toList());
+        List<Long> idList = userMsgList.getRecords().stream().filter(userMsgVo -> !userMsgVo.getState())
+                .map(UserMsgVo::getId).collect(Collectors.toList());
         if (idList.size() == 0) {
             return;
         }
         UpdateWrapper<MsgRemind> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.in("id", idList)
-                .set("state", true);
+        updateWrapper.in("id", idList).set("state", true);
         msgRemindEntityService.update(null, updateWrapper);
     }
 

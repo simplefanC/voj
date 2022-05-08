@@ -1,13 +1,12 @@
 package com.simplefanc.voj.backend.controller.admin;
 
-
 import cn.hutool.json.JSONObject;
-import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.pojo.dto.DBAndRedisConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
 import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -53,7 +52,6 @@ public class ConfigController {
         return CommonResult.successResponse(configService.getWebConfig());
     }
 
-
     @RequiresPermissions("system_info_admin")
     @DeleteMapping("/home-carousel")
     public CommonResult<Void> deleteHomeCarousel(@RequestParam("id") Long id) {
@@ -90,14 +88,14 @@ public class ConfigController {
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping("/get-db-and-redis-config")
-    public CommonResult<DBAndRedisConfigDto> getDBAndRedisConfig() {
-        return CommonResult.successResponse(configService.getDBAndRedisConfig());
+    public CommonResult<DbAndRedisConfigDto> getDbAndRedisConfig() {
+        return CommonResult.successResponse(configService.getDbAndRedisConfig());
     }
 
     @RequiresPermissions("system_info_admin")
     @PutMapping("/set-db-and-redis-config")
-    public CommonResult<Void> setDBAndRedisConfig(@RequestBody DBAndRedisConfigDto config) {
-        configService.setDBAndRedisConfig(config);
+    public CommonResult<Void> setDbAndRedisConfig(@RequestBody DbAndRedisConfigDto config) {
+        configService.setDbAndRedisConfig(config);
         return CommonResult.successResponse();
     }
 

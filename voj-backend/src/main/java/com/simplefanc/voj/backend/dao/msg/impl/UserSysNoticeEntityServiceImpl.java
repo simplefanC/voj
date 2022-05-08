@@ -3,10 +3,10 @@ package com.simplefanc.voj.backend.dao.msg.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.UserSysNoticeMapper;
 import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
+import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,7 +17,8 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
-public class UserSysNoticeEntityServiceImpl extends ServiceImpl<UserSysNoticeMapper, UserSysNotice> implements UserSysNoticeEntityService {
+public class UserSysNoticeEntityServiceImpl extends ServiceImpl<UserSysNoticeMapper, UserSysNotice>
+        implements UserSysNoticeEntityService {
 
     @Resource
     private UserSysNoticeMapper userSysNoticeMapper;

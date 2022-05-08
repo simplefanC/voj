@@ -2,8 +2,8 @@ package com.simplefanc.voj.backend.dao.user;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 
 /**
  * <p>
@@ -22,4 +22,5 @@ public interface UserRoleEntityService extends IService<UserRole> {
     void deleteCache(String uid, boolean isRemoveSession);
 
     String getAuthChangeContent(int oldType, int newType);
+
 }

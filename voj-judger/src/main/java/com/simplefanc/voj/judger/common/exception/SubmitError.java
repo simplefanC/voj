@@ -9,7 +9,9 @@ import lombok.Data;
  */
 @Data
 public class SubmitError extends Exception {
+
     private String stdout;
+
     private String stderr;
 
     public SubmitError(String message, String stdout, String stderr) {
@@ -17,4 +19,5 @@ public class SubmitError extends Exception {
         this.stdout = stdout;
         this.stderr = stderr;
     }
+
 }

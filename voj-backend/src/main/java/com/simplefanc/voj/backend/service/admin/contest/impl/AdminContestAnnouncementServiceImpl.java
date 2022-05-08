@@ -1,13 +1,13 @@
 package com.simplefanc.voj.backend.service.admin.contest.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestAnnouncement;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestAnnouncementEntityService;
 import com.simplefanc.voj.backend.pojo.dto.AnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestAnnouncementService;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestAnnouncement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +29,10 @@ public class AdminContestAnnouncementServiceImpl implements AdminContestAnnounce
     @Override
     public IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage, Long cid) {
 
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
         return announcementEntityService.getContestAnnouncement(cid, false, limit, currentPage);
     }
 
@@ -47,8 +49,7 @@ public class AdminContestAnnouncementServiceImpl implements AdminContestAnnounce
     public void addAnnouncement(AnnouncementDto announcementDto) {
         boolean saveAnnouncement = announcementEntityService.save(announcementDto.getAnnouncement());
         boolean saveContestAnnouncement = contestAnnouncementEntityService.saveOrUpdate(new ContestAnnouncement()
-                .setAid(announcementDto.getAnnouncement().getId())
-                .setCid(announcementDto.getCid()));
+                .setAid(announcementDto.getAnnouncement().getId()).setCid(announcementDto.getCid()));
         if (!saveAnnouncement || !saveContestAnnouncement) {
             throw new StatusFailException("添加失败");
         }
@@ -62,4 +63,5 @@ public class AdminContestAnnouncementServiceImpl implements AdminContestAnnounce
             throw new StatusFailException("更新失败！");
         }
     }
+
 }

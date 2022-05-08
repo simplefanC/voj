@@ -18,13 +18,20 @@ public class RemoteAccountProps {
 
     @Data
     public static class RemoteOJ {
+
         private String oj;
+
         private List<Account> accounts;
+
     }
 
     @Data
     public static class Account {
+
         private String username;
+
         private String password;
+
     }
+
 }

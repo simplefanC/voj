@@ -1,21 +1,21 @@
 package com.simplefanc.voj.backend.dao.user.impl;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
-import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
-import com.simplefanc.voj.common.pojo.entity.user.Session;
 import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.mapper.SessionMapper;
+import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
+import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
+import com.simplefanc.voj.common.pojo.entity.user.Session;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -42,9 +42,7 @@ public class SessionEntityServiceImpl extends ServiceImpl<SessionMapper, Session
     @Async
     public void checkRemoteLogin(String uid) {
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
-        sessionQueryWrapper.eq("uid", uid)
-                .orderByDesc("gmt_create")
-                .last("limit 2");
+        sessionQueryWrapper.eq("uid", uid).orderByDesc("gmt_create").last("limit 2");
         List<Session> sessionList = sessionMapper.selectList(sessionQueryWrapper);
         if (sessionList.size() < 2) {
             return;
@@ -53,25 +51,19 @@ public class SessionEntityServiceImpl extends ServiceImpl<SessionMapper, Session
         Session lastSession = sessionList.get(1);
         // 如果两次登录的ip不相同，需要发通知给用户
         if (!nowSession.getIp().equals(lastSession.getIp())) {
-            String remoteLoginContent = getRemoteLoginContent(lastSession.getIp(), nowSession.getIp(), nowSession.getGmtCreate());
+            String remoteLoginContent = getRemoteLoginContent(lastSession.getIp(), nowSession.getIp(),
+                    nowSession.getGmtCreate());
             if (remoteLoginContent == null) {
                 return;
             }
             AdminSysNotice adminSysNotice = new AdminSysNotice();
-            adminSysNotice
-                    .setType("Single")
-                    .setContent(remoteLoginContent)
-                    .setTitle("账号异地登录通知(Account Remote Login Notice)")
-                    .setAdminId("1")
-                    .setState(false)
+            adminSysNotice.setType("Single").setContent(remoteLoginContent)
+                    .setTitle("账号异地登录通知(Account Remote Login Notice)").setAdminId("1").setState(false)
                     .setRecipientId(uid);
             boolean isSaveOk = adminSysNoticeEntityService.save(adminSysNotice);
             if (isSaveOk) {
                 UserSysNotice userSysNotice = new UserSysNotice();
-                userSysNotice.setType("Sys")
-                        .setSysNoticeId(adminSysNotice.getId())
-                        .setRecipientId(uid)
-                        .setState(false);
+                userSysNotice.setType("Sys").setSysNoticeId(adminSysNotice.getId()).setRecipientId(uid).setState(false);
                 boolean isOk = userSysNoticeEntityService.save(userSysNotice);
                 if (isOk) {
                     adminSysNotice.setState(true);
@@ -105,25 +97,18 @@ public class SessionEntityServiceImpl extends ServiceImpl<SessionMapper, Session
         } catch (Exception ignored) {
             return null;
         }
-        if (!StringUtils.isEmpty(addr)) {
-            sb.append("在【")
-                    .append(addr)
-                    .append("】");
+        if (!StrUtil.isEmpty(addr)) {
+            sb.append("在【").append(addr).append("】");
         }
-        sb.append("登录，登录IP为：【")
-                .append(newIp)
-                .append("】，若非本人操作，请立即修改密码。")
-                .append("\n\n")
+        sb.append("登录，登录IP为：【").append(newIp).append("】，若非本人操作，请立即修改密码。").append("\n\n")
                 .append("Hello! Dear user, Your account was logged in in");
 
-        if (!StringUtils.isEmpty(addr)) {
-            sb.append(" 【")
-                    .append(addr)
-                    .append("】 on ")
-                    .append(dateStr)
+        if (!StrUtil.isEmpty(addr)) {
+            sb.append(" 【").append(addr).append("】 on ").append(dateStr)
                     .append(". If you do not operate by yourself, please change your password immediately.");
         }
 
         return sb.toString();
     }
+
 }

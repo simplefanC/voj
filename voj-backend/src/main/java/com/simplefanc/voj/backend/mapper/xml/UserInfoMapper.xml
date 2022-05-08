@@ -10,6 +10,6 @@
         from user_info u,
              user_role ur
         where u.uuid = ur.uid
-          and ur.role_id = 1000
+          and ur.role_id = #{roleId}
     </select>
 </mapper>

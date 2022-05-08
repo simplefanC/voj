@@ -1,6 +1,5 @@
 package com.simplefanc.voj.judger.judge.remote.provider.tkoj;
 
-
 import cn.hutool.core.util.ReUtil;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
@@ -25,20 +24,20 @@ public class TKOJVerifyUtil {
     public static String getCaptcha(DedicatedHttpClient client) throws ClientProtocolException, IOException {
         HttpGet get = new HttpGet("/vcode.php");
         BufferedImage image = client.execute(get, new ResponseHandler<BufferedImage>() {
-                    @Override
-                    public BufferedImage handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-                        FileOutputStream fos = null;
-                        try {
-                            File captchaImg = File.createTempFile("TKOJ", ".png");
-                            fos = new FileOutputStream(captchaImg);
-                            response.getEntity().writeTo(fos);
-                            return ImageIO.read(captchaImg);
-                        } finally {
-                            fos.close();
-                        }
-                    }
+            @Override
+            public BufferedImage handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                FileOutputStream fos = null;
+                try {
+                    File captchaImg = File.createTempFile("TKOJ", ".png");
+                    fos = new FileOutputStream(captchaImg);
+                    response.getEntity().writeTo(fos);
+                    return ImageIO.read(captchaImg);
+                } finally {
+                    fos.close();
                 }
-        );
+            }
+        });
         return TKOJCaptchaRecognizer.recognize(image);
     }
+
 }

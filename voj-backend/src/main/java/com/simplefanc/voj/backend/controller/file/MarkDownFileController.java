@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.MarkDownFileService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -25,7 +24,6 @@ import java.util.Map;
 @RequestMapping("/api/file")
 public class MarkDownFileController {
 
-
     @Resource
     private MarkDownFileService markDownFileService;
 
@@ -37,7 +35,6 @@ public class MarkDownFileController {
         return CommonResult.successResponse(markDownFileService.uploadMDImg(image));
     }
 
-
     @RequestMapping(value = "/delete-md-img", method = RequestMethod.GET)
     @RequiresAuthentication
     @ResponseBody
@@ -46,7 +43,6 @@ public class MarkDownFileController {
         markDownFileService.deleteMDImg(fileId);
         return CommonResult.successResponse();
     }
-
 
     @RequestMapping(value = "/upload-md-file", method = RequestMethod.POST)
     @RequiresAuthentication

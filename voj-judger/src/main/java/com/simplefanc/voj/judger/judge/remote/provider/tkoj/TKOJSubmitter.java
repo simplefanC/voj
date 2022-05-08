@@ -20,27 +20,31 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class TKOJSubmitter implements Submitter {
-    private static final Map<String, String> LANGUAGE_MAP = new HashMap<String, String>() {{
-        put("C", "0");
-        put("C++", "1");
-        put("Pascal", "2");
-        put("Java", "3");
-        put("Ruby", "4");
-        put("Bash", "5");
-        put("Python", "6");
-        put("PHP", "7");
-        put("Perl", "8");
-        put("C#", "9");
-        put("Obj-C", "10");
-        put("FreeBasic", "11");
-        put("Scheme", "12");
-        put("Clang", "13");
-        put("Clang++", "14");
-        put("Lua", "15");
-        put("JavaScript", "16");
-        put("Go", "17");
-        put("SQL(sqlite3)", "18");
-    }};
+
+    private static final Map<String, String> LANGUAGE_MAP = new HashMap<String, String>() {
+        {
+            put("C", "0");
+            put("C++", "1");
+            put("Pascal", "2");
+            put("Java", "3");
+            put("Ruby", "4");
+            put("Bash", "5");
+            put("Python", "6");
+            put("PHP", "7");
+            put("Perl", "8");
+            put("C#", "9");
+            put("Obj-C", "10");
+            put("FreeBasic", "11");
+            put("Scheme", "12");
+            put("Clang", "13");
+            put("Clang++", "14");
+            put("Lua", "15");
+            put("JavaScript", "16");
+            put("Go", "17");
+            put("SQL(sqlite3)", "18");
+        }
+    };
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -50,7 +54,8 @@ public class TKOJSubmitter implements Submitter {
     }
 
     protected String getRunId(SubmissionInfo info, DedicatedHttpClient client) {
-        String html = client.get("/status.php?problem_id=" + info.remotePid + "&user_id=" + info.remoteAccountId, HttpStatusValidator.SC_OK).getBody();
+        String html = client.get("/status.php?problem_id=" + info.remotePid + "&user_id=" + info.remoteAccountId,
+                HttpStatusValidator.SC_OK).getBody();
         return ReUtil.getGroup1("prevtop=(\\d+)", html);
     }
 
@@ -58,13 +63,9 @@ public class TKOJSubmitter implements Submitter {
     public void submit(SubmissionInfo info, RemoteAccount account) throws Exception {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
         // 进行代码提交
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "id", info.remotePid,
-                "language", info.language,
-                "source", info.userCode,
-                "csrf", TKOJVerifyUtil.getCsrf(client),
-                "vcode", TKOJVerifyUtil.getCaptcha(client)
-        );
+        HttpEntity entity = SimpleNameValueEntityFactory.create("id", info.remotePid, "language", info.language,
+                "source", info.userCode, "csrf", TKOJVerifyUtil.getCsrf(client), "vcode",
+                TKOJVerifyUtil.getCaptcha(client));
         HttpPost post = new HttpPost("/submit.php");
         post.setEntity(entity);
         client.execute(post, HttpStatusValidator.SC_MOVED_TEMPORARILY);
@@ -74,4 +75,5 @@ public class TKOJSubmitter implements Submitter {
             info.remoteRunId = getRunId(info, client);
         }
     }
+
 }

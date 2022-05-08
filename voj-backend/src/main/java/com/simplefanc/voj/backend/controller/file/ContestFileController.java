@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
 import com.simplefanc.voj.backend.service.file.ContestFileService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
@@ -26,11 +25,9 @@ public class ContestFileController {
     @Autowired
     private ContestFileService contestFileService;
 
-
     @GetMapping("/download-contest-rank")
     @RequiresAuthentication
-    public void downloadContestRank(@RequestParam("cid") Long cid,
-                                    @RequestParam("forceRefresh") Boolean forceRefresh,
+    public void downloadContestRank(@RequestParam("cid") Long cid, @RequestParam("forceRefresh") Boolean forceRefresh,
                                     @RequestParam(value = "removeStar", defaultValue = "false") Boolean removeStar,
                                     HttpServletResponse response) throws IOException {
         contestFileService.downloadContestRank(cid, forceRefresh, removeStar, response);
@@ -41,12 +38,10 @@ public class ContestFileController {
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public void downloadContestACSubmission(@RequestParam("cid") Long cid,
                                             @RequestParam(value = "excludeAdmin", defaultValue = "false") Boolean excludeAdmin,
-                                            @RequestParam(value = "splitType", defaultValue = "user") String splitType,
-                                            HttpServletResponse response) {
+                                            @RequestParam(value = "splitType", defaultValue = "user") String splitType, HttpServletResponse response) {
 
-        contestFileService.downloadContestACSubmission(cid, excludeAdmin, splitType, response);
+        contestFileService.downloadContestAcSubmission(cid, excludeAdmin, splitType, response);
     }
-
 
     @GetMapping("/download-contest-print-text")
     @RequiresAuthentication
@@ -54,4 +49,5 @@ public class ContestFileController {
     public void downloadContestPrintText(@RequestParam("id") Long id, HttpServletResponse response) {
         contestFileService.downloadContestPrintText(id, response);
     }
+
 }

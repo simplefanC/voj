@@ -34,20 +34,28 @@ public class EmailService {
 
     @Value("${voj.web-config.base-url}")
     public String ojAddr;
+
     @Value("${voj.web-config.name}")
     public String ojName;
+
     @Value("${voj.web-config.short-name}")
     public String ojShortName;
+
     @Value("${voj.mail.username}")
     public String ojEmailFrom;
+
     @Value("${voj.mail.password}")
     public String ojEmailPassword;
+
     @Value("${voj.mail.host}")
     public String ojEmailHost;
+
     @Value("${voj.mail.port}")
     public Integer ojEmailPort;
+
     @Value("${voj.mail.ssl}")
     public String ojEmailSsl;
+
     @Autowired
     private TemplateEngine templateEngine;
 
@@ -102,8 +110,7 @@ public class EmailService {
         JavaMailSenderImpl mailSender = getMailSender();
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
-                    true);
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             // 设置渲染到html页面对应的值
             Context context = new Context();
             context.setVariable(EmailConstant.OJ_NAME, UnicodeUtil.toString(ojName));
@@ -112,7 +119,7 @@ public class EmailService {
             context.setVariable("CODE", code);
             context.setVariable("EXPIRE_TIME", expireTime.toString());
 
-            //利用模板引擎加载html文件进行渲染并生成对应的字符串
+            // 利用模板引擎加载html文件进行渲染并生成对应的字符串
             String emailContent = templateEngine.process("emailTemplate_registerCode", context);
 
             // 设置邮件标题
@@ -129,7 +136,6 @@ public class EmailService {
         }
     }
 
-
     /**
      * @param username 需要重置密码的用户名
      * @param email    用户邮箱
@@ -145,8 +151,7 @@ public class EmailService {
         JavaMailSenderImpl mailSender = getMailSender();
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
-                    true);
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             // 设置渲染到html页面对应的值
             Context context = new Context();
             context.setVariable(EmailConstant.OJ_NAME, UnicodeUtil.toString(ojName));
@@ -164,7 +169,7 @@ public class EmailService {
             context.setVariable("EXPIRE_TIME", expireTime.toString());
             context.setVariable("USERNAME", username);
 
-            //利用模板引擎加载html文件进行渲染并生成对应的字符串
+            // 利用模板引擎加载html文件进行渲染并生成对应的字符串
             String emailContent = templateEngine.process("emailTemplate_resetPassword", context);
 
             mimeMessageHelper.setSubject(UnicodeUtil.toString(ojShortName).toUpperCase() + "的重置密码邮件");
@@ -180,7 +185,6 @@ public class EmailService {
         }
     }
 
-
     /**
      * @param email 用户邮箱
      * @MethodName testEmail
@@ -193,14 +197,13 @@ public class EmailService {
         JavaMailSenderImpl mailSender = getMailSender();
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,
-                    true);
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             // 设置渲染到html页面对应的值
             Context context = new Context();
             context.setVariable(EmailConstant.OJ_NAME, UnicodeUtil.toString(ojName));
             context.setVariable(EmailConstant.OJ_SHORT_NAME, UnicodeUtil.toString(ojShortName).toUpperCase());
             context.setVariable(EmailConstant.OJ_URL, ojAddr);
-            //利用模板引擎加载html文件进行渲染并生成对应的字符串
+            // 利用模板引擎加载html文件进行渲染并生成对应的字符串
             String emailContent = templateEngine.process("emailTemplate_testEmail", context);
 
             mimeMessageHelper.setSubject(UnicodeUtil.toString(ojShortName).toUpperCase() + "的测试邮件");
@@ -215,4 +218,5 @@ public class EmailService {
             log.error("超级管理员重置邮件系统配置的测试邮箱可用性的任务发生异常------------>{}", e.getMessage());
         }
     }
+
 }

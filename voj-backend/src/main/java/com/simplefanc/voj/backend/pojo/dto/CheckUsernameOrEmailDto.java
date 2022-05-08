@@ -13,4 +13,5 @@ public class CheckUsernameOrEmailDto {
     private String email;
 
     private String username;
+
 }

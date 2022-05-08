@@ -2,13 +2,13 @@ package com.simplefanc.voj.backend.judge.local;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.backend.common.constants.CallJudgerType;
 import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.judge.AbstractReceiver;
 import com.simplefanc.voj.backend.judge.Dispatcher;
+import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -33,10 +33,8 @@ public class JudgeReceiver extends AbstractReceiver {
     public void processWaitingTask() {
         // 优先处理比赛的提交
         // 其次处理普通提交的提交
-        handleWaitingTask(QueueConstant.CONTEST_JUDGE_WAITING,
-                QueueConstant.GENERAL_JUDGE_WAITING);
+        handleWaitingTask(QueueConstant.CONTEST_JUDGE_WAITING, QueueConstant.GENERAL_JUDGE_WAITING);
     }
-
 
     @Override
     public String getTaskByRedis(String queue) {
@@ -54,10 +52,8 @@ public class JudgeReceiver extends AbstractReceiver {
         Judge judge = task.get("judge", Judge.class);
         String token = task.getStr("token");
         // 调用判题服务
-        dispatcher.dispatcher(CallJudgerType.JUDGE, "/judge", new ToJudge()
-                .setJudge(judge)
-                .setToken(token)
-                .setRemoteJudgeProblem(null));
+        dispatcher.dispatcher(CallJudgerType.JUDGE, "/judge",
+                new ToJudge().setJudge(judge).setToken(token).setRemoteJudgeProblem(null));
         // 接着处理任务
         processWaitingTask();
     }

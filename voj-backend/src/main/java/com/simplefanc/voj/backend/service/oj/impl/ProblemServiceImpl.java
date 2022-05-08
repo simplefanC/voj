@@ -1,13 +1,8 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.constants.RemoteOj;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.problem.*;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
@@ -17,12 +12,14 @@ import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.pojo.dto.PidListDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.ProblemService;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.common.constants.*;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.problem.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,6 +34,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ProblemServiceImpl implements ProblemService {
+
     @Autowired
     private ProblemEntityService problemEntityService;
 
@@ -71,21 +69,22 @@ public class ProblemServiceImpl implements ProblemService {
      * @Since 2020/10/27
      */
     @Override
-    public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage,
-                                          String keyword, List<Long> tagId, Integer difficulty, String oj) {
+    public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId,
+                                          Integer difficulty, String oj) {
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
 
         // 关键词查询不为空
-        if (!StringUtils.isEmpty(keyword)) {
+        if (!StrUtil.isEmpty(keyword)) {
             keyword = keyword.trim();
         }
         if (oj != null && !RemoteOj.isRemoteOJ(oj)) {
-            oj = "LOCAL";
+            oj = Constant.LOCAL;
         }
-        return problemEntityService.getProblemList(limit, currentPage, null, keyword,
-                difficulty, tagId, oj);
+        return problemEntityService.getProblemList(limit, currentPage, null, keyword, difficulty, tagId, oj);
     }
 
     /**
@@ -119,15 +118,12 @@ public class ProblemServiceImpl implements ProblemService {
     public HashMap<Long, Object> getUserProblemStatus(PidListDto pidListDto) {
 
         // 需要获取一下该token对应用户的数据
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         HashMap<Long, Object> result = new HashMap<>();
         // 先查询判断该用户对于这些题是否已经通过，若已通过，则无论后续再提交结果如何，该题都标记为通过
         QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("distinct pid,status,submit_time,score")
-                .in("pid", pidListDto.getPidList())
-                .eq("uid", userRolesVo.getUid())
-                .orderByDesc("submit_time");
+        queryWrapper.select("distinct pid,status,submit_time,score").in("pid", pidListDto.getPidList())
+                .eq("uid", userRolesVo.getUid()).orderByDesc("submit_time");
 
         if (pidListDto.getIsContestProblemList()) {
             // 如果是比赛的提交记录需要判断cid
@@ -158,7 +154,7 @@ public class ProblemServiceImpl implements ProblemService {
                         // 判断该提交是否为封榜之后的提交,OI赛制封榜后的提交看不到提交结果，
                         // 只有比赛结束可以看到,比赛管理员与超级管理员的提交除外
                         if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true,
-                                SecurityUtils.getSubject().hasRole("root"))) {
+                                UserSessionUtil.isRoot())) {
                             temp.put("status", JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus());
                             temp.put("score", null);
                         } else {
@@ -231,7 +227,7 @@ public class ProblemServiceImpl implements ProblemService {
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
         }
-        if (problem.getAuth() != 1) {
+        if (!problem.getAuth().equals(ProblemEnum.AUTH_PUBLIC.getCode())) {
             throw new StatusForbiddenException("该题号对应题目并非公开题目，不支持访问！");
         }
 
@@ -252,8 +248,8 @@ public class ProblemServiceImpl implements ProblemService {
         List<String> languagesStr = new LinkedList<>();
         QueryWrapper<ProblemLanguage> problemLanguageQueryWrapper = new QueryWrapper<>();
         problemLanguageQueryWrapper.eq("pid", problem.getId()).select("lid");
-        List<Long> lidList = problemLanguageEntityService.list(problemLanguageQueryWrapper)
-                .stream().map(ProblemLanguage::getLid).collect(Collectors.toList());
+        List<Long> lidList = problemLanguageEntityService.list(problemLanguageQueryWrapper).stream()
+                .map(ProblemLanguage::getLid).collect(Collectors.toList());
         languageEntityService.listByIds(lidList).forEach(language -> {
             languagesStr.add(language.getName());
             tmpMap.put(language.getId(), language.getName());
@@ -273,9 +269,7 @@ public class ProblemServiceImpl implements ProblemService {
             }
         }
         // 屏蔽一些题目参数
-        problem.setJudgeExtraFile(null)
-                .setSpjCode(null)
-                .setSpjLanguage(null);
+        problem.setJudgeExtraFile(null).setSpjCode(null).setSpjLanguage(null);
 
         // 将数据统一写入到一个Vo返回数据实体类中
         ProblemInfoVo problemInfoVo = new ProblemInfoVo(problem, tags, languagesStr, problemCount, LangNameAndCode);

@@ -23,6 +23,7 @@ import java.util.Date;
 @Accessors(chain = true)
 @ApiModel(value = "ContestPrint", description = "")
 public class ContestPrint {
+
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
@@ -47,4 +48,5 @@ public class ContestPrint {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

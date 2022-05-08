@@ -1,8 +1,11 @@
 package com.simplefanc.voj.backend.judge;
 
-
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.simplefanc.voj.backend.common.constants.CallJudgerType;
+import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
+import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
+import com.simplefanc.voj.backend.dao.judge.impl.RemoteJudgeAccountEntityServiceImpl;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
@@ -11,10 +14,6 @@ import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
-import com.simplefanc.voj.backend.common.constants.CallJudgerType;
-import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
-import com.simplefanc.voj.backend.dao.judge.impl.RemoteJudgeAccountEntityServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,15 +33,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Dispatcher {
 
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(20);
+
     private final static Map<String, Future> futureTaskMap = new ConcurrentHashMap<>(20);
+
     @Autowired
     private RestTemplate restTemplate;
+
     @Autowired
     private JudgeServerEntityService judgeServerEntityService;
+
     @Autowired
     private JudgeEntityService judgeEntityService;
+
     @Autowired
     private ChooseUtils chooseUtils;
+
     @Autowired
     private RemoteJudgeAccountEntityServiceImpl remoteJudgeAccountService;
 
@@ -67,7 +72,8 @@ public class Dispatcher {
             oj = data.getRemoteJudgeProblem().split("-")[0];
         }
         String key = UUID.randomUUID().toString() + submitId;
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(new SubmitTask(path, data, submitId, isRemote, oj, key), 0, 2, TimeUnit.SECONDS);
+        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(
+                new SubmitTask(path, data, submitId, isRemote, oj, key), 0, 2, TimeUnit.SECONDS);
         futureTaskMap.put(key, scheduledFuture);
     }
 
@@ -109,8 +115,7 @@ public class Dispatcher {
             // 如果是结果码不是200 说明调用有错误
             if (result.getStatus() != ResultStatus.SUCCESS.getStatus()) {
                 // 判为系统错误
-                judge.setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus())
-                        .setErrorMessage(result.getMsg());
+                judge.setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus()).setErrorMessage(result.getMsg());
                 judgeEntityService.updateById(judge);
             }
         }
@@ -146,14 +151,13 @@ public class Dispatcher {
                     e.printStackTrace();
                 }
             }
-        } while (retryable);
+        }
+        while (retryable);
     }
 
     public void changeRemoteJudgeStatus(String remoteJudge, String username) {
         UpdateWrapper<RemoteJudgeAccount> remoteJudgeAccountUpdateWrapper = new UpdateWrapper<>();
-        remoteJudgeAccountUpdateWrapper.set("status", true)
-                .eq("status", false)
-                .eq("username", username);
+        remoteJudgeAccountUpdateWrapper.set("status", true).eq("status", false).eq("username", username);
         remoteJudgeAccountUpdateWrapper.eq("oj", remoteJudge);
 
         boolean isOk = remoteJudgeAccountService.update(remoteJudgeAccountUpdateWrapper);
@@ -164,7 +168,8 @@ public class Dispatcher {
         }
     }
 
-    private void tryAgainUpdateAccount(UpdateWrapper<RemoteJudgeAccount> updateWrapper, String remoteJudge, String username) {
+    private void tryAgainUpdateAccount(UpdateWrapper<RemoteJudgeAccount> updateWrapper, String remoteJudge,
+                                       String username) {
         boolean retryable;
         int attemptNumber = 0;
         do {
@@ -184,16 +189,24 @@ public class Dispatcher {
                     e.printStackTrace();
                 }
             }
-        } while (retryable);
+        }
+        while (retryable);
     }
 
     class SubmitTask implements Runnable {
+
         String path;
+
         ToJudge data;
+
         Long submitId;
+
         Boolean isRemote;
+
         String oj;
+
         String key;
+
         // 尝试600s
         AtomicInteger count = new AtomicInteger(0);
 
@@ -248,6 +261,7 @@ public class Dispatcher {
                 cancelFutureTask(key);
             }
         }
+
     }
 
 }

@@ -9,4 +9,5 @@ import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
  * @Description:
  */
 public interface ProblemCaseEntityService extends IService<ProblemCase> {
+
 }

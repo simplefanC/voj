@@ -60,4 +60,5 @@ public class UserMsgVo {
 
     @TableField(fill = FieldFill.INSERT)
     private Date gmtCreate;
+
 }

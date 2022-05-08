@@ -1,9 +1,8 @@
 package com.simplefanc.voj.backend.controller.admin;
 
-
+import com.simplefanc.voj.backend.service.admin.training.AdminTrainingCategoryService;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.service.admin.training.AdminTrainingCategoryService;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -46,4 +45,5 @@ public class AdminTrainingCategoryController {
         adminTrainingCategoryService.deleteTrainingCategory(cid);
         return CommonResult.successResponse();
     }
+
 }

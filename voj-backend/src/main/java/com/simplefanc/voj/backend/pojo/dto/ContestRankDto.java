@@ -11,11 +11,12 @@ import java.util.List;
  */
 @Data
 public class ContestRankDto {
+
     /***
-     *     @param cid           比赛id
-     *     @param removeStar    是否移除打星队伍
-     *     @param forceRefresh  是否强制实时榜单
-     *     @param concernedList 关注的用户(uuid)列表
+     * @param cid 比赛id
+     * @param removeStar 是否移除打星队伍
+     * @param forceRefresh 是否强制实时榜单
+     * @param concernedList 关注的用户(uuid)列表
      */
     private Long cid;
 
@@ -28,4 +29,5 @@ public class ContestRankDto {
     private Boolean removeStar;
 
     private List<String> concernedList;
+
 }

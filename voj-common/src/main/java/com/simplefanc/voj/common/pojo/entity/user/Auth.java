@@ -47,5 +47,4 @@ public class Auth implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
 
-
 }

@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.ImportFpsProblemService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.stereotype.Controller;
@@ -23,7 +22,6 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/api/file")
 public class ImportFpsProblemController {
-
 
     @Resource
     private ImportFpsProblemService importFpsProblemService;
@@ -47,6 +45,5 @@ public class ImportFpsProblemController {
             return CommonResult.errorResponse(e.getMessage());
         }
     }
-
 
 }

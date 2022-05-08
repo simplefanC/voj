@@ -1,10 +1,11 @@
 package com.simplefanc.voj.backend.judge.remote.crawler;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.http.HttpUtil;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.ProblemEnum;
+import com.simplefanc.voj.common.constants.ProblemLevelEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.backend.common.utils.JsoupUtil;
-import org.jsoup.Connection;
-import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -14,8 +15,11 @@ import org.springframework.util.Assert;
  **/
 @Component
 public class MXTProblemCrawler extends ProblemCrawler {
+
     public static final String JUDGE_NAME = "MXT";
+
     public static final String HOST = "https://www.maxuetang.cn";
+
     public static final String PROBLEM_URL = "/course/%s.html";
 
     @Override
@@ -24,58 +28,42 @@ public class MXTProblemCrawler extends ProblemCrawler {
         Assert.isTrue(problemId.matches("\\d{4,5}"), "MXT题号格式错误！");
         Problem info = new Problem();
         String url = HOST + String.format(PROBLEM_URL, problemId);
-        // 获取连接
-        Connection connection = JsoupUtil.getConnectionFromUrl(url, null, null);
-        Document document = JsoupUtil.getDocument(connection, null);
-        String html = document.html();
+        String html = HttpUtil.get(url);
         html = html.replaceAll("<br>", "\n");
         info.setProblemId(JUDGE_NAME + "-" + problemId);
-        info.setTitle(ReUtil.get("<div class=\"page-header\">\n" +
-                "\t\t<h2>([A-Z]\\d{4} )(\\[[\\s\\S]*?\\] )*([\\s\\S]*?)<\\/h2>\n" +
-                "\t<\\/div>", html, 3));
-        info.setDescription(ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                "\t\t\t<b>描述</b>\n" +
-                "\t\t</div>\n" +
-                "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
-        info.setInput(ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                "\t\t\t<b>输入</b>\n" +
-                "\t\t</div>\n" +
-                "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
-        info.setOutput(ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                "\t\t\t<b>输出</b>\n" +
-                "\t\t<\\/div>\n" +
-                "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
-//        info.setTimeLimit(jsonObject.getInt("time_limit"));
-//        info.setMemoryLimit(jsonObject.getInt("mem_limit") / 1024);
-        StringBuilder sb = new StringBuilder("<input>")
-                .append(ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                        "\t\t\t<b>样例输入 </b>\n" +
-                        "\t\t</div>\n" +
-                        "\t\t<div class=\"panel-body\">\n" +
-                        "\t\t<figure class=\"highlight\"><pre class=\"pre\" style=\"background-color:#fff\">([\\s\\S]*?)</pre></figure>\n" +
-                        "\t\t</div>", html))
-                .append("</input><output>")
-                .append(ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                        "\t\t\t<b>样例输出 </b>\n" +
-                        "\t\t</div>\n" +
-                        "\t\t<div class=\"panel-body\">\n" +
-                        "\t\t<figure><pre class=\"pre\" style=\"background-color:#fff\">([\\s\\S]*?)</pre></figure>\n" +
-                        "\t\t</div>", html))
-                .append("</output>");
-        info.setExamples(sb.toString());
-        final String hint = ReUtil.getGroup1("<div class=\"panel-heading\">\n" +
-                "\t\t\t<b>提示</b>\n" +
-                "\t\t</div>\n" +
-                "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html);
+        info.setTitle(ReUtil.get("<div class=\"page-header\">\n"
+                + "\t\t<h2>([A-Z]\\d{4} )(\\[[\\s\\S]*?\\] )*([\\s\\S]*?)<\\/h2>\n" + "\t<\\/div>", html, 3));
+        info.setDescription(ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>描述</b>\n" + "\t\t</div>\n"
+                + "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
+        info.setInput(ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>输入</b>\n" + "\t\t</div>\n"
+                + "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
+        info.setOutput(ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>输出</b>\n" + "\t\t<\\/div>\n"
+                + "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html).trim());
+        // info.setTimeLimit(jsonObject.getInt("time_limit"));
+        // info.setMemoryLimit(jsonObject.getInt("mem_limit") / 1024);
+        String sb = "<input>" + ReUtil.getGroup1("<div class=\"panel-heading\">\n"
+                + "\t\t\t<b>样例输入 </b>\n" + "\t\t</div>\n" + "\t\t<div class=\"panel-body\">\n"
+                + "\t\t<figure class=\"highlight\"><pre class=\"pre\" style=\"background-color:#fff\">([\\s\\S]*?)</pre></figure>\n"
+                + "\t\t</div>", html) +
+                "</input><output>" +
+                ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>样例输出 </b>\n" + "\t\t</div>\n"
+                        + "\t\t<div class=\"panel-body\">\n"
+                        + "\t\t<figure><pre class=\"pre\" style=\"background-color:#fff\">([\\s\\S]*?)</pre></figure>\n"
+                        + "\t\t</div>", html) +
+                "</output>";
+        info.setExamples(sb);
+        final String hint = ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>提示</b>\n" + "\t\t</div>\n"
+                + "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html);
         info.setHint(hint != null ? hint.trim() : hint);
         info.setIsRemote(true);
-        info.setSource(String.format("<a style='color:#1A5CC8' href='https://www.maxuetang.cn/course/%s.html'>%s</a>", problemId, JUDGE_NAME + "-" + problemId));
-        info.setType(0)
-                .setAuth(1)
+        info.setSource(String.format("<a style='color:#1A5CC8' href='https://www.maxuetang.cn/course/%s.html'>%s</a>",
+                problemId, JUDGE_NAME + "-" + problemId));
+        info.setType(ContestEnum.TYPE_ACM.getCode())
+                .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
                 .setAuthor(author)
                 .setOpenCaseResult(false)
                 .setIsRemoveEndBlank(false)
-                .setDifficulty(1);
+                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode());
         return new RemoteProblemInfo().setProblem(info).setTagList(null);
     }
 
@@ -83,4 +71,5 @@ public class MXTProblemCrawler extends ProblemCrawler {
     public String getOjInfo() {
         return JUDGE_NAME;
     }
+
 }

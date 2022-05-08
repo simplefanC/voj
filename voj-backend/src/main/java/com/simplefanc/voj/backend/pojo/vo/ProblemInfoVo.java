@@ -16,9 +16,15 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ProblemInfoVo {
+
     private Problem problem;
+
     private List<Tag> tags;
+
     private List<String> languages;
+
     private ProblemCountVo problemCount;
+
     private HashMap<String, String> codeTemplate;
+
 }

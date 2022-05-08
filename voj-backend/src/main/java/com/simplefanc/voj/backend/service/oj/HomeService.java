@@ -15,6 +15,7 @@ import java.util.List;
  */
 
 public interface HomeService {
+
     /**
      * @MethodName getRecentContest
      * @Params * @param null
@@ -59,4 +60,5 @@ public interface HomeService {
      * @Since 2020/12/29
      */
     IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage);
+
 }

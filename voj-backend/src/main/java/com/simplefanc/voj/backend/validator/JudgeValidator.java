@@ -15,9 +15,8 @@ import java.util.List;
 @Component
 public class JudgeValidator {
 
-    private final static List<String> VOJ_LANGUAGE_LIST = Arrays.asList("C++", "C++ With O2",
-            "C", "C With O2", "Python3", "Python2", "Java", "Golang", "C#", "PHP", "PyPy2", "PyPy3",
-            "JavaScript Node", "JavaScript V8");
+    private final static List<String> VOJ_LANGUAGE_LIST = Arrays.asList("C++", "C++ With O2", "C", "C With O2",
+            "Python3", "Python2", "Java", "Golang", "C#", "PHP", "PyPy2", "PyPy3", "JavaScript Node", "JavaScript V8");
 
     public void validateSubmissionInfo(ToJudgeDto toJudgeDto) {
 
@@ -25,10 +24,8 @@ public class JudgeValidator {
             throw new StatusFailException("提交的代码的语言错误！请使用" + VOJ_LANGUAGE_LIST + "中之一的语言！");
         }
 
-        if (toJudgeDto.getCode().length() < 50
-                && !toJudgeDto.getLanguage().contains("Py")
-                && !toJudgeDto.getLanguage().contains("PHP")
-                && !toJudgeDto.getLanguage().contains("JavaScript")) {
+        if (toJudgeDto.getCode().length() < 50 && !toJudgeDto.getLanguage().contains("Py")
+                && !toJudgeDto.getLanguage().contains("PHP") && !toJudgeDto.getLanguage().contains("JavaScript")) {
             throw new StatusFailException("提交的代码是无效的，代码字符长度请不要低于50！");
         }
 
@@ -36,4 +33,5 @@ public class JudgeValidator {
             throw new StatusFailException("提交的代码是无效的，代码字符长度请不要超过65535！");
         }
     }
+
 }

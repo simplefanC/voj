@@ -12,7 +12,6 @@ import java.util.List;
  */
 public interface ProblemFileService {
 
-
     /**
      * @param file
      * @MethodName importProblem
@@ -21,7 +20,6 @@ public interface ProblemFileService {
      * @Since 2021/5/27
      */
     void importProblem(MultipartFile file);
-
 
     /**
      * @param pidList

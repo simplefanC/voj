@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.admin.tag.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
 import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
+import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,7 @@ public class AdminTagServiceImpl implements AdminTagService {
 
     public Tag addProblem(Tag tag) {
         QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
-        tagQueryWrapper.eq("name", tag.getName())
-                .eq("oj", tag.getOj());
+        tagQueryWrapper.eq("name", tag.getName()).eq("oj", tag.getOj());
         Tag existTag = tagEntityService.getOne(tagQueryWrapper, false);
 
         if (existTag != null) {
@@ -49,4 +48,5 @@ public class AdminTagServiceImpl implements AdminTagService {
             throw new StatusFailException("删除失败");
         }
     }
+
 }

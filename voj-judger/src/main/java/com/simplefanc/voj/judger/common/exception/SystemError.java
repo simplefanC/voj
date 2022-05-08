@@ -9,7 +9,9 @@ import lombok.Data;
  */
 @Data
 public class SystemError extends Exception {
+
     private String stdout;
+
     private String stderr;
 
     public SystemError(String message, String stdout, String stderr) {
@@ -17,4 +19,5 @@ public class SystemError extends Exception {
         this.stdout = stdout;
         this.stderr = stderr;
     }
+
 }

@@ -1,11 +1,6 @@
 package com.simplefanc.voj.backend.controller.admin;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.AnnouncementDto;
 import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
@@ -14,6 +9,10 @@ import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestAnnouncementService;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestService;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -24,7 +23,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * @Author: chenfan
  * @Date: 2020/12/19 22:28
@@ -33,7 +31,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/admin/contest")
 public class AdminContestController {
-
 
     @Autowired
     private AdminContestService adminContestService;
@@ -65,7 +62,7 @@ public class AdminContestController {
 
     @DeleteMapping("")
     @RequiresAuthentication
-    @RequiresRoles(value = "root") // 只有超级管理员能删除比赛
+    @RequiresRoles(value = "root")
     public CommonResult<Void> deleteContest(@RequestParam("cid") Long cid) {
         adminContestService.deleteContest(cid);
         return CommonResult.successResponse();
@@ -90,9 +87,9 @@ public class AdminContestController {
     @PutMapping("/change-contest-visible")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> changeContestVisible(@RequestParam(value = "cid", required = true) Long cid,
-                                                   @RequestParam(value = "uid", required = true) String uid,
-                                                   @RequestParam(value = "visible", required = true) Boolean visible) {
+    public CommonResult<Void> changeContestVisible(@RequestParam(value = "cid") Long cid,
+                                                   @RequestParam(value = "uid") String uid,
+                                                   @RequestParam(value = "visible") Boolean visible) {
         adminContestService.changeContestVisible(cid, uid, visible);
         return CommonResult.successResponse();
     }
@@ -104,20 +101,22 @@ public class AdminContestController {
     @GetMapping("/get-problem-list")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<HashMap<String, Object>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                @RequestParam(value = "keyword", required = false) String keyword,
-                                                                @RequestParam(value = "cid", required = true) Long cid,
-                                                                @RequestParam(value = "problemType", required = false) Integer problemType,
-                                                                @RequestParam(value = "oj", required = false) String oj) {
-        HashMap<String, Object> problemList = adminContestProblemService.getProblemList(limit, currentPage, keyword, cid, problemType, oj);
+    public CommonResult<HashMap<String, Object>> getProblemList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "cid") Long cid,
+            @RequestParam(value = "problemType", required = false) Integer problemType,
+            @RequestParam(value = "oj", required = false) String oj) {
+        HashMap<String, Object> problemList = adminContestProblemService.getProblemList(limit, currentPage, keyword,
+                cid, problemType, oj);
         return CommonResult.successResponse(problemList);
     }
 
     @GetMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid, HttpServletRequest request) {
+    public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid) {
         Problem problem = adminContestProblemService.getProblem(pid);
         return CommonResult.successResponse(problem);
     }
@@ -150,8 +149,8 @@ public class AdminContestController {
     @GetMapping("/contest-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<ContestProblem> getContestProblem(@RequestParam(value = "cid", required = true) Long cid,
-                                                          @RequestParam(value = "pid", required = true) Long pid) {
+    public CommonResult<ContestProblem> getContestProblem(@RequestParam(value = "cid") Long cid,
+                                                          @RequestParam(value = "pid") Long pid) {
         ContestProblem contestProblem = adminContestProblemService.getContestProblem(cid, pid);
         return CommonResult.successResponse(contestProblem);
     }
@@ -175,8 +174,7 @@ public class AdminContestController {
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> importContestRemoteOJProblem(@RequestParam("name") String name,
-                                                           @RequestParam("problemId") String problemId,
-                                                           @RequestParam("cid") Long cid,
+                                                           @RequestParam("problemId") String problemId, @RequestParam("cid") Long cid,
                                                            @RequestParam("displayId") String displayId) {
         adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid, displayId);
         return CommonResult.successResponse();
@@ -185,14 +183,15 @@ public class AdminContestController {
     /**
      * 以下处理比赛公告的操作请求
      */
-
     @GetMapping("/announcement")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                   @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                                   @RequestParam(value = "cid", required = true) Long cid) {
-        IPage<AnnouncementVo> announcementList = adminContestAnnouncementService.getAnnouncementList(limit, currentPage, cid);
+    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "cid") Long cid) {
+        IPage<AnnouncementVo> announcementList = adminContestAnnouncementService.getAnnouncementList(limit, currentPage,
+                cid);
         return CommonResult.successResponse(announcementList);
     }
 
@@ -219,4 +218,5 @@ public class AdminContestController {
         adminContestAnnouncementService.updateAnnouncement(announcementDto);
         return CommonResult.successResponse();
     }
+
 }

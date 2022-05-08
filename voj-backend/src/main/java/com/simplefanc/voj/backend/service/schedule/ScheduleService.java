@@ -1,5 +1,6 @@
 package com.simplefanc.voj.backend.service.schedule;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -8,16 +9,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.entity.common.File;
-import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
-import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
-import com.simplefanc.voj.common.pojo.entity.user.Session;
-import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import com.simplefanc.voj.backend.common.constants.ScheduleConstant;
-import com.simplefanc.voj.backend.common.utils.JsoupUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
@@ -28,8 +20,15 @@ import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
+import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.pojo.entity.common.File;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
+import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
+import com.simplefanc.voj.common.pojo.entity.user.Session;
+import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
+import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -43,29 +42,17 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-
 /**
  * 一个cron表达式有至少6个（也可能7个）有空格分隔的时间元素。按顺序依次为：
  * <p>
- * 字段	允许值	允许的特殊字符
- * 秒	0~59	, - * /
- * 分	0~59	, - * /
- * 小时	0~23	, - * /
- * 日期	1-31	, - * ? / L W C
- * 月份	1~12或者JAN~DEC	, - * /
- * 星期	1~7或者SUN~SAT	, - * ? / L C #
- * 年（可选）	留空，1970~2099	, - * /
+ * 字段 允许值 允许的特殊字符 秒 0~59 , - * / 分 0~59 , - * / 小时 0~23 , - * / 日期 1-31 , - * ? / L W C 月份
+ * 1~12或者JAN~DEC , - * / 星期 1~7或者SUN~SAT , - * ? / L C # 年（可选） 留空，1970~2099 , - * /
  * <p>
- * “*”  字符代表所有可能的值
- * “-”  字符代表数字范围 例如1-5
- * “/”  字符用来指定数值的增量
- * “？” 字符仅被用于天（月）和天（星期）两个子表达式，表示不指定值。
- * 当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为“？”
- * “L” 字符仅被用于天（月）和天（星期）两个子表达式，它是单词“last”的缩写
- * 如果在“L”前有具体的内容，它就具有其他的含义了。
- * “W” 字符代表着平日(Mon-Fri)，并且仅能用于日域中。它用来指定离指定日的最近的一个平日。
- * 大部分的商业处理都是基于工作周的，所以 W 字符可能是非常重要的。
- * "C" 代表“Calendar”的意思。它的意思是计划所关联的日期，如果日期没有被关联，则相当于日历中所有日期。
+ * “*” 字符代表所有可能的值 “-” 字符代表数字范围 例如1-5 “/” 字符用来指定数值的增量 “？” 字符仅被用于天（月）和天（星期）两个子表达式，表示不指定值。
+ * 当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为“？” “L” 字符仅被用于天（月）和天（星期）两个子表达式，它是单词“last”的缩写
+ * 如果在“L”前有具体的内容，它就具有其他的含义了。 “W” 字符代表着平日(Mon-Fri)，并且仅能用于日域中。它用来指定离指定日的最近的一个平日。
+ * 大部分的商业处理都是基于工作周的，所以 W 字符可能是非常重要的。 "C"
+ * 代表“Calendar”的意思。它的意思是计划所关联的日期，如果日期没有被关联，则相当于日历中所有日期。
  */
 @Service
 @Slf4j(topic = "voj")
@@ -131,7 +118,6 @@ public class ScheduleService {
         }
     }
 
-
     /**
      * @MethodName deleteTestCase
      * @Params * @param null
@@ -163,129 +149,6 @@ public class ScheduleService {
     }
 
     /**
-     * 每两小时获取其他OJ的比赛列表，并保存在redis里
-     * 保存格式：
-     * oj: "Codeforces",
-     * title: "Codeforces Round #680 (Div. 1, based on VK Cup 2020-2021 - Final)",
-     * beginTime: "2020-11-08T05:00:00Z",
-     * endTime: "2020-11-08T08:00:00Z",
-     */
-//    @Scheduled(cron = "0 0 0/2 * * *")
-    public void getOjContestsList() {
-        // 待格式化的API，需要填充年月查询
-        String nowcoderContestAPI = "https://ac.nowcoder.com/acm/calendar/contest?token=&month=%d-%d";
-        // 将获取的比赛列表添加进这里
-        List<Map<String, Object>> contestsList = new ArrayList<>();
-        // 获取当前年月
-        DateTime dateTime = DateUtil.date();
-        // offsetMonth 增加的月份，只枚举最近3个月的比赛
-        for (int offsetMonth = 0; offsetMonth <= 2; offsetMonth++) {
-            // 月份增加i个月
-            DateTime newDate = DateUtil.offsetMonth(dateTime, offsetMonth);
-            // 格式化API 月份从0-11，所以要加一
-            String contestAPI = String.format(nowcoderContestAPI, newDate.year(), newDate.month() + 1);
-            try {
-                // 连接api，获取json格式对象
-                JSONObject resultObject = JsoupUtil.getJsonFromConnection(JsoupUtil.getConnectionFromUrl(contestAPI, null, null));
-                // 比赛列表存放在data字段中
-                JSONArray contestsArray = resultObject.getJSONArray("data");
-                // 牛客比赛列表按时间顺序排序，所以从后向前取可以减少不必要的遍历
-                for (int i = contestsArray.size() - 1; i >= 0; i--) {
-                    JSONObject contest = contestsArray.getJSONObject(i);
-                    // 如果比赛已经结束了，则直接结束
-                    if (contest.getLong("endTime", 0L) < dateTime.getTime()) {
-                        break;
-                    }
-                    // 把比赛列表信息添加在List里
-                    // TODO put 键
-                    contestsList.add(MapUtil.builder(new HashMap<String, Object>())
-                            .put("oj", contest.getStr("ojName"))
-                            .put("url", contest.getStr("link"))
-                            .put("title", contest.getStr("contestName"))
-                            .put("beginTime", new Date(contest.getLong("startTime")))
-                            .put("endTime", new Date(contest.getLong("endTime"))).map());
-                }
-            } catch (Exception e) {
-                log.error("爬虫爬取Nowcoder比赛异常----------------------->{}", e.getMessage());
-            }
-        }
-        // 把比赛列表按照开始时间排序，方便查看
-        contestsList.sort((o1, o2) -> {
-
-            long beginTime1 = ((Date) o1.get("beginTime")).getTime();
-            long beginTime2 = ((Date) o2.get("beginTime")).getTime();
-
-            return Long.compare(beginTime1, beginTime2);
-        });
-
-        // 获取对应的redis key
-        String redisKey = ScheduleConstant.RECENT_OTHER_CONTEST;
-        // 缓存时间一天
-        redisUtil.set(redisKey, contestsList, 60 * 60 * 24);
-        // 增加log提示
-        log.info("获取牛客API的比赛列表成功！共获取数据" + contestsList.size() + "条");
-    }
-
-
-    /**
-     * 每天3点获取codeforces的rating分数
-     */
-//    @Scheduled(cron = "0 0 3 * * *")
-    public void getCodeforcesRating() {
-        String codeforcesUserInfoAPI = "https://codeforces.com/api/user.info?handles=%s";
-        QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-        // 查询cf_username不为空的数据
-        userInfoQueryWrapper.isNotNull("cf_username");
-        List<UserInfo> userInfoList = userInfoEntityService.list(userInfoQueryWrapper);
-        for (UserInfo userInfo : userInfoList) {
-            // 获取cf名字
-            String cfUsername = userInfo.getCfUsername();
-            // 获取uuid
-            String uuid = userInfo.getUuid();
-            // 格式化api
-            String ratingAPI = String.format(codeforcesUserInfoAPI, cfUsername);
-            try {
-                // 连接api，获取json格式对象
-                JSONObject resultObject = getCFUserInfo(ratingAPI);
-                // 获取状态码
-                String status = resultObject.getStr("status");
-                // 如果查无此用户，则跳过
-                if ("FAILED".equals(status)) {
-                    continue;
-                }
-                // 用户信息存放在result列表中的第0个
-                JSONObject cfUserInfo = resultObject.getJSONArray("result").getJSONObject(0);
-                // 获取cf的分数
-                Integer cfRating = cfUserInfo.getInt("rating", null);
-                UpdateWrapper<UserRecord> userRecordUpdateWrapper = new UpdateWrapper<>();
-                // 将对应的cf分数修改
-                userRecordUpdateWrapper.eq("uid", uuid).set("rating", cfRating);
-                boolean result = userRecordEntityService.update(userRecordUpdateWrapper);
-                if (!result) {
-                    log.error("插入UserRecord表失败------------------------------->");
-                }
-
-            } catch (Exception e) {
-                log.error("爬虫爬取Codeforces Rating分数异常----------------------->{}", e.getMessage());
-            }
-            try {
-                TimeUnit.SECONDS.sleep(2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        log.info("获取Codeforces Rating成功！");
-    }
-
-    @Retryable(value = Exception.class,
-            maxAttempts = 5,
-            backoff = @Backoff(delay = 1000, multiplier = 1.4))
-    public JSONObject getCFUserInfo(String url) throws IOException {
-        return JsoupUtil.getJsonFromConnection(JsoupUtil.getConnectionFromUrl(url, null, null));
-    }
-
-
-    /**
      * @MethodName deleteUserSession
      * @Params * @param null
      * @Description 每天3点定时删除用户半年的session表记录
@@ -296,18 +159,18 @@ public class ScheduleService {
     public void deleteUserSession() {
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
         DateTime dateTime = DateUtil.offsetMonth(new Date(), -6);
-        String strTime = DateFormatUtils.format(dateTime, "yyyy-MM-dd HH:mm:ss");
+        String strTime = dateTime.toString(DatePattern.NORM_DATETIME_FORMAT);
         sessionQueryWrapper.select("distinct uid");
         sessionQueryWrapper.apply("UNIX_TIMESTAMP(gmt_create) >= UNIX_TIMESTAMP('" + strTime + "')");
         List<Session> sessionList = sessionEntityService.list(sessionQueryWrapper);
         if (sessionList.size() > 0) {
             List<String> uidList = sessionList.stream().map(Session::getUid).collect(Collectors.toList());
             QueryWrapper<Session> queryWrapper = new QueryWrapper<>();
-            queryWrapper.in("uid", uidList)
-                    .apply("UNIX_TIMESTAMP('" + strTime + "') > UNIX_TIMESTAMP(gmt_create)");
+            queryWrapper.in("uid", uidList).apply("UNIX_TIMESTAMP('" + strTime + "') > UNIX_TIMESTAMP(gmt_create)");
             List<Session> needDeletedSessionList = sessionEntityService.list(queryWrapper);
             if (needDeletedSessionList.size() > 0) {
-                List<Long> needDeletedIdList = needDeletedSessionList.stream().map(Session::getId).collect(Collectors.toList());
+                List<Long> needDeletedIdList = needDeletedSessionList.stream().map(Session::getId)
+                        .collect(Collectors.toList());
                 boolean isOk = sessionEntityService.removeByIds(needDeletedIdList);
                 if (!isOk) {
                     log.error("=============数据库session表定时删除用户6个月前的记录失败===============");
@@ -315,7 +178,6 @@ public class ScheduleService {
             }
         }
     }
-
 
     /**
      * @MethodName syncNoticeToUser
@@ -339,13 +201,12 @@ public class ScheduleService {
 
         for (AdminSysNotice adminSysNotice : adminSysNotices) {
             switch (adminSysNotice.getType()) {
+                // TODO 魔法
                 case "All":
                     List<UserSysNotice> userSysNoticeList = new ArrayList<>();
                     for (String uid : userIds) {
                         UserSysNotice userSysNotice = new UserSysNotice();
-                        userSysNotice.setRecipientId(uid)
-                                .setType("Sys")
-                                .setSysNoticeId(adminSysNotice.getId());
+                        userSysNotice.setRecipientId(uid).setType("Sys").setSysNoticeId(adminSysNotice.getId());
                         userSysNoticeList.add(userSysNotice);
                     }
                     boolean isOk1 = userSysNoticeEntityService.saveOrUpdateBatch(userSysNoticeList);
@@ -355,8 +216,7 @@ public class ScheduleService {
                     break;
                 case "Single":
                     UserSysNotice userSysNotice = new UserSysNotice();
-                    userSysNotice.setRecipientId(adminSysNotice.getRecipientId())
-                            .setType("Mine")
+                    userSysNotice.setRecipientId(adminSysNotice.getRecipientId()).setType("Mine")
                             .setSysNoticeId(adminSysNotice.getId());
                     boolean isOk2 = userSysNoticeEntityService.saveOrUpdate(userSysNotice);
                     if (isOk2) {
@@ -379,7 +239,7 @@ public class ScheduleService {
     @Scheduled(cron = "0 0/20 * * * ?")
     public void check20MPendingSubmission() {
         DateTime dateTime = DateUtil.offsetMinute(new Date(), -15);
-        String strTime = DateFormatUtils.format(dateTime, "yyyy-MM-dd HH:mm:ss");
+        String strTime = dateTime.toString(DatePattern.NORM_DATETIME_FORMAT);
 
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper.select("distinct submit_id");

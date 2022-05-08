@@ -3,13 +3,9 @@ package com.simplefanc.voj.backend.service.file.impl;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.JudgeMode;
-import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
-import com.simplefanc.voj.common.pojo.entity.problem.Language;
-import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
@@ -17,12 +13,15 @@ import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ImportFpsProblemService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.*;
+import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
+import com.simplefanc.voj.common.pojo.entity.problem.Language;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
+import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,8 +42,10 @@ import java.util.*;
 public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
     private final static List<String> timeUnits = Arrays.asList("ms", "s");
+
     private final static List<String> memoryUnits = Arrays.asList("kb", "mb");
-    private static final Map<String, String> fpsMapVOJ = new HashMap<String, String>() {
+
+    private static final Map<String, String> fpsMapVOJ = new HashMap<>() {
         {
             put("Python", "Python3");
             put("Go", "Golang");
@@ -79,8 +80,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             throw new StatusFailException("请上传xml后缀格式的fps题目文件！");
         }
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         List<ProblemDto> problemDtoList = parseFps(file.getInputStream(), userRolesVo.getUsername());
         for (ProblemDto problemDto : problemDtoList) {
@@ -106,14 +106,13 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             Problem problem = new Problem();
 
             problem.setAuthor(username)
-                    .setType(0)
+                    .setType(ContestEnum.TYPE_ACM.getCode())
                     .setIsUploadCase(true)
-                    .setDifficulty(1)
+                    .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode())
                     .setIsRemoveEndBlank(true)
                     .setOpenCaseResult(true)
-                    .setCodeShare(false)
-                    .setIsRemote(false)
-                    .setAuth(1)
+                    .setCodeShare(false).setIsRemote(false)
+                    .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
                     .setProblemId(String.valueOf(System.currentTimeMillis()));
 
             Element title = XmlUtil.getElement(item, "title");
@@ -193,9 +192,8 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             }
             problem.setExamples(sb.toString());
 
-
             QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-            languageQueryWrapper.eq("oj", "LOCAL");
+            languageQueryWrapper.eq("oj", Constant.LOCAL);
             List<Language> languageList = languageEntityService.list(languageQueryWrapper);
 
             HashMap<String, Long> languageMap = new HashMap<>();
@@ -214,9 +212,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
                 }
                 String lang = fpsMapVOJ.get(templateLanguage);
                 if (lang != null) {
-                    codeTemplates.add(new CodeTemplate()
-                            .setCode(templateCode)
-                            .setLid(languageMap.get(lang)));
+                    codeTemplates.add(new CodeTemplate().setCode(templateCode).setLid(languageMap.get(lang)));
                 }
 
             }
@@ -226,9 +222,8 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             if (spjNode != null) {
                 String spjLanguage = spjNode.getAttribute("language");
                 String spjCode = spjNode.getTextContent();
-                if (("C".equals(spjLanguage) || "C++".equals(spjLanguage)) && !StringUtils.isEmpty(spjCode)) {
-                    problem.setSpjLanguage(spjLanguage)
-                            .setSpjCode(spjCode);
+                if (("C".equals(spjLanguage) || "C++".equals(spjLanguage)) && !StrUtil.isEmpty(spjCode)) {
+                    problem.setSpjLanguage(spjLanguage).setSpjCode(spjCode);
                 }
             }
 
@@ -244,21 +239,15 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
                 FileWriter outfileWriter = new FileWriter(problemTestCaseDir + File.separator + outfileName);
                 infileWriter.write(testInputs.get(i).getTextContent());
                 outfileWriter.write(testOutputs.get(i).getTextContent());
-                problemSamples.add(new ProblemCase()
-                        .setInput(infileName).setOutput(outfileName));
+                problemSamples.add(new ProblemCase().setInput(infileName).setOutput(outfileName));
             }
             String mode = JudgeMode.DEFAULT.getMode();
             if (problem.getSpjLanguage() != null) {
                 mode = JudgeMode.SPJ.getMode();
             }
             ProblemDto problemDto = new ProblemDto();
-            problemDto.setSamples(problemSamples)
-                    .setIsUploadTestCase(true)
-                    .setUploadTestcaseDir(problemTestCaseDir)
-                    .setLanguages(languageList)
-                    .setTags(null)
-                    .setJudgeMode(mode)
-                    .setProblem(problem)
+            problemDto.setSamples(problemSamples).setIsUploadTestCase(true).setUploadTestcaseDir(problemTestCaseDir)
+                    .setLanguages(languageList).setTags(null).setJudgeMode(mode).setProblem(problem)
                     .setCodeTemplates(codeTemplates);
 
             problemDtoList.add(problemDto);
@@ -266,7 +255,6 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
         }
         return problemDtoList;
     }
-
 
     private Integer getTimeLimit(String version, Element item) {
         Element timeLimitNode = XmlUtil.getElement(item, "time_limit");
@@ -295,4 +283,5 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
         return Integer.parseInt(memoryLimit) * (int) Math.pow(1000, index - 1);
     }
+
 }

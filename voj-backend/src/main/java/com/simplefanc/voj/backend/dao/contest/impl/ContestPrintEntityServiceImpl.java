@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.contest.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.mapper.ContestPrintMapper;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class ContestPrintEntityServiceImpl extends ServiceImpl<ContestPrintMapper, ContestPrint> implements ContestPrintEntityService {
+public class ContestPrintEntityServiceImpl extends ServiceImpl<ContestPrintMapper, ContestPrint>
+        implements ContestPrintEntityService {
+
 }

@@ -15,5 +15,7 @@ import org.springframework.stereotype.Service;
  * @since 2020-10-23
  */
 @Service
-public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, UserRecord> implements UserRecordEntityService {
+public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, UserRecord>
+        implements UserRecordEntityService {
+
 }

@@ -4,11 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
-import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
-import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.discussion.CommentEntityService;
 import com.simplefanc.voj.backend.dao.discussion.ReplyEntityService;
@@ -16,6 +11,11 @@ import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.CommentMapper;
 import com.simplefanc.voj.backend.pojo.vo.CommentVo;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
+import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
+import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -50,15 +50,16 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
     private MsgRemindEntityService msgRemindEntityService;
 
     @Override
-    public IPage<CommentVo> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot, String uid) {
+    public IPage<CommentVo> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot,
+                                           String uid) {
         // 新建分页
         Page<CommentVo> page = new Page<>(currentPage, limit);
 
         if (cid != null) {
             Contest contest = contestEntityService.getById(cid);
 
-            boolean onlyMineAndAdmin = contest.getStatus().equals(ContestEnum.STATUS_RUNNING.getCode())
-                    && !isRoot && !contest.getUid().equals(uid);
+            boolean onlyMineAndAdmin = contest.getStatus().equals(ContestEnum.STATUS_RUNNING.getCode()) && !isRoot
+                    && !contest.getUid().equals(uid);
             // 自己和比赛管理者评论可看
             if (onlyMineAndAdmin) {
                 List<String> myAndAdminUidList = userInfoEntityService.getSuperAdminUidList();
@@ -78,8 +79,8 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
 
         if (cid != null) {
             Contest contest = contestEntityService.getById(cid);
-            boolean onlyMineAndAdmin = contest.getStatus().equals(ContestEnum.STATUS_RUNNING.getCode())
-                    && !isRoot && !contest.getUid().equals(uid);
+            boolean onlyMineAndAdmin = contest.getStatus().equals(ContestEnum.STATUS_RUNNING.getCode()) && !isRoot
+                    && !contest.getUid().equals(uid);
             // 自己和比赛管理者评论可看
             if (onlyMineAndAdmin) {
                 List<String> myAndAdminUidList = userInfoEntityService.getSuperAdminUidList();
@@ -102,28 +103,20 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
         }
 
         MsgRemind msgRemind = new MsgRemind();
-        msgRemind.setAction("Discuss")
-                .setRecipientId(recipientId)
-                .setSenderId(senderId)
-                .setSourceContent(content)
-                .setSourceId(discussionId)
-                .setSourceType("Discussion")
-                .setUrl("/discussion-detail/" + discussionId);
+        msgRemind.setAction("Discuss").setRecipientId(recipientId).setSenderId(senderId).setSourceContent(content)
+                .setSourceId(discussionId).setSourceType("Discussion").setUrl("/discussion-detail/" + discussionId);
         msgRemindEntityService.saveOrUpdate(msgRemind);
     }
-
 
     @Async
     @Override
     public void updateCommentLikeMsg(String recipientId, String senderId, Integer sourceId, String sourceType) {
 
         MsgRemind msgRemind = new MsgRemind();
-        msgRemind.setAction("Like_Discuss")
-                .setRecipientId(recipientId)
-                .setSenderId(senderId)
-                .setSourceId(sourceId)
-                .setSourceType(sourceType)
-                .setUrl(sourceType.equals("Discussion") ? "/discussion-detail/" + sourceId : "/contest/" + sourceId + "/comment");
+        msgRemind.setAction("Like_Discuss").setRecipientId(recipientId).setSenderId(senderId).setSourceId(sourceId)
+                .setSourceType(sourceType).setUrl(sourceType.equals("Discussion") ? "/discussion-detail/" + sourceId
+                : "/contest/" + sourceId + "/comment");
         msgRemindEntityService.saveOrUpdate(msgRemind);
     }
+
 }

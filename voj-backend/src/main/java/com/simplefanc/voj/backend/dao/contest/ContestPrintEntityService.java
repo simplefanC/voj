@@ -9,4 +9,5 @@ import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
  * @Description:
  */
 public interface ContestPrintEntityService extends IService<ContestPrint> {
+
 }

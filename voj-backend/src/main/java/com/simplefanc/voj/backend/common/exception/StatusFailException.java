@@ -6,6 +6,7 @@ package com.simplefanc.voj.backend.common.exception;
  * @Description:
  */
 public class StatusFailException extends RuntimeException {
+
     public StatusFailException() {
     }
 
@@ -24,4 +25,5 @@ public class StatusFailException extends RuntimeException {
     public StatusFailException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
+
 }

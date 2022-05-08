@@ -40,6 +40,9 @@ public class AdminContestVo {
     @ApiModelProperty(value = "0为公开赛，1为私有赛（访问有密码），2为保护赛（提交有密码）")
     private Integer auth;
 
+    @ApiModelProperty(value = "是否打开密码限制")
+    private Boolean openPwdLimit;
+
     @ApiModelProperty(value = "比赛密码")
     private String pwd;
 
@@ -73,7 +76,8 @@ public class AdminContestVo {
     @ApiModelProperty(value = "是否打开账号限制")
     private Boolean openAccountLimit;
 
-    @ApiModelProperty(value = "账号限制规则 <prefix>**</prefix><suffix>**</suffix><start>**</start><end>**</end><extra>**</extra>")
+    @ApiModelProperty(
+            value = "账号限制规则 <prefix>**</prefix><suffix>**</suffix><start>**</start><end>**</end><extra>**</extra>")
     private String accountLimitRule;
 
     @ApiModelProperty(value = "排行榜显示（username、nickname、realname）")

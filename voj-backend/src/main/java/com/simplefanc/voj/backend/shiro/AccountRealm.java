@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.shiro;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.simplefanc.voj.common.pojo.entity.user.Auth;
-import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.mapper.RoleAuthMapper;
 import com.simplefanc.voj.backend.mapper.UserRoleMapper;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.common.pojo.entity.user.Auth;
+import com.simplefanc.voj.common.pojo.entity.user.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -52,11 +52,8 @@ public class AccountRealm extends AuthorizingRealm {
         // 获取该用户角色所有的权限
         List<Role> roles = userRoleMapper.getRolesByUid(user.getUid());
         // 角色变动，同时需要修改会话里面的数据
-//        Session session = SecurityUtils.getSubject().getSession();
-//        UserRolesVo userInfo = (UserRolesVo) session.getAttribute("userInfo");
         UserRolesVo userInfo = UserSessionUtil.getUserInfo();
         userInfo.setRoles(roles);
-//        session.setAttribute("userInfo", userInfo);
         UserSessionUtil.setUserInfo(userInfo);
         for (Role role : roles) {
             roleNameList.add(role.getRole());
@@ -86,9 +83,8 @@ public class AccountRealm extends AuthorizingRealm {
         AccountProfile profile = new AccountProfile();
         BeanUtil.copyProperties(userRoles, profile);
         // 写入会话，后续不必重复查询
-//        Session session = SecurityUtils.getSubject().getSession();
-//        session.setAttribute("userInfo", userRoles);
         UserSessionUtil.setUserInfo(userRoles);
         return new SimpleAuthenticationInfo(profile, jwt.getCredentials(), getName());
     }
+
 }

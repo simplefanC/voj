@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 @Component
 public class EojLoginer extends RetentiveLoginer {
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -41,38 +42,32 @@ public class EojLoginer extends RetentiveLoginer {
             return;
         }
         String csrfmiddlewaretoken = ReUtil.getGroup1("name='csrfmiddlewaretoken' value='([\\s\\S]*?)'", body);
-        String publicKey = ReUtil.getGroup1("name=\"public_key\" placeholder=\"\" type=\"hidden\" value=\"([\\s\\S]*?)\"", body);
+        String publicKey = ReUtil
+                .getGroup1("name=\"public_key\" placeholder=\"\" type=\"hidden\" value=\"([\\s\\S]*?)\"", body);
         final String captcha_0 = ReUtil.getGroup1("name=\"captcha_0\" value=\"([\\s\\S]*?)\"", body);
         final String ciphertext = HttpUtil.post("127.0.0.1:9898/rsa", MapUtil.builder(new HashMap<String, Object>())
-                .put("publicKey", publicKey)
-                .put("password", account.password).build());
+                .put("publicKey", publicKey).put("password", account.password).build());
         HttpPost post = new HttpPost("/login");
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "csrfmiddlewaretoken", csrfmiddlewaretoken,
-                "next", "/login/",
-                "username", account.accountId,
-                "password", ciphertext,
-                "captcha_0", captcha_0,
-                "captcha_1", getCaptcha(client, "/captcha/image/" + captcha_0 + "/"),
-                "public_key", publicKey
-        );
+        HttpEntity entity = SimpleNameValueEntityFactory.create("csrfmiddlewaretoken", csrfmiddlewaretoken, "next",
+                "/login/", "username", account.accountId, "password", ciphertext, "captcha_0", captcha_0, "captcha_1",
+                getCaptcha(client, "/captcha/image/" + captcha_0 + "/"), "public_key", publicKey);
         post.setEntity(entity);
-//        post.setHeader("", "");
-//        client.execute(post, HttpStatusValidator.SC_MOVED_TEMPORARILY, new HttpBodyValidator("success"));
+        // post.setHeader("", "");
+        // client.execute(post, HttpStatusValidator.SC_MOVED_TEMPORARILY, new
+        // HttpBodyValidator("success"));
         client.execute(post, HttpStatusValidator.SC_MOVED_TEMPORARILY);
     }
 
     private String getCaptcha(DedicatedHttpClient client, String url) throws ClientProtocolException, IOException {
         HttpGet get = new HttpGet(url);
         InputStream imgBytes = client.execute(get, new ResponseHandler<InputStream>() {
-                    @Override
-                    public InputStream handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-                        return response.getEntity().getContent();
-                    }
-                }
-        );
-        return HttpUtil.post("127.0.0.1:9898/ocr", MapUtil.builder(new HashMap<String, Object>())
-                .put("image", imgBytes)
-                .build());
+            @Override
+            public InputStream handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                return response.getEntity().getContent();
+            }
+        });
+        return HttpUtil.post("127.0.0.1:9898/ocr",
+                MapUtil.builder(new HashMap<String, Object>()).put("image", imgBytes).build());
     }
+
 }

@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.config;
 
-
 import com.simplefanc.voj.backend.shiro.AccountRealm;
 import com.simplefanc.voj.backend.shiro.JwtFilter;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
@@ -30,6 +29,7 @@ import java.util.Map;
  */
 @Configuration
 public class ShiroConfig {
+
     @Autowired
     JwtFilter jwtFilter;
 
@@ -48,15 +48,12 @@ public class ShiroConfig {
     }
 
     @Bean
-    public DefaultWebSecurityManager securityManager(AccountRealm accountRealm,
-                                                     SessionManager sessionManager,
+    public DefaultWebSecurityManager securityManager(AccountRealm accountRealm, SessionManager sessionManager,
                                                      RedisCacheManager redisCacheManager) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager(accountRealm);
         securityManager.setSessionManager(sessionManager);
         securityManager.setCacheManager(redisCacheManager);
-        /*
-         * 关闭shiro自带的session，详情见文档
-         */
+        // 关闭shiro自带的session，详情见文档
         DefaultSubjectDAO subjectDAO = new DefaultSubjectDAO();
         DefaultSessionStorageEvaluator defaultSessionStorageEvaluator = new DefaultSessionStorageEvaluator();
         defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
@@ -88,11 +85,12 @@ public class ShiroConfig {
         return shiroFilter;
     }
 
-    //开启注解代理（默认好像已经开启，可以不要）
+    // 开启注解代理（默认好像已经开启，可以不要）
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
         authorizationAttributeSourceAdvisor.setSecurityManager(securityManager);
         return authorizationAttributeSourceAdvisor;
     }
+
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.*;
 public class ThreadPoolUtil {
 
     private static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
+
     private static ExecutorService executorService;
 
     private ThreadPoolUtil() {
@@ -24,8 +25,7 @@ public class ThreadPoolUtil {
                 // 结束线程时间单位
                 TimeUnit.SECONDS,
                 // 阻塞队列，限制等候线程数
-                new LinkedBlockingDeque<>(200 * CPU_NUM),
-                Executors.defaultThreadFactory(),
+                new LinkedBlockingDeque<>(200 * CPU_NUM), Executors.defaultThreadFactory(),
                 // 队列满了，尝试去和最早的竞争，也不会抛出异常！
                 new ThreadPoolExecutor.DiscardOldestPolicy());
     }
@@ -39,7 +39,9 @@ public class ThreadPoolUtil {
     }
 
     private static class PluginConfigHolder {
+
         private final static ThreadPoolUtil INSTANCE = new ThreadPoolUtil();
+
     }
 
 }

@@ -15,4 +15,5 @@ public interface JudgeDir {
     String INTERACTIVE_WORKPLACE_DIR = "/judge/interactive";
 
     String TMPFS_DIR = "/w";
+
 }

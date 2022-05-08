@@ -40,4 +40,5 @@ public class MappingTrainingCategory implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
+
 }

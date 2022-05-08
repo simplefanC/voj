@@ -15,6 +15,6 @@ public interface ContestScoreboardService {
 
     ContestOutsideInfo getContestOutsideInfo(Long cid);
 
-
     List getContestOutsideScoreboard(ContestRankDto contestRankDto);
+
 }

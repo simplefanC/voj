@@ -21,6 +21,7 @@ import java.util.Date;
 @TableName("`file`")
 // TODO 名字
 public class File {
+
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)

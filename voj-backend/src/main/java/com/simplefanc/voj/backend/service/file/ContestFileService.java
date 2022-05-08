@@ -10,9 +10,10 @@ import java.io.IOException;
  */
 public interface ContestFileService {
 
-    void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response) throws IOException;
+    void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response)
+            throws IOException;
 
-    void downloadContestACSubmission(Long cid, Boolean excludeAdmin, String splitType, HttpServletResponse response);
+    void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, String splitType, HttpServletResponse response);
 
     void downloadContestPrintText(Long id, HttpServletResponse response);
 

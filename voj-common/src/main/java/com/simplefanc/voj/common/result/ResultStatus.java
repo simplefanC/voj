@@ -24,8 +24,8 @@ public enum ResultStatus {
 
     SYSTEM_ERROR(500, "系统错误");
 
-
     private int status;
 
     private String description;
+
 }

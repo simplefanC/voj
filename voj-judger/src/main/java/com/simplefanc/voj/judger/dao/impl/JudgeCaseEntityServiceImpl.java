@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
  * @since 2020-10-23
  */
 @Service
-public class JudgeCaseEntityServiceImpl extends ServiceImpl<JudgeCaseMapper, JudgeCase> implements JudgeCaseEntityService {
+public class JudgeCaseEntityServiceImpl extends ServiceImpl<JudgeCaseMapper, JudgeCase>
+        implements JudgeCaseEntityService {
 
 }

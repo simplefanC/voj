@@ -18,7 +18,6 @@ import java.util.List;
 
 public interface TrainingService {
 
-
     /**
      * @param limit
      * @param currentPage
@@ -31,7 +30,6 @@ public interface TrainingService {
      * @Since 2021/11/20
      */
     IPage<TrainingVo> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId, String auth);
-
 
     /**
      * @param tid
@@ -60,7 +58,6 @@ public interface TrainingService {
      */
     void toRegisterTraining(RegisterTrainingDto registerTrainingDto);
 
-
     /**
      * @param tid
      * @MethodName getTrainingAccess
@@ -69,7 +66,6 @@ public interface TrainingService {
      * @Since 2021/11/20
      */
     AccessVo getTrainingAccess(Long tid);
-
 
     /**
      * @param tid
@@ -81,7 +77,6 @@ public interface TrainingService {
      * @Since 2021/11/22
      */
     IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage);
-
 
     /**
      * 未启用，该操作会导致公开训练也记录，但其实并不需求，会造成数据量无效增加

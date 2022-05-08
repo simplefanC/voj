@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.service.admin.problem;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.common.result.CommonResult;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 
 import java.util.List;
 
@@ -36,6 +36,5 @@ public interface AdminProblemService {
     void importRemoteOJProblem(String name, String problemId);
 
     void changeProblemAuth(Problem problem);
-
 
 }

@@ -45,23 +45,32 @@ import java.util.Map;
 public class HttpClientUtil {
 
     private static final String _HTTP = "http";
+
     private static final String _HTTPS = "https";
 
     // 配置连接池获取超时时间
     private static final int CONNECTION_REQUEST_TIMEOUT = 1 * 1000;
+
     // 配置客户端连接服务器超时时间
     private static final int CONNECT_TIMEOUT = 3 * 1000;
+
     // 配置服务器响应超时时间
     private static final int SOCKET_TIMEOUT = 20 * 1000;
+
     private static int maxConnTotal = 20;
+
     private static int maxConnPerRoute = 4;
+
     // 默认返回null串
     private static String EMPTY_STR = "";
+
     private static String userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36";
 
     private static SSLConnectionSocketFactory sslConnectionSocketFactory = null;
+
     // 连接池管理类
     private static PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = null;
+
     // 管理Https连接的上下文类
     private static SSLContextBuilder sslContextBuilder = null;
 
@@ -96,8 +105,8 @@ public class HttpClientUtil {
 
             // 注册两种请求形式
             Registry<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register(_HTTP, new PlainConnectionSocketFactory())
-                    .register(_HTTPS, sslConnectionSocketFactory).build();
+                    .register(_HTTP, new PlainConnectionSocketFactory()).register(_HTTPS, sslConnectionSocketFactory)
+                    .build();
             poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager(registryBuilder);
             // 最大连接数
             poolingHttpClientConnectionManager.setMaxTotal(maxConnTotal);
@@ -115,7 +124,8 @@ public class HttpClientUtil {
         return RequestConfig.custom()
                 /*
                  * 从连接池中获取连接的超时时间，假设：连接池中已经使用的连接数等于setMaxTotal，新来的线程在等待1*1000
-                 * 后超时，错误内容：org.apache.http.conn.ConnectionPoolTimeoutException: Timeout waiting for connection from pool
+                 * 后超时，错误内容：org.apache.http.conn.ConnectionPoolTimeoutException: Timeout
+                 * waiting for connection from pool
                  */
                 .setConnectionRequestTimeout(CONNECTION_REQUEST_TIMEOUT)
                 /*
@@ -127,11 +137,10 @@ public class HttpClientUtil {
                 .setConnectTimeout(CONNECT_TIMEOUT)
                 /*
                  * 指的是连接上一个url，获取response的返回等待时间，假设：url程序中存在阻塞、或者response
-                 * 返回的文件内容太大，在指定的时间内没有读完，则出现
-                 * java.net.SocketTimeoutException: Read timed out
+                 * 返回的文件内容太大，在指定的时间内没有读完，则出现 java.net.SocketTimeoutException: Read timed
+                 * out
                  */
-                .setSocketTimeout(SOCKET_TIMEOUT)
-                .build();
+                .setSocketTimeout(SOCKET_TIMEOUT).build();
     }
 
     /**
@@ -141,18 +150,17 @@ public class HttpClientUtil {
         return new ConnectionKeepAliveStrategy() {
             @Override
             public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
-                HeaderElementIterator it = new BasicHeaderElementIterator
-                        (response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+                HeaderElementIterator it = new BasicHeaderElementIterator(
+                        response.headerIterator(HTTP.CONN_KEEP_ALIVE));
                 while (it.hasNext()) {
                     HeaderElement he = it.nextElement();
                     String param = he.getName();
                     String value = he.getValue();
-                    if (value != null && param.equalsIgnoreCase
-                            ("timeout")) {
+                    if (value != null && param.equalsIgnoreCase("timeout")) {
                         return Long.parseLong(value) * 1000;
                     }
                 }
-                //如果没有约定，则默认定义时长为20s
+                // 如果没有约定，则默认定义时长为20s
                 return 20 * 1000;
             }
         };
@@ -170,9 +178,8 @@ public class HttpClientUtil {
                 // 设置http请求规则
                 .setDefaultRequestConfig(getDefaultRequestConfig())
                 // 设置keep-Alive
-//                .setKeepAliveStrategy(getKeepAliveStrategy())
-                .setUserAgent(userAgent)
-                .build();
+                // .setKeepAliveStrategy(getKeepAliveStrategy())
+                .setUserAgent(userAgent).build();
     }
 
     /**
@@ -260,5 +267,5 @@ public class HttpClientUtil {
         }
         return EMPTY_STR;
     }
-}
 
+}

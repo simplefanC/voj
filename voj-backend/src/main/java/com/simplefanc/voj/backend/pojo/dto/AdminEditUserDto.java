@@ -29,4 +29,5 @@ public class AdminEditUserDto {
     private Integer status;
 
     private Boolean setNewPwd;
+
 }

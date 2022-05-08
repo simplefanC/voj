@@ -3,11 +3,12 @@ package com.simplefanc.voj.backend.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.List;
 
@@ -27,10 +28,14 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
     List<Role> getRolesByUid(@Param("uid") String uid);
 
     IPage<UserRolesVo> getUserList(Page<UserRolesVo> page, @Param("limit") int limit,
-                                   @Param("currentPage") int currentPage,
-                                   @Param("keyword") String keyword);
+                                   @Param("currentPage") int currentPage, @Param("keyword") String keyword);
 
     IPage<UserRolesVo> getAdminUserList(Page<UserRolesVo> page, @Param("limit") int limit,
+                                        @Param("currentPage") int currentPage, @Param("keyword") String keyword);
+
+    IPage<UserRolesVo> getAdminUserList(Page<UserRolesVo> page,
+                                        @Param("limit") int limit,
                                         @Param("currentPage") int currentPage,
-                                        @Param("keyword") String keyword);
+                                        @Param("keyword") String keyword,
+                                        List roleIdList);
 }

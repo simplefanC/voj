@@ -16,6 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 @EnableAsync
 public class JudgeAsyncTaskConfig {
+
     @Bean
     public Executor judgeTaskAsyncPool() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -36,4 +37,5 @@ public class JudgeAsyncTaskConfig {
         executor.initialize();
         return executor;
     }
+
 }

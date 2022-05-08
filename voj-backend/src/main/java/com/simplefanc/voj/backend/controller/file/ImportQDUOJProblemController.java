@@ -1,8 +1,7 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.service.file.ImportQDUOJProblemService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +40,5 @@ public class ImportQDUOJProblemController {
         importQDUOJProblemService.importQDOJProblem(file);
         return CommonResult.successResponse();
     }
-
 
 }

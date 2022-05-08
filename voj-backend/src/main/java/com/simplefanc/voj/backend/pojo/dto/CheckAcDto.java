@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
  * @Description:
  */
 @Data
-public class CheckACDto {
+public class CheckAcDto {
 
     @NotBlank(message = "比赛记录id不能为空")
     private Long id;
@@ -20,4 +20,5 @@ public class CheckACDto {
 
     @NotBlank(message = "是否确认不能为空")
     private Boolean checked;
+
 }

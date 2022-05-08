@@ -15,12 +15,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @EnableRetry
 @EnableScheduling // 开启定时任务
-@EnableDiscoveryClient // 开启注册发现
+@EnableDiscoveryClient // 开启服务注册发现功能
 @SpringBootApplication
 @EnableAsync(proxyTargetClass = true) // 开启异步注解
 @EnableTransactionManagement
 public class BackendApplication {
+
     public static void main(String[] args) {
         SpringApplication.run(BackendApplication.class, args);
     }
+
 }

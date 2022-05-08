@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.discussion.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.backend.dao.discussion.DiscussionReportEntityService;
 import com.simplefanc.voj.backend.mapper.DiscussionReportMapper;
+import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class DiscussionReportEntityServiceImpl extends ServiceImpl<DiscussionReportMapper, DiscussionReport> implements DiscussionReportEntityService {
+public class DiscussionReportEntityServiceImpl extends ServiceImpl<DiscussionReportMapper, DiscussionReport>
+        implements DiscussionReportEntityService {
+
 }

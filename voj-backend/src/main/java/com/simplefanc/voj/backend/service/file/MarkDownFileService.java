@@ -10,7 +10,6 @@ import java.util.Map;
  * @Description:
  */
 
-
 public interface MarkDownFileService {
 
     Map<Object, Object> uploadMDImg(MultipartFile image);

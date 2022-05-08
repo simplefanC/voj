@@ -22,6 +22,7 @@ import java.io.IOException;
 
 @Component
 public class MXTLoginer extends RetentiveLoginer {
+
     @Autowired
     private DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
@@ -33,16 +34,15 @@ public class MXTLoginer extends RetentiveLoginer {
     private String getCaptcha(DedicatedHttpClient client) throws ClientProtocolException, IOException {
         HttpGet get = new HttpGet("/code");
         File gif = client.execute(get, new ResponseHandler<File>() {
-                    @Override
-                    public File handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
-                        File captchaGif = File.createTempFile("mxt", ".gif");
-                        try (FileOutputStream fos = new FileOutputStream(captchaGif)) {
-                            response.getEntity().writeTo(fos);
-                            return captchaGif;
-                        }
-                    }
+            @Override
+            public File handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+                File captchaGif = File.createTempFile("mxt", ".gif");
+                try (FileOutputStream fos = new FileOutputStream(captchaGif)) {
+                    response.getEntity().writeTo(fos);
+                    return captchaGif;
                 }
-        );
+            }
+        });
         return MXTCaptchaRecognizer.recognize(gif);
     }
 
@@ -54,13 +54,12 @@ public class MXTLoginer extends RetentiveLoginer {
         if (client.execute(new HttpPost("/islogin"), HttpStatusValidator.SC_OK).getBody().contains("1")) {
             return;
         }
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "username", account.getAccountId(),
-                "password", account.getPassword(),
-                "valiCode", getCaptcha(client));
+        HttpEntity entity = SimpleNameValueEntityFactory.create("username", account.getAccountId(), "password",
+                account.getPassword(), "valiCode", getCaptcha(client));
 
         HttpPost post = new HttpPost("/login");
         post.setEntity(entity);
         client.execute(post, HttpStatusValidator.SC_MOVED_TEMPORARILY);
     }
+
 }

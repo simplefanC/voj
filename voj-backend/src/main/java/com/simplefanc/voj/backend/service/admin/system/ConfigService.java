@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.admin.system;
 
 import cn.hutool.json.JSONObject;
-import com.simplefanc.voj.backend.pojo.dto.DBAndRedisConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
 import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
 import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
@@ -38,9 +38,10 @@ public interface ConfigService {
 
     void testEmail(TestEmailDto testEmailDto);
 
-    DBAndRedisConfigDto getDBAndRedisConfig();
+    DbAndRedisConfigDto getDbAndRedisConfig();
 
-    void setDBAndRedisConfig(DBAndRedisConfigDto config);
+    void setDbAndRedisConfig(DbAndRedisConfigDto config);
 
     boolean sendNewConfigToNacos();
+
 }

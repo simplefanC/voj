@@ -1,14 +1,13 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
 import com.simplefanc.voj.backend.pojo.vo.AccessVo;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.TrainingRankVo;
 import com.simplefanc.voj.backend.pojo.vo.TrainingVo;
 import com.simplefanc.voj.backend.service.oj.TrainingService;
+import com.simplefanc.voj.common.result.CommonResult;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,14 +39,15 @@ public class TrainingController {
      * @Since 2021/11/20
      */
     @GetMapping("/get-training-list")
-    public CommonResult<IPage<TrainingVo>> getTrainingList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                           @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                           @RequestParam(value = "keyword", required = false) String keyword,
-                                                           @RequestParam(value = "categoryId", required = false) Long categoryId,
-                                                           @RequestParam(value = "auth", required = false) String auth) {
-        return CommonResult.successResponse(trainingService.getTrainingList(limit, currentPage, keyword, categoryId, auth));
+    public CommonResult<IPage<TrainingVo>> getTrainingList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "auth", required = false) String auth) {
+        return CommonResult
+                .successResponse(trainingService.getTrainingList(limit, currentPage, keyword, categoryId, auth));
     }
-
 
     /**
      * @param tid
@@ -89,7 +89,6 @@ public class TrainingController {
         return CommonResult.successResponse();
     }
 
-
     /**
      * @param tid
      * @MethodName getTrainingAccess
@@ -103,7 +102,6 @@ public class TrainingController {
         return CommonResult.successResponse(trainingService.getTrainingAccess(tid));
     }
 
-
     /**
      * @param tid
      * @param limit
@@ -115,7 +113,7 @@ public class TrainingController {
      */
     @GetMapping("/get-training-rank")
     @RequiresAuthentication
-    public CommonResult<IPage<TrainingRankVo>> getTrainingRank(@RequestParam(value = "tid", required = true) Long tid,
+    public CommonResult<IPage<TrainingRankVo>> getTrainingRank(@RequestParam(value = "tid") Long tid,
                                                                @RequestParam(value = "limit", required = false) Integer limit,
                                                                @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(trainingService.getTrainingRank(tid, limit, currentPage));

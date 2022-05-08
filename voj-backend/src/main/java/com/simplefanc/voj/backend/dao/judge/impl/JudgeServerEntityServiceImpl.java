@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.dao.judge.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
 import com.simplefanc.voj.backend.mapper.JudgeServerMapper;
+import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper, JudgeServer> implements JudgeServerEntityService {
+public class JudgeServerEntityServiceImpl extends ServiceImpl<JudgeServerMapper, JudgeServer>
+        implements JudgeServerEntityService {
 
 }

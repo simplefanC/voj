@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.controller.file;
 
-
 import com.simplefanc.voj.backend.service.file.UserFileService;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;

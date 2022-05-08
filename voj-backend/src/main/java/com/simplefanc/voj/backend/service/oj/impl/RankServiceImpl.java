@@ -1,10 +1,9 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
@@ -13,9 +12,10 @@ import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.service.oj.RankService;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,10 +30,13 @@ public class RankServiceImpl implements RankService {
 
     // 排行榜缓存时间 60s
     private static final long cacheRankSecond = 60;
+
     @Autowired
     private UserRecordEntityService userRecordEntityService;
+
     @Autowired
     private UserInfoEntityService userInfoEntityService;
+
     @Autowired
     private RedisUtil redisUtil;
 
@@ -48,24 +51,20 @@ public class RankServiceImpl implements RankService {
     public IPage getRankList(Integer limit, Integer currentPage, String searchUser, Integer type) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 30;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 30;
 
         List<String> uidList = null;
-        if (!StringUtils.isEmpty(searchUser)) {
+        if (!StrUtil.isEmpty(searchUser)) {
             QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-            userInfoQueryWrapper.and(wrapper -> wrapper
-                    .like("username", searchUser)
-                    .or()
-                    .like("nickname", searchUser)
-                    .or()
-                    .like("realname", searchUser));
+            userInfoQueryWrapper.and(wrapper -> wrapper.like("username", searchUser).or().like("nickname", searchUser)
+                    .or().like("realname", searchUser));
 
             userInfoQueryWrapper.eq("status", 0);
 
-            uidList = userInfoEntityService.list(userInfoQueryWrapper)
-                    .stream()
-                    .map(UserInfo::getUuid)
+            uidList = userInfoEntityService.list(userInfoQueryWrapper).stream().map(UserInfo::getUuid)
                     .collect(Collectors.toList());
         }
 
@@ -80,7 +79,6 @@ public class RankServiceImpl implements RankService {
         }
         return rankList;
     }
-
 
     private IPage<ACMRankVo> getACMRankList(int limit, int currentPage, List<String> uidList) {
 
@@ -105,7 +103,6 @@ public class RankServiceImpl implements RankService {
         return data;
     }
 
-
     private IPage<OIRankVo> getOIRankList(int limit, int currentPage, List<String> uidList) {
 
         IPage<OIRankVo> data = null;
@@ -128,4 +125,5 @@ public class RankServiceImpl implements RankService {
 
         return data;
     }
+
 }

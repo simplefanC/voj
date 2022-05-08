@@ -1,6 +1,5 @@
 package com.simplefanc.voj.backend.service.admin.training;
 
-
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 
 /**
@@ -15,4 +14,5 @@ public interface AdminTrainingCategoryService {
     void updateTrainingCategory(TrainingCategory trainingCategory);
 
     void deleteTrainingCategory(Long cid);
+
 }

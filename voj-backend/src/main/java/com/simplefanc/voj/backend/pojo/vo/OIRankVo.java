@@ -14,6 +14,7 @@ import java.io.Serializable;
 @ApiModel(value = "OI排行榜数据类OIRankVo", description = "")
 @Data
 public class OIRankVo implements Serializable {
+
     @ApiModelProperty(value = "用户id")
     private String uid;
 

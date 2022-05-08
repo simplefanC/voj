@@ -13,6 +13,7 @@ import java.util.Enumeration;
  */
 @Slf4j(topic = "voj")
 public class IpUtil {
+
     public static String getUserIpAddr(HttpServletRequest request) {
         String ipAddress = null;
         try {
@@ -25,7 +26,7 @@ public class IpUtil {
             }
             if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
                 ipAddress = request.getRemoteAddr();
-                if (ipAddress.equals("127.0.0.1")) {
+                if ("127.0.0.1".equals(ipAddress)) {
                     // 根据网卡取本机配置的IP
                     try {
                         ipAddress = InetAddress.getLocalHost().getHostAddress();
@@ -86,4 +87,5 @@ public class IpUtil {
         }
         return siteLocalAddress == null ? "" : siteLocalAddress;
     }
+
 }

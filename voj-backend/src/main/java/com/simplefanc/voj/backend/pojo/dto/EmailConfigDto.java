@@ -47,4 +47,5 @@ public class EmailConfigDto {
      * SMTP 使用 SSL
      */
     private Boolean emailSsl;
+
 }

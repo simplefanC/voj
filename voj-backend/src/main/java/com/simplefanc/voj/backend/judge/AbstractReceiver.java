@@ -19,4 +19,5 @@ public abstract class AbstractReceiver {
     public abstract String getTaskByRedis(String queue);
 
     public abstract void handleJudgeMsg(String taskJsonStr);
+
 }

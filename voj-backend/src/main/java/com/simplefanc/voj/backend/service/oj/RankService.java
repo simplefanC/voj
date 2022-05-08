@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface RankService {
 
-
     /**
      * @MethodName get-rank-list
      * @Params * @param null
@@ -19,6 +18,5 @@ public interface RankService {
      * @Since 2020/10/27
      */
     IPage getRankList(Integer limit, Integer currentPage, String searchUser, Integer type);
-
 
 }

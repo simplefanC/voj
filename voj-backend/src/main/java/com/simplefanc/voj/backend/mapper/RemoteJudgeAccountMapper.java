@@ -12,11 +12,10 @@ import java.util.List;
 @Mapper
 public interface RemoteJudgeAccountMapper extends BaseMapper<RemoteJudgeAccount> {
 
-
     @Select("select * from `remote_judge_account` where `oj` = #{oj} and `status` = 1 for update")
     List<RemoteJudgeAccount> getAvailableAccount(@Param("oj") String oj);
 
-
     @Update("update `remote_judge_account` set `status` = 0 where `id` = #{id} and `status` = 1")
     int updateAccountStatusById(@Param("id") Integer id);
+
 }

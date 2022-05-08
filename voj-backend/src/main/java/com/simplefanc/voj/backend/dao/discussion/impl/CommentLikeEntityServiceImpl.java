@@ -1,11 +1,10 @@
 package com.simplefanc.voj.backend.dao.discussion.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.common.pojo.entity.discussion.CommentLike;
 import com.simplefanc.voj.backend.dao.discussion.CommentLikeEntityService;
 import com.simplefanc.voj.backend.mapper.CommentLikeMapper;
+import com.simplefanc.voj.common.pojo.entity.discussion.CommentLike;
 import org.springframework.stereotype.Service;
-
 
 /**
  * @Author: chenfan
@@ -13,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
-public class CommentLikeEntityServiceImpl extends ServiceImpl<CommentLikeMapper, CommentLike> implements CommentLikeEntityService {
+public class CommentLikeEntityServiceImpl extends ServiceImpl<CommentLikeMapper, CommentLike>
+        implements CommentLikeEntityService {
+
 }

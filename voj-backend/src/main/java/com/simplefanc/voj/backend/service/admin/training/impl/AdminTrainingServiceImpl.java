@@ -1,13 +1,10 @@
 package com.simplefanc.voj.backend.service.admin.training.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.common.pojo.entity.training.MappingTrainingCategory;
-import com.simplefanc.voj.common.pojo.entity.training.Training;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
-import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
 import com.simplefanc.voj.backend.common.constants.TrainingEnum;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
@@ -19,11 +16,13 @@ import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingService;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.session.Session;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.pojo.entity.training.MappingTrainingCategory;
+import com.simplefanc.voj.common.pojo.entity.training.Training;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
+import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Objects;
@@ -55,39 +54,36 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     @Override
     public IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword) {
 
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
         IPage<Training> iPage = new Page<>(currentPage, limit);
         QueryWrapper<Training> queryWrapper = new QueryWrapper<>();
         // 过滤密码
         queryWrapper.select(Training.class, info -> !info.getColumn().equals("private_pwd"));
-        if (!StringUtils.isEmpty(keyword)) {
+        if (!StrUtil.isEmpty(keyword)) {
             keyword = keyword.trim();
-            queryWrapper
-                    .like("title", keyword).or()
-                    .like("id", keyword).or()
-                    .like("`rank`", keyword);
+            queryWrapper.like("title", keyword).or().like("id", keyword).or().like("`rank`", keyword);
         }
-
         queryWrapper.orderByAsc("`rank`");
 
         return trainingEntityService.page(iPage, queryWrapper);
     }
 
-
     @Override
     public TrainingDto getTraining(Long tid) {
         // 获取本场训练的信息
         Training training = trainingEntityService.getById(tid);
-        if (training == null) { // 查询不存在
+        // 查询不存在
+        if (training == null) {
             throw new StatusFailException("查询失败：该训练不存在,请检查参数tid是否准确！");
         }
 
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(training.getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
@@ -98,7 +94,8 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
 
         QueryWrapper<MappingTrainingCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tid", tid);
-        MappingTrainingCategory mappingTrainingCategory = mappingTrainingCategoryEntityService.getOne(queryWrapper, false);
+        MappingTrainingCategory mappingTrainingCategory = mappingTrainingCategoryEntityService.getOne(queryWrapper,
+                false);
         TrainingCategory trainingCategory = null;
         if (mappingTrainingCategory != null) {
             trainingCategory = trainingCategoryEntityService.getById(mappingTrainingCategory.getCid());
@@ -107,14 +104,10 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         return trainingDto;
     }
 
-
     @Override
     public void deleteTraining(Long tid) {
-
         boolean isOk = trainingEntityService.removeById(tid);
-        /*
-        Training的id为其他表的外键的表中的对应数据都会被一起删除！
-         */
+        // Training的id为其他表的外键的表中的对应数据都会被一起删除！
         if (!isOk) {
             throw new StatusFailException("删除失败！");
         }
@@ -137,9 +130,8 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
             }
         }
 
-        boolean isOk = mappingTrainingCategoryEntityService.save(new MappingTrainingCategory()
-                .setTid(training.getId())
-                .setCid(trainingCategory.getId()));
+        boolean isOk = mappingTrainingCategoryEntityService
+                .save(new MappingTrainingCategory().setTid(training.getId()).setCid(trainingCategory.getId()));
         if (!isOk) {
             throw new StatusFailException("添加失败！");
         }
@@ -149,10 +141,9 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     @Transactional(rollbackFor = Exception.class)
     public void updateTraining(TrainingDto trainingDto) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(trainingDto.getTraining().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
@@ -170,7 +161,6 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
             }
         }
 
-
         TrainingCategory trainingCategory = trainingDto.getTrainingCategory();
         if (trainingCategory.getId() == null) {
             try {
@@ -183,12 +173,11 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         }
 
         MappingTrainingCategory mappingTrainingCategory = mappingTrainingCategoryEntityService
-                .getOne(new QueryWrapper<MappingTrainingCategory>().eq("tid", training.getId()),
-                        false);
+                .getOne(new QueryWrapper<MappingTrainingCategory>().eq("tid", training.getId()), false);
 
         if (mappingTrainingCategory == null) {
-            mappingTrainingCategoryEntityService.save(new MappingTrainingCategory()
-                    .setTid(training.getId()).setCid(trainingCategory.getId()));
+            mappingTrainingCategoryEntityService
+                    .save(new MappingTrainingCategory().setTid(training.getId()).setCid(trainingCategory.getId()));
             adminTrainingRecordService.checkSyncRecord(trainingDto.getTraining());
         } else {
             if (!mappingTrainingCategory.getCid().equals(trainingCategory.getId())) {
@@ -208,10 +197,9 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     @Override
     public void changeTrainingStatus(Long tid, String author, Boolean status) {
         // 获取当前登录的用户
-        Session session = SecurityUtils.getSubject().getSession();
-        UserRolesVo userRolesVo = (UserRolesVo) session.getAttribute("userInfo");
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(author)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
@@ -222,6 +210,5 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
             throw new StatusFailException("修改失败");
         }
     }
-
 
 }

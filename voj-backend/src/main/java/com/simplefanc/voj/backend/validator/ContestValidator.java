@@ -1,16 +1,16 @@
 package com.simplefanc.voj.backend.validator;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -43,7 +43,6 @@ public class ContestValidator {
         return false;
     }
 
-
     /**
      * @param contest
      * @param userRolesVo
@@ -60,10 +59,9 @@ public class ContestValidator {
 
         // 若不是比赛管理者
         if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
-
             // 判断一下比赛的状态，还未开始不能查看题目。
-            if (contest.getStatus().intValue() != ContestEnum.STATUS_RUNNING.getCode() &&
-                    contest.getStatus().intValue() != ContestEnum.STATUS_ENDED.getCode()) {
+            if (contest.getStatus().intValue() != ContestEnum.STATUS_RUNNING.getCode()
+                    && contest.getStatus().intValue() != ContestEnum.STATUS_ENDED.getCode()) {
                 throw new StatusForbiddenException("比赛还未开始，您无权访问该比赛！");
             } else {
                 // 如果是处于比赛正在进行阶段，需要判断该场比赛是否为私有赛，私有赛需要判断该用户是否已注册
@@ -85,11 +83,10 @@ public class ContestValidator {
         }
     }
 
-
     public void validateJudgeAuth(Contest contest, String uid) {
 
-        if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode() ||
-                contest.getAuth().intValue() == ContestEnum.AUTH_PROTECT.getCode()) {
+        if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode()
+                || contest.getAuth().intValue() == ContestEnum.AUTH_PROTECT.getCode()) {
             QueryWrapper<ContestRegister> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("cid", contest.getId()).eq("uid", uid);
             ContestRegister register = contestRegisterEntityService.getOne(queryWrapper, false);
@@ -100,19 +97,13 @@ public class ContestValidator {
         }
     }
 
-
     public boolean validateAccountRule(String accountRule, String username) {
 
-        String prefix = ReUtil.get("<prefix>([\\s\\S]*?)</prefix>",
-                accountRule, 1);
-        String suffix = ReUtil.get("<suffix>([\\s\\S]*?)</suffix>",
-                accountRule, 1);
-        String start = ReUtil.get("<start>([\\s\\S]*?)</start>",
-                accountRule, 1);
-        String end = ReUtil.get("<end>([\\s\\S]*?)</end>",
-                accountRule, 1);
-        String extra = ReUtil.get("<extra>([\\s\\S]*?)</extra>",
-                accountRule, 1);
+        String prefix = ReUtil.get("<prefix>([\\s\\S]*?)</prefix>", accountRule, 1);
+        String suffix = ReUtil.get("<suffix>([\\s\\S]*?)</suffix>", accountRule, 1);
+        String start = ReUtil.get("<start>([\\s\\S]*?)</start>", accountRule, 1);
+        String end = ReUtil.get("<end>([\\s\\S]*?)</end>", accountRule, 1);
+        String extra = ReUtil.get("<extra>([\\s\\S]*?)</extra>", accountRule, 1);
 
         int startNum = Integer.parseInt(start);
         int endNum = Integer.parseInt(end);
@@ -123,7 +114,7 @@ public class ContestValidator {
             }
         }
         // 额外账号列表
-        if (!StringUtils.isEmpty(extra)) {
+        if (!StrUtil.isEmpty(extra)) {
             String[] accountList = extra.trim().split("\n");
             for (String account : accountList) {
                 if (username.equals(account)) {
@@ -134,4 +125,5 @@ public class ContestValidator {
 
         return false;
     }
+
 }

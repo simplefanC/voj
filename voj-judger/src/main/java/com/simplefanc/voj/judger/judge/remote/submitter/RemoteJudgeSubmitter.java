@@ -33,13 +33,13 @@ public class RemoteJudgeSubmitter {
     @Autowired
     private JudgeService judgeService;
 
-
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
 
     public boolean process(SubmissionInfo info, RemoteAccount account) {
-        log.info("Ready Send Task to RemoteJudge[{}] => submit_id: [{}], uid: [{}]," +
-                        " pid: [{}], vjudge_username: [{}], vjudge_password: [{}]",
+        log.info(
+                "Ready Send Task to RemoteJudge[{}] => submit_id: [{}], uid: [{}],"
+                        + " pid: [{}], vjudge_username: [{}], vjudge_password: [{}]",
                 info.remoteJudge, info.submitId, info.uid, info.pid, account.accountId, account.password);
 
         String errLog = null;
@@ -61,31 +61,23 @@ public class RemoteJudgeSubmitter {
             // 更新此次提交状态为提交失败！
             UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
             judgeUpdateWrapper.set("status", JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus())
-                    .set("error_message", errLog)
-                    .eq("submit_id", info.submitId);
+                    .set("error_message", errLog).eq("submit_id", info.submitId);
             judgeEntityService.update(judgeUpdateWrapper);
             // 更新其它表
-            judgeService.updateOtherTable(new Judge()
-                    .setSubmitId(info.submitId)
-                    .setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus())
-                    .setCid(info.cid)
-                    .setUid(info.uid)
-                    .setPid(info.pid));
+            judgeService.updateOtherTable(
+                    new Judge().setSubmitId(info.submitId).setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus())
+                            .setCid(info.cid).setUid(info.uid).setPid(info.pid));
             return false;
         }
 
         // 提交成功顺便更新状态为-->STATUS_PENDING 判题中...
-        judgeEntityService.updateById(new Judge()
-                .setSubmitId(info.submitId)
-                .setStatus(JudgeStatus.STATUS_PENDING.getStatus())
-                .setVjudgeSubmitId(info.remoteRunId)
-                .setVjudgeUsername(account.accountId)
-                .setVjudgePassword(account.password)
-                .setJudger(judgeServerName)
-        );
+        judgeEntityService.updateById(new Judge().setSubmitId(info.submitId)
+                .setStatus(JudgeStatus.STATUS_PENDING.getStatus()).setVjudgeSubmitId(info.remoteRunId)
+                .setVjudgeUsername(account.accountId).setVjudgePassword(account.password).setJudger(judgeServerName));
 
         log.info("[{}] Submit Successfully! The submit_id of remote judge is [{}]. Waiting the result of the task!",
                 info.remoteRunId, info.remoteJudge);
         return true;
     }
+
 }
