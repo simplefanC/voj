@@ -72,7 +72,7 @@ public class AccountRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         JwtToken jwt = (JwtToken) token;
-        String userId = jwtUtil.getClaimByToken((String) jwt.getPrincipal()).getSubject();
+        String userId = jwtUtil.getClaimByToken((String) jwt.getPrincipal());
         UserRolesVo userRoles = userRoleMapper.getUserRoles(userId, null);
         if (userRoles == null) {
             throw new UnknownAccountException("账户不存在！");

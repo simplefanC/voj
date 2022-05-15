@@ -6,7 +6,6 @@ import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
-import io.jsonwebtoken.Claims;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
@@ -59,12 +58,10 @@ public class JwtFilter extends AuthenticatingFilter {
         if (StrUtil.isEmpty(token)) {
             return true;
         } else {
-            // 判断是否已过期
-            Claims claim = jwtUtil.getClaimByToken(token);
-            if (claim == null || jwtUtil.isTokenExpired(claim.getExpiration())) {
+            if(!jwtUtil.verifyToken(token)){
                 return true;
             }
-            String userId = claim.getSubject();
+            String userId = jwtUtil.getClaimByToken(token);
             if (!redisUtil.hasKey(TOKEN_REFRESH + userId) && redisUtil.hasKey(TOKEN_KEY + userId)) {
                 // 过了需更新token时间，但是还未过期，则进行token刷新
                 HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;

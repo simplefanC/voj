@@ -86,6 +86,7 @@ public class PassportServiceImpl implements PassportService {
         loginDto.setPassword(loginDto.getPassword().trim());
         loginDto.setUsername(loginDto.getUsername().trim());
         if (loginDto.getPassword().length() < 6 || loginDto.getPassword().length() > 20) {
+            // TODO 加入 validation
             throw new StatusFailException("密码长度应该为6~20位！");
         }
         if (loginDto.getUsername().length() > 20) {

@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.common.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,33 +36,34 @@ public class JwtUtil {
      * 生成jwt token
      */
     public String generateToken(String userId) {
-        Date nowDate = new Date();
         // 过期时间
-        Date expireDate = new Date(nowDate.getTime() + expire * 1000);
-
-        String token = Jwts.builder().setHeaderParam("type", "JWT").setSubject(userId).setIssuedAt(nowDate)
-                .setExpiration(expireDate).signWith(SignatureAlgorithm.HS512, secret).compact();
+        Date expireTime = new Date(System.currentTimeMillis() + expire * 1000);
+        String token = JWT.create()
+                .withSubject(userId)
+                .withExpiresAt(expireTime)
+                .sign(Algorithm.HMAC256(secret));
         redisUtil.set(TOKEN_REFRESH + userId, token, checkRefreshExpire);
         redisUtil.set(TOKEN_KEY + userId, token, expire);
         return token;
     }
 
-    public Claims getClaimByToken(String token) {
-        try {
-            return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-        } catch (Exception e) {
-            log.debug("validate is token error ", e);
-            return null;
-        }
+    public String getClaimByToken(String token) {
+        return JWT.decode(token)
+                .getSubject();
     }
 
     /**
-     * token是否过期
-     *
-     * @return true：过期
+     * token是否合法&过期
+     * 抛异常
      */
-    public boolean isTokenExpired(Date expiration) {
-        return expiration.before(new Date());
+    public boolean verifyToken(String token) {
+        try {
+            JWT.require(Algorithm.HMAC256(secret))
+                    .build()
+                    .verify(token);
+        } catch (JWTVerificationException e) {
+            return false;
+        }
+        return true;
     }
-
 }

@@ -93,7 +93,7 @@ logging:
   level:
     com.alibaba.nacos: error
     root: info
-#  config: classpath:logback-spring.xml
+  #  config: classpath:logback-spring.xml
   file:
     path: ./log
 
