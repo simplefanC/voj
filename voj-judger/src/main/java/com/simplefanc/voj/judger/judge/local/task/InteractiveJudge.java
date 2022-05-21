@@ -39,12 +39,12 @@ public class InteractiveJudge extends AbstractJudge {
 
         String userOutputFileName = judgeGlobalDTO.getProblemId() + "_user_output";
 
-        return SandboxRun.interactTestCase(parseRunCommand(runConfig.getCommand(), runConfig, null, null, null),
+        return SandboxRun.interactTestCase(parseRunCommand(runConfig, null, null, null),
                 runConfig.getEnvs(), runConfig.getExeName(), judgeGlobalDTO.getUserFileId(),
                 judgeGlobalDTO.getUserFileSrc(), judgeGlobalDTO.getTestTime(), judgeGlobalDTO.getMaxMemory(),
                 judgeGlobalDTO.getMaxStack(), judgeDTO.getTestCaseInputPath(), testCaseInputFileName,
                 judgeDTO.getTestCaseOutputPath(), testCaseOutputFileName, userOutputFileName,
-                parseRunCommand(interactiveRunConfig.getCommand(), interactiveRunConfig, testCaseInputFileName,
+                parseRunCommand(interactiveRunConfig, testCaseInputFileName,
                         userOutputFileName, testCaseOutputFileName),
                 interactiveRunConfig.getEnvs(), interactiveExeSrc, interactiveRunConfig.getExeName());
     }
@@ -78,7 +78,7 @@ public class InteractiveJudge extends AbstractJudge {
             result.set("status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
             if (userExitCode < 32) {
                 errMsg.append(String.format("The program return exit status code: %s (%s)\n", userExitCode,
-                        SandboxRun.signals.get(userExitCode)));
+                        SandboxRun.SIGNALS.get(userExitCode)));
             } else {
                 errMsg.append(String.format("The program return exit status code: %s\n", userExitCode));
             }

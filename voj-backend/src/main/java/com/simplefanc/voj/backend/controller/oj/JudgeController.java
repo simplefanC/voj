@@ -9,9 +9,9 @@ import com.simplefanc.voj.backend.service.oj.JudgeService;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,21 +19,21 @@ import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/27 20:52
+ * @Date: 2021/10/27 20:52
  * @Description: 处理代码评判相关业务
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class JudgeController {
 
-    @Autowired
-    private JudgeService judgeService;
+    private final JudgeService judgeService;
 
     /**
      * @MethodName submitProblemJudge
      * @Description 核心方法 判题通过openfeign调用判题系统服务
      * @Return CommonResult
-     * @Since 2020/10/30
+     * @Since 2021/10/30
      */
     @RequiresAuthentication
     @RequiresPermissions("submit")
@@ -90,7 +90,7 @@ public class JudgeController {
      * @MethodName getJudgeList
      * @Description 通用查询判题记录列表
      * @Return CommonResult
-     * @Since 2020/10/29
+     * @Since 2021/10/29
      */
     @RequestMapping(value = "/submissions", method = RequestMethod.GET)
     public CommonResult<IPage<JudgeVo>> getJudgeList(@RequestParam(value = "limit", required = false) Integer limit,
@@ -133,12 +133,12 @@ public class JudgeController {
      * @MethodName getJudgeCase
      * @Description 获得指定提交id的测试样例结果，暂不支持查看测试数据，只可看测试点结果，时间，空间，或者IO得分
      * @Return
-     * @Since 2020/10/29
+     * @Since 2021/10/29
      */
     @GetMapping("/get-all-case-result")
     public CommonResult<List<JudgeCase>> getALLCaseResult(
             @RequestParam(value = "submitId") Long submitId) {
-        return CommonResult.successResponse(judgeService.getALLCaseResult(submitId));
+        return CommonResult.successResponse(judgeService.getAllCaseResult(submitId));
     }
 
 }

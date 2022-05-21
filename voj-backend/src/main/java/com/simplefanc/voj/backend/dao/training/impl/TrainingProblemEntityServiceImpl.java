@@ -8,10 +8,10 @@ import com.simplefanc.voj.backend.mapper.TrainingProblemMapper;
 import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,14 +25,13 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProblemMapper, TrainingProblem>
         implements TrainingProblemEntityService {
 
-    @Resource
-    private TrainingProblemMapper trainingProblemMapper;
+    private final TrainingProblemMapper trainingProblemMapper;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
     static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();

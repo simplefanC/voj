@@ -15,8 +15,8 @@ import com.simplefanc.voj.backend.service.file.ImageService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,18 +31,16 @@ import java.util.Map;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
     public static final String IMAGE_FORMAT = "jpg,jpeg,gif,png,webp,jfif,svg";
 
-    @Autowired
-    private FileEntityService fileEntityService;
+    private final FileEntityService fileEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -122,7 +120,7 @@ public class ImageServiceImpl implements ImageService {
             // 将文件保存指定目录
             image.transferTo(FileUtil.file(filePathProps.getHomeCarouselFolder() + File.separator + filename));
         } catch (Exception e) {
-            log.error("图片文件上传异常-------------->{}", e.getMessage());
+            log.error("图片文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：图片上传失败！");
         }
 

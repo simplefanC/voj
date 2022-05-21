@@ -25,7 +25,7 @@ import com.simplefanc.voj.common.constants.RemoteOj;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,22 +39,18 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminContestProblemServiceImpl implements AdminContestProblemService {
 
-    @Autowired
-    private ContestProblemEntityService contestProblemEntityService;
+    private final ContestProblemEntityService contestProblemEntityService;
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private RemoteProblemService remoteProblemService;
+    private final RemoteProblemService remoteProblemService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

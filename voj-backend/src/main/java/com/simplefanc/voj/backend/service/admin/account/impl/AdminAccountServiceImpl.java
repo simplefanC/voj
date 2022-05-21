@@ -13,8 +13,7 @@ import com.simplefanc.voj.backend.service.admin.account.AdminAccountService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
 import com.simplefanc.voj.common.utils.IpUtil;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -32,16 +31,14 @@ import java.util.Map;
  */
 
 @Service
+@RequiredArgsConstructor
 public class AdminAccountServiceImpl implements AdminAccountService {
 
-    @Autowired
-    private SessionEntityService sessionEntityService;
+    private final SessionEntityService sessionEntityService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UserRoleEntityService userRoleEntityService;
+    private final UserRoleEntityService userRoleEntityService;
 
     @Override
     public Map<Object, Object> login(LoginDto loginDto) {

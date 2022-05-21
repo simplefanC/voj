@@ -15,7 +15,6 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,81 +22,104 @@ import java.util.Map;
 /**
  * @Author: chenfan
  * @Date: 2021/1/23 13:44
- * @Description:
+ * @Description: 调用判题安全沙箱
  */
 
 /**
- * args: string[]; // command line argument env?: string[]; // environment
+ * args: string[]; // command line argument
+ * env?: string[]; // environment
  * <p>
- * // specifies file input / pipe collector for program file descriptors files?:
- * (LocalFile | MemoryFile | PreparedFile | Pipe | null)[]; tty?: boolean; // enables tty
- * on the input and output pipes (should have just one input & one output) // Notice: must
- * have TERM environment variables (e.g. TERM=xterm)
+ * // specifies file input / pipe collector for program file descriptors
+ * files?: (LocalFile | MemoryFile | PreparedFile | Pipe | null)[];
+ * tty?: boolean; // enables tty on the input and output pipes (should have just one input & one output)
+ * // Notice: must have TERM environment variables (e.g. TERM=xterm)
  * <p>
- * // limitations cpuLimit?: number; // ns realCpuLimit?: number; // deprecated: use clock
- * limit instead (still working) clockLimit?: number; // ns memoryLimit?: number; // byte
- * stackLimit?: number; // byte (N/A on windows, macOS cannot set over 32M) procLimit?:
- * number;
+ * // limitations
+ * cpuLimit?: number;     // ns
+ * realCpuLimit?: number; // deprecated: use clock limit instead (still working)
+ * clockLimit?: number;   // ns
+ * memoryLimit?: number;  // byte
+ * stackLimit?: number;   // byte (N/A on windows, macOS cannot set over 32M)
+ * procLimit?: number;
  * <p>
- * // copy the correspond file to the container dst path copyIn?: {[dst:string]:LocalFile
- * | MemoryFile | PreparedFile};
+ * // copy the correspond file to the container dst path
+ * copyIn?: {[dst:string]:LocalFile | MemoryFile | PreparedFile};
  * <p>
  * // copy out specifies files need to be copied out from the container after execution
- * copyOut?: string[]; // similar to copyOut but stores file in executor service and
- * returns fileId, later download through /file/:fileId copyOutCached?: string[]; //
- * specifies the directory to dump container /w content copyOutDir: string // specifies
- * the max file size to copy out copyOutMax: number; // byte
+ * copyOut?: string[];
+ * // similar to copyOut but stores file in executor service and returns fileId, later download through /file/:fileId
+ * copyOutCached?: string[];
+ * // specifies the directory to dump container /w content
+ * copyOutDir: string
+ * // specifies the max file size to copy out
+ * copyOutMax: number; // byte
  */
-
 @Slf4j(topic = "voj")
 public class SandboxRun {
 
-    public static final HashMap<String, Integer> RESULT_MAP_STATUS = new HashMap<>();
+    public static final HashMap<String, Integer> RESULT_STATUS_MAP = new HashMap<>() {
+        {
+            put("Time Limit Exceeded", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
+            put("Memory Limit Exceeded", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
+            put("Output Limit Exceeded", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+            put("Accepted", JudgeStatus.STATUS_ACCEPTED.getStatus());
+            put("Nonzero Exit Status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+            put("Internal Error", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
+            put("File Error", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
+            put("Signalled", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+        }
+    };
 
-    public static final List<String> signals = Arrays.asList("", // 0
-            "Hangup", // 1
-            "Interrupt", // 2
-            "Quit", // 3
-            "Illegal instruction", // 4
-            "Trace/breakpoint trap", // 5
-            "Aborted", // 6
-            "Bus error", // 7
-            "Floating point exception", // 8
-            "Killed", // 9
-            "User defined signal 1", // 10
-            "Segmentation fault", // 11
-            "User defined signal 2", // 12
-            "Broken pipe", // 13
-            "Alarm clock", // 14
-            "Terminated", // 15
-            "Stack fault", // 16
-            "Child exited", // 17
-            "Continued", // 18
-            "Stopped (signal)", // 19
-            "Stopped", // 20
-            "Stopped (tty input)", // 21
-            "Stopped (tty output)", // 22
-            "Urgent I/O condition", // 23
-            "CPU time limit exceeded", // 24
-            "File size limit exceeded", // 25
-            "Virtual timer expired", // 26
-            "Profiling timer expired", // 27
-            "Window changed", // 28
-            "I/O possible", // 29
-            "Power failure", // 30
-            "Bad system call" // 31
-    );
+    public static final Map<Integer, String> SIGNALS = new HashMap<>() {
+        {
+            put(0, "");
+            put(1, "Hangup");
+            put(2, "Interrupt");
+            put(3, "Quit");
+            put(4, "Illegal instruction");
+            put(5, "Trace/breakpoint trap");
+            put(6, "Aborted");
+            put(7, "Bus error");
+            put(8, "Floating point exception");
+            put(9, "Killed");
+            put(10, "User defined signal 1");
+            put(11, "Segmentation fault");
+            put(12, "User defined signal 2");
+            put(13, "Broken pipe");
+            put(14, "Alarm clock");
+            put(15, "Terminated");
+            put(16, "Stack fault");
+            put(17, "Child exited");
+            put(18, "Continued");
+            put(19, "Stopped (signal)");
+            put(20, "Stopped");
+            put(21, "Stopped (tty input)");
+            put(22, "Stopped (tty output)");
+            put(23, "Urgent I/O condition");
+            put(24, "CPU time limit exceeded");
+            put(25, "File size limit exceeded");
+            put(26, "Virtual timer expired");
+            put(27, "Profiling timer expired");
+            put(28, "Window changed");
+            put(29, "I/O possible");
+            put(30, "Power failure");
+            put(31, "Bad system call");
+        }
+    };
 
     private static final RestTemplate restTemplate;
 
     /**
      * 单例模式
      */
-    private static final SandboxRun instance = new SandboxRun();
+    private static final SandboxRun INSTANCE = new SandboxRun();
+
+    private SandboxRun() {
+    }
 
     private static final String SANDBOX_BASE_URL = "http://localhost:5050";
 
-    private static final int maxProcessNumber = 128;
+    private static final int MAX_PROCESS_NUMBER = 128;
 
     private static final int TIME_LIMIT_MS = 16000;
 
@@ -121,17 +143,6 @@ public class SandboxRun {
     }
 
     static {
-        RESULT_MAP_STATUS.put("Time Limit Exceeded", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
-        RESULT_MAP_STATUS.put("Memory Limit Exceeded", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
-        RESULT_MAP_STATUS.put("Output Limit Exceeded", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
-        RESULT_MAP_STATUS.put("Accepted", JudgeStatus.STATUS_ACCEPTED.getStatus());
-        RESULT_MAP_STATUS.put("Nonzero Exit Status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
-        RESULT_MAP_STATUS.put("Internal Error", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
-        RESULT_MAP_STATUS.put("File Error", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
-        RESULT_MAP_STATUS.put("Signalled", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
-    }
-
-    static {
         JSONObject content = new JSONObject();
         content.set("content", "");
 
@@ -147,10 +158,6 @@ public class SandboxRun {
         COMPILE_FILES.put(stderr);
     }
 
-    private SandboxRun() {
-
-    }
-
     public static RestTemplate getRestTemplate() {
         return restTemplate;
     }
@@ -159,8 +166,26 @@ public class SandboxRun {
         return SANDBOX_BASE_URL;
     }
 
-    public static void delFile(String fileId) {
+    public JSONArray run(String uri, JSONObject param) throws SystemError {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(JSONUtil.toJsonStr(param), headers);
+        ResponseEntity<String> postForEntity;
+        try {
+            postForEntity = restTemplate.postForEntity(SANDBOX_BASE_URL + uri, request, String.class);
+            // TODO 疑似出现OOM
+            return JSONUtil.parseArray(postForEntity.getBody());
+        } catch (RestClientResponseException ex) {
+            if (ex.getRawStatusCode() != 200) {
+                throw new SystemError("Cannot connect to sandbox service.", null, ex.getResponseBodyAsString());
+            }
+        } catch (Exception e) {
+            throw new SystemError("Call SandBox Error.", null, e.getMessage());
+        }
+        return null;
+    }
 
+    public static void delFile(String fileId) {
         try {
             restTemplate.delete(SANDBOX_BASE_URL + "/file/{0}", fileId);
         } catch (RestClientResponseException ex) {
@@ -168,7 +193,6 @@ public class SandboxRun {
                 log.error("安全沙箱判题的删除内存中的文件缓存操作异常----------------->{}", ex.getResponseBodyAsString());
             }
         }
-
     }
 
     /**
@@ -190,7 +214,6 @@ public class SandboxRun {
      * @Return
      * @Since 2022/1/3
      */
-    // TODO 参数过多 返回值能否封装一下
     public static JSONArray compile(Long maxCpuTime, Long maxRealTime, Long maxMemory, Long maxStack, String srcName,
                                     String exeName, List<String> args, List<String> envs, String code, HashMap<String, String> extraFiles,
                                     Boolean needCopyOutCached, Boolean needCopyOutExe, String copyOutDir) throws SystemError {
@@ -203,7 +226,7 @@ public class SandboxRun {
         cmd.set("clockLimit", maxRealTime * 1000 * 1000L);
         // byte
         cmd.set("memoryLimit", maxMemory);
-        cmd.set("procLimit", maxProcessNumber);
+        cmd.set("procLimit", MAX_PROCESS_NUMBER);
         cmd.set("stackLimit", maxStack);
 
         JSONObject fileContent = new JSONObject();
@@ -236,9 +259,9 @@ public class SandboxRun {
         JSONObject param = new JSONObject();
         param.set("cmd", new JSONArray().put(cmd));
 
-        JSONArray result = instance.run("/run", param);
+        JSONArray result = INSTANCE.run("/run", param);
         JSONObject tmp = (JSONObject) result.get(0);
-        ((JSONObject) result.get(0)).set("status", RESULT_MAP_STATUS.get(tmp.getStr("status")));
+        ((JSONObject) result.get(0)).set("status", RESULT_STATUS_MAP.get(tmp.getStr("status")));
         return result;
     }
 
@@ -257,7 +280,6 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    // TODO 参数过多
     public static JSONArray testCase(List<String> args, List<String> envs, String testCasePath, Long maxTime,
                                      Long maxMemory, Long maxOutputSize, Integer maxStack, String exeName, String fileId, String fileSrc)
             throws SystemError {
@@ -292,7 +314,7 @@ public class SandboxRun {
         } else {
             cmd.set("memoryLimit", MEMORY_LIMIT_MB * 1024 * 1024L);
         }
-        cmd.set("procLimit", maxProcessNumber);
+        cmd.set("procLimit", MAX_PROCESS_NUMBER);
         cmd.set("stackLimit", maxStack * 1024 * 1024L);
 
         JSONObject exeFile = new JSONObject();
@@ -311,10 +333,10 @@ public class SandboxRun {
         param.set("cmd", new JSONArray().put(cmd));
 
         // 调用判题安全沙箱
-        JSONArray result = instance.run("/run", param);
+        JSONArray result = INSTANCE.run("/run", param);
 
         JSONObject tmp = (JSONObject) result.get(0);
-        ((JSONObject) result.get(0)).set("status", RESULT_MAP_STATUS.get(tmp.getStr("status")));
+        ((JSONObject) result.get(0)).set("status", RESULT_STATUS_MAP.get(tmp.getStr("status")));
         return result;
     }
 
@@ -334,7 +356,6 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    // TODO 参数过多
     public static JSONArray spjCheckResult(List<String> args, List<String> envs, String userOutputFilePath,
                                            String userOutputFileName, String testCaseInputFilePath, String testCaseInputFileName,
                                            String testCaseOutputFilePath, String testCaseOutputFileName, String spjExeSrc, String spjExeName)
@@ -367,7 +388,7 @@ public class SandboxRun {
         cmd.set("clockLimit", TIME_LIMIT_MS * 1000 * 1000L * 3);
         // byte
         cmd.set("memoryLimit", MEMORY_LIMIT_MB * 1024 * 1024L);
-        cmd.set("procLimit", maxProcessNumber);
+        cmd.set("procLimit", MAX_PROCESS_NUMBER);
         cmd.set("stackLimit", STACK_LIMIT_MB * 1024 * 1024L);
 
         JSONObject spjExeFile = new JSONObject();
@@ -397,10 +418,10 @@ public class SandboxRun {
         param.set("cmd", new JSONArray().put(cmd));
 
         // 调用判题安全沙箱
-        JSONArray result = instance.run("/run", param);
+        JSONArray result = INSTANCE.run("/run", param);
 
         JSONObject tmp = (JSONObject) result.get(0);
-        ((JSONObject) result.get(0)).set("status", RESULT_MAP_STATUS.get(tmp.getStr("status")));
+        ((JSONObject) result.get(0)).set("status", RESULT_STATUS_MAP.get(tmp.getStr("status")));
         return result;
     }
 
@@ -426,7 +447,6 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    // TODO 参数过多
     public static JSONArray interactTestCase(List<String> args, List<String> envs, String userExeName,
                                              String userFileId, String userFileSrc, Long userMaxTime, Long userMaxMemory, Integer userMaxStack,
                                              String testCaseInputPath, String testCaseInputFileName, String testCaseOutputFilePath,
@@ -461,7 +481,7 @@ public class SandboxRun {
         // byte
 
         pipeInputCmd.set("memoryLimit", (userMaxMemory + 100) * 1024 * 1024L);
-        pipeInputCmd.set("procLimit", maxProcessNumber);
+        pipeInputCmd.set("procLimit", MAX_PROCESS_NUMBER);
         pipeInputCmd.set("stackLimit", userMaxStack * 1024 * 1024L);
 
         JSONObject exeFile = new JSONObject();
@@ -497,7 +517,7 @@ public class SandboxRun {
         pipeOutputCmd.set("clockLimit", userMaxTime * 1000 * 1000L * 3 * 2);
         // byte
         pipeOutputCmd.set("memoryLimit", (userMaxMemory + 100) * 1024 * 1024L * 2);
-        pipeOutputCmd.set("procLimit", maxProcessNumber);
+        pipeOutputCmd.set("procLimit", MAX_PROCESS_NUMBER);
         pipeOutputCmd.set("stackLimit", STACK_LIMIT_MB * 1024 * 1024L);
 
         JSONObject spjExeFile = new JSONObject();
@@ -568,76 +588,190 @@ public class SandboxRun {
         param.set("pipeMapping", pipeMapping);
 
         // 调用判题安全沙箱
-        JSONArray result = instance.run("/run", param);
+        JSONArray result = INSTANCE.run("/run", param);
         JSONObject userRes = (JSONObject) result.get(0);
         JSONObject interactiveRes = (JSONObject) result.get(1);
-        userRes.set("status", RESULT_MAP_STATUS.get(userRes.getStr("status")));
-        interactiveRes.set("status", RESULT_MAP_STATUS.get(interactiveRes.getStr("status")));
+        userRes.set("status", RESULT_STATUS_MAP.get(userRes.getStr("status")));
+        interactiveRes.set("status", RESULT_STATUS_MAP.get(interactiveRes.getStr("status")));
         return result;
     }
-
-    public JSONArray run(String uri, JSONObject param) throws SystemError {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> request = new HttpEntity<>(JSONUtil.toJsonStr(param), headers);
-        ResponseEntity<String> postForEntity;
-        try {
-            postForEntity = restTemplate.postForEntity(SANDBOX_BASE_URL + uri, request, String.class);
-            // TODO 疑似出现OOM
-            return JSONUtil.parseArray(postForEntity.getBody());
-        } catch (RestClientResponseException ex) {
-            if (ex.getRawStatusCode() != 200) {
-                throw new SystemError("Cannot connect to sandbox service.", null, ex.getResponseBodyAsString());
-            }
-        } catch (Exception e) {
-            throw new SystemError("Call SandBox Error.", null, e.getMessage());
-        }
-        return null;
-    }
-
 }
 /*
- * 1. compile Json Request Body { "cmd": [{ "args": ["/usr/bin/g++", "a.cc", "-o", "a"],
- * "env": ["PATH=/usr/bin:/bin"], "files": [{ "content": "" }, { "name": "stdout", "max":
- * 10240 }, { "name": "stderr", "max": 10240 }], "cpuLimit": 10000000000, "memoryLimit":
- * 104857600, "procLimit": 50, "copyIn": { "a.cc": { "content":
- * "#include <iostream>\nusing namespace std;\nint main() {\nint a, b;\ncin >> a >> b;\ncout << a + b << endl;\n}"
- * } }, "copyOut": ["stdout", "stderr"], "copyOutCached": ["a.cc", "a"], "copyOutDir": "1"
- * }] }
- *
- * Json Response Data
- *
- * [ { "status": "Accepted", "exitStatus": 0, "time": 303225231, "memory": 32243712,
- * "runTime": 524177700, "files": { "stderr": "", "stdout": "" }, "fileIds": { "a":
- * "5LWIZAA45JHX4Y4Z", "a.cc": "NOHPGGDTYQUFRSLJ" } } ] 2.test case
- *
- * Json Request Body { "cmd": [{ "args": ["a"], "env":
- * ["PATH=/usr/bin:/bin","LANG=en_US.UTF-8","LC_ALL=en_US.UTF-8","LANGUAGE=en_US:en"],
- * "files": [{ "src": "/judge/test_case/problem_1010/1.in" }, { "name": "stdout", "max":
- * 10240 }, { "name": "stderr", "max": 10240 }], "cpuLimit": 10000000000,
- * "realCpuLimit":30000000000, "stackLimit":134217728, "memoryLimit": 104811111,
- * "procLimit": 50, "copyIn": { "a":{"fileId":"WDQL5TNLRRVB2KAP"} }, "copyOut": ["stdout",
- * "stderr"] }] }
- *
- * Json Response Data [{ "status": "Accepted", "exitStatus": 0, "time": 3171607, "memory":
- * 475136, "runTime": 110396333, "files": { "stderr": "", "stdout": "23\n" } }]
- *
- * 3. Interactive
- *
- * { "pipeMapping": [ { "in": { "max": 16777216, "index": 0, "fd": 1 }, "out": { "index":
- * 1, "fd": 0 } } ], "cmd": [ { "stackLimit": 134217728, "cpuLimit": 3000000000,
- * "realCpuLimit": 9000000000, "clockLimit": 64, "env": [ "LANG=en_US.UTF-8",
- * "LANGUAGE=en_US:en", "LC_ALL=en_US.UTF-8", "PYTHONIOENCODING=utf-8" ], "copyOut": [
- * "stderr" ], "args": [ "/usr/bin/python3", "main" ], "files": [ { "src":
- * "/judge/test_case/problem_1002/5.in" }, null, { "max": 16777216, "name": "stderr" } ],
- * "memoryLimit": 536870912, "copyIn": { "main": { "fileId": "CGTRDEMKW5VAYN6O" } } }, {
- * "stackLimit": 134217728, "cpuLimit": 8000000000, "clockLimit": 24000000000, "env": [
- * "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
- * "LANG=en_US.UTF-8", "LANGUAGE=en_US:en", "LC_ALL=en_US.UTF-8" ], "copyOut": [ "stdout",
- * "stderr" ], "args": [ "/w/spj", "/w/tmp" ], "files": [ null, { "max": 16777216, "name":
- * "stdout" }, { "max": 16777216, "name": "stderr" } ], "memoryLimit": 536870912,
- * "copyIn": { "spj": { "src": "/judge/spj/1002/spj" }, "tmp": { "src":
- * "/judge/test_case/problem_1002/5.out" } }, "procLimit": 64 } ] }
- *
- *
- */
+     1. compile
+        Json Request Body
+        {
+            "cmd": [{
+                "args": ["/usr/bin/g++", "a.cc", "-o", "a"],
+                "env": ["PATH=/usr/bin:/bin"],
+                "files": [{
+                    "content": ""
+                }, {
+                    "name": "stdout",
+                    "max": 10240
+                }, {
+                    "name": "stderr",
+                    "max": 10240
+                }],
+                "cpuLimit": 10000000000,
+                "memoryLimit": 104857600,
+                "procLimit": 50,
+                "copyIn": {
+                    "a.cc": {
+                        "content": "#include <iostream>\nusing namespace std;\nint main() {\nint a, b;\ncin >> a >> b;\ncout << a + b << endl;\n}"
+                    }
+                },
+                "copyOut": ["stdout", "stderr"],
+                "copyOutCached": ["a.cc", "a"],
+                "copyOutDir": "1"
+            }]
+        }
+
+        Json Response Data
+        [
+            {
+                "status": "Accepted",
+                "exitStatus": 0,
+                "time": 303225231,
+                "memory": 32243712,
+                "runTime": 524177700,
+                "files": {
+                    "stderr": "",
+                    "stdout": ""
+                },
+                "fileIds": {
+                    "a": "5LWIZAA45JHX4Y4Z",
+                    "a.cc": "NOHPGGDTYQUFRSLJ"
+                }
+            }
+        ]
+    2.test case
+
+      Json Request Body
+      {
+        "cmd": [{
+            "args": ["a"],
+            "env": ["PATH=/usr/bin:/bin","LANG=en_US.UTF-8","LC_ALL=en_US.UTF-8","LANGUAGE=en_US:en"],
+            "files": [{
+                "src": "/judge/test_case/problem_1010/1.in"
+            }, {
+                "name": "stdout",
+                "max": 10240
+            }, {
+                "name": "stderr",
+                "max": 10240
+            }],
+            "cpuLimit": 10000000000,
+            "realCpuLimit":30000000000,
+            "stackLimit":134217728,
+            "memoryLimit": 104811111,
+            "procLimit": 50,
+            "copyIn": {
+                "a":{"fileId":"WDQL5TNLRRVB2KAP"}
+            },
+            "copyOut": ["stdout", "stderr"]
+        }]
+      }
+
+    Json Response Data
+     [{
+      "status": "Accepted",
+      "exitStatus": 0,
+      "time": 3171607,
+      "memory": 475136,
+      "runTime": 110396333,
+      "files": {
+        "stderr": "",
+        "stdout": "23\n"
+      }
+    }]
+
+    3. Interactive
+    {
+        "pipeMapping": [{
+            "in": {
+                "max": 16777216,
+                "index": 0,
+                "fd": 1
+            },
+            "out": {
+                "index": 1,
+                "fd": 0
+            }
+        }],
+        "cmd": [{
+                "stackLimit": 134217728,
+                "cpuLimit": 3000000000,
+                "realCpuLimit": 9000000000,
+                "clockLimit": 64,
+                "env": [
+                    "LANG=en_US.UTF-8",
+                    "LANGUAGE=en_US:en",
+                    "LC_ALL=en_US.UTF-8",
+                    "PYTHONIOENCODING=utf-8"
+                ],
+                "copyOut": [
+                    "stderr"
+                ],
+                "args": [
+                    "/usr/bin/python3",
+                    "main"
+                ],
+                "files": [{
+                        "src": "/judge/test_case/problem_1002/5.in"
+                    },
+                    null,
+                    {
+                        "max": 16777216,
+                        "name": "stderr"
+                    }
+                ],
+                "memoryLimit": 536870912,
+                "copyIn": {
+                    "main": {
+                        "fileId": "CGTRDEMKW5VAYN6O"
+                    }
+                }
+            },
+            {
+                "stackLimit": 134217728,
+                "cpuLimit": 8000000000,
+                "clockLimit": 24000000000,
+                "env": [
+                    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                    "LANG=en_US.UTF-8",
+                    "LANGUAGE=en_US:en",
+                    "LC_ALL=en_US.UTF-8"
+                ],
+                "copyOut": [
+                    "stdout",
+                    "stderr"
+                ],
+                "args": [
+                    "/w/spj",
+                    "/w/tmp"
+                ],
+                "files": [
+                    null,
+                    {
+                        "max": 16777216,
+                        "name": "stdout"
+                    },
+                    {
+                        "max": 16777216,
+                        "name": "stderr"
+                    }
+                ],
+                "memoryLimit": 536870912,
+                "copyIn": {
+                    "spj": {
+                        "src": "/judge/spj/1002/spj"
+                    },
+                    "tmp": {
+                        "src": "/judge/test_case/problem_1002/5.out"
+                    }
+                },
+                "procLimit": 64
+            }
+        ]
+    }
+  */

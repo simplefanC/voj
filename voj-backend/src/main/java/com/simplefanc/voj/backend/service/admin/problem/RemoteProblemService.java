@@ -5,7 +5,7 @@ import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.judge.remote.crawler.CrawlersHolder;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,22 +19,18 @@ import java.util.List;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class RemoteProblemService {
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private ProblemTagEntityService problemTagEntityService;
+    private final ProblemTagEntityService problemTagEntityService;
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private LanguageEntityService languageEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Autowired
-    private ProblemLanguageEntityService problemLanguageEntityService;
+    private final ProblemLanguageEntityService problemLanguageEntityService;
 
     public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId, String author)
             throws Exception {

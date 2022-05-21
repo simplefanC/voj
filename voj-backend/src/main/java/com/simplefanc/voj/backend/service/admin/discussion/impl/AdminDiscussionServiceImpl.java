@@ -9,7 +9,7 @@ import com.simplefanc.voj.backend.dao.discussion.DiscussionReportEntityService;
 import com.simplefanc.voj.backend.service.admin.discussion.AdminDiscussionService;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +20,12 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminDiscussionServiceImpl implements AdminDiscussionService {
 
-    @Autowired
-    private DiscussionEntityService discussionEntityService;
+    private final DiscussionEntityService discussionEntityService;
 
-    @Autowired
-    private DiscussionReportEntityService discussionReportEntityService;
+    private final DiscussionReportEntityService discussionReportEntityService;
 
     @Override
     public void updateDiscussion(Discussion discussion) {

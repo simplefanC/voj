@@ -21,7 +21,7 @@ public interface HomeService {
      * @Params * @param null
      * @Description 获取最近14天的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     List<ContestVo> getRecentContest();
 
@@ -48,7 +48,7 @@ public interface HomeService {
      * @Params * @param null
      * @Description 获取最近其他OJ的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/1/15
+     * @Since 2021/1/15
      */
     List<HashMap<String, Object>> getRecentOtherContest();
 
@@ -57,7 +57,7 @@ public interface HomeService {
      * @Params * @param null
      * @Description 获取主页公告列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage);
 

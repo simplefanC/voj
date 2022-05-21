@@ -15,7 +15,7 @@ public interface RankService {
      * @Params * @param null
      * @Description 获取排行榜数据
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     IPage getRankList(Integer limit, Integer currentPage, String searchUser, Integer type);
 

@@ -17,10 +17,10 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,28 +31,22 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class RejudgeServiceImpl implements RejudgeService {
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Resource
-    private UserAcproblemEntityService userAcproblemEntityService;
+    private final UserAcproblemEntityService userAcproblemEntityService;
 
-    @Resource
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestRecordEntityService contestRecordEntityService;
 
-    @Resource
-    private JudgeCaseEntityService judgeCaseEntityService;
+    private final JudgeCaseEntityService judgeCaseEntityService;
 
-    @Resource
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Resource
-    private JudgeDispatcher judgeDispatcher;
+    private final JudgeDispatcher judgeDispatcher;
 
-    @Resource
-    private RemoteJudgeDispatcher remoteJudgeDispatcher;
+    private final RemoteJudgeDispatcher remoteJudgeDispatcher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

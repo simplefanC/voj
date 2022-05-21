@@ -25,7 +25,7 @@ import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,22 +40,18 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
-    @Autowired
-    private UserRoleEntityService userRoleEntityService;
+    private final UserRoleEntityService userRoleEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private AdminNoticeService adminNoticeService;
+    private final AdminNoticeService adminNoticeService;
 
-    @Autowired
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     @Override
     public IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin, String keyword) {

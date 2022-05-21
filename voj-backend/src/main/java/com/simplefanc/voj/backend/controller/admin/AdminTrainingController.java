@@ -8,12 +8,12 @@ import com.simplefanc.voj.backend.service.admin.training.AdminTrainingService;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 
 /**
@@ -23,13 +23,12 @@ import java.util.HashMap;
  */
 @RestController
 @RequestMapping("/api/admin/training")
+@RequiredArgsConstructor
 public class AdminTrainingController {
 
-    @Resource
-    private AdminTrainingService adminTrainingService;
+    private final AdminTrainingService adminTrainingService;
 
-    @Resource
-    private AdminTrainingProblemService adminTrainingProblemService;
+    private final AdminTrainingProblemService adminTrainingProblemService;
 
     @GetMapping("/list")
     @RequiresAuthentication

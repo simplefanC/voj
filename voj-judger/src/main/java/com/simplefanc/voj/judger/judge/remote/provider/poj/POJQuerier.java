@@ -11,13 +11,14 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpBodyValidator;
 import com.simplefanc.voj.judger.judge.remote.querier.Querier;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class POJQuerier implements Querier {
 
     private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {
@@ -35,8 +36,7 @@ public class POJQuerier implements Querier {
         }
     };
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

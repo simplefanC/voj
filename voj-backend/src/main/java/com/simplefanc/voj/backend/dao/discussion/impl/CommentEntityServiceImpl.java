@@ -16,11 +16,10 @@ import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -32,22 +31,18 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentEntityService {
 
-    @Autowired
-    private CommentMapper commentMapper;
+    private final CommentMapper commentMapper;
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private ReplyEntityService replyEntityService;
+    private final ReplyEntityService replyEntityService;
 
-    @Resource
-    private MsgRemindEntityService msgRemindEntityService;
+    private final MsgRemindEntityService msgRemindEntityService;
 
     @Override
     public IPage<CommentVo> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot,

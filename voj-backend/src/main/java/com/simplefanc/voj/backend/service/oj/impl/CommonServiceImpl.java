@@ -12,7 +12,7 @@ import com.simplefanc.voj.common.pojo.entity.problem.*;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.base.Captcha;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -27,31 +27,24 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class CommonServiceImpl implements CommonService {
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private ProblemTagEntityService problemTagEntityService;
+    private final ProblemTagEntityService problemTagEntityService;
 
-    @Autowired
-    private LanguageEntityService languageEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Autowired
-    private ProblemLanguageEntityService problemLanguageEntityService;
+    private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private CodeTemplateEntityService codeTemplateEntityService;
+    private final CodeTemplateEntityService codeTemplateEntityService;
 
-    @Autowired
-    private TrainingCategoryEntityService trainingCategoryEntityService;
+    private final TrainingCategoryEntityService trainingCategoryEntityService;
 
     @Override
     public CaptchaVo getCaptcha() {

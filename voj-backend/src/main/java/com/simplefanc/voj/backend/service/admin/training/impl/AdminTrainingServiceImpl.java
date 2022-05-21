@@ -21,10 +21,10 @@ import com.simplefanc.voj.common.pojo.entity.training.MappingTrainingCategory;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
@@ -34,22 +34,18 @@ import java.util.Objects;
  */
 
 @Service
+@RequiredArgsConstructor
 public class AdminTrainingServiceImpl implements AdminTrainingService {
 
-    @Resource
-    private TrainingEntityService trainingEntityService;
+    private final TrainingEntityService trainingEntityService;
 
-    @Resource
-    private MappingTrainingCategoryEntityService mappingTrainingCategoryEntityService;
+    private final MappingTrainingCategoryEntityService mappingTrainingCategoryEntityService;
 
-    @Resource
-    private TrainingCategoryEntityService trainingCategoryEntityService;
+    private final TrainingCategoryEntityService trainingCategoryEntityService;
 
-    @Resource
-    private TrainingRegisterEntityService trainingRegisterEntityService;
+    private final TrainingRegisterEntityService trainingRegisterEntityService;
 
-    @Resource
-    private AdminTrainingRecordService adminTrainingRecordService;
+    private final AdminTrainingRecordService adminTrainingRecordService;
 
     @Override
     public IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword) {

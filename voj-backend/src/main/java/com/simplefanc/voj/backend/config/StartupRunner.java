@@ -7,8 +7,8 @@ import com.simplefanc.voj.backend.pojo.bo.RemoteAccountProps;
 import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -23,16 +23,14 @@ import java.util.List;
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class StartupRunner implements CommandLineRunner {
 
-    @Autowired
-    private ConfigVo configVo;
+    private final ConfigVo configVo;
 
-    @Autowired
-    private ConfigService configService;
+    private final ConfigService configService;
 
-    @Autowired
-    private RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
+    private final RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
 
     @Value("${OPEN_REMOTE_JUDGE:true}")
     private String openRemoteJudge;
@@ -106,8 +104,7 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${spring.profiles.active}")
     private String profile;
 
-    @Autowired
-    private RemoteAccountProps remoteAccountProps;
+    private final RemoteAccountProps remoteAccountProps;
 
     @Override
     public void run(String... args) {

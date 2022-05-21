@@ -14,7 +14,7 @@ import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.service.oj.RankService;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,26 +26,24 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class RankServiceImpl implements RankService {
 
     // 排行榜缓存时间 60s
     private static final long cacheRankSecond = 60;
 
-    @Autowired
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     /**
      * @MethodName get-rank-list
      * @Params * @param null
      * @Description 获取排行榜数据
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @Override
     public IPage getRankList(Integer limit, Integer currentPage, String searchUser, Integer type) {

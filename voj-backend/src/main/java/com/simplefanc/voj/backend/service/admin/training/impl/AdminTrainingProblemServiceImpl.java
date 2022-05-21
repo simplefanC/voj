@@ -21,11 +21,10 @@ import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,25 +35,20 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemService {
 
-    @Resource
-    private TrainingProblemEntityService trainingProblemEntityService;
+    private final TrainingProblemEntityService trainingProblemEntityService;
 
-    @Resource
-    private TrainingEntityService trainingEntityService;
+    private final TrainingEntityService trainingEntityService;
 
-    @Resource
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Resource
-    private AdminTrainingRecordService adminTrainingRecordService;
+    private final AdminTrainingRecordService adminTrainingRecordService;
 
-    @Resource
-    private RemoteProblemService remoteProblemService;
+    private final RemoteProblemService remoteProblemService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     @Override
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,

@@ -19,14 +19,13 @@ import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +38,7 @@ import java.util.*;
  */
 
 @Service
+@RequiredArgsConstructor
 public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
     private final static List<String> timeUnits = Arrays.asList("ms", "s");
@@ -56,14 +56,11 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
         }
     };
 
-    @Resource
-    private LanguageEntityService languageEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Resource
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     /**
      * @param file

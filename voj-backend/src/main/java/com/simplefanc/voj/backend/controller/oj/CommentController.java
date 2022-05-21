@@ -7,9 +7,9 @@ import com.simplefanc.voj.backend.service.oj.CommentService;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +21,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
 
     @GetMapping("/comments")
     public CommonResult<CommentListVo> getComments(@RequestParam(value = "cid", required = false) Long cid,

@@ -25,8 +25,8 @@ import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,20 +46,17 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService {
 
     public static final List<String> LANGUAGES = Arrays.asList("C", "C With O2", "C++", "C++ With O2", "Java", "Python3", "Python2", "Golang", "C#");
-    @Autowired
-    private LanguageEntityService languageEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     /**
      * @param file

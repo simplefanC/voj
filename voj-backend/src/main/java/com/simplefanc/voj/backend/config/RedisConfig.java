@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/23 23:47
+ * @Date: 2021/10/23 23:47
  * @Description:
  */
 @Configuration

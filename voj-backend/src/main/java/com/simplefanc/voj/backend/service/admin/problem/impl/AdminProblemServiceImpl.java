@@ -27,13 +27,12 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.common.result.CommonResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.List;
 
@@ -45,28 +44,23 @@ import java.util.List;
 
 @Service
 @RefreshScope
+@RequiredArgsConstructor
 public class AdminProblemServiceImpl implements AdminProblemService {
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private ProblemCaseEntityService problemCaseEntityService;
+    private final ProblemCaseEntityService problemCaseEntityService;
 
-    @Autowired
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
 
     @Value("${voj.judge.token}")
     private String judgeToken;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private RemoteProblemService remoteProblemService;
+    private final RemoteProblemService remoteProblemService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     @Override
     public IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj) {

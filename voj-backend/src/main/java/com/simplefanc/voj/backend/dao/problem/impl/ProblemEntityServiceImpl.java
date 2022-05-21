@@ -25,7 +25,7 @@ import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeMode;
 import com.simplefanc.voj.common.constants.ProblemEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -46,34 +46,26 @@ import java.util.stream.Collectors;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem> implements ProblemEntityService {
 
-    @Autowired
-    private ProblemMapper problemMapper;
+    private final ProblemMapper problemMapper;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private ProblemCaseEntityService problemCaseEntityService;
+    private final ProblemCaseEntityService problemCaseEntityService;
 
-    @Autowired
-    private ProblemLanguageEntityService problemLanguageEntityService;
+    private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private ProblemTagEntityService problemTagEntityService;
+    private final ProblemTagEntityService problemTagEntityService;
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-    @Autowired
-    private CodeTemplateEntityService codeTemplateEntityService;
+    private final CodeTemplateEntityService codeTemplateEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     // 去除每行末尾的空白符
     public static String rtrim(String value) {

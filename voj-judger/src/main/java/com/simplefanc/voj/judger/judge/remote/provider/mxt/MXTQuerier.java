@@ -11,14 +11,15 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.querier.Querier;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.client.methods.HttpPost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class MXTQuerier implements Querier {
 
     private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {
@@ -73,8 +74,7 @@ public class MXTQuerier implements Querier {
             // 14
             "Read"};
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

@@ -7,9 +7,9 @@ import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingMapper;
 import com.simplefanc.voj.backend.pojo.vo.TrainingVo;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +19,10 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingEntityServiceImpl extends ServiceImpl<TrainingMapper, Training> implements TrainingEntityService {
 
-    @Resource
-    private TrainingMapper trainingMapper;
+    private final TrainingMapper trainingMapper;
 
     @Override
     public IPage<TrainingVo> getTrainingList(int limit, int currentPage, Long categoryId, String auth, String keyword) {

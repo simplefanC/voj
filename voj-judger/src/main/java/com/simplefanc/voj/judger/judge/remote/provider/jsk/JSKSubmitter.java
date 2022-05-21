@@ -6,15 +6,16 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.*;
 import com.simplefanc.voj.judger.judge.remote.submitter.Submitter;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class JSKSubmitter implements Submitter {
 
     private static final Map<String, String> FILE_MAP = new HashMap<String, String>() {
@@ -36,8 +37,7 @@ public class JSKSubmitter implements Submitter {
         }
     };
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

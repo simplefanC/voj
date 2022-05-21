@@ -8,9 +8,8 @@ import com.simplefanc.voj.backend.mapper.MsgRemindMapper;
 import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
 import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
 import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -18,11 +17,11 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class MsgRemindEntityServiceImpl extends ServiceImpl<MsgRemindMapper, MsgRemind>
         implements MsgRemindEntityService {
 
-    @Resource
-    private MsgRemindMapper msgRemindMapper;
+    private final MsgRemindMapper msgRemindMapper;
 
     @Override
     public UserUnreadMsgCountVo getUserUnreadMsgCount(String uid) {

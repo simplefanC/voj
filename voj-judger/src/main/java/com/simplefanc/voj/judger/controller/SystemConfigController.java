@@ -3,7 +3,7 @@ package com.simplefanc.voj.judger.controller;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.judger.dao.JudgeServerEntityService;
 import com.simplefanc.voj.judger.service.SystemConfigService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,17 +11,16 @@ import java.util.HashMap;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/3 20:12
+ * @Date: 2021/12/3 20:12
  * @Description:
  */
 @RestController
+@RequiredArgsConstructor
 public class SystemConfigController {
 
-    @Autowired
-    private SystemConfigService systemConfigService;
+    private final SystemConfigService systemConfigService;
 
-    @Autowired
-    private JudgeServerEntityService judgeServerEntityService;
+    private final JudgeServerEntityService judgeServerEntityService;
 
     @RequestMapping("/get-sys-config")
     public HashMap<String, Object> getSystemConfig() {

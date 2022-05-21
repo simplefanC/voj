@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.system.DashboardService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,19 +22,16 @@ import java.util.Map;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private SessionEntityService sessionEntityService;
+    private final SessionEntityService sessionEntityService;
 
     @Override
     public Session getRecentSession() {

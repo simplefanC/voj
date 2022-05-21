@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.oj.HomeService;
 import com.simplefanc.voj.common.result.CommonResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,25 +19,24 @@ import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/26 14:12
+ * @Date: 2021/12/26 14:12
  * @Description: 处理首页的请求
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class HomeController {
 
-    @Autowired
-    private HomeService homeService;
+    private final HomeService homeService;
 
-    @Autowired
-    private ConfigService configService;
+    private final ConfigService configService;
 
     /**
      * @MethodName getRecentContest
      * @Params * @param null
      * @Description 获取最近14天的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
 
     @GetMapping("/get-recent-contest")
@@ -74,7 +73,7 @@ public class HomeController {
      * @Params * @param null
      * @Description 获取最近其他OJ的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/1/15
+     * @Since 2021/1/15
      */
 
     @GetMapping("/get-recent-other-contest")
@@ -87,7 +86,7 @@ public class HomeController {
      * @Params * @param null
      * @Description 获取主页公告列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
 
     @GetMapping("/get-common-announcement")
@@ -102,7 +101,7 @@ public class HomeController {
      * @Params * @param null
      * @Description 获取网站的基础配置。例如名字，缩写名字等等。
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
 
     @GetMapping("/get-website-config")

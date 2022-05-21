@@ -24,7 +24,7 @@ import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionLike;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.pojo.entity.problem.Category;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,25 +36,20 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class DiscussionServiceImpl implements DiscussionService {
 
-    @Autowired
-    private DiscussionEntityService discussionEntityService;
+    private final DiscussionEntityService discussionEntityService;
 
-    @Autowired
-    private DiscussionLikeEntityService discussionLikeEntityService;
+    private final DiscussionLikeEntityService discussionLikeEntityService;
 
-    @Autowired
-    private CategoryEntityService categoryEntityService;
+    private final CategoryEntityService categoryEntityService;
 
-    @Autowired
-    private DiscussionReportEntityService discussionReportEntityService;
+    private final DiscussionReportEntityService discussionReportEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private UserAcproblemEntityService userAcproblemEntityService;
+    private final UserAcproblemEntityService userAcproblemEntityService;
 
     @Override
     public IPage<Discussion> getDiscussionList(Integer limit, Integer currentPage, Integer categoryId, String pid,

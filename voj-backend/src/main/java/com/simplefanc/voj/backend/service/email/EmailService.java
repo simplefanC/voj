@@ -5,8 +5,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.UnicodeUtil;
 import com.simplefanc.voj.backend.common.constants.EmailConstant;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -30,6 +30,7 @@ import java.util.Properties;
 @Component
 @RefreshScope
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class EmailService {
 
     @Value("${voj.web-config.base-url}")
@@ -56,8 +57,7 @@ public class EmailService {
     @Value("${voj.mail.ssl}")
     public String ojEmailSsl;
 
-    @Autowired
-    private TemplateEngine templateEngine;
+    private final TemplateEngine templateEngine;
 
     /**
      * @MethodName getMailSender
@@ -132,7 +132,7 @@ public class EmailService {
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            log.error("用户注册的邮件任务发生异常------------>{}", e.getMessage());
+            log.error("用户注册的邮件任务发生异常------------>", e);
         }
     }
 
@@ -181,7 +181,7 @@ public class EmailService {
             mimeMessageHelper.setFrom(ojEmailFrom);
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            log.error("用户重置密码的邮件任务发生异常------------>{}", e.getMessage());
+            log.error("用户重置密码的邮件任务发生异常------------>", e);
         }
     }
 
@@ -215,7 +215,7 @@ public class EmailService {
             mimeMessageHelper.setFrom(ojEmailFrom);
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            log.error("超级管理员重置邮件系统配置的测试邮箱可用性的任务发生异常------------>{}", e.getMessage());
+            log.error("超级管理员重置邮件系统配置的测试邮箱可用性的任务发生异常------------>", e);
         }
     }
 

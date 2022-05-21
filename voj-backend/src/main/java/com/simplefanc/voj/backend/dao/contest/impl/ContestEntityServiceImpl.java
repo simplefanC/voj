@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.mapper.ContestMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest> implements ContestEntityService {
 
-    @Autowired
-    private ContestMapper contestMapper;
+    private final ContestMapper contestMapper;
 
     @Override
     public List<ContestVo> getWithinNext14DaysContests() {

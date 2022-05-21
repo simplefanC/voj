@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.config;
 
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -13,10 +13,10 @@ import java.io.File;
  * 解决跨域问题
  */
 @Configuration
+@RequiredArgsConstructor
 public class CorsConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

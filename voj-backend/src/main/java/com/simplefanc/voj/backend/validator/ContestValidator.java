@@ -7,12 +7,13 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -21,14 +22,24 @@ import java.util.Date;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class ContestValidator {
 
-    @Resource
-    private ContestRegisterEntityService contestRegisterEntityService;
+    private final ContestRegisterEntityService contestRegisterEntityService;
 
-    public boolean isSealRank(String uid, Contest contest, Boolean forceRefresh, Boolean isRoot) {
+    public boolean isContestAdmin(Contest contest) {
+        // 超级管理员或比赛拥有者
+        return UserSessionUtil.isRoot() || isContestOwner(contest.getUid());
+    }
+
+    public boolean isContestOwner(String uid) {
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        return userRolesVo.getUid().equals(uid);
+    }
+
+    public boolean isOpenSealRank(Contest contest, Boolean forceRefresh) {
         // 如果是管理员同时选择强制刷新榜单，则封榜无效
-        if (forceRefresh && (isRoot || contest.getUid().equals(uid))) {
+        if (forceRefresh && isContestAdmin(contest)) {
             return false;
         } else if (contest.getSealRank() && contest.getSealRankTime() != null) {
             // 该比赛开启封榜模式
@@ -45,20 +56,16 @@ public class ContestValidator {
 
     /**
      * @param contest
-     * @param userRolesVo
-     * @param isRoot
      * @MethodName validateContestAuth
      * @Description 需要对该比赛做判断，是否处于开始或结束状态才可以获取，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
      * @Since 2021/1/17
      */
-    public void validateContestAuth(Contest contest, UserRolesVo userRolesVo, Boolean isRoot) {
-
+    public void validateContestAuth(Contest contest) {
         if (contest == null || !contest.getVisible()) {
             throw new StatusFailException("对不起，该比赛不存在！");
         }
-
         // 若不是比赛管理者
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!isContestAdmin(contest)) {
             // 判断一下比赛的状态，还未开始不能查看题目。
             if (contest.getStatus().intValue() != ContestEnum.STATUS_RUNNING.getCode()
                     && contest.getStatus().intValue() != ContestEnum.STATUS_ENDED.getCode()) {
@@ -67,7 +74,7 @@ public class ContestValidator {
                 // 如果是处于比赛正在进行阶段，需要判断该场比赛是否为私有赛，私有赛需要判断该用户是否已注册
                 if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode()) {
                     QueryWrapper<ContestRegister> registerQueryWrapper = new QueryWrapper<>();
-                    registerQueryWrapper.eq("cid", contest.getId()).eq("uid", userRolesVo.getUid());
+                    registerQueryWrapper.eq("cid", contest.getId()).eq("uid", UserSessionUtil.getUserInfo().getUid());
                     ContestRegister register = contestRegisterEntityService.getOne(registerQueryWrapper);
                     // 如果数据为空，表示未注册私有赛，不可访问
                     if (register == null) {
@@ -75,7 +82,7 @@ public class ContestValidator {
                     }
 
                     if (contest.getOpenAccountLimit()
-                            && !validateAccountRule(contest.getAccountLimitRule(), userRolesVo.getUsername())) {
+                            && !validateAccountRule(contest.getAccountLimitRule(), UserSessionUtil.getUserInfo().getUsername())) {
                         throw new StatusForbiddenException("对不起！本次比赛只允许特定账号规则的用户参赛！");
                     }
                 }
@@ -83,8 +90,8 @@ public class ContestValidator {
         }
     }
 
-    public void validateJudgeAuth(Contest contest, String uid) {
-
+    public void validateJudgeAuth(Contest contest) {
+        String uid = UserSessionUtil.getUserInfo().getUid();
         if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode()
                 || contest.getAuth().intValue() == ContestEnum.AUTH_PROTECT.getCode()) {
             QueryWrapper<ContestRegister> queryWrapper = new QueryWrapper<>();

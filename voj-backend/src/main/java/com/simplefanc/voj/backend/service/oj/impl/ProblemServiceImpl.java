@@ -18,7 +18,7 @@ import com.simplefanc.voj.common.constants.*;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,40 +33,32 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class ProblemServiceImpl implements ProblemService {
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private ProblemTagEntityService problemTagEntityService;
+    private final ProblemTagEntityService problemTagEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private LanguageEntityService languageEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ProblemLanguageEntityService problemLanguageEntityService;
+    private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    @Autowired
-    private CodeTemplateEntityService codeTemplateEntityService;
+    private final CodeTemplateEntityService codeTemplateEntityService;
 
-    @Autowired
-    private ContestValidator contestValidator;
+    private final ContestValidator contestValidator;
 
     /**
      * @MethodName getProblemList
      * @Params * @param null
      * @Description 获取题目列表分页
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @Override
     public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId,
@@ -90,7 +82,7 @@ public class ProblemServiceImpl implements ProblemService {
     /**
      * @MethodName getRandomProblem
      * @Description 随机选取一道题目
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @Override
     public RandomProblemVo getRandomProblem() {
@@ -111,7 +103,7 @@ public class ProblemServiceImpl implements ProblemService {
     /**
      * @MethodName getUserProblemStatus
      * @Description 获取用户对应该题目列表中各个题目的做题情况
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     // TODO 行数过多
     @Override
@@ -153,8 +145,7 @@ public class ProblemServiceImpl implements ProblemService {
                     if (!result.containsKey(judge.getPid())) {
                         // 判断该提交是否为封榜之后的提交,OI赛制封榜后的提交看不到提交结果，
                         // 只有比赛结束可以看到,比赛管理员与超级管理员的提交除外
-                        if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true,
-                                UserSessionUtil.isRoot())) {
+                        if (contestValidator.isOpenSealRank(contest, true)) {
                             temp.put("status", JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus());
                             temp.put("score", null);
                         } else {
@@ -216,7 +207,7 @@ public class ProblemServiceImpl implements ProblemService {
     /**
      * @MethodName getProblemInfo
      * @Description 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @Override
     public ProblemInfoVo getProblemInfo(String problemId) {

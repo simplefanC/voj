@@ -9,11 +9,9 @@ import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccountRepository;
 import com.simplefanc.voj.judger.judge.remote.querier.RemoteJudgeQuerier;
 import com.simplefanc.voj.judger.judge.remote.submitter.RemoteJudgeSubmitter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -22,19 +20,16 @@ import javax.annotation.Resource;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class RemoteJudgeContext {
 
-    @Resource
-    private RemoteJudgeSubmitter remoteJudgeSubmitter;
+    private final RemoteJudgeSubmitter remoteJudgeSubmitter;
 
-    @Resource
-    private RemoteJudgeQuerier remoteJudgeQuerier;
+    private final RemoteJudgeQuerier remoteJudgeQuerier;
 
-    @Autowired
-    private RemoteAccountRepository remoteAccountRepository;
+    private final RemoteAccountRepository remoteAccountRepository;
 
-    @Autowired
-    private ProblemEntityService problemService;
+    private final ProblemEntityService problemService;
 
     // @Async // 去掉 异步注解 否则直接返回主服务器 无法实现对判题机的负载均衡
     public void judge(ToJudge toJudge) {

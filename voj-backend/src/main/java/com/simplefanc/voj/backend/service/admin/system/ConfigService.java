@@ -20,7 +20,7 @@ public interface ConfigService {
      * @Params * @param null
      * @Description 获取当前服务的相关信息以及当前系统的cpu情况，内存使用情况
      * @Return CommonResult
-     * @Since 2020/12/3
+     * @Since 2021/12/3
      */
     JSONObject getServiceInfo();
 

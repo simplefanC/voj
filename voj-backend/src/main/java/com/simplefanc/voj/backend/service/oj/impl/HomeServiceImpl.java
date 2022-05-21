@@ -14,6 +14,7 @@ import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.service.oj.HomeService;
 import com.simplefanc.voj.common.pojo.entity.common.File;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,36 +29,31 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class HomeServiceImpl implements HomeService {
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ConfigVo configVo;
+    private final ConfigVo configVo;
 
-    @Autowired
-    private AnnouncementEntityService announcementEntityService;
+    private final AnnouncementEntityService announcementEntityService;
 
     @Autowired
 
     private UserRecordEntityService userRecordEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private FileEntityService fileEntityService;
+    private final FileEntityService fileEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     /**
      * @MethodName getRecentContest
      * @Params * @param null
      * @Description 获取最近14天的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     @Override
     public List<ContestVo> getRecentContest() {
@@ -101,7 +97,7 @@ public class HomeServiceImpl implements HomeService {
      * @Params * @param null
      * @Description 获取最近其他OJ的比赛信息列表
      * @Return CommonResult
-     * @Since 2020/1/15
+     * @Since 2021/1/15
      */
     @Override
     public List<HashMap<String, Object>> getRecentOtherContest() {
@@ -115,7 +111,7 @@ public class HomeServiceImpl implements HomeService {
      * @Params * @param null
      * @Description 获取主页公告列表
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     @Override
     public IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage) {

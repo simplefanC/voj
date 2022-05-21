@@ -10,11 +10,11 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.*;
 import com.simplefanc.voj.judger.judge.remote.querier.Querier;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -22,6 +22,7 @@ import java.util.Map;
 
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class JSKQuerier implements Querier {
 
     /**
@@ -44,8 +45,7 @@ public class JSKQuerier implements Querier {
         }
     };
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

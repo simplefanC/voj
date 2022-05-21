@@ -5,11 +5,10 @@ import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -18,10 +17,10 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/api/admin/msg")
+@RequiredArgsConstructor
 public class AdminNoticeController {
 
-    @Resource
-    private AdminNoticeService adminNoticeService;
+    private final AdminNoticeService adminNoticeService;
 
     @GetMapping("/notice")
     @RequiresAuthentication

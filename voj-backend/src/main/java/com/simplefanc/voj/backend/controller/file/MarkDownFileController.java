@@ -2,6 +2,7 @@ package com.simplefanc.voj.backend.controller.file;
 
 import com.simplefanc.voj.backend.service.file.MarkDownFileService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -22,10 +22,10 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/api/file")
+@RequiredArgsConstructor
 public class MarkDownFileController {
 
-    @Resource
-    private MarkDownFileService markDownFileService;
+    private final MarkDownFileService markDownFileService;
 
     @RequestMapping(value = "/upload-md-img", method = RequestMethod.POST)
     @RequiresAuthentication

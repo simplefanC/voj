@@ -9,17 +9,15 @@ import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.ContestRankService;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
-import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
@@ -29,19 +27,16 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class ContestScoreboardServiceImpl implements ContestScoreboardService {
 
-    @Resource
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Resource
-    private ContestProblemEntityService contestProblemEntityService;
+    private final ContestProblemEntityService contestProblemEntityService;
 
-    @Resource
-    private ContestValidator contestValidator;
+    private final ContestValidator contestValidator;
 
-    @Resource
-    private ContestRankService contestRankService;
+    private final ContestRankService contestRankService;
 
     @Override
     public ContestOutsideInfo getContestOutsideInfo(Long cid) {
@@ -106,24 +101,13 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
             throw new StatusForbiddenException("本场比赛正在筹备中，禁止访问外榜！");
         }
 
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = false;
-        String currentUid = null;
-
-        if (userRolesVo != null) {
-            currentUid = userRolesVo.getUid();
-            isRoot = UserSessionUtil.isRoot();
-            // 不是比赛创建者或者超管无权限开启强制实时榜单
-            if (!isRoot && !contest.getUid().equals(currentUid)) {
-                forceRefresh = false;
-            }
+        // 不是比赛创建者或者超管无权限开启强制实时榜单
+        if (!contestValidator.isContestAdmin(contest)) {
+            forceRefresh = false;
         }
 
         // 校验该比赛是否开启了封榜模式，超级管理员和比赛创建者可以直接看到实际榜单
-        boolean isOpenSealRank = contestValidator.isSealRank(currentUid, contest, forceRefresh, isRoot);
+        boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
 
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
 

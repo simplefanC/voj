@@ -5,23 +5,23 @@ import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.announcement.AdminAnnouncementService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/10 19:53
+ * @Date: 2021/12/10 19:53
  * @Description:
  */
 @RestController
 @RequiresAuthentication
+@RequiredArgsConstructor
 public class AnnouncementController {
 
-    @Autowired
-    private AdminAnnouncementService adminAnnouncementService;
+    private final AdminAnnouncementService adminAnnouncementService;
 
     @GetMapping("/api/admin/announcement")
     @RequiresPermissions("announcement_admin")

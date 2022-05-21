@@ -10,8 +10,8 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.service.JudgeService;
 import com.simplefanc.voj.judger.service.RemoteJudgeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j(topic = "voj")
 @Component
+@RequiredArgsConstructor
 public class RemoteJudgeQuerier {
 
     private final static ScheduledExecutorService SCHEDULER = Executors
@@ -31,14 +32,11 @@ public class RemoteJudgeQuerier {
     private final static Map<String, Future> FUTURE_TASK_MAP = new ConcurrentHashMap<>(
             Runtime.getRuntime().availableProcessors() * 2);
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private JudgeService judgeService;
+    private final JudgeService judgeService;
 
-    @Autowired
-    private RemoteJudgeService remoteJudgeService;
+    private final RemoteJudgeService remoteJudgeService;
 
     public void process(SubmissionInfo info, RemoteAccount account) {
         String key = UUID.randomUUID().toString() + info.submitId;

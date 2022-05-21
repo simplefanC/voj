@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.backend.common.constants.CallJudgerType;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
-import com.simplefanc.voj.backend.dao.judge.impl.RemoteJudgeAccountEntityServiceImpl;
+import com.simplefanc.voj.backend.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
@@ -14,8 +14,8 @@ import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,26 +30,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class Dispatcher {
 
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(20);
 
     private final static Map<String, Future> futureTaskMap = new ConcurrentHashMap<>(20);
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private JudgeServerEntityService judgeServerEntityService;
+    private final JudgeServerEntityService judgeServerEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private ChooseUtils chooseUtils;
+    private final ChooseUtils chooseUtils;
 
-    @Autowired
-    private RemoteJudgeAccountEntityServiceImpl remoteJudgeAccountService;
+    private final RemoteJudgeAccountEntityService remoteJudgeAccountService;
 
     public CommonResult dispatcher(CallJudgerType type, String path, Object data) {
         switch (type) {
@@ -89,12 +85,12 @@ public class Dispatcher {
 
     public CommonResult toCompile(String path, CompileDTO data) {
         CommonResult result = CommonResult.errorResponse("没有可用的判题服务器，请重新尝试！");
-        JudgeServer judgeServer = chooseUtils.chooseServer(false);
+        JudgeServer judgeServer = chooseUtils.chooseJudgeServer(false);
         if (judgeServer != null) {
             try {
                 result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
             } catch (Exception e) {
-                log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e.getMessage());
+                log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e);
             } finally {
                 // 无论成功与否，都要将对应的当前判题机当前判题数减1
                 reduceCurrentTaskNum(judgeServer.getId());
@@ -227,7 +223,7 @@ public class Dispatcher {
                 return;
             }
             count.getAndIncrement();
-            JudgeServer judgeServer = chooseUtils.chooseServer(isRemote);
+            JudgeServer judgeServer = chooseUtils.chooseJudgeServer(isRemote);
             // 获取到判题机资源
             if (judgeServer != null) {
                 handleJudgeProcess(judgeServer);
@@ -248,6 +244,7 @@ public class Dispatcher {
             data.setJudgeServerPort(judgeServer.getPort());
             CommonResult result = null;
             try {
+                // https://blog.csdn.net/qq_35893120/article/details/118637987
                 result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
             } catch (Exception e) {
                 log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e);

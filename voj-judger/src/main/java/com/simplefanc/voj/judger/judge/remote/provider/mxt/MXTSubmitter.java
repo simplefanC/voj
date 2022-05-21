@@ -10,15 +10,16 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFact
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
 import com.simplefanc.voj.judger.judge.remote.submitter.Submitter;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class MXTSubmitter implements Submitter {
 
     private static final Map<String, String> LANGUAGE_MAP = new HashMap<String, String>() {
@@ -47,8 +48,7 @@ public class MXTSubmitter implements Submitter {
         }
     };
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

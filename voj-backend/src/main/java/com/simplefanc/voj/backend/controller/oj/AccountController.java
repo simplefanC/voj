@@ -9,27 +9,27 @@ import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
 import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.backend.service.oj.AccountService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/23 12:00
+ * @Date: 2021/10/23 12:00
  * @Description: 主要负责处理账号的相关操作
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class AccountController {
 
-    @Autowired
-    private AccountService accountService;
+    private final AccountService accountService;
 
     /**
      * @MethodName checkUsernameOrEmail
      * @Description 检验用户名和邮箱是否存在
      * @Return
-     * @Since 2020/11/5
+     * @Since 2021/11/5
      */
     @RequestMapping(value = "/check-username-or-email", method = RequestMethod.POST)
     public CommonResult<CheckUsernameOrEmailVo> checkUsernameOrEmail(

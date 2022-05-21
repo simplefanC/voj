@@ -7,9 +7,9 @@ import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.pojo.entity.problem.Category;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +21,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class DiscussionController {
 
-    @Autowired
-    private DiscussionService discussionService;
+    private final DiscussionService discussionService;
 
     @GetMapping("/discussions")
     public CommonResult<IPage<Discussion>> getDiscussionList(

@@ -5,7 +5,7 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.JudgeLanguage;
 import com.simplefanc.voj.judger.common.exception.SystemError;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -16,15 +16,17 @@ import java.util.HashMap;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class JudgeContext {
 
-    @Autowired
-    private JudgeStrategy judgeStrategy;
+    private final JudgeStrategy judgeStrategy;
 
     public Judge judge(Problem problem, Judge judge) {
         // c和c++为一倍时间和空间，其它语言为2倍时间和空间
-        if (!JudgeLanguage.CPP.getLanguage().equals(judge.getLanguage()) && !JudgeLanguage.C.getLanguage().equals(judge.getLanguage())
-                && !JudgeLanguage.CPPWithO2.getLanguage().equals(judge.getLanguage()) && !JudgeLanguage.CWithO2.getLanguage().equals(judge.getLanguage())) {
+        if (!JudgeLanguage.CPP.getLanguage().equals(judge.getLanguage()) &&
+                !JudgeLanguage.C.getLanguage().equals(judge.getLanguage()) &&
+                !JudgeLanguage.CPPWithO2.getLanguage().equals(judge.getLanguage()) &&
+                !JudgeLanguage.CWithO2.getLanguage().equals(judge.getLanguage())) {
             problem.setTimeLimit(problem.getTimeLimit() * 2);
             problem.setMemoryLimit(problem.getMemoryLimit() * 2);
         }

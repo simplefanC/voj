@@ -7,8 +7,8 @@ import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.RandomProblemVo;
 import com.simplefanc.voj.backend.service.oj.ProblemService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,15 +17,15 @@ import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/27 13:24
+ * @Date: 2021/10/27 13:24
  * @Description: 问题数据控制类，处理题目列表请求，题目内容请求。
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ProblemController {
 
-    @Autowired
-    private ProblemService problemService;
+    private final ProblemService problemService;
 
     /**
      * @param currentPage
@@ -36,7 +36,7 @@ public class ProblemController {
      * @MethodName getProblemList
      * @Description 获取题目列表分页
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @RequestMapping(value = "/get-problem-list", method = RequestMethod.GET)
     public CommonResult<Page<ProblemVo>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
@@ -53,7 +53,7 @@ public class ProblemController {
      * @MethodName getRandomProblem
      * @Description 随机选取一道题目
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @GetMapping("/get-random-problem")
     public CommonResult<RandomProblemVo> getRandomProblem() {
@@ -65,7 +65,7 @@ public class ProblemController {
      * @MethodName getUserProblemStatus
      * @Description 获取用户对应该题目列表中各个题目的做题情况
      * @Return CommonResult
-     * @Since 2020/12/29
+     * @Since 2021/12/29
      */
     @RequiresAuthentication
     @PostMapping("/get-user-problem-status")
@@ -78,7 +78,7 @@ public class ProblemController {
      * @MethodName getProblemInfo
      * @Description 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @RequestMapping(value = "/get-problem", method = RequestMethod.GET)
     public CommonResult<ProblemInfoVo> getProblemInfo(

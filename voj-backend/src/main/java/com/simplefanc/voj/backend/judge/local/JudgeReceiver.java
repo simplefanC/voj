@@ -9,8 +9,8 @@ import com.simplefanc.voj.backend.judge.AbstractReceiver;
 import com.simplefanc.voj.backend.judge.Dispatcher;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -21,13 +21,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class JudgeReceiver extends AbstractReceiver {
 
-    @Autowired
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     @Async("judgeTaskAsyncPool")
     public void processWaitingTask() {

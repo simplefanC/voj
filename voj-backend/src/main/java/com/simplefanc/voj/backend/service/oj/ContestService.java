@@ -15,7 +15,6 @@ import java.util.List;
  * @Date: 2022/3/11 22:26
  * @Description:
  */
-
 public interface ContestService {
 
     IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer status, Integer type, String keyword);

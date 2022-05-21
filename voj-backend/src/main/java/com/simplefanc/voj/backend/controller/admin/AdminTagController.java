@@ -3,12 +3,11 @@ package com.simplefanc.voj.backend.controller.admin;
 import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -18,10 +17,10 @@ import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/api/admin/tag")
+@RequiredArgsConstructor
 public class AdminTagController {
 
-    @Resource
-    private AdminTagService adminTagService;
+    private final AdminTagService adminTagService;
 
     @PostMapping("")
     @RequiresAuthentication

@@ -10,8 +10,8 @@ import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.loginer.LoginersHolder;
 import com.simplefanc.voj.judger.service.JudgeService;
 import com.simplefanc.voj.judger.service.RemoteJudgeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -22,16 +22,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j(topic = "voj")
 @RefreshScope
+@RequiredArgsConstructor
 public class RemoteJudgeSubmitter {
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private RemoteJudgeService remoteJudgeService;
+    private final RemoteJudgeService remoteJudgeService;
 
-    @Autowired
-    private JudgeService judgeService;
+    private final JudgeService judgeService;
 
     @Value("${voj-judge-server.name}")
     private String judgeServerName;

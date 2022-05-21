@@ -1,9 +1,8 @@
 package com.simplefanc.voj.backend.common.utils;
 
 import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,15 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/23 23:48
+ * @Date: 2021/10/23 23:48
  * @Description:
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public final class RedisUtil {
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // =============================common============================
 
@@ -40,7 +39,7 @@ public final class RedisUtil {
                 result = true;
             }
         } catch (Exception e) {
-            log.error("获取锁过程出错-->{}", e.getMessage());
+            log.error("获取锁过程出错-->", e);
         }
         return result;
     }

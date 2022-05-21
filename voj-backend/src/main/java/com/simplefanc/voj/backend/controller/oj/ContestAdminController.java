@@ -6,8 +6,8 @@ import com.simplefanc.voj.backend.service.oj.ContestAdminService;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ContestAdminController {
 
-    @Autowired
-    private ContestAdminService contestAdminService;
+    private final ContestAdminService contestAdminService;
 
     /**
      * @MethodName getContestACInfo

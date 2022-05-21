@@ -20,15 +20,8 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.bulid.sourceEncoding>UTF-8</project.bulid.sourceEncoding>
-        <maven.compiler.sourse>11</maven.compiler.sourse>
-        <maven.compiler.target>11</maven.compiler.target>
         <skipTests>true</skipTests>
-        <junit.version>4.12</junit.version>
-        <lombok.version>1.18.20</lombok.version>
-        <log4j.version>1.2.17</log4j.version>
-        <logback.version>1.2.3</logback.version>
-        <shiro.redis.boot.version>3.2.1</shiro.redis.boot.version>
-        <shiro.redis.version>3.3.1</shiro.redis.version>
+        <shiro.redis.boot.version>3.3.1</shiro.redis.boot.version>
         <mysql.version>8.0.19</mysql.version>
         <druid.version>1.1.20</druid.version>
         <mybatis.spring.boot.version>3.2.0</mybatis.spring.boot.version>
@@ -43,10 +36,8 @@
         <hutool.version>5.7.22</hutool.version>
         <jwt.version>3.19.1</jwt.version>
         <captcha.version>1.6.2</captcha.version>
-        <jsoup.version>1.13.1</jsoup.version>
         <oshi.version>5.6.1</oshi.version>
         <emoji.version>4.0.0</emoji.version>
-        <servlet.version>4.0.1</servlet.version>
         <swagger.version>2.9.2</swagger.version>
         <spring.checkstyle.plugin>0.0.29</spring.checkstyle.plugin>
     </properties>
@@ -109,12 +100,6 @@
                 <artifactId>shiro-redis-spring-boot-starter</artifactId>
                 <version>${shiro.redis.boot.version}</version>
             </dependency>
-            <!--lombok-->
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>${lombok.version}</version>
-            </dependency>
             <!-- hutool工具类-->
             <dependency>
                 <groupId>cn.hutool</groupId>
@@ -138,17 +123,10 @@
                 <artifactId>oshi-core</artifactId>
                 <version>${oshi.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>com.vdurmont</groupId>
                 <artifactId>emoji-java</artifactId>
                 <version>${emoji.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet.version}</version>
-                <scope>provided</scope>
             </dependency>
             <!--导入swagger-->
             <dependency>
@@ -217,9 +195,9 @@
         </profile>
         <!-- 生产 -->
         <profile>
-            <id>pro</id>
+            <id>prod</id>
             <properties>
-                <profiles.active>pro</profiles.active>
+                <profiles.active>prod</profiles.active>
             </properties>
             <activation>
                 <!-- 默认环境 -->

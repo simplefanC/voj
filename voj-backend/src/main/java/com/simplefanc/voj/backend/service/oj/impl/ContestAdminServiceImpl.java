@@ -9,14 +9,13 @@ import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.pojo.dto.CheckAcDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.ContestAdminService;
-import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,29 +24,23 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class ContestAdminServiceImpl implements ContestAdminService {
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestRecordEntityService contestRecordEntityService;
 
-    @Autowired
-    private ContestPrintEntityService contestPrintEntityService;
+    private final ContestPrintEntityService contestPrintEntityService;
+
+    private final ContestValidator contestValidator;
 
     @Override
     public IPage<ContestRecord> getContestACInfo(Long cid, Integer currentPage, Integer limit) {
-
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权查看！");
         }
 
@@ -65,15 +58,10 @@ public class ContestAdminServiceImpl implements ContestAdminService {
     @Override
     public void checkContestAcInfo(CheckAcDto checkAcDto) {
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(checkAcDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权操作！");
         }
 
@@ -88,15 +76,10 @@ public class ContestAdminServiceImpl implements ContestAdminService {
 
     @Override
     public IPage<ContestPrint> getContestPrint(Long cid, Integer currentPage, Integer limit) {
-
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权查看！");
         }
 
@@ -118,15 +101,9 @@ public class ContestAdminServiceImpl implements ContestAdminService {
 
     @Override
     public void checkContestPrintStatus(Long id, Long cid) {
-
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权操作！");
         }
 

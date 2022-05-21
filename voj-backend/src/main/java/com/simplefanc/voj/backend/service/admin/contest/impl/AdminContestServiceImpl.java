@@ -13,14 +13,13 @@ import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,13 +33,14 @@ import java.util.Objects;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminContestServiceImpl implements AdminContestService {
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ContestRegisterEntityService contestRegisterEntityService;
+    private final ContestRegisterEntityService contestRegisterEntityService;
+
+    private final ContestValidator contestValidator;
 
     @Override
     public IPage<Contest> getContestList(Integer limit, Integer currentPage, String keyword) {
@@ -69,14 +69,9 @@ public class AdminContestServiceImpl implements AdminContestService {
         if (contest == null) {
             throw new StatusFailException("查询失败：该比赛不存在,请检查参数cid是否准确！");
         }
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
-        // 是否为超级管理员
-        boolean isRoot = UserSessionUtil.isRoot();
 
         // 只有超级管理员和比赛拥有者才能操作
-        if (!isRoot && !userRolesVo.getUid().equals(contest.getUid())) {
+        if(!contestValidator.isContestAdmin(contest)){
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
         AdminContestVo adminContestVo = BeanUtil.copyProperties(contest, AdminContestVo.class, "starAccount");
@@ -116,12 +111,9 @@ public class AdminContestServiceImpl implements AdminContestService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateContest(AdminContestVo adminContestVo) {
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
-        // 只有超级管理员和比赛拥有者才能操作
-        if (!isRoot && !userRolesVo.getUid().equals(adminContestVo.getUid())) {
+        if (!isRoot && !contestValidator.isContestOwner(adminContestVo.getUid())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
         Contest contest = BeanUtil.copyProperties(adminContestVo, Contest.class, "starAccount");
@@ -146,12 +138,10 @@ public class AdminContestServiceImpl implements AdminContestService {
 
     @Override
     public void changeContestVisible(Long cid, String uid, Boolean visible) {
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和比赛拥有者才能操作
-        if (!isRoot && !userRolesVo.getUid().equals(uid)) {
+        if (!isRoot && !contestValidator.isContestOwner(uid)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
 

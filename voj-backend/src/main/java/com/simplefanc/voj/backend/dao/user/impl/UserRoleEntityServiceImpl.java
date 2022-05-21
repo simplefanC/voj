@@ -9,6 +9,7 @@ import com.simplefanc.voj.backend.mapper.UserRoleMapper;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.shiro.AccountProfile;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.Authenticator;
 import org.apache.shiro.authc.LogoutAware;
@@ -17,7 +18,6 @@ import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.crazycake.shiro.RedisSessionDAO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -34,21 +34,20 @@ import java.util.Objects;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleEntityService {
 
-    private final static List<String> ChineseRole = Arrays.asList("超级管理员", "普通管理员", "普通用户(默认)", "普通用户(禁止提交)",
+    private final static List<String> CHINESE_ROLE = Arrays.asList("超级管理员", "普通管理员", "普通用户(默认)", "普通用户(禁止提交)",
             "普通用户(禁止发讨论)", "普通用户(禁言)", "普通用户(禁止提交&禁止发讨论)", "用户(禁止提交&禁言)", "题目管理员");
 
-    private final static List<String> EnglishRole = Arrays.asList("Super Administrator", "General Administrator",
+    private final static List<String> ENGLISH_ROLE = Arrays.asList("Super Administrator", "General Administrator",
             "Normal User(Default)", "Normal User(No Submission)", "Normal User(No Discussion)",
             "Normal User(Forbidden Words)", "Normal User(No Submission & No Discussion)",
             "Normal User(No Submission & Forbidden Words)", "Problem Administrator");
 
-    @Autowired
-    private UserRoleMapper userRoleMapper;
+    private final UserRoleMapper userRoleMapper;
 
-    @Autowired
-    private RedisSessionDAO redisSessionDAO;
+    private final RedisSessionDAO redisSessionDAO;
 
     @Override
     public UserRolesVo getUserRoles(String uid, String username) {
@@ -112,9 +111,9 @@ public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserR
 
     @Override
     public String getAuthChangeContent(int oldType, int newType) {
-        String msg = "您好，您的权限产生了变更，由【" + ChineseRole.get(oldType - 1000) + "】变更为【" + ChineseRole.get(newType - 1000)
+        String msg = "您好，您的权限产生了变更，由【" + CHINESE_ROLE.get(oldType - 1000) + "】变更为【" + CHINESE_ROLE.get(newType - 1000)
                 + "】。部分权限可能与之前有所不同，请您注意！" + "\n\n" + "Hello, your permission has been changed from 【"
-                + EnglishRole.get(oldType - 1000) + "】 to 【" + EnglishRole.get(newType - 1000)
+                + ENGLISH_ROLE.get(oldType - 1000) + "】 to 【" + ENGLISH_ROLE.get(newType - 1000)
                 + "】. Some permissions may be different from before. Please note!";
         return msg;
     }

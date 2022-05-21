@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * @Author: chenfan
- * @Date: 2020/7/20 00:23
+ * @Date: 2021/7/20 00:23
  * @Description: 登录数据实体类
  */
 @Data

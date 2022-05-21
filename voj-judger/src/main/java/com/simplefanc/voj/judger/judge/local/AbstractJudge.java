@@ -34,9 +34,10 @@ public abstract class AbstractJudge {
     protected static final int SPJ_ERROR = 103;
 
     public JSONObject judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
-
+        // 判题
         JSONArray judgeResultList = judgeCase(judgeDTO, judgeGlobalDTO);
 
+        // 处理判题结果
         switch (judgeGlobalDTO.getJudgeMode()) {
             case SPJ:
             case DEFAULT:
@@ -51,16 +52,24 @@ public abstract class AbstractJudge {
 
     public abstract JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
 
+    public abstract JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
+            throws SystemError;
+
+    public abstract JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
+                                                   JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO);
+
     private JSONObject process(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
             throws SystemError {
         JSONObject judgeResult = (JSONObject) judgeResultList.get(0);
-        SandBoxRes sandBoxRes = SandBoxRes.builder().stdout(((JSONObject) judgeResult.get("files")).getStr("stdout"))
+        SandBoxRes sandBoxRes = SandBoxRes.builder()
+                .stdout(((JSONObject) judgeResult.get("files")).getStr("stdout"))
                 .stderr(((JSONObject) judgeResult.get("files")).getStr("stderr"))
                 // ns->ms
                 .time(judgeResult.getLong("time") / 1000000)
                 // b-->kb
                 .memory(judgeResult.getLong("memory") / 1024).exitCode(judgeResult.getInt("exitStatus"))
-                .status(judgeResult.getInt("status")).build();
+                .status(judgeResult.getInt("status"))
+                .build();
 
         return checkResult(sandBoxRes, judgeDTO, judgeGlobalDTO);
     }
@@ -72,31 +81,29 @@ public abstract class AbstractJudge {
         SandBoxRes userSandBoxRes = SandBoxRes.builder()
                 .stdout(((JSONObject) userJudgeResult.get("files")).getStr("stdout"))
                 .stderr(((JSONObject) userJudgeResult.get("files")).getStr("stderr"))
-                .time(userJudgeResult.getLong("time") / 1000000) // ns->ms
-                .memory(userJudgeResult.getLong("memory") / 1024) // b-->kb
+                // ns->ms
+                .time(userJudgeResult.getLong("time") / 1000000)
+                // b-->kb
+                .memory(userJudgeResult.getLong("memory") / 1024)
                 .exitCode(userJudgeResult.getInt("exitStatus")).status(userJudgeResult.getInt("status")).build();
 
         JSONObject interactiveJudgeResult = (JSONObject) judgeResultList.get(1);
         SandBoxRes interactiveSandBoxRes = SandBoxRes.builder()
                 .stdout(((JSONObject) interactiveJudgeResult.get("files")).getStr("stdout"))
                 .stderr(((JSONObject) interactiveJudgeResult.get("files")).getStr("stderr"))
-                .time(interactiveJudgeResult.getLong("time") / 1000000) // ns->ms
-                .memory(interactiveJudgeResult.getLong("memory") / 1024) // b-->kb
+                // ns->ms
+                .time(interactiveJudgeResult.getLong("time") / 1000000)
+                // b-->kb
+                .memory(interactiveJudgeResult.getLong("memory") / 1024)
                 .exitCode(interactiveJudgeResult.getInt("exitStatus")).status(interactiveJudgeResult.getInt("status"))
                 .build();
 
         return checkMultipleResult(userSandBoxRes, interactiveSandBoxRes, judgeDTO, judgeGlobalDTO);
     }
 
-    public abstract JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
-            throws SystemError;
-
-    public abstract JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
-                                                   JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO);
-
-    protected List<String> parseRunCommand(String command, RunConfig runConfig, String testCaseInputName,
+    protected List<String> parseRunCommand(RunConfig runConfig, String testCaseInputName,
                                            String userOutputName, String testCaseOutputName) {
-
+        String command = runConfig.getCommand();
         command = MessageFormat.format(command, JudgeDir.TMPFS_DIR, runConfig.getExeName(),
                 JudgeDir.TMPFS_DIR + File.separator + testCaseInputName,
                 JudgeDir.TMPFS_DIR + File.separator + userOutputName,

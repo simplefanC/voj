@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/27 21:09
+ * @Date: 2021/10/27 21:09
  * @Description:
  */
 @ApiModel(value = "ACM排行榜数据类ACMRankVo", description = "")

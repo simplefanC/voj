@@ -5,7 +5,7 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
 import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminTagServiceImpl implements AdminTagService {
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final TagEntityService tagEntityService;
 
     public Tag addProblem(Tag tag) {
         QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();

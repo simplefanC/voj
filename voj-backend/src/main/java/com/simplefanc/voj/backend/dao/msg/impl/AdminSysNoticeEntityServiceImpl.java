@@ -7,9 +7,8 @@ import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.AdminSysNoticeMapper;
 import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -17,11 +16,11 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminSysNoticeEntityServiceImpl extends ServiceImpl<AdminSysNoticeMapper, AdminSysNotice>
         implements AdminSysNoticeEntityService {
 
-    @Resource
-    private AdminSysNoticeMapper adminSysNoticeMapper;
+    private final AdminSysNoticeMapper adminSysNoticeMapper;
 
     @Override
     public IPage<AdminSysNoticeVo> getSysNotice(int limit, int currentPage, String type) {

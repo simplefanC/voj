@@ -14,33 +14,29 @@ import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+@RequiredArgsConstructor
 public class RemoteJudgeReceiver extends AbstractReceiver {
 
     private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
 
     private final static Map<String, Future> futureTaskMap = new ConcurrentHashMap<>(10);
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Resource
-    private ChooseUtils chooseUtils;
+    private final ChooseUtils chooseUtils;
 
     @Async("judgeTaskAsyncPool")
     public void processWaitingTask() {

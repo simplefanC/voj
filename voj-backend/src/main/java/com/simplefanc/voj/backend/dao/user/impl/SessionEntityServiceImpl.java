@@ -14,29 +14,27 @@ import com.simplefanc.voj.backend.mapper.SessionMapper;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/3 22:46
+ * @Date: 2021/12/3 22:46
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class SessionEntityServiceImpl extends ServiceImpl<SessionMapper, Session> implements SessionEntityService {
 
-    @Resource
-    private SessionMapper sessionMapper;
+    private final SessionMapper sessionMapper;
 
-    @Resource
-    private AdminSysNoticeEntityService adminSysNoticeEntityService;
+    private final AdminSysNoticeEntityService adminSysNoticeEntityService;
 
-    @Resource
-    private UserSysNoticeEntityService userSysNoticeEntityService;
+    private final UserSysNoticeEntityService userSysNoticeEntityService;
 
     @Override
     @Async

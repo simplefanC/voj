@@ -5,9 +5,8 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingCategoryService;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -16,11 +15,12 @@ import javax.annotation.Resource;
  */
 
 @Service
+@RequiredArgsConstructor
 public class AdminTrainingCategoryServiceImpl implements AdminTrainingCategoryService {
 
-    @Resource
-    private TrainingCategoryEntityService trainingCategoryEntityService;
+    private final TrainingCategoryEntityService trainingCategoryEntityService;
 
+    @Override
     public TrainingCategory addTrainingCategory(TrainingCategory trainingCategory) {
         QueryWrapper<TrainingCategory> trainingCategoryQueryWrapper = new QueryWrapper<>();
         trainingCategoryQueryWrapper.eq("name", trainingCategory.getName());
@@ -38,6 +38,7 @@ public class AdminTrainingCategoryServiceImpl implements AdminTrainingCategorySe
         return trainingCategory;
     }
 
+    @Override
     public void updateTrainingCategory(TrainingCategory trainingCategory) {
         boolean isOk = trainingCategoryEntityService.updateById(trainingCategory);
         if (!isOk) {

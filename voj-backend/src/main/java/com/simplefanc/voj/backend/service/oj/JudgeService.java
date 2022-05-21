@@ -22,7 +22,7 @@ public interface JudgeService {
     /**
      * @MethodName submitProblemJudge
      * @Description 核心方法 判题通过openfeign调用判题系统服务
-     * @Since 2020/10/30
+     * @Since 2021/10/30
      */
     Judge submitProblemJudge(ToJudgeDto judgeDto);
 
@@ -50,7 +50,7 @@ public interface JudgeService {
     /**
      * @MethodName getJudgeList
      * @Description 通用查询判题记录列表
-     * @Since 2020/10/29
+     * @Since 2021/10/29
      */
     IPage<JudgeVo> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
                                 Integer searchStatus, String searchUsername, Boolean completeProblemId);
@@ -72,8 +72,8 @@ public interface JudgeService {
     /**
      * @MethodName getJudgeCase
      * @Description 获得指定提交id的测试样例结果，暂不支持查看测试数据，只可看测试点结果，时间，空间，或者IO得分
-     * @Since 2020/10/29
+     * @Since 2021/10/29
      */
-    List<JudgeCase> getALLCaseResult(Long submitId);
+    List<JudgeCase> getAllCaseResult(Long submitId);
 
 }

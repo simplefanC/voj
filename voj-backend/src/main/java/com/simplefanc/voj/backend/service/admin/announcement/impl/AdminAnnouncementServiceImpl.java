@@ -6,7 +6,7 @@ import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.announcement.AdminAnnouncementService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminAnnouncementServiceImpl implements AdminAnnouncementService {
 
-    @Autowired
-    private AnnouncementEntityService announcementEntityService;
+    private final AnnouncementEntityService announcementEntityService;
 
     @Override
     public IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage) {

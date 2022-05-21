@@ -8,7 +8,7 @@ import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
 import com.simplefanc.voj.common.result.CommonResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,15 +19,15 @@ import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/12 23:25
+ * @Date: 2021/12/12 23:25
  * @Description: 通用的请求控制处理类
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class CommonController {
 
-    @Autowired
-    private CommonService commonService;
+    private final CommonService commonService;
 
     @GetMapping("/captcha")
     public CommonResult<CaptchaVo> getCaptcha() {

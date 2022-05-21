@@ -9,7 +9,7 @@ import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
 import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,11 +23,11 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, UserRecord>
         implements UserRecordEntityService {
 
-    @Autowired
-    private UserRecordMapper userRecordMapper;
+    private final UserRecordMapper userRecordMapper;
 
     @Override
     public List<ACMRankVo> getRecent7ACRank() {

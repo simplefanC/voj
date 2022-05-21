@@ -10,13 +10,13 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFact
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
 import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,10 +24,10 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 @Component
+@RequiredArgsConstructor
 public class EojLoginer extends RetentiveLoginer {
 
-    @Autowired
-    private DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 
     @Override
     public RemoteOjInfo getOjInfo() {

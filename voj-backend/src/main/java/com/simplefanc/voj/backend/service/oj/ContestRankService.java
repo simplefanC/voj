@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,10 +17,10 @@ import java.util.List;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class ContestRankService {
 
-    @Resource
-    private ContestCalculateRankService contestCalculateRankService;
+    private final ContestCalculateRankService contestCalculateRankService;
 
     /**
      * @param isOpenSealRank
@@ -57,7 +57,7 @@ public class ContestRankService {
 
     /**
      * @param isOpenSealRank
-     * @param removeStar
+     * @param removeStarUser
      * @param currentUserId
      * @param concernedList
      * @param contest
@@ -65,10 +65,10 @@ public class ContestRankService {
      * @param limit
      * @desc 获取OI比赛排行榜，有分页
      */
-    public IPage<OIContestRankVo> getContestOIRankPage(Boolean isOpenSealRank, Boolean removeStar, String currentUserId,
+    public IPage<OIContestRankVo> getContestOIRankPage(Boolean isOpenSealRank, Boolean removeStarUser, String currentUserId,
                                                        List<String> concernedList, Contest contest, int currentPage, int limit) {
 
-        List<OIContestRankVo> orderResultList = contestCalculateRankService.calculateOIRank(isOpenSealRank, removeStar,
+        List<OIContestRankVo> orderResultList = contestCalculateRankService.calculateOIRank(isOpenSealRank, removeStarUser,
                 contest, currentUserId, concernedList);
 
         // 计算好排行榜，然后进行分页

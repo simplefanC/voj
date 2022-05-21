@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.UserInfoMapper;
 import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,13 +22,12 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class UserInfoEntityServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoEntityService {
 
-    @Autowired
-    private UserInfoMapper userInfoMapper;
+    private final UserInfoMapper userInfoMapper;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
     @Override
     public Boolean addUser(RegisterDto registerDto) {
@@ -37,11 +36,10 @@ public class UserInfoEntityServiceImpl extends ServiceImpl<UserInfoMapper, UserI
 
     @Override
     public List<String> getSuperAdminUidList() {
-        String cacheKey = AccountConstant.SUPER_ADMIN_UID_LIST_CACHE;
-        List<String> superAdminUidList = (List<String>) redisUtil.get(cacheKey);
+        List<String> superAdminUidList = (List<String>) redisUtil.get(AccountConstant.SUPER_ADMIN_UID_LIST_CACHE);
         if (superAdminUidList == null) {
             superAdminUidList = userInfoMapper.getSuperAdminUidList(RoleEnum.ROOT.getId());
-            redisUtil.set(cacheKey, superAdminUidList, 12 * 3600);
+            redisUtil.set(AccountConstant.SUPER_ADMIN_UID_LIST_CACHE, superAdminUidList, 12 * 3600);
         }
         return superAdminUidList;
     }

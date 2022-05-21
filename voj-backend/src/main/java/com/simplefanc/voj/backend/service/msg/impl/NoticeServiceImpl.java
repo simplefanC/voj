@@ -11,11 +11,11 @@ import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,16 +27,14 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class NoticeServiceImpl implements NoticeService {
 
-    @Resource
-    private UserSysNoticeEntityService userSysNoticeEntityService;
+    private final UserSysNoticeEntityService userSysNoticeEntityService;
 
-    @Resource
-    private AdminSysNoticeEntityService adminSysNoticeEntityService;
+    private final AdminSysNoticeEntityService adminSysNoticeEntityService;
 
-    @Resource
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     @Override
     public IPage<SysMsgVo> getSysNotice(Integer limit, Integer currentPage) {

@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.controller.file;
 
 import com.simplefanc.voj.backend.service.file.UserFileService;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,10 +18,10 @@ import java.io.IOException;
  */
 @Controller
 @RequestMapping("/api/file")
+@RequiredArgsConstructor
 public class UserFileController {
 
-    @Autowired
-    private UserFileService userFileService;
+    private final UserFileService userFileService;
 
     @RequestMapping("/generate-user-excel")
     @RequiresAuthentication

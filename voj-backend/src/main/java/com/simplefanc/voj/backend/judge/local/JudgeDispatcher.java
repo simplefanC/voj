@@ -7,8 +7,8 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -21,16 +21,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j(topic = "voj")
 @RefreshScope
+@RequiredArgsConstructor
 public class JudgeDispatcher {
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private JudgeReceiver judgeReceiver;
+    private final JudgeReceiver judgeReceiver;
 
     @Value("${voj.judge.token}")
     private String judgeToken;
@@ -55,7 +53,7 @@ public class JudgeDispatcher {
             // 调用判题任务处理
             judgeReceiver.processWaitingTask();
         } catch (Exception e) {
-            log.error("调用redis将判题纳入判题等待队列异常,此次判题任务判为系统错误--------------->{}", e.getMessage());
+            log.error("调用redis将判题纳入判题等待队列异常,此次判题任务判为系统错误--------------->", e);
             judgeEntityService.failToUseRedisPublishJudge(judge.getSubmitId(), judge.getPid(), isContest);
         }
     }

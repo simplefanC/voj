@@ -16,7 +16,6 @@ import java.util.HashMap;
  * @Date: 2022/1/3 11:53
  * @Description: 一次评测全局通用的传输实体类
  */
-
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
@@ -84,6 +83,11 @@ public class JudgeGlobalDTO implements Serializable {
      * 当前题目评测的最大栈空间限制 mb
      */
     private Integer maxStack;
+
+    /**
+     * 测试数据文件所在文件夹
+     */
+    String testCasesDir;
 
     /**
      * 评测数据json内容

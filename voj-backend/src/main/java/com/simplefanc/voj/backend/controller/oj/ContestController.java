@@ -9,30 +9,29 @@ import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/27 21:40
+ * @Date: 2021/10/27 21:40
  * @Description: 处理比赛模块的相关数据请求
  */
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ContestController {
-
-    @Autowired
-    private ContestService contestService;
+    private final ContestService contestService;
 
     /**
      * @MethodName getContestList
      * @Params * @param null
      * @Description 获取比赛列表分页数据
      * @Return CommonResult
-     * @Since 2020/10/27
+     * @Since 2021/10/27
      */
     @GetMapping("/get-contest-list")
     public CommonResult<IPage<ContestVo>> getContestList(@RequestParam(value = "limit", required = false) Integer limit,
@@ -47,7 +46,7 @@ public class ContestController {
      * @MethodName getContestInfo
      * @Description 获得指定比赛的详细信息
      * @Return
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @GetMapping("/get-contest-info")
     @RequiresAuthentication
@@ -59,7 +58,7 @@ public class ContestController {
      * @MethodName toRegisterContest
      * @Description 注册比赛
      * @Return
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @PostMapping("/register-contest")
     @RequiresAuthentication
@@ -72,7 +71,7 @@ public class ContestController {
      * @MethodName getContestAccess
      * @Description 获得指定私有比赛的访问权限或保护比赛的提交权限
      * @Return
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @RequiresAuthentication
     @GetMapping("/get-contest-access")
@@ -84,7 +83,7 @@ public class ContestController {
      * @MethodName getContestProblem
      * @Description 获得指定比赛的题目列表
      * @Return
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @GetMapping("/get-contest-problem")
     @RequiresAuthentication
@@ -121,7 +120,7 @@ public class ContestController {
      * @MethodName getContestRank
      * @Description 获得比赛做题记录以用来排名
      * @Return
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @PostMapping("/get-contest-rank")
     @RequiresAuthentication
@@ -133,7 +132,7 @@ public class ContestController {
      * @MethodName getContestAnnouncement
      * @Description 获得比赛的通知列表
      * @Return CommonResult
-     * @Since 2020/10/28
+     * @Since 2021/10/28
      */
     @GetMapping("/get-contest-announcement")
     @RequiresAuthentication

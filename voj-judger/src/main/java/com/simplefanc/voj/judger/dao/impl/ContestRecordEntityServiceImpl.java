@@ -8,7 +8,7 @@ import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.judger.dao.ContestRecordEntityService;
 import com.simplefanc.voj.judger.mapper.ContestRecordMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -23,6 +23,7 @@ import java.util.List;
  * @since 2020-10-23
  */
 @Service
+@RequiredArgsConstructor
 public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord>
         implements ContestRecordEntityService {
 
@@ -30,8 +31,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
             JudgeStatus.STATUS_WRONG_ANSWER.getStatus(), JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus(),
             JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus(), JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
 
-    @Autowired
-    private ContestRecordMapper contestRecordMapper;
+    private final ContestRecordMapper contestRecordMapper;
 
     @Override
     public void updateContestRecord(Judge judge) {

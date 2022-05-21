@@ -5,10 +5,10 @@ import com.simplefanc.voj.backend.service.admin.discussion.AdminDiscussionServic
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +20,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/admin")
+@RequiredArgsConstructor
 public class AdminDiscussionController {
 
-    @Autowired
-    private AdminDiscussionService adminDiscussionService;
+    private final AdminDiscussionService adminDiscussionService;
 
     @PutMapping("/discussion")
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)

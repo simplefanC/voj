@@ -4,9 +4,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingCategoryMapper;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingCategory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -14,11 +13,11 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingCategoryEntityServiceImpl extends ServiceImpl<TrainingCategoryMapper, TrainingCategory>
         implements TrainingCategoryEntityService {
 
-    @Resource
-    private TrainingCategoryMapper trainingCategoryMapper;
+    private final TrainingCategoryMapper trainingCategoryMapper;
 
     @Override
     public TrainingCategory getTrainingCategoryByTrainingId(Long tid) {

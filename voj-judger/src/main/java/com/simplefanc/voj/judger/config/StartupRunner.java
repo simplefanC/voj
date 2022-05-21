@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.utils.IpUtil;
 import com.simplefanc.voj.judger.dao.JudgeServerEntityService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -20,6 +20,7 @@ import java.util.HashMap;
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class StartupRunner implements CommandLineRunner {
 
     private static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
@@ -42,8 +43,7 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${voj-judge-server.port}")
     private Integer port;
 
-    @Autowired
-    private JudgeServerEntityService judgeServerEntityService;
+    private final JudgeServerEntityService judgeServerEntityService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

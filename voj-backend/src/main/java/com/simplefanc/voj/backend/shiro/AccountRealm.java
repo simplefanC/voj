@@ -7,13 +7,13 @@ import com.simplefanc.voj.backend.mapper.UserRoleMapper;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.common.pojo.entity.user.Auth;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
@@ -21,21 +21,19 @@ import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/7/19 22:57
- * @Description:
+ * @Date: 2021/7/19 22:57
+ * @Description: 定义认证与授权的实现
  */
 @Slf4j(topic = "voj")
 @Component
+@RequiredArgsConstructor
 public class AccountRealm extends AuthorizingRealm {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UserRoleMapper userRoleMapper;
+    private final UserRoleMapper userRoleMapper;
 
-    @Autowired
-    private RoleAuthMapper roleAuthMapper;
+    private final RoleAuthMapper roleAuthMapper;
 
     @Override
     public boolean supports(AuthenticationToken token) {

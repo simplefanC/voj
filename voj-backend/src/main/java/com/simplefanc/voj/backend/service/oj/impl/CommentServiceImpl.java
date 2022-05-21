@@ -23,7 +23,7 @@ import com.simplefanc.voj.common.pojo.entity.discussion.CommentLike;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,22 +37,18 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    @Autowired
-    private CommentEntityService commentEntityService;
+    private final CommentEntityService commentEntityService;
 
-    @Autowired
-    private CommentLikeEntityService commentLikeEntityService;
+    private final CommentLikeEntityService commentLikeEntityService;
 
-    @Autowired
-    private ReplyEntityService replyEntityService;
+    private final ReplyEntityService replyEntityService;
 
-    @Autowired
-    private DiscussionEntityService discussionEntityService;
+    private final DiscussionEntityService discussionEntityService;
 
-    @Autowired
-    private UserAcproblemEntityService userAcproblemEntityService;
+    private final UserAcproblemEntityService userAcproblemEntityService;
 
     @Override
     public CommentListVo getComments(Long cid, Integer did, Integer limit, Integer currentPage) {

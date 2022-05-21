@@ -6,10 +6,9 @@ import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.mapper.ReplyMapper;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -17,10 +16,10 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class ReplyEntityServiceImpl extends ServiceImpl<ReplyMapper, Reply> implements ReplyEntityService {
 
-    @Resource
-    private MsgRemindEntityService msgRemindEntityService;
+    private final MsgRemindEntityService msgRemindEntityService;
 
     @Async
     @Override

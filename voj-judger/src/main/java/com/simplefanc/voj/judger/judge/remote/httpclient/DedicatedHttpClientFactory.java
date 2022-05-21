@@ -1,18 +1,15 @@
 package com.simplefanc.voj.judger.judge.remote.httpclient;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHost;
 import org.apache.http.protocol.HttpContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class DedicatedHttpClientFactory {
 
-    @Autowired
-    private AnonymousHttpContextRepository contextRepository;
-
-    public DedicatedHttpClientFactory() {
-    }
+    private final AnonymousHttpContextRepository contextRepository;
 
     public DedicatedHttpClient build(HttpHost host, HttpContext context, String charset) {
         DedicatedHttpClient client = new DedicatedHttpClient();

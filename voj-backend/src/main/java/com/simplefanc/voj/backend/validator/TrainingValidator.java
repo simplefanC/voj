@@ -9,9 +9,8 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: Himit_ZH
@@ -19,21 +18,16 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class TrainingValidator {
 
-    @Resource
-    private TrainingRegisterEntityService trainingRegisterEntityService;
+    private final TrainingRegisterEntityService trainingRegisterEntityService;
 
-    public void validateTrainingAuth(Training training) throws StatusAccessDeniedException, StatusForbiddenException {
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        validateTrainingAuth(training, userRolesVo);
-    }
-
-    public void validateTrainingAuth(Training training, UserRolesVo userRolesVo)
-            throws StatusAccessDeniedException, StatusForbiddenException {
+    public void validateTrainingAuth(Training training) {
 
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
+        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         if (TrainingEnum.AUTH_PRIVATE.getValue().equals(training.getAuth())) {
 
@@ -52,8 +46,7 @@ public class TrainingValidator {
         }
     }
 
-    private void checkTrainingRegister(Long tid, String uid)
-            throws StatusAccessDeniedException, StatusForbiddenException {
+    private void checkTrainingRegister(Long tid, String uid) {
         QueryWrapper<TrainingRegister> trainingRegisterQueryWrapper = new QueryWrapper<>();
         trainingRegisterQueryWrapper.eq("tid", tid);
         trainingRegisterQueryWrapper.eq("uid", uid);
@@ -68,7 +61,7 @@ public class TrainingValidator {
         }
     }
 
-    public boolean isInTrainingOrAdmin(Training training, UserRolesVo userRolesVo) throws StatusAccessDeniedException {
+    public boolean isInTrainingOrAdmin(Training training, UserRolesVo userRolesVo) {
         if (TrainingEnum.AUTH_PRIVATE.getValue().equals(training.getAuth())) {
             if (userRolesVo == null) {
                 throw new StatusAccessDeniedException("该训练属于私有题单，请先登录以校验权限！");

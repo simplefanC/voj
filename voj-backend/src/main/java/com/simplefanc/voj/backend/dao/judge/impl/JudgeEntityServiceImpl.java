@@ -13,8 +13,8 @@ import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -30,13 +30,12 @@ import java.util.List;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> implements JudgeEntityService {
 
-    @Autowired
-    private JudgeMapper judgeMapper;
+    private final JudgeMapper judgeMapper;
 
-    @Autowired
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestRecordEntityService contestRecordEntityService;
 
     @Override
     public IPage<JudgeVo> getCommonJudgeList(Integer limit, Integer currentPage, String searchPid, Integer status,

@@ -8,10 +8,10 @@ import com.simplefanc.voj.backend.pojo.vo.TrainingRankVo;
 import com.simplefanc.voj.backend.pojo.vo.TrainingVo;
 import com.simplefanc.voj.backend.service.oj.TrainingService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,10 +22,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class TrainingController {
 
-    @Resource
-    private TrainingService trainingService;
+    private final TrainingService trainingService;
 
     /**
      * @param limit

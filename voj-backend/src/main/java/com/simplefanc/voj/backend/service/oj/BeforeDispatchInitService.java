@@ -29,10 +29,9 @@ import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -40,37 +39,28 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class BeforeDispatchInitService {
 
-    @Resource
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Resource
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestRecordEntityService contestRecordEntityService;
 
-    @Resource
-    private ContestProblemEntityService contestProblemEntityService;
+    private final ContestProblemEntityService contestProblemEntityService;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Resource
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Resource
-    private TrainingEntityService trainingEntityService;
+    private final TrainingEntityService trainingEntityService;
 
-    @Resource
-    private TrainingProblemEntityService trainingProblemEntityService;
+    private final TrainingProblemEntityService trainingProblemEntityService;
 
-    @Resource
-    private TrainingRecordEntityService trainingRecordEntityService;
+    private final TrainingRecordEntityService trainingRecordEntityService;
 
-    @Resource
-    private TrainingValidator trainingValidator;
+    private final TrainingValidator trainingValidator;
 
-    @Resource
-    private ContestValidator contestValidator;
+    private final ContestValidator contestValidator;
 
     public void initCommonSubmission(String problemId, Judge judge) {
 
@@ -89,7 +79,7 @@ public class BeforeDispatchInitService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void initContestSubmission(Long cid, String displayId, UserRolesVo userRolesVo, Judge judge) {
+    public void initContestSubmission(Long cid, String displayId, Judge judge) {
         // 首先判断一下比赛的状态是否是正在进行，结束状态都不能提交，比赛前比赛管理员可以提交
         Contest contest = contestEntityService.getById(cid);
 
@@ -101,14 +91,14 @@ public class BeforeDispatchInitService {
             throw new StatusForbiddenException("比赛已结束，不可再提交！");
         }
 
-        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean root = UserSessionUtil.isRoot();
-        if (!root && !contest.getUid().equals(userRolesVo.getUid())) {
+        final UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        // 是否为比赛管理者
+        if (!contestValidator.isContestAdmin(contest)) {
             if (contest.getStatus().intValue() == ContestEnum.STATUS_SCHEDULED.getCode()) {
                 throw new StatusForbiddenException("比赛未开始，不可提交！");
             }
             // 需要检查是否有权限在当前比赛进行提交
-            contestValidator.validateJudgeAuth(contest, userRolesVo.getUid());
+            contestValidator.validateJudgeAuth(contest);
 
             // 需要校验当前比赛是否为保护比赛，同时是否开启账号规则限制，如果有，需要对当前用户的用户名进行验证
             if (contest.getAuth().equals(ContestEnum.AUTH_PROTECT.getCode()) && contest.getOpenAccountLimit()
@@ -148,14 +138,14 @@ public class BeforeDispatchInitService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void initTrainingSubmission(Long tid, String displayId, UserRolesVo userRolesVo, Judge judge) {
+    public void initTrainingSubmission(Long tid, String displayId, Judge judge) {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
             throw new StatusFailException("该训练不存在或不允许显示！");
         }
 
-        trainingValidator.validateTrainingAuth(training, userRolesVo);
+        trainingValidator.validateTrainingAuth(training);
 
         // 查询获取对应的pid和cpid
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
@@ -179,7 +169,7 @@ public class BeforeDispatchInitService {
 
         TrainingRecord trainingRecord = new TrainingRecord();
         trainingRecord.setPid(problem.getId()).setTid(tid).setTpid(trainingProblem.getId())
-                .setSubmitId(judge.getSubmitId()).setUid(userRolesVo.getUid());
+                .setSubmitId(judge.getSubmitId()).setUid(UserSessionUtil.getUserInfo().getUid());
         trainingRecordEntityService.save(trainingRecord);
     }
 

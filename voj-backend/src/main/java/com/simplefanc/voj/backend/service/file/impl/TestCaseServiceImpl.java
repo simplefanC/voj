@@ -1,29 +1,27 @@
 package com.simplefanc.voj.backend.service.file.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
+import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.service.file.TestCaseService;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
-import com.simplefanc.voj.common.result.ResultStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,13 +35,12 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class TestCaseServiceImpl implements TestCaseService {
 
-    @Autowired
-    private ProblemCaseEntityService problemCaseEntityService;
+    private final ProblemCaseEntityService problemCaseEntityService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     // TODO 行数过多
     @Override
@@ -61,7 +58,7 @@ public class TestCaseServiceImpl implements TestCaseService {
         try {
             file.transferTo(new File(filePath));
         } catch (IOException e) {
-            log.error("评测数据文件上传异常-------------->{}", e.getMessage());
+            log.error("评测数据文件上传异常-------------->", e);
             throw new StatusSystemErrorException("服务器异常：评测数据上传失败！");
         }
 
@@ -138,7 +135,6 @@ public class TestCaseServiceImpl implements TestCaseService {
         return MapUtil.builder().put("fileList", fileList).put("fileListDir", fileDir).map();
     }
 
-    // TODO 行数过多
     @Override
     public void downloadTestcase(Long pid, HttpServletResponse response) {
 
@@ -180,54 +176,9 @@ public class TestCaseServiceImpl implements TestCaseService {
         String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
         ZipUtil.zip(workDir, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
-        // 将zip变成io流返回给前端
-        FileReader fileReader = new FileReader(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
-        // 放到缓冲流里面
-        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());
-        // 获取文件输出IO流
-        OutputStream outs = null;
-        BufferedOutputStream bouts = null;
-        try {
-            outs = response.getOutputStream();
-            bouts = new BufferedOutputStream(outs);
-            response.setContentType("application/x-download");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024 * 10];
-            // 开始向网络传输文件流
-            while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
-                bouts.write(buffer, 0, bytesRead);
-            }
-            bouts.flush();
-        } catch (IOException e) {
-            log.error("下载题目测试数据的压缩文件异常------------>{}", e.getMessage());
-            response.reset();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
-            Map<String, Object> map = new HashMap<>();
-            map.put("status", ResultStatus.SYSTEM_ERROR);
-            map.put("msg", "下载文件失败，请重新尝试！");
-            map.put("data", null);
-            try {
-                response.getWriter().println(JSONUtil.toJsonStr(map));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        } finally {
-            try {
-                bins.close();
-                if (outs != null) {
-                    outs.close();
-                }
-                if (bouts != null) {
-                    bouts.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            // 清空临时文件
-            FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
-        }
+        DownloadFileUtil.download(response, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
+        // 清空临时文件
+        FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
     }
 
 }

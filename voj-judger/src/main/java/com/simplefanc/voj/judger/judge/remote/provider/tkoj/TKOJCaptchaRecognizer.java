@@ -155,7 +155,6 @@ public class TKOJCaptchaRecognizer {
             // 根据特征色，依次识别子图片
             ans.append(recognizeSymbol(subImgs.get(i), graySet));
         }
-        System.out.printf("recognize: %s\n", ans);
         return ans.toString();
     }
 

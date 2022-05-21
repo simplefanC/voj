@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/29 22:12
+ * @Date: 2021/10/29 22:12
  * @Description: 判题机服务系统启动类
  */
 @EnableDiscoveryClient // 开启服务注册发现功能

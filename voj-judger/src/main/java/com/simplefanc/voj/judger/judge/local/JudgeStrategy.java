@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeMode;
@@ -20,30 +19,24 @@ import com.simplefanc.voj.judger.common.exception.SystemError;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.util.*;
 
 @Slf4j(topic = "voj")
 @Component
+@RequiredArgsConstructor
 public class JudgeStrategy {
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Resource
-    private ProblemTestCaseUtils problemTestCaseUtils;
+    private final JudgeCaseEntityService JudgeCaseEntityService;
 
-    @Resource
-    private JudgeCaseEntityService JudgeCaseEntityService;
+    private final JudgeRun judgeRun;
 
-    @Resource
-    private JudgeRun judgeRun;
-
-    // TODO 行数过多
     public HashMap<String, Object> judge(Problem problem, Judge judge) {
         HashMap<String, Object> result = new HashMap<>();
         // 编译好的临时代码文件id
@@ -63,13 +56,6 @@ public class JudgeStrategy {
                 FileWriter fileWriter = new FileWriter(userFileSrc);
                 fileWriter.write(judge.getCode());
             }
-            // 测试数据文件所在文件夹
-            String testCasesDir = JudgeDir.TEST_CASE_DIR + File.separator + "problem_" + problem.getId();
-            // 从文件中加载测试数据json
-            JSONObject testCasesInfo = problemTestCaseUtils.loadTestCaseInfo(problem.getId(), testCasesDir,
-                    problem.getCaseVersion(), problem.getJudgeMode());
-            JSONArray testcaseList = (JSONArray) testCasesInfo.get("testCases");
-            String version = testCasesInfo.getStr("version");
 
             // 检查是否为spj或者interactive，同时是否有对应编译完成的文件，若不存在，就先编译生成该文件，同时也要检查版本
             boolean isOk = checkOrCompileExtraProgram(problem);
@@ -85,42 +71,18 @@ public class JudgeStrategy {
             judge.setStatus(JudgeStatus.STATUS_JUDGING.getStatus());
             judgeEntityService.updateById(judge);
             // 开始测试每个测试点
-            List<JSONObject> allCaseResultList = judgeRun.judgeAllCase(judge.getSubmitId(), problem,
-                    judge.getLanguage(), testCasesDir, testCasesInfo, userFileId, userFileSrc, false);
+            List<JSONObject> allCaseResultList = judgeRun.judgeAllCase(judge, problem, userFileId, userFileSrc, false);
 
-            // 对全部测试点结果进行评判,获取最终评判结果
+            // 对全部测试点结果进行评判，获取最终评判结果
             return getJudgeInfo(allCaseResultList, problem, judge);
         } catch (SystemError systemError) {
-            result.put("code", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
-            result.put("errMsg",
-                    "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
-            result.put("time", 0);
-            result.put("memory", 0);
-            log.error(
-                    "题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生系统性的异常------------------->",
-                    systemError);
+            handleSystemError(problem, judge, result, systemError);
         } catch (SubmitError submitError) {
-            result.put("code", JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus());
-            result.put("errMsg",
-                    mergeNonEmptyStrings(submitError.getMessage(), submitError.getStdout(), submitError.getStderr()));
-            result.put("time", 0);
-            result.put("memory", 0);
-            log.error(
-                    "题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生提交的异常-------------------->",
-                    submitError);
+            handleSubmitError(problem, judge, result, submitError);
         } catch (CompileError compileError) {
-            result.put("code", JudgeStatus.STATUS_COMPILE_ERROR.getStatus());
-            result.put("errMsg", mergeNonEmptyStrings(compileError.getStdout(), compileError.getStderr()));
-            result.put("time", 0);
-            result.put("memory", 0);
+            handleCompileError(result, compileError);
         } catch (Exception e) {
-            result.put("code", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
-            result.put("errMsg",
-                    "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
-            result.put("time", 0);
-            result.put("memory", 0);
-            log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId()
-                    + "在评测过程中发生系统性的异常-------------------->", e);
+            handleOtherException(problem, judge, result, e);
         } finally {
             // 删除tmpfs内存中的用户代码可执行文件
             if (!StrUtil.isEmpty(userFileId)) {
@@ -130,91 +92,138 @@ public class JudgeStrategy {
         return result;
     }
 
-    // TODO 行数过多
+    private void handleOtherException(Problem problem, Judge judge, HashMap<String, Object> result, Exception e) {
+        result.put("code", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
+        result.put("errMsg",
+                "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
+        result.put("time", 0);
+        result.put("memory", 0);
+        log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId()
+                + "在评测过程中发生系统性的异常-------------------->", e);
+    }
+
+    private void handleCompileError(HashMap<String, Object> result, CompileError compileError) {
+        result.put("code", JudgeStatus.STATUS_COMPILE_ERROR.getStatus());
+        result.put("errMsg", mergeNonEmptyStrings(compileError.getStdout(), compileError.getStderr()));
+        result.put("time", 0);
+        result.put("memory", 0);
+    }
+
+    private void handleSubmitError(Problem problem, Judge judge, HashMap<String, Object> result, SubmitError submitError) {
+        result.put("code", JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus());
+        result.put("errMsg",
+                mergeNonEmptyStrings(submitError.getMessage(), submitError.getStdout(), submitError.getStderr()));
+        result.put("time", 0);
+        result.put("memory", 0);
+        log.error(
+                "题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生提交的异常-------------------->",
+                submitError);
+    }
+
+    private void handleSystemError(Problem problem, Judge judge, HashMap<String, Object> result, SystemError systemError) {
+        result.put("code", JudgeStatus.STATUS_SYSTEM_ERROR.getStatus());
+        result.put("errMsg",
+                "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
+        result.put("time", 0);
+        result.put("memory", 0);
+        log.error(
+                "题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生系统性的异常------------------->",
+                systemError);
+    }
+
     private Boolean checkOrCompileExtraProgram(Problem problem) throws CompileError, SystemError {
-
         JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
-
         String currentVersion = problem.getCaseVersion();
-
-        CompileConfig compiler;
-
-        String programFilePath;
-
-        String programVersionPath;
-
+        Boolean isOk;
         switch (Objects.requireNonNull(judgeMode)) {
             case DEFAULT:
                 return true;
             case SPJ:
-                compiler = CompileConfig.getCompilerByLanguage("SPJ-" + problem.getSpjLanguage());
-
-                programFilePath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                        + compiler.getExeName();
-
-                programVersionPath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                        + "version";
-
-                // 如果不存在该已经编译好的程序，则需要再次进行编译
-                if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
-                    boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
-                            problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
-
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
-                    fileWriter.write(currentVersion);
-                    return isCompileSpjOk;
-                }
-
-                FileReader spjVersionReader = new FileReader(programVersionPath);
-                String recordSpjVersion = spjVersionReader.readString();
-
-                // 版本变动也需要重新编译
-                if (!currentVersion.equals(recordSpjVersion)) {
-                    boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
-                            problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
-                    fileWriter.write(currentVersion);
-                    return isCompileSpjOk;
-                }
-
+                isOk = isCompileSpjOk(problem, currentVersion);
+                if (isOk != null) return isOk;
                 break;
             case INTERACTIVE:
-                compiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
-                programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                        + compiler.getExeName();
-
-                programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                        + "version";
-
-                // 如果不存在该已经编译好的程序，则需要再次进行编译 版本变动也需要重新编译
-                if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
-                    boolean isCompileInteractive = Compiler.compileInteractive(problem.getSpjCode(), problem.getId(),
-                            problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
-                    fileWriter.write(currentVersion);
-                    return isCompileInteractive;
-                }
-
-                FileReader interactiveVersionFileReader = new FileReader(programVersionPath);
-                String recordInteractiveVersion = interactiveVersionFileReader.readString();
-
-                // 版本变动也需要重新编译
-                if (!currentVersion.equals(recordInteractiveVersion)) {
-                    boolean isCompileInteractive = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
-                            problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
-
-                    FileWriter fileWriter = new FileWriter(programVersionPath);
-                    fileWriter.write(currentVersion);
-
-                    return isCompileInteractive;
-                }
-
+                isOk = isCompileInteractive(problem, currentVersion);
+                if (isOk != null) return isOk;
                 break;
             default:
                 throw new RuntimeException("The problem mode is error:" + judgeMode);
         }
 
         return true;
+    }
+
+    private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemError {
+        CompileConfig compiler;
+        String programFilePath;
+        String programVersionPath;
+        compiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
+        programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+                + compiler.getExeName();
+
+        programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+                + "version";
+
+        // 如果不存在该已经编译好的程序，则需要再次进行编译 版本变动也需要重新编译
+        if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
+            boolean isCompileInteractive = Compiler.compileInteractive(problem.getSpjCode(), problem.getId(),
+                    problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
+            FileWriter fileWriter = new FileWriter(programVersionPath);
+            fileWriter.write(currentVersion);
+            return isCompileInteractive;
+        }
+
+        FileReader interactiveVersionFileReader = new FileReader(programVersionPath);
+        String recordInteractiveVersion = interactiveVersionFileReader.readString();
+
+        // 版本变动也需要重新编译
+        if (!currentVersion.equals(recordInteractiveVersion)) {
+            boolean isCompileInteractive = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
+                    problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
+
+            FileWriter fileWriter = new FileWriter(programVersionPath);
+            fileWriter.write(currentVersion);
+
+            return isCompileInteractive;
+        }
+        return null;
+    }
+
+
+    private Boolean isCompileSpjOk(Problem problem, String currentVersion) throws SystemError {
+        CompileConfig compiler;
+        String programFilePath;
+        String programVersionPath;
+        compiler = CompileConfig.getCompilerByLanguage("SPJ-" + problem.getSpjLanguage());
+
+        programFilePath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+                + compiler.getExeName();
+
+        programVersionPath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+                + "version";
+
+        // 如果不存在该已经编译好的程序，则需要再次进行编译
+        if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
+            boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
+                    problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
+
+            FileWriter fileWriter = new FileWriter(programVersionPath);
+            fileWriter.write(currentVersion);
+            return isCompileSpjOk;
+        }
+
+        FileReader spjVersionReader = new FileReader(programVersionPath);
+        String recordSpjVersion = spjVersionReader.readString();
+
+        // 版本变动也需要重新编译
+        if (!currentVersion.equals(recordSpjVersion)) {
+            boolean isCompileSpjOk = Compiler.compileSpj(problem.getSpjCode(), problem.getId(),
+                    problem.getSpjLanguage(), JudgeUtil.getProblemExtraFileMap(problem, "judge"));
+            FileWriter fileWriter = new FileWriter(programVersionPath);
+            fileWriter.write(currentVersion);
+            return isCompileSpjOk;
+        }
+        return null;
     }
 
     // 获取判题的运行时间，运行空间，OI得分

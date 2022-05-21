@@ -8,7 +8,6 @@ import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.List;
 
@@ -30,12 +29,9 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
     IPage<UserRolesVo> getUserList(Page<UserRolesVo> page, @Param("limit") int limit,
                                    @Param("currentPage") int currentPage, @Param("keyword") String keyword);
 
-    IPage<UserRolesVo> getAdminUserList(Page<UserRolesVo> page, @Param("limit") int limit,
-                                        @Param("currentPage") int currentPage, @Param("keyword") String keyword);
-
     IPage<UserRolesVo> getAdminUserList(Page<UserRolesVo> page,
                                         @Param("limit") int limit,
                                         @Param("currentPage") int currentPage,
                                         @Param("keyword") String keyword,
-                                        List roleIdList);
+                                        @Param("roleIdList") List roleIdList);
 }

@@ -5,9 +5,9 @@ import com.simplefanc.voj.backend.dao.training.TrainingRecordEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingRecordMapper;
 import com.simplefanc.voj.backend.pojo.vo.TrainingRecordVo;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -16,11 +16,11 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingRecordEntityServiceImpl extends ServiceImpl<TrainingRecordMapper, TrainingRecord>
         implements TrainingRecordEntityService {
 
-    @Resource
-    private TrainingRecordMapper trainingRecordMapper;
+    private final TrainingRecordMapper trainingRecordMapper;
 
     @Override
     public List<TrainingRecordVo> getTrainingRecord(Long tid) {

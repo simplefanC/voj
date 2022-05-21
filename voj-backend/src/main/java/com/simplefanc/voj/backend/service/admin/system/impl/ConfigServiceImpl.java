@@ -21,8 +21,8 @@ import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.common.pojo.entity.common.File;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -40,25 +40,20 @@ import java.util.Properties;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ConfigServiceImpl implements ConfigService {
 
-    @Autowired
-    private ConfigVo configVo;
+    private final ConfigVo configVo;
 
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    @Autowired
-    private FileEntityService fileEntityService;
+    private final FileEntityService fileEntityService;
 
-    @Autowired
-    private ConfigUtil configUtil;
+    private final ConfigUtil configUtil;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private DiscoveryClient discoveryClient;
+    private final DiscoveryClient discoveryClient;
 
     @Value("${service-url.name}")
     private String judgeServiceName;
@@ -67,22 +62,13 @@ public class ConfigServiceImpl implements ConfigService {
     private String currentServiceName;
 
     @Value("${spring.cloud.nacos.discovery.server-addr}")
-    private String NACOS_URL;
+    private String nacosServerAddr;
 
-//    @Value("${spring.cloud.nacos.config.prefix}")
-//    private String prefix;
-
-    @Value("${spring.profiles.active}" + "${spring.profiles.active}" + ".yml")
+    @Value("voj" + "-" + "${spring.profiles.active}" + ".yml")
     private String dataId;
 
-//    @Value("${spring.cloud.nacos.config.file-extension}")
-//    private String fileExtension;
-
     @Value("${spring.cloud.nacos.config.group}")
-    private String GROUP;
-
-//    @Value("${spring.cloud.nacos.config.type}")
-//    private String TYPE;
+    private String group;
 
     @Value("${spring.cloud.nacos.config.username}")
     private String nacosUsername;
@@ -95,7 +81,7 @@ public class ConfigServiceImpl implements ConfigService {
      * @Params @param null
      * @Description 获取当前服务的相关信息以及当前系统的cpu情况，内存使用情况
      * @Return CommonResult
-     * @Since 2020/12/3
+     * @Since 2021/12/3
      */
     @Override
     public JSONObject getServiceInfo() {
@@ -105,7 +91,7 @@ public class ConfigServiceImpl implements ConfigService {
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(currentServiceName);
 
         // 获取nacos中心配置所在的机器环境
-        String response = restTemplate.getForObject(String.format("%s%s%s", "http://", NACOS_URL, "/nacos/v1/ns/operator/metrics"), String.class);
+        String response = restTemplate.getForObject(String.format("%s%s%s", "http://", nacosServerAddr, "/nacos/v1/ns/operator/metrics"), String.class);
 
         JSONObject jsonObject = JSONUtil.parseObj(response);
         // 获取当前数据后台所在机器环境
@@ -308,7 +294,7 @@ public class ConfigServiceImpl implements ConfigService {
     public boolean sendNewConfigToNacos() {
 
         Properties properties = new Properties();
-        properties.put("serverAddr", NACOS_URL);
+        properties.put("serverAddr", nacosServerAddr);
 
         // if need username and password to login
         properties.put("username", nacosUsername);
@@ -318,10 +304,10 @@ public class ConfigServiceImpl implements ConfigService {
         boolean isOk = false;
         try {
             configService = NacosFactory.createConfigService(properties);
-            isOk = configService.publishConfig(String.format("%s%s%s%s", "voj", "-", dataId, ".yml"), GROUP,
+            isOk = configService.publishConfig(dataId, group,
                     configUtil.getConfigContent(), ConfigType.YAML.getType());
         } catch (NacosException e) {
-            log.error("通过 Nacos 修改网站配置异常--------------->{}", e.getMessage());
+            log.error("通过 Nacos 修改网站配置异常--------------->", e);
         }
         return isOk;
     }

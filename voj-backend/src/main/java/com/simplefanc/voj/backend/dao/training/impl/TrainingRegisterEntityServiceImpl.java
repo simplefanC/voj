@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.training.TrainingRegisterEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingRegisterMapper;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingRegisterEntityServiceImpl extends ServiceImpl<TrainingRegisterMapper, TrainingRegister>
         implements TrainingRegisterEntityService {
 
-    @Resource
-    private TrainingRegisterMapper trainingRegisterMapper;
+    private final TrainingRegisterMapper trainingRegisterMapper;
 
     @Override
     public List<String> getAlreadyRegisterUidList(Long tid) {

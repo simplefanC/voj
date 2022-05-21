@@ -1,15 +1,15 @@
 package com.simplefanc.voj.backend.service.file.impl;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
+import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
+import com.simplefanc.voj.backend.common.utils.ExcelUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
@@ -19,10 +19,8 @@ import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ContestFileService;
 import com.simplefanc.voj.backend.service.oj.ContestCalculateRankService;
-import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -30,15 +28,13 @@ import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
-import com.simplefanc.voj.common.result.ResultStatus;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,6 +49,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ContestFileServiceImpl implements ContestFileService {
 
     private static final ThreadLocal<SimpleDateFormat> threadLocalTime = new ThreadLocal<SimpleDateFormat>() {
@@ -62,32 +59,23 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
     };
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ContestProblemEntityService contestProblemEntityService;
+    private final ContestProblemEntityService contestProblemEntityService;
 
-    @Autowired
-    private ContestPrintEntityService contestPrintEntityService;
+    private final ContestPrintEntityService contestPrintEntityService;
 
-    @Autowired
-    private FileEntityService fileEntityService;
+    private final FileEntityService fileEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private ContestCalculateRankService contestCalculateRankService;
+    private final ContestCalculateRankService contestCalculateRankService;
 
-    @Autowired
-    private ContestValidator contestValidator;
+    private final ContestValidator contestValidator;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
@@ -148,9 +136,6 @@ public class ContestFileServiceImpl implements ContestFileService {
     @Override
     public void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response)
             throws IOException {
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
@@ -158,21 +143,15 @@ public class ContestFileServiceImpl implements ContestFileService {
             throw new StatusFailException("错误：该比赛不存在！");
         }
 
-        // 是否为超级管理员
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("错误：您并非该比赛的管理员，无权下载榜单！");
         }
 
-        // 检查是否需要开启封榜模式
-        boolean isOpenSealRank = contestValidator.isSealRank(userRolesVo.getUid(), contest, forceRefresh, isRoot);
-        response.setContentType("application/vnd.ms-excel");
-        response.setCharacterEncoding("utf-8");
-        // 这里URLEncoder.encode可以防止中文乱码
-        String fileName = URLEncoder.encode("contest_" + contest.getId() + "_rank", StandardCharsets.UTF_8);
-        response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
-        response.setHeader("Content-Type", "application/xlsx");
+        // 检查是否开启封榜模式
+        boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
+        final String fileName = "contest_" + contest.getId() + "_rank";
+
+        ExcelUtil.wrapExcelResponse(response, fileName);
 
         // 获取题目displayID列表
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
@@ -182,7 +161,6 @@ public class ContestFileServiceImpl implements ContestFileService {
 
         // ACM比赛
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-
             List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calculateACMRank(isOpenSealRank,
                     removeStar, contest, null, null);
             EasyExcel.write(response.getOutputStream())
@@ -199,10 +177,9 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
     }
 
-    // TODO 行数过多
     @Override
     public void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, String splitType,
-                                            HttpServletResponse response) throws StatusForbiddenException, StatusFailException {
+                                            HttpServletResponse response) {
 
         Contest contest = contestEntityService.getById(cid);
 
@@ -210,12 +187,7 @@ public class ContestFileServiceImpl implements ContestFileService {
             throw new StatusFailException("错误：该比赛不存在！");
         }
 
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        boolean isRoot = UserSessionUtil.isRoot();
-
-        // 除非是root 其它管理员只能下载自己的比赛ac记录
-        if (!isRoot && !contest.getUid().equals(userRolesVo.getUid())) {
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("错误：您并非该比赛的管理员，无权下载AC记录！");
         }
 
@@ -252,54 +224,7 @@ public class ContestFileServiceImpl implements ContestFileService {
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
         String zipPath = filePathProps.getContestAcSubmissionTmpFolder() + File.separator + zipFileName;
         ZipUtil.zip(tmpFilesDir, zipPath);
-        // 将zip变成io流返回给前端
-        FileReader zipFileReader = new FileReader(zipPath);
-        // 放到缓冲流里面
-        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());
-        // 获取文件输出IO流
-        OutputStream outs = null;
-        BufferedOutputStream bouts = null;
-        try {
-            outs = response.getOutputStream();
-            bouts = new BufferedOutputStream(outs);
-            response.setContentType("application/x-download");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(zipFileName, "UTF-8"));
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024 * 10];
-            // 开始向网络传输文件流
-            while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
-                bouts.write(buffer, 0, bytesRead);
-            }
-            // 刷新缓存
-            bouts.flush();
-        } catch (IOException e) {
-            log.error("下载比赛AC提交代码的压缩文件异常------------>", e);
-            response.reset();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
-            Map<String, Object> map = new HashMap<>();
-            map.put("status", ResultStatus.SYSTEM_ERROR);
-            map.put("msg", "下载文件失败，请重新尝试！");
-            map.put("data", null);
-            try {
-                response.getWriter().println(JSONUtil.toJsonStr(map));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        } finally {
-            try {
-                bins.close();
-                if (outs != null) {
-                    outs.close();
-                }
-                if (bouts != null) {
-                    bouts.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+        DownloadFileUtil.download(response, zipPath, zipFileName, "下载比赛AC代码失败，请重新尝试！");
         FileUtil.del(tmpFilesDir);
         FileUtil.del(zipPath);
 
@@ -404,57 +329,11 @@ public class ContestFileServiceImpl implements ContestFileService {
         String filename = contestPrint.getUsername() + "_Contest_Print.txt";
         String filePath = filePathProps.getContestTextPrintFolder() + File.separator + id + File.separator + filename;
         if (!FileUtil.exist(filePath)) {
-
             FileWriter fileWriter = new FileWriter(filePath);
             fileWriter.write(contestPrint.getContent());
         }
 
-        FileReader zipFileReader = new FileReader(filePath);
-        // 放到缓冲流里面
-        BufferedInputStream bins = new BufferedInputStream(zipFileReader.getInputStream());
-        // 获取文件输出IO流
-        OutputStream outs = null;
-        BufferedOutputStream bouts = null;
-        try {
-            outs = response.getOutputStream();
-            bouts = new BufferedOutputStream(outs);
-            response.setContentType("application/x-download");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024 * 10];
-            // 开始向网络传输文件流
-            while ((bytesRead = bins.read(buffer, 0, 1024 * 10)) != -1) {
-                bouts.write(buffer, 0, bytesRead);
-            }
-            // 刷新缓存
-            bouts.flush();
-        } catch (IOException e) {
-            log.error("下载比赛打印文本文件异常------------>", e);
-            response.reset();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("utf-8");
-            Map<String, Object> map = new HashMap<>();
-            map.put("status", ResultStatus.SYSTEM_ERROR);
-            map.put("msg", "下载文件失败，请重新尝试！");
-            map.put("data", null);
-            try {
-                response.getWriter().println(JSONUtil.toJsonStr(map));
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        } finally {
-            try {
-                bins.close();
-                if (outs != null) {
-                    outs.close();
-                }
-                if (bouts != null) {
-                    bouts.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        DownloadFileUtil.download(response, filePath, filename, "下载比赛打印文本文件失败，请重新尝试！");
     }
 
 }

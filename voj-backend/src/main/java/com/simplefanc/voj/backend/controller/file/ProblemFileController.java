@@ -2,9 +2,9 @@ package com.simplefanc.voj.backend.controller.file;
 
 import com.simplefanc.voj.backend.service.file.ProblemFileService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,10 +19,10 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/api/file")
+@RequiredArgsConstructor
 public class ProblemFileController {
 
-    @Autowired
-    private ProblemFileService problemFileService;
+    private final ProblemFileService problemFileService;
 
     /**
      * @param file

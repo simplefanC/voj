@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/24 11:15
+ * @Date: 2021/10/24 11:15
  * @Description: 注册数据实体类
  */
 @Data

@@ -9,8 +9,8 @@ import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
 import com.simplefanc.voj.backend.mapper.RemoteJudgeAccountMapper;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,19 +26,17 @@ import java.util.List;
  */
 @Component
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ChooseUtils {
 
-    @Autowired
-    private NacosDiscoveryProperties discoveryProperties;
+    private final NacosDiscoveryProperties discoveryProperties;
 
     @Value("${service-url.name}")
     private String judgeServiceName;
 
-    @Autowired
-    private JudgeServerEntityService judgeServerEntityService;
+    private final JudgeServerEntityService judgeServerEntityService;
 
-    @Autowired
-    private RemoteJudgeAccountMapper remoteJudgeAccountMapper;
+    private final RemoteJudgeAccountMapper remoteJudgeAccountMapper;
 
     /**
      * @param
@@ -48,7 +46,7 @@ public class ChooseUtils {
      * @Since 2021/4/15
      */
     @Transactional(rollbackFor = Exception.class)
-    public JudgeServer chooseServer(Boolean isRemote) {
+    public JudgeServer chooseJudgeServer(Boolean isRemote) {
         // 获取该微服务的所有健康实例
         List<Instance> instances = getInstances(judgeServiceName);
         if (instances.size() <= 0) {
@@ -62,8 +60,10 @@ public class ChooseUtils {
 
         // 过滤出小于或等于规定最大并发判题任务数的服务实例且健康的判题机
         QueryWrapper<JudgeServer> judgeServerQueryWrapper = new QueryWrapper<>();
-        judgeServerQueryWrapper.in("url", keyList).eq("is_remote", isRemote).orderByAsc("task_number")
-                // 开启悲观锁
+        judgeServerQueryWrapper.in("url", keyList)
+                .eq("is_remote", isRemote)
+                .orderByAsc("task_number")
+                // 开启排他锁
                 .last("for update");
 
         /**
@@ -95,7 +95,7 @@ public class ChooseUtils {
      * @Since 2021/4/15
      */
     private List<Instance> getInstances(String serviceId) {
-        // 获取服务发现的相关API
+        // 获取服务发现的相关API TODO 过时
         NamingService namingService = discoveryProperties.namingServiceInstance();
         try {
             // 获取该微服务的所有健康实例

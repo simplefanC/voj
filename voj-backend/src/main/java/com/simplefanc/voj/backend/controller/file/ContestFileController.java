@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.file;
 
 import com.simplefanc.voj.backend.service.file.ContestFileService;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +20,10 @@ import java.io.IOException;
  */
 @Controller
 @RequestMapping("/api/file")
+@RequiredArgsConstructor
 public class ContestFileController {
 
-    @Autowired
-    private ContestFileService contestFileService;
+    private final ContestFileService contestFileService;
 
     @GetMapping("/download-contest-rank")
     @RequiresAuthentication

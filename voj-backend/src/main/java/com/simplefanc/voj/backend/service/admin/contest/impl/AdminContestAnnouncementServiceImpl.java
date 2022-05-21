@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.pojo.dto.AnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestAnnouncementService;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestAnnouncement;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AdminContestAnnouncementServiceImpl implements AdminContestAnnouncementService {
 
-    @Autowired
-    private AnnouncementEntityService announcementEntityService;
+    private final AnnouncementEntityService announcementEntityService;
 
-    @Autowired
-    private ContestAnnouncementEntityService contestAnnouncementEntityService;
+    private final ContestAnnouncementEntityService contestAnnouncementEntityService;
 
     @Override
     public IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage, Long cid) {

@@ -11,7 +11,7 @@ import java.util.Date;
 
 /**
  * @Author: chenfan
- * @Date: 2020/10/27 21:53
+ * @Date: 2021/10/27 21:53
  * @Description:
  */
 @ApiModel(value = "比赛信息", description = "")

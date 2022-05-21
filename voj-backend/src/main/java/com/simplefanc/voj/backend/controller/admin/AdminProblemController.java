@@ -8,25 +8,25 @@ import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/11 21:45
+ * @Date: 2021/12/11 21:45
  * @Description:
  */
 @RestController
 @RequestMapping("/api/admin/problem")
+@RequiredArgsConstructor
 public class AdminProblemController {
 
-    @Autowired
-    private AdminProblemService adminProblemService;
+    private final AdminProblemService adminProblemService;
 
     @GetMapping("/get-problem-list")
     @RequiresAuthentication

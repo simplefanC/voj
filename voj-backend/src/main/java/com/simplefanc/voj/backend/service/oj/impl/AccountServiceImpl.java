@@ -23,7 +23,7 @@ import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -38,35 +38,29 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private UserRoleEntityService userRoleEntityService;
+    private final UserRoleEntityService userRoleEntityService;
 
-    @Autowired
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
-    @Autowired
-    private UserAcproblemEntityService userAcproblemEntityService;
+    private final UserAcproblemEntityService userAcproblemEntityService;
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private SessionEntityService sessionEntityService;
+    private final SessionEntityService sessionEntityService;
 
     /**
      * @MethodName checkUsernameOrEmail
      * @Params * @param null
      * @Description 检验用户名和邮箱是否存在
      * @Return
-     * @Since 2020/11/5
+     * @Since 2021/11/5
      */
     @Override
     public CheckUsernameOrEmailVo checkUsernameOrEmail(CheckUsernameOrEmailDto checkUsernameOrEmailDto) {

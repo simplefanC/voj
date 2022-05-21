@@ -13,12 +13,11 @@ import com.simplefanc.voj.judger.dao.UserAcproblemEntityService;
 import com.simplefanc.voj.judger.judge.local.JudgeContext;
 import com.simplefanc.voj.judger.judge.remote.RemoteJudgeContext;
 import com.simplefanc.voj.judger.service.JudgeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 
 /**
@@ -28,28 +27,23 @@ import java.util.HashMap;
  */
 @Service
 @RefreshScope
+@RequiredArgsConstructor
 public class JudgeServiceImpl implements JudgeService {
 
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Resource
-    private ProblemEntityService problemEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Resource
-    private JudgeContext judgeContext;
+    private final JudgeContext judgeContext;
 
-    @Autowired
-    private RemoteJudgeContext remoteJudgeContext;
+    private final RemoteJudgeContext remoteJudgeContext;
 
-    @Autowired
-    private UserAcproblemEntityService userAcproblemEntityService;
+    private final UserAcproblemEntityService userAcproblemEntityService;
 
-    @Autowired
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestRecordEntityService contestRecordEntityService;
 
     @Override
     public void judge(Judge judge) {

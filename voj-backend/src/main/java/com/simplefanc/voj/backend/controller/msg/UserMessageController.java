@@ -5,13 +5,12 @@ import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
 import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
 import com.simplefanc.voj.backend.service.msg.UserMessageService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -20,10 +19,10 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/api/msg")
+@RequiredArgsConstructor
 public class UserMessageController {
 
-    @Resource
-    private UserMessageService userMessageService;
+    private final UserMessageService userMessageService;
 
     /**
      * @MethodName getUnreadMsgCount

@@ -34,10 +34,10 @@ import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.backend.service.oj.PassportService;
 import com.simplefanc.voj.common.pojo.entity.user.*;
 import com.simplefanc.voj.common.utils.IpUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.stream.Collectors;
@@ -48,37 +48,28 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class PassportServiceImpl implements PassportService {
 
-    @Resource
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Resource
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Resource
-    private ConfigVo configVo;
+    private final ConfigVo configVo;
 
-    @Resource
-    private EmailRuleBo emailRuleBo;
+    private final EmailRuleBo emailRuleBo;
 
-    @Resource
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Resource
-    private UserRoleEntityService userRoleEntityService;
+    private final UserRoleEntityService userRoleEntityService;
 
-    @Resource
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
-    @Resource
-    private SessionEntityService sessionEntityService;
+    private final SessionEntityService sessionEntityService;
 
-    @Resource
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    @Resource
-    private NoticeService noticeService;
+    private final NoticeService noticeService;
 
     @Override
     public UserInfoVo login(LoginDto loginDto, HttpServletResponse response, HttpServletRequest request) {

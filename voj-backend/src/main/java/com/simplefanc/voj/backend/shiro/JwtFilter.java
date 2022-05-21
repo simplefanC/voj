@@ -6,11 +6,11 @@ import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.web.filter.authc.AuthenticatingFilter;
 import org.apache.shiro.web.util.WebUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -22,10 +22,11 @@ import java.io.IOException;
 
 /**
  * @Author: chenfan
- * @Date: 2020/7/19 23:16
+ * @Date: 2021/7/19 23:16
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends AuthenticatingFilter {
 
     private final static String TOKEN_KEY = "token-key:";
@@ -34,12 +35,16 @@ public class JwtFilter extends AuthenticatingFilter {
 
     private final static String TOKEN_REFRESH = "token-refresh:";
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
+    /**
+     * 拦截请求之后，用于把令牌字符串封装成令牌对象
+     * @param servletRequest
+     * @param servletResponse
+     * @return
+     */
     @Override
     protected AuthenticationToken createToken(ServletRequest servletRequest, ServletResponse servletResponse) {
         // 获取 token
@@ -51,6 +56,13 @@ public class JwtFilter extends AuthenticatingFilter {
         return new JwtToken(jwt);
     }
 
+    /**
+     * 该方法用于处理所有应该被Shiro处理的请求
+     * @param servletRequest
+     * @param servletResponse
+     * @return
+     * @throws Exception
+     */
     @Override
     protected boolean onAccessDenied(ServletRequest servletRequest, ServletResponse servletResponse) throws Exception {
         HttpServletRequest request = (HttpServletRequest) servletRequest;

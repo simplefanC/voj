@@ -21,11 +21,11 @@ import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -37,28 +37,22 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class UserMessageServiceImpl implements UserMessageService {
 
-    @Resource
-    private MsgRemindEntityService msgRemindEntityService;
+    private final MsgRemindEntityService msgRemindEntityService;
 
-    @Resource
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Resource
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-    @Resource
-    private DiscussionEntityService discussionEntityService;
+    private final DiscussionEntityService discussionEntityService;
 
-    @Resource
-    private CommentEntityService commentEntityService;
+    private final CommentEntityService commentEntityService;
 
-    @Resource
-    private ReplyEntityService replyEntityService;
+    private final ReplyEntityService replyEntityService;
 
-    @Resource
-    private UserSysNoticeEntityService userSysNoticeEntityService;
+    private final UserSysNoticeEntityService userSysNoticeEntityService;
 
     @Override
     public UserUnreadMsgCountVo getUnreadMsgCount() {

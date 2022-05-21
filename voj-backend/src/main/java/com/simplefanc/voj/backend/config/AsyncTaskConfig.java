@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @Author: chenfan
- * @Date: 2020/11/6 23:36
+ * @Date: 2021/11/6 23:36
  * @Description: 通用异步线程池
  */
 @Configuration

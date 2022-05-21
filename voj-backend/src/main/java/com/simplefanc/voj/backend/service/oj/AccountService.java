@@ -20,7 +20,7 @@ public interface AccountService {
      * @Params * @param null
      * @Description 检验用户名和邮箱是否存在
      * @Return
-     * @Since 2020/11/5
+     * @Since 2021/11/5
      */
     CheckUsernameOrEmailVo checkUsernameOrEmail(CheckUsernameOrEmailDto checkUsernameOrEmailDto);
 

@@ -4,13 +4,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -19,10 +18,10 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/api/msg")
+@RequiredArgsConstructor
 public class NoticeController {
 
-    @Resource
-    private NoticeService noticeService;
+    private final NoticeService noticeService;
 
     @RequestMapping(value = "/sys", method = RequestMethod.GET)
     @RequiresAuthentication

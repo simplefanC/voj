@@ -5,9 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
-import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.training.*;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
@@ -18,10 +16,10 @@ import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.TrainingValidator;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.training.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,31 +29,24 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
 
-    @Resource
-    private TrainingEntityService trainingEntityService;
+    private final TrainingEntityService trainingEntityService;
 
-    @Resource
-    private TrainingRegisterEntityService trainingRegisterEntityService;
+    private final TrainingRegisterEntityService trainingRegisterEntityService;
 
-    @Resource
-    private TrainingCategoryEntityService trainingCategoryEntityService;
+    private final TrainingCategoryEntityService trainingCategoryEntityService;
 
-    @Resource
-    private TrainingProblemEntityService trainingProblemEntityService;
+    private final TrainingProblemEntityService trainingProblemEntityService;
 
-    @Resource
-    private TrainingRecordEntityService trainingRecordEntityService;
+    private final TrainingRecordEntityService trainingRecordEntityService;
 
-    @Resource
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Resource
-    private AdminTrainingRecordService adminTrainingRecordService;
+    private final AdminTrainingRecordService adminTrainingRecordService;
 
-    @Resource
-    private TrainingValidator trainingValidator;
+    private final TrainingValidator trainingValidator;
 
     /**
      * @param limit
@@ -88,8 +79,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public TrainingVo getTraining(Long tid)
-            throws StatusFailException, StatusAccessDeniedException, StatusForbiddenException {
+    public TrainingVo getTraining(Long tid) {
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         boolean isRoot = UserSessionUtil.isRoot();
@@ -126,8 +116,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public List<ProblemVo> getTrainingProblemList(Long tid)
-            throws StatusAccessDeniedException, StatusForbiddenException, StatusFailException {
+    public List<ProblemVo> getTrainingProblemList(Long tid) {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -148,8 +137,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public void toRegisterTraining(RegisterTrainingDto registerTrainingDto)
-            throws StatusFailException, StatusForbiddenException {
+    public void toRegisterTraining(RegisterTrainingDto registerTrainingDto) {
 
         Long tid = registerTrainingDto.getTid();
         String password = registerTrainingDto.getPassword();
@@ -195,7 +183,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public AccessVo getTrainingAccess(Long tid) throws StatusFailException {
+    public AccessVo getTrainingAccess(Long tid) {
 
         // 获取当前登录的用户
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
@@ -228,8 +216,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/22
      */
     @Override
-    public IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage)
-            throws StatusAccessDeniedException, StatusForbiddenException, StatusFailException {
+    public IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage) {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {

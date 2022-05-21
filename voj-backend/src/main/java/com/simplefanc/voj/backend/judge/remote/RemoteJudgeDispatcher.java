@@ -7,8 +7,8 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
@@ -16,16 +16,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j(topic = "voj")
 @RefreshScope
+@RequiredArgsConstructor
 public class RemoteJudgeDispatcher {
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private RemoteJudgeReceiver remoteJudgeReceiver;
+    private final RemoteJudgeReceiver remoteJudgeReceiver;
 
     @Value("${voj.judge.token}")
     private String judgeToken;

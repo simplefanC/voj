@@ -12,11 +12,11 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,22 +27,18 @@ import java.util.List;
  * @Description:
  */
 @Component
+@RequiredArgsConstructor
 public class AdminTrainingRecordService {
 
-    @Resource
-    private TrainingEntityService trainingEntityService;
+    private final TrainingEntityService trainingEntityService;
 
-    @Resource
-    private TrainingProblemEntityService trainingProblemEntityService;
+    private final TrainingProblemEntityService trainingProblemEntityService;
 
-    @Resource
-    private TrainingRecordEntityService trainingRecordEntityService;
+    private final TrainingRecordEntityService trainingRecordEntityService;
 
-    @Resource
-    private TrainingRegisterEntityService trainingRegisterEntityService;
+    private final TrainingRegisterEntityService trainingRegisterEntityService;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
     @Async
     public void syncUserSubmissionToRecordByTid(Long tid, String uid) {

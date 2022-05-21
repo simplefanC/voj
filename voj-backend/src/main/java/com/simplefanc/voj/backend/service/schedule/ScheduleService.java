@@ -4,12 +4,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.map.MapUtil;
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.backend.common.constants.ScheduleConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
@@ -26,20 +21,13 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
-import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -56,37 +44,28 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class ScheduleService {
 
-    @Autowired
-    private FileEntityService fileEntityService;
+    private final FileEntityService fileEntityService;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
-    @Resource
-    private SessionEntityService sessionEntityService;
+    private final SessionEntityService sessionEntityService;
 
-    @Resource
-    private AdminSysNoticeEntityService adminSysNoticeEntityService;
+    private final AdminSysNoticeEntityService adminSysNoticeEntityService;
 
-    @Resource
-    private UserSysNoticeEntityService userSysNoticeEntityService;
+    private final UserSysNoticeEntityService userSysNoticeEntityService;
 
-    @Resource
-    private JudgeEntityService judgeEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Resource
-    private RejudgeService rejudgeService;
+    private final RejudgeService rejudgeService;
 
-    @Autowired
-    private FilePathProps filePathProps;
+    private final FilePathProps filePathProps;
 
     /**
      * @MethodName deleteAvatar

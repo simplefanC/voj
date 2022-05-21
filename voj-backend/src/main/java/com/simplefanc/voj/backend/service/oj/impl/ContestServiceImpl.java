@@ -26,7 +26,7 @@ import com.simplefanc.voj.common.constants.ProblemEnum;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.pojo.entity.contest.*;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -38,61 +38,42 @@ import java.util.stream.Collectors;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class ContestServiceImpl implements ContestService {
 
-    @Autowired
-    private ContestEntityService contestEntityService;
+    private final ContestEntityService contestEntityService;
 
-    @Autowired
-    private ContestRecordEntityService contestRecordEntityService;
+    private final ContestProblemEntityService contestProblemEntityService;
 
-    @Autowired
-    private ContestProblemEntityService contestProblemEntityService;
+    private final ContestAnnouncementEntityService contestAnnouncementEntityService;
 
-    @Autowired
-    private ContestAnnouncementEntityService contestAnnouncementEntityService;
+    private final AnnouncementEntityService announcementEntityService;
 
-    @Autowired
-    private AnnouncementEntityService announcementEntityService;
+    private final ContestRegisterEntityService contestRegisterEntityService;
 
-    @Autowired
-    private ContestRegisterEntityService contestRegisterEntityService;
+    private final ProblemEntityService problemEntityService;
 
-    @Autowired
-    private ProblemEntityService problemEntityService;
+    private final ProblemTagEntityService problemTagEntityService;
 
-    @Autowired
-    private ProblemTagEntityService problemTagEntityService;
+    private final TagEntityService tagEntityService;
 
-    @Autowired
-    private TagEntityService tagEntityService;
+    private final LanguageEntityService languageEntityService;
 
-    @Autowired
-    private LanguageEntityService languageEntityService;
+    private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    @Autowired
-    private ProblemLanguageEntityService problemLanguageEntityService;
+    private final JudgeEntityService judgeEntityService;
 
-    @Autowired
-    private JudgeEntityService judgeEntityService;
+    private final CodeTemplateEntityService codeTemplateEntityService;
 
-    @Autowired
-    private CodeTemplateEntityService codeTemplateEntityService;
+    private final ContestPrintEntityService contestPrintEntityService;
 
-    @Autowired
-    private ContestPrintEntityService contestPrintEntityService;
+    private final UserInfoEntityService userInfoEntityService;
 
-    @Autowired
-    private UserInfoEntityService userInfoEntityService;
+    private final RedisUtil redisUtil;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final ContestValidator contestValidator;
 
-    @Autowired
-    private ContestValidator contestValidator;
-
-    @Autowired
-    private ContestRankService contestRankService;
+    private final ContestRankService contestRankService;
 
     @Override
     public IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer status, Integer type,
@@ -204,48 +185,32 @@ public class ContestServiceImpl implements ContestService {
 
     @Override
     public List<ContestProblemVo> getContestProblem(Long cid) {
-
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目列表，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
-        List<ContestProblemVo> contestProblemList;
-        boolean isAdmin = isRoot || contest.getAuthor().equals(userRolesVo.getUsername());
+        boolean isAdmin = contestValidator.isContestAdmin(contest);
         // 如果比赛开启封榜
-        if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true, isRoot)) {
-            contestProblemList = contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
+        if (contestValidator.isOpenSealRank(contest, true)) {
+            return contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
+                    // TODO getAuthor参数
                     contest.getEndTime(), contest.getSealRankTime(), isAdmin, contest.getAuthor());
-        } else {
-            contestProblemList = contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
-                    contest.getEndTime(), null, isAdmin, contest.getAuthor());
         }
-
-        return contestProblemList;
+        return contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
+                contest.getEndTime(), null, isAdmin, contest.getAuthor());
     }
 
     @Override
     // TODO 行数过多
     public ProblemInfoVo getContestProblemDetails(Long cid, String displayId) {
 
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
         // 根据cid和displayId获取pid
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
@@ -300,7 +265,7 @@ public class ContestServiceImpl implements ContestService {
 
         Date sealRankTime = null;
         // 封榜时间除超级管理员和比赛管理员外 其它人不可看到最新数据
-        if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true, isRoot)) {
+        if (contestValidator.isOpenSealRank(contest, true)) {
             sealRankTime = contest.getSealRankTime();
         }
 
@@ -337,11 +302,8 @@ public class ContestServiceImpl implements ContestService {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(searchCid);
 
-        // 是否为超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1)
@@ -365,7 +327,7 @@ public class ContestServiceImpl implements ContestService {
         Date sealRankTime = null;
 
         // 需要判断是否需要封榜
-        if (contestValidator.isSealRank(userRolesVo.getUid(), contest, true, isRoot)) {
+        if (contestValidator.isOpenSealRank(contest, true)) {
             sealRankTime = contest.getSealRankTime();
         }
         // OI比赛封榜期间不更新，ACM比赛封榜期间可看到自己的提交，但是其它人的不可见
@@ -378,8 +340,7 @@ public class ContestServiceImpl implements ContestService {
             return contestJudgeList;
         } else {
             // 比赛还是进行阶段，同时不是超级管理员与比赛管理员，需要将除自己之外的提交的时间、空间、长度隐藏
-            if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode() && !isRoot
-                    && !userRolesVo.getUid().equals(contest.getUid())) {
+            if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode() && !contestValidator.isContestAdmin(contest)) {
                 contestJudgeList.getRecords().forEach(judgeVo -> {
                     if (!judgeVo.getUid().equals(userRolesVo.getUid())) {
                         judgeVo.setTime(null);
@@ -399,14 +360,14 @@ public class ContestServiceImpl implements ContestService {
         List<String> concernedList = contestRankDto.getConcernedList();
         Integer currentPage = contestRankDto.getCurrentPage();
         Integer limit = contestRankDto.getLimit();
-        Boolean removeStar = contestRankDto.getRemoveStar();
+        Boolean removeStarUser = contestRankDto.getRemoveStar();
         Boolean forceRefresh = contestRankDto.getForceRefresh();
 
         if (cid == null) {
             throw new StatusFailException("错误：cid不能为空");
         }
-        if (removeStar == null) {
-            removeStar = false;
+        if (removeStarUser == null) {
+            removeStarUser = false;
         }
         if (forceRefresh == null) {
             forceRefresh = false;
@@ -423,42 +384,32 @@ public class ContestServiceImpl implements ContestService {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestRankDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
         // 校验该比赛是否开启了封榜模式，超级管理员和比赛创建者可以直接看到实际榜单
-        boolean isOpenSealRank = contestValidator.isSealRank(userRolesVo.getUid(), contest, forceRefresh, isRoot);
+        boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
 
-        IPage resultList;
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
             // ACM比赛
             // 进行排行榜计算以及排名分页
-            resultList = contestRankService.getContestACMRankPage(isOpenSealRank, removeStar, userRolesVo.getUid(),
+            return contestRankService.getContestACMRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
                     concernedList, contest, currentPage, limit);
 
         } else {
             // OI比赛
-            resultList = contestRankService.getContestOIRankPage(isOpenSealRank, removeStar, userRolesVo.getUid(),
+            return contestRankService.getContestOIRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
                     concernedList, contest, currentPage, limit);
         }
-        return resultList;
     }
 
     @Override
     public IPage<AnnouncementVo> getContestAnnouncement(Long cid, Integer limit, Integer currentPage) {
-
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
@@ -505,11 +456,8 @@ public class ContestServiceImpl implements ContestService {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestPrintDto.getCid());
 
-        // 超级管理员或者该比赛的创建者，则为比赛管理者
-        boolean isRoot = UserSessionUtil.isRoot();
-
         // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
-        contestValidator.validateContestAuth(contest, userRolesVo, isRoot);
+        contestValidator.validateContestAuth(contest);
 
         String lockKey = AccountConstant.CONTEST_ADD_PRINT_LOCK + userRolesVo.getUid();
         if (redisUtil.hasKey(lockKey)) {

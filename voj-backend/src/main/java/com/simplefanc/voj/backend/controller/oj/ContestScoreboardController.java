@@ -4,9 +4,9 @@ import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -17,10 +17,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor
 public class ContestScoreboardController {
 
-    @Resource
-    private ContestScoreboardService contestScoreboardService;
+    private final ContestScoreboardService contestScoreboardService;
 
     /**
      * @param cid 比赛id

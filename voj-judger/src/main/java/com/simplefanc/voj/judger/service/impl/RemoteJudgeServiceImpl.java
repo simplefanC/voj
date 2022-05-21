@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import com.simplefanc.voj.judger.dao.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.judger.service.RemoteJudgeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j(topic = "voj")
+@RequiredArgsConstructor
 public class RemoteJudgeServiceImpl implements RemoteJudgeService {
 
-    @Autowired
-    private RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
+    private final RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
 
     @Override
     public void changeAccountStatus(String remoteJudge, String username) {

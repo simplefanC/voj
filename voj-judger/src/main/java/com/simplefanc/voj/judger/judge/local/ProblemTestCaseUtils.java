@@ -10,11 +10,12 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.common.constants.JudgeMode;
+import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.exception.SystemError;
 import com.simplefanc.voj.judger.dao.ProblemCaseEntityService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
@@ -30,10 +31,10 @@ import java.util.List;
  * @Description: 判题流程解耦重构2.0，该类只负责题目测试数据的检查与初始化
  */
 @Component
+@RequiredArgsConstructor
 public class ProblemTestCaseUtils {
 
-    @Autowired
-    private ProblemCaseEntityService problemCaseEntityService;
+    private final ProblemCaseEntityService problemCaseEntityService;
 
     /**
      * 去除每行末尾的空白符
@@ -80,7 +81,6 @@ public class ProblemTestCaseUtils {
         String testCasesDir = JudgeDir.TEST_CASE_DIR + "/problem_" + problemId;
 
         // 无论有没有测试数据，一旦执行该函数，一律清空，重新生成该题目对应的测试数据文件
-
         FileUtil.del(testCasesDir);
         for (int index = 0; index < testCases.size(); index++) {
             JSONObject jsonObject = new JSONObject();
@@ -105,7 +105,7 @@ public class ProblemTestCaseUtils {
                 // 原数据MD5
                 jsonObject.set("outputMd5", DigestUtils.md5DigestAsHex(outputData.getBytes()));
                 // 原数据大小
-                jsonObject.set("outputSize", outputData.getBytes("utf-8").length);
+                jsonObject.set("outputSize", outputData.getBytes(CharsetUtil.UTF_8).length);
                 // 去掉全部空格的MD5，用来判断pe
                 jsonObject.set("allStrippedOutputMd5",
                         DigestUtils.md5DigestAsHex(outputData.replaceAll("\\s+", "").getBytes()));
@@ -124,7 +124,14 @@ public class ProblemTestCaseUtils {
         return result;
     }
 
-    // 本地有文件，进行数据初始化 生成json文件
+    /**
+     * 本地有文件，进行数据初始化 生成json文件
+     * @param mode
+     * @param version
+     * @param testCasesDir
+     * @param problemCaseList
+     * @return
+     */
     public JSONObject initLocalTestCase(String mode, String version, String testCasesDir,
                                         List<ProblemCase> problemCaseList) {
 
@@ -168,7 +175,16 @@ public class ProblemTestCaseUtils {
         return result;
     }
 
-    // 获取指定题目的info数据
+    /**
+     * 获取指定题目的info数据
+     * @param problemId
+     * @param testCasesDir
+     * @param version
+     * @param mode
+     * @return
+     * @throws SystemError
+     * @throws UnsupportedEncodingException
+     */
     public JSONObject loadTestCaseInfo(Long problemId, String testCasesDir, String version, String mode)
             throws SystemError, UnsupportedEncodingException {
         if (FileUtil.exist(testCasesDir + File.separator + "info")) {
@@ -185,15 +201,46 @@ public class ProblemTestCaseUtils {
         }
     }
 
-    // 若没有测试数据，则尝试从数据库获取并且初始化到本地，如果数据库中该题目测试数据为空，rsync同步也出了问题，则直接判系统错误
+    public JSONObject loadTestCaseInfo(Problem problem)
+            throws SystemError, UnsupportedEncodingException {
+        Long problemId = problem.getId();
+        String testCasesDir = JudgeDir.TEST_CASE_DIR + File.separator + "problem_" + problem.getId();;
+        String version = problem.getCaseVersion();
+        String mode = problem.getJudgeMode();
+
+        if (FileUtil.exist(testCasesDir + File.separator + "info")) {
+            FileReader fileReader = new FileReader(testCasesDir + File.separator + "info", CharsetUtil.UTF_8);
+            String infoStr = fileReader.readString();
+            JSONObject testcaseInfo = JSONUtil.parseObj(infoStr);
+            // 测试样例被改动需要重新生成
+            if (!testcaseInfo.getStr("version", null).equals(version)) {
+                return tryInitTestCaseInfo(testCasesDir, problemId, version, mode);
+            }
+            return testcaseInfo;
+        } else {
+            return tryInitTestCaseInfo(testCasesDir, problemId, version, mode);
+        }
+    }
+
+    /**
+     * 若没有测试数据，则尝试从数据库获取并且初始化到本地，如果数据库中该题目测试数据为空，rsync同步也出了问题，则直接判系统错误
+     *
+     * @param testCasesDir
+     * @param problemId
+     * @param version
+     * @param mode
+     * @return
+     * @throws SystemError
+     * @throws UnsupportedEncodingException
+     */
     public JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
             throws SystemError, UnsupportedEncodingException {
 
         QueryWrapper<ProblemCase> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", problemId);
         List<ProblemCase> problemCases = problemCaseEntityService.list(queryWrapper);
-
-        if (problemCases.size() == 0) { // 数据库也为空的话
+        // 数据库也为空的话
+        if (problemCases.size() == 0) {
             throw new SystemError("problemID:[" + problemId + "] test case has not found.", null, null);
         }
 

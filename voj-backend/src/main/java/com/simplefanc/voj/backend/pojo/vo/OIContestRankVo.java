@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Author: chenfan
@@ -15,6 +15,9 @@ import java.util.HashMap;
 @Data
 @Accessors(chain = true)
 public class OIContestRankVo {
+
+    @ApiModelProperty(value = "序号")
+    private Integer seq;
 
     @ApiModelProperty(value = "排名,排名为-1则为打星队伍")
     private Integer rank;
@@ -47,9 +50,9 @@ public class OIContestRankVo {
     private Integer totalTime;
 
     @ApiModelProperty(value = "OI的题对应提交得分")
-    private HashMap<String, Integer> submissionInfo;
+    private Map<String, Integer> submissionInfo;
 
     @ApiModelProperty(value = "OI的题得满分后对应提交最优耗时")
-    private HashMap<String, Integer> timeInfo;
+    private Map<String, Integer> timeInfo;
 
 }

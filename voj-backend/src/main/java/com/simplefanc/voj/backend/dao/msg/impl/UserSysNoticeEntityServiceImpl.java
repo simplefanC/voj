@@ -7,9 +7,8 @@ import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.UserSysNoticeMapper;
 import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -17,11 +16,11 @@ import javax.annotation.Resource;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class UserSysNoticeEntityServiceImpl extends ServiceImpl<UserSysNoticeMapper, UserSysNotice>
         implements UserSysNoticeEntityService {
 
-    @Resource
-    private UserSysNoticeMapper userSysNoticeMapper;
+    private final UserSysNoticeMapper userSysNoticeMapper;
 
     @Override
     public IPage<SysMsgVo> getSysNotice(int limit, int currentPage, String uid) {

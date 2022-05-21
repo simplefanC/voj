@@ -3,6 +3,7 @@ package com.simplefanc.voj.judger.judge.local;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeMode;
+import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
@@ -14,10 +15,11 @@ import com.simplefanc.voj.judger.judge.local.entity.JudgeGlobalDTO;
 import com.simplefanc.voj.judger.judge.local.task.DefaultJudge;
 import com.simplefanc.voj.judger.judge.local.task.InteractiveJudge;
 import com.simplefanc.voj.judger.judge.local.task.SpecialJudge;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -32,85 +34,29 @@ import java.util.concurrent.FutureTask;
  * @Description: 判题流程解耦重构3.0，该类负责输入数据进入程序进行测评
  */
 @Component
+@RequiredArgsConstructor
 public class JudgeRun {
 
-    @Resource
-    private DefaultJudge defaultJudge;
+    private final DefaultJudge defaultJudge;
 
-    @Resource
-    private SpecialJudge specialJudge;
+    private final SpecialJudge specialJudge;
 
-    @Resource
-    private InteractiveJudge interactiveJudge;
+    private final InteractiveJudge interactiveJudge;
 
-    // TODO 参数过多
-    // TODO 行数过多
-    public List<JSONObject> judgeAllCase(Long submitId, Problem problem, String judgeLanguage, String testCasesDir,
-                                         JSONObject testCasesInfo, String userFileId, String userFileSrc, Boolean getUserOutput)
-            throws SystemError, ExecutionException, InterruptedException {
+    private final ProblemTestCaseUtils problemTestCaseUtils;
 
-        if (testCasesInfo == null) {
-            throw new SystemError("The evaluation data of the problem does not exist", null, null);
-        }
+    public List<JSONObject> judgeAllCase(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput)
+            throws SystemError, ExecutionException, InterruptedException, UnsupportedEncodingException {
 
-        List<FutureTask<JSONObject>> futureTasks = new ArrayList<>();
-        JSONArray testcaseList = (JSONArray) testCasesInfo.get("testCases");
+        JudgeGlobalDTO judgeGlobalDTO = getJudgeGlobalDTO(judge, problem, userFileId, userFileSrc, getUserOutput);
 
-        // 默认给题目限制时间+200ms用来测评
-        Long testTime = (long) problem.getTimeLimit() + 200;
-
-        JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
-
-        if (judgeMode == null) {
-            throw new RuntimeException(
-                    "The judge mode of problem " + problem.getProblemId() + " error:" + problem.getJudgeMode());
-        }
-
-        // 用户输出的文件夹
-        String runDir = JudgeDir.RUN_WORKPLACE_DIR + File.separator + submitId;
-
-        RunConfig runConfig = RunConfig.getRunnerByLanguage(judgeLanguage);
-        RunConfig spjConfig = RunConfig.getRunnerByLanguage("SPJ-" + problem.getSpjLanguage());
-        RunConfig interactiveConfig = RunConfig.getRunnerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
-
-        JudgeGlobalDTO judgeGlobalDTO = JudgeGlobalDTO.builder().problemId(problem.getId()).judgeMode(judgeMode)
-                .userFileId(userFileId).userFileSrc(userFileSrc).runDir(runDir).testTime(testTime)
-                .maxMemory((long) problem.getMemoryLimit()).maxTime((long) problem.getTimeLimit())
-                .maxStack(problem.getStackLimit()).testCaseInfo(testCasesInfo)
-                .judgeExtraFiles(JudgeUtil.getProblemExtraFileMap(problem, "judge")).runConfig(runConfig)
-                .spjRunConfig(spjConfig).interactiveRunConfig(interactiveConfig).needUserOutputFile(getUserOutput)
-                .removeEOLBlank(problem.getIsRemoveEndBlank()).build();
-
-        for (int index = 0; index < testcaseList.size(); index++) {
-            JSONObject testcase = (JSONObject) testcaseList.get(index);
-            // 将每个需要测试的线程任务加入任务列表中
-            final int testCaseId = index + 1;
-            // 输入文件名
-            final String inputFileName = testcase.getStr("inputName");
-            // 输出文件名
-            final String outputFileName = testcase.getStr("outputName");
-            // 题目数据的输入文件的路径
-            final String testCaseInputPath = testCasesDir + File.separator + inputFileName;
-            // 题目数据的输出文件的路径
-            final String testCaseOutputPath = testCasesDir + File.separator + outputFileName;
-            // 数据库表的测试样例id
-            final Long caseId = testcase.getLong("caseId", null);
-            // 该测试点的满分
-            final Integer score = testcase.getInt("score", 0);
-
-            final Long maxOutputSize = Math.max(testcase.getLong("outputSize", 0L) * 2, 16 * 1024 * 1024L);
-
-            JudgeDTO judgeDTO = JudgeDTO.builder().testCaseId(testCaseId).testCaseInputPath(testCaseInputPath)
-                    .testCaseOutputPath(testCaseOutputPath).maxOutputSize(maxOutputSize).build();
-
-            futureTasks.add(new FutureTask<>(
-                    new JudgeTask(judgeMode, judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
-        }
+        List<FutureTask<JSONObject>> futureTasks = getFutureTasks(judgeGlobalDTO);
 
         // 提交到线程池进行执行
         for (FutureTask<JSONObject> futureTask : futureTasks) {
             ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
         }
+
         List<JSONObject> result = new LinkedList<>();
         while (futureTasks.size() > 0) {
             Iterator<FutureTask<JSONObject>> iterable = futureTasks.iterator();
@@ -119,8 +65,7 @@ public class JudgeRun {
                 FutureTask<JSONObject> future = iterable.next();
                 if (future.isDone() && !future.isCancelled()) {
                     // 获取线程返回结果 TODO 报OOM异常
-                    JSONObject tmp = future.get();
-                    result.add(tmp);
+                    result.add(future.get());
                     // 任务完成移除任务
                     iterable.remove();
                 } else {
@@ -132,25 +77,98 @@ public class JudgeRun {
         return result;
     }
 
+    private List<FutureTask<JSONObject>> getFutureTasks(JudgeGlobalDTO judgeGlobalDTO) {
+        JSONObject testCasesInfo = judgeGlobalDTO.getTestCaseInfo();
+        List<FutureTask<JSONObject>> futureTasks = new ArrayList<>();
+        JSONArray testcaseList = (JSONArray) testCasesInfo.get("testCases");
+        for (int index = 0; index < testcaseList.size(); index++) {
+            JSONObject testcase = (JSONObject) testcaseList.get(index);
+            // 将每个需要测试的线程任务加入任务列表中
+            final int testCaseId = index + 1;
+            // 输入文件名
+            final String inputFileName = testcase.getStr("inputName");
+            // 输出文件名
+            final String outputFileName = testcase.getStr("outputName");
+            // 题目数据的输入文件的路径
+            final String testCaseInputPath = judgeGlobalDTO.getTestCasesDir() + File.separator + inputFileName;
+            // 题目数据的输出文件的路径
+            final String testCaseOutputPath = judgeGlobalDTO.getTestCasesDir() + File.separator + outputFileName;
+            // 数据库表的测试样例id
+            final Long caseId = testcase.getLong("caseId", null);
+            // 该测试点的满分
+            final Integer score = testcase.getInt("score", 0);
+
+            final Long maxOutputSize = Math.max(testcase.getLong("outputSize", 0L) * 2, 16 * 1024 * 1024L);
+
+            JudgeDTO judgeDTO = JudgeDTO.builder().testCaseId(testCaseId).testCaseInputPath(testCaseInputPath)
+                    .testCaseOutputPath(testCaseOutputPath).maxOutputSize(maxOutputSize).build();
+
+            futureTasks.add(new FutureTask<>(
+                    new JudgeTask(judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
+        }
+        return futureTasks;
+    }
+
+    private JudgeGlobalDTO getJudgeGlobalDTO(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput) throws SystemError, UnsupportedEncodingException {
+        Long submitId = judge.getSubmitId();
+        String judgeLanguage = judge.getLanguage();
+
+        // 默认给题目限制时间+200ms用来测评
+        Long testTime = (long) problem.getTimeLimit() + 200;
+
+        JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
+
+        if (judgeMode == null) {
+            throw new RuntimeException(
+                    "The judge mode of problem " + problem.getProblemId() + " error:" + problem.getJudgeMode());
+        }
+
+        // 从文件中加载测试数据json
+        JSONObject testCasesInfo = problemTestCaseUtils.loadTestCaseInfo(problem);
+        if (testCasesInfo == null) {
+            throw new SystemError("The evaluation data of the problem does not exist", null, null);
+        }
+
+        // 测试数据文件所在文件夹
+        String testCasesDir = JudgeDir.TEST_CASE_DIR + File.separator + "problem_" + problem.getId();
+
+        // 用户输出的文件夹
+        String runDir = JudgeDir.RUN_WORKPLACE_DIR + File.separator + submitId;
+
+        RunConfig runConfig = RunConfig.getRunnerByLanguage(judgeLanguage);
+        RunConfig spjConfig = RunConfig.getRunnerByLanguage("SPJ-" + problem.getSpjLanguage());
+        RunConfig interactiveConfig = RunConfig.getRunnerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
+
+        return JudgeGlobalDTO.builder()
+                .problemId(problem.getId())
+                .judgeMode(judgeMode)
+                .userFileId(userFileId)
+                .userFileSrc(userFileSrc)
+                .runDir(runDir)
+                .testTime(testTime)
+                .maxMemory((long) problem.getMemoryLimit())
+                .maxTime((long) problem.getTimeLimit())
+                .maxStack(problem.getStackLimit())
+                .testCasesDir(testCasesDir)
+                .testCaseInfo(testCasesInfo)
+                .judgeExtraFiles(JudgeUtil.getProblemExtraFileMap(problem, "judge"))
+                .runConfig(runConfig)
+                .spjRunConfig(spjConfig)
+                .interactiveRunConfig(interactiveConfig)
+                .needUserOutputFile(getUserOutput)
+                .removeEOLBlank(problem.getIsRemoveEndBlank()).build();
+    }
+
     class JudgeTask implements Callable<JSONObject> {
-
-        JudgeMode judgeMode;
-
         JudgeDTO judgeDTO;
-
         JudgeGlobalDTO judgeGlobalDTO;
-
         Long caseId;
-
         Integer score;
-
         String inputFileName;
-
         String outputFileName;
 
-        public JudgeTask(JudgeMode judgeMode, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, Long caseId,
+        public JudgeTask(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, Long caseId,
                          Integer score, String inputFileName, String outputFileName) {
-            this.judgeMode = judgeMode;
             this.judgeDTO = judgeDTO;
             this.judgeGlobalDTO = judgeGlobalDTO;
             this.caseId = caseId;
@@ -162,7 +180,7 @@ public class JudgeRun {
         @Override
         public JSONObject call() throws Exception {
             JSONObject result;
-            switch (judgeMode) {
+            switch (judgeGlobalDTO.getJudgeMode()) {
                 case DEFAULT:
                     result = defaultJudge.judge(judgeDTO, judgeGlobalDTO);
                     break;
@@ -173,7 +191,7 @@ public class JudgeRun {
                     result = interactiveJudge.judge(judgeDTO, judgeGlobalDTO);
                     break;
                 default:
-                    throw new RuntimeException("The problem mode is error:" + judgeMode);
+                    throw new RuntimeException("The problem mode is error:" + judgeGlobalDTO.getJudgeMode());
             }
             result.set("caseId", caseId);
             result.set("score", score);

@@ -5,9 +5,9 @@ import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,15 +15,15 @@ import java.util.Map;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/6 15:18
+ * @Date: 2021/12/6 15:18
  * @Description:
  */
 @RestController
 @RequestMapping("/api/admin/user")
+@RequiredArgsConstructor
 public class AdminUserController {
 
-    @Autowired
-    private AdminUserService adminUserService;
+    private final AdminUserService adminUserService;
 
     @GetMapping("/get-user-list")
     @RequiresAuthentication
@@ -66,8 +66,7 @@ public class AdminUserController {
     @RequiresAuthentication
     public CommonResult<Map<Object, Object>> generateUser(@RequestBody Map<String, Object> params) {
         // TODO 参数
-        adminUserService.generateUser(params);
-        return CommonResult.successResponse();
+        return CommonResult.successResponse(adminUserService.generateUser(params));
     }
 
 }

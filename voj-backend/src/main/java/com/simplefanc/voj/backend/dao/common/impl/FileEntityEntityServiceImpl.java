@@ -6,12 +6,13 @@ import com.simplefanc.voj.backend.mapper.FileMapper;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.common.pojo.entity.common.File;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: chenfan
@@ -19,10 +20,10 @@ import java.util.List;
  * @Description:
  */
 @Service
+@RequiredArgsConstructor
 public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> implements FileEntityService {
 
-    @Autowired
-    private FileMapper fileMapper;
+    private final FileMapper fileMapper;
 
     @Override
     public int updateFileToDeleteByUidAndType(String uid, String type) {
@@ -42,22 +43,25 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
     @Override
     public List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIdList, Boolean isACM) {
         List<List<String>> headList = new LinkedList<>();
+        List<String> head = new LinkedList<>();
+        head.add("No");
 
         List<String> head0 = new LinkedList<>();
         head0.add("Rank");
 
         List<String> head1 = new LinkedList<>();
         head1.add("Username");
-        List<String> head2 = new LinkedList<>();
-        head2.add("ShowName");
+//        List<String> head2 = new LinkedList<>();
+//        head2.add("ShowName");
         List<String> head3 = new LinkedList<>();
         head3.add("Real Name");
         List<String> head4 = new LinkedList<>();
         head4.add("School");
 
+        headList.add(head);
         headList.add(head0);
         headList.add(head1);
-        headList.add(head2);
+//        headList.add(head2);
         headList.add(head3);
         headList.add(head4);
 
@@ -93,15 +97,15 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
             List<Object> rowData = new LinkedList<>();
             rowData.add(acmContestRankVo.getRank() == -1 ? "*" : acmContestRankVo.getRank().toString());
             rowData.add(acmContestRankVo.getUsername());
-            if ("username".equals(rankShowName)) {
-                rowData.add(acmContestRankVo.getUsername());
-            } else if ("realname".equals(rankShowName)) {
-                rowData.add(acmContestRankVo.getRealname());
-            } else if ("nickname".equals(rankShowName)) {
-                rowData.add(acmContestRankVo.getNickname());
-            } else {
-                rowData.add("");
-            }
+//            if ("username".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getUsername());
+//            } else if ("realname".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getRealname());
+//            } else if ("nickname".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getNickname());
+//            } else {
+//                rowData.add("");
+//            }
             rowData.add(acmContestRankVo.getRealname());
             rowData.add(acmContestRankVo.getSchool());
             rowData.add(acmContestRankVo.getAc());
@@ -147,21 +151,22 @@ public class FileEntityEntityServiceImpl extends ServiceImpl<FileMapper, File> i
         List<List<Object>> allRowDataList = new LinkedList<>();
         for (OIContestRankVo oiContestRankVo : oiContestRankVoList) {
             List<Object> rowData = new LinkedList<>();
+            rowData.add(oiContestRankVo.getSeq());
             rowData.add(oiContestRankVo.getRank() == -1 ? "*" : oiContestRankVo.getRank().toString());
             rowData.add(oiContestRankVo.getUsername());
-            if ("username".equals(rankShowName)) {
-                rowData.add(oiContestRankVo.getUsername());
-            } else if ("realname".equals(rankShowName)) {
-                rowData.add(oiContestRankVo.getRealname());
-            } else if ("nickname".equals(rankShowName)) {
-                rowData.add(oiContestRankVo.getNickname());
-            } else {
-                rowData.add("");
-            }
+//            if ("username".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getUsername());
+//            } else if ("realname".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getRealname());
+//            } else if ("nickname".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getNickname());
+//            } else {
+//                rowData.add("");
+//            }
             rowData.add(oiContestRankVo.getRealname());
             rowData.add(oiContestRankVo.getSchool());
             rowData.add(oiContestRankVo.getTotalScore());
-            HashMap<String, Integer> submissionInfo = oiContestRankVo.getSubmissionInfo();
+            Map<String, Integer> submissionInfo = oiContestRankVo.getSubmissionInfo();
             for (String displayId : contestProblemDisplayIdList) {
                 Integer score = submissionInfo.getOrDefault(displayId, null);
                 // 如果是有提交记录的就写最后一次提交的分数，没有的就写空

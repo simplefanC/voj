@@ -13,33 +13,30 @@ import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @Author: chenfan
- * @Date: 2020/12/19 22:28
+ * @Date: 2021/12/19 22:28
  * @Description:
  */
 @RestController
 @RequestMapping("/api/admin/contest")
+@RequiredArgsConstructor
 public class AdminContestController {
 
-    @Autowired
-    private AdminContestService adminContestService;
+    private final AdminContestService adminContestService;
 
-    @Autowired
-    private AdminContestProblemService adminContestProblemService;
+    private final AdminContestProblemService adminContestProblemService;
 
-    @Autowired
-    private AdminContestAnnouncementService adminContestAnnouncementService;
+    private final AdminContestAnnouncementService adminContestAnnouncementService;
 
     @GetMapping("/get-contest-list")
     @RequiresAuthentication

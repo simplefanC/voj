@@ -3,6 +3,7 @@ package com.simplefanc.voj.backend.controller.admin;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.result.CommonResult;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -10,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * @Author: chenfan
@@ -21,10 +20,10 @@ import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/api/admin/judge")
+@RequiredArgsConstructor
 public class AdminJudgeController {
 
-    @Resource
-    private RejudgeService rejudgeService;
+    private final RejudgeService rejudgeService;
 
     @GetMapping("/rejudge")
     @RequiresAuthentication
