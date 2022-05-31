@@ -64,28 +64,29 @@ public class ContestValidator {
         if (contest == null || !contest.getVisible()) {
             throw new StatusFailException("对不起，该比赛不存在！");
         }
+        if (isContestAdmin(contest)) {
+            return;
+        }
         // 若不是比赛管理者
-        if (!isContestAdmin(contest)) {
-            // 判断一下比赛的状态，还未开始不能查看题目。
-            if (contest.getStatus().intValue() != ContestEnum.STATUS_RUNNING.getCode()
-                    && contest.getStatus().intValue() != ContestEnum.STATUS_ENDED.getCode()) {
-                throw new StatusForbiddenException("比赛还未开始，您无权访问该比赛！");
-            } else {
-                // 如果是处于比赛正在进行阶段，需要判断该场比赛是否为私有赛，私有赛需要判断该用户是否已注册
-                if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode()) {
-                    QueryWrapper<ContestRegister> registerQueryWrapper = new QueryWrapper<>();
-                    registerQueryWrapper.eq("cid", contest.getId()).eq("uid", UserSessionUtil.getUserInfo().getUid());
-                    ContestRegister register = contestRegisterEntityService.getOne(registerQueryWrapper);
-                    // 如果数据为空，表示未注册私有赛，不可访问
-                    if (register == null) {
-                        throw new StatusForbiddenException("对不起，请先到比赛首页输入比赛密码进行注册！");
-                    }
+        // 判断一下比赛的状态，还未开始不能访问
+        if (contest.getStatus().intValue() != ContestEnum.STATUS_RUNNING.getCode()
+                && contest.getStatus().intValue() != ContestEnum.STATUS_ENDED.getCode()) {
+            throw new StatusForbiddenException("比赛还未开始，您无权访问该比赛！");
+        }
 
-                    if (contest.getOpenAccountLimit()
-                            && !validateAccountRule(contest.getAccountLimitRule(), UserSessionUtil.getUserInfo().getUsername())) {
-                        throw new StatusForbiddenException("对不起！本次比赛只允许特定账号规则的用户参赛！");
-                    }
-                }
+        // 如果是处于比赛正在进行阶段，需要判断该场比赛是否为私有赛，私有赛需要判断该用户是否已注册
+        if (contest.getAuth().intValue() == ContestEnum.AUTH_PRIVATE.getCode()) {
+            QueryWrapper<ContestRegister> registerQueryWrapper = new QueryWrapper<>();
+            registerQueryWrapper.eq("cid", contest.getId()).eq("uid", UserSessionUtil.getUserInfo().getUid());
+            ContestRegister register = contestRegisterEntityService.getOne(registerQueryWrapper);
+            // 如果数据为空，表示未注册私有赛，不可访问
+            if (register == null) {
+                throw new StatusForbiddenException("对不起，请先到比赛首页输入比赛密码进行注册！");
+            }
+
+            if (contest.getOpenAccountLimit()
+                    && !validateAccountRule(contest.getAccountLimitRule(), UserSessionUtil.getUserInfo().getUsername())) {
+                throw new StatusForbiddenException("对不起！本次比赛只允许特定账号规则的用户参赛！");
             }
         }
     }

@@ -31,11 +31,11 @@
 
 
     <select id="getContestJudgeList" resultType="com.simplefanc.voj.backend.pojo.vo.JudgeVo" useCache="false">
-        select j.uid,j.submit_id,j.submit_time,j.uid,j.username,j.uid,cp.display_id,cp.display_title as title,
+        select j.uid,j.submit_id,j.submit_time,j.username,u.realname,j.uid,cp.display_id,cp.display_title as title,
         j.status,j.share,j.time,j.memory,j.score,j.length,j.language,j.cid,j.cpid,j.judger
-        from judge j,contest_problem cp
+        from judge j, contest_problem cp, user_info u
         <where>
-            j.pid=cp.pid AND j.cid = cp.cid
+            j.pid = cp.pid AND j.cid = cp.cid AND u.uuid = j.uid
             <if test="cid!=null">
                 AND j.cid = #{cid}
             </if>

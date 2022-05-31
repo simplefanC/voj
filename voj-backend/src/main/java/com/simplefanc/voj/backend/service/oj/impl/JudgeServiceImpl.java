@@ -96,7 +96,6 @@ public class JudgeServiceImpl implements JudgeService {
 
         judgeValidator.validateSubmissionInfo(judgeDto);
 
-        // 需要获取一下该token对应用户的数据
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         boolean isContestSubmission = judgeDto.getCid() != 0;
@@ -232,41 +231,14 @@ public class JudgeServiceImpl implements JudgeService {
         // 如果不是本人或者并未分享代码，则不可查看
         // 当此次提交代码不共享
         // 比赛提交只有比赛创建者和root账号可看代码
-        SubmissionInfoVo submissionInfoVo = new SubmissionInfoVo();
-
         if (judge.getCid() != 0) {
-            Contest contest = contestEntityService.getById(judge.getCid());
-            if (!contestValidator.isContestAdmin(contest)) {
-                // 如果是比赛,那么还需要判断是否为封榜,比赛管理员和超级管理员可以有权限查看(ACM题目除外)
-                if (contest.getType().intValue() == ContestEnum.TYPE_OI.getCode()
-                        && contestValidator.isOpenSealRank(contest, true)) {
-                    submissionInfoVo.setSubmission(
-                            new Judge().setStatus(JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus()));
-                    return submissionInfoVo;
-                }
-                // 不是本人的话不能查看代码、时间，空间，长度
-                if (!userRolesVo.getUid().equals(judge.getUid())) {
-                    judge.setCode(null);
-                    // 如果还在比赛时间，不是本人不能查看时间，空间，长度，错误提示信息
-                    if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()) {
-                        judge.setTime(null);
-                        judge.setMemory(null);
-                        judge.setLength(null);
-                        judge.setErrorMessage(
-                                "The contest is in progress. You are not allowed to view other people's error information.");
-                    }
-                }
+            if (extracted(judge, userRolesVo)) {
+                return new SubmissionInfoVo().setSubmission(
+                        new Judge().setStatus(JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus()));
             }
         } else {
-            if (!judge.getShare() && !isRoot && !problemAdmin) {
-                // 需要判断是否为当前登陆用户自己的提交代码
-                if (!judge.getUid().equals(userRolesVo.getUid())) {
-                    judge.setCode(null);
-                }
-            }
+            extracted(judge, userRolesVo, isRoot, problemAdmin);
         }
-
-        Problem problem = problemEntityService.getById(judge.getPid());
 
         // 只允许用户查看ce错误,sf错误，se错误信息提示
         if (judge.getStatus().intValue() != JudgeStatus.STATUS_COMPILE_ERROR.getStatus()
@@ -274,11 +246,44 @@ public class JudgeServiceImpl implements JudgeService {
                 && judge.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
             judge.setErrorMessage("The error message does not support viewing.");
         }
-        submissionInfoVo.setSubmission(judge);
-        submissionInfoVo.setCodeShare(problem.getCodeShare());
 
-        return submissionInfoVo;
+        Problem problem = problemEntityService.getById(judge.getPid());
+        return new SubmissionInfoVo()
+                .setSubmission(judge)
+                .setCodeShare(problem.getCodeShare());
+    }
 
+    private boolean extracted(Judge judge, UserRolesVo userRolesVo) {
+        Contest contest = contestEntityService.getById(judge.getCid());
+        if (!contestValidator.isContestAdmin(contest)) {
+            // 如果是比赛,那么还需要判断是否为封榜,比赛管理员和超级管理员可以有权限查看(ACM题目除外)
+            if (contest.getType().intValue() == ContestEnum.TYPE_OI.getCode()
+                    && contestValidator.isOpenSealRank(contest, true)) {
+                return true;
+            }
+            // 不是本人的话不能查看代码
+            if (!userRolesVo.getUid().equals(judge.getUid())) {
+                judge.setCode(null);
+                // 如果还在比赛时间，不是本人不能查看时间，空间，长度，错误提示信息
+                if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()) {
+                    judge.setTime(null);
+                    judge.setMemory(null);
+                    judge.setLength(null);
+                    judge.setErrorMessage(
+                            "The contest is in progress. You are not allowed to view other people's error information.");
+                }
+            }
+        }
+        return false;
+    }
+
+    private void extracted(Judge judge, UserRolesVo userRolesVo, boolean isRoot, boolean problemAdmin) {
+        if (!judge.getShare() && !isRoot && !problemAdmin) {
+            // 需要判断是否为当前登陆用户自己的提交代码
+            if (!judge.getUid().equals(userRolesVo.getUid())) {
+                judge.setCode(null);
+            }
+        }
     }
 
     /**
@@ -327,7 +332,6 @@ public class JudgeServiceImpl implements JudgeService {
         String uid = null;
         // 只查看当前用户的提交
         if (onlyMine) {
-            // 需要获取一下该token对应用户的数据（有token便能获取到）
             UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
             if (userRolesVo == null) {
@@ -448,9 +452,8 @@ public class JudgeServiceImpl implements JudgeService {
 
         if (judge.getCid() != 0) {
             Contest contest = contestEntityService.getById(judge.getCid());
-            // 如果不是比赛管理员 比赛封榜不能看
             if (!contestValidator.isContestAdmin(contest)) {
-                // 当前是比赛期间 同时处于封榜时间
+                // 当前是比赛期间 比赛封榜不能看
                 if (contest.getSealRank() && contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()
                         && contest.getSealRankTime().before(new Date())) {
                     throw new StatusForbiddenException("对不起，该题测试样例详情不能查看！");

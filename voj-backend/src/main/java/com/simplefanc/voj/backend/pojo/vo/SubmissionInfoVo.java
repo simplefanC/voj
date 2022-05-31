@@ -3,6 +3,7 @@ package com.simplefanc.voj.backend.pojo.vo;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @Author: chenfan
@@ -10,6 +11,7 @@ import lombok.Data;
  * @Description:
  */
 @Data
+@Accessors(chain = true)
 public class SubmissionInfoVo {
 
     @ApiModelProperty(value = "提交详情")

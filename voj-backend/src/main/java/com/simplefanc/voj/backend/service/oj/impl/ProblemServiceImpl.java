@@ -108,8 +108,6 @@ public class ProblemServiceImpl implements ProblemService {
     // TODO 行数过多
     @Override
     public HashMap<Long, Object> getUserProblemStatus(PidListDto pidListDto) {
-
-        // 需要获取一下该token对应用户的数据
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         HashMap<Long, Object> result = new HashMap<>();
         // 先查询判断该用户对于这些题是否已经通过，若已通过，则无论后续再提交结果如何，该题都标记为通过

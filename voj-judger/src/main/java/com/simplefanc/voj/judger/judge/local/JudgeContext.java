@@ -33,6 +33,12 @@ public class JudgeContext {
 
         HashMap<String, Object> judgeResult = judgeStrategy.judge(problem, judge);
 
+        handleJudgeResult(problem, judge, judgeResult);
+
+        return judge;
+    }
+
+    private void handleJudgeResult(Problem problem, Judge judge, HashMap<String, Object> judgeResult) {
         // 如果是编译失败、提交错误或者系统错误就有错误提醒
         if (judgeResult.get("code") == JudgeStatus.STATUS_COMPILE_ERROR.getStatus()
                 || judgeResult.get("code") == JudgeStatus.STATUS_SYSTEM_ERROR.getStatus()
@@ -53,8 +59,6 @@ public class JudgeContext {
         judge.setScore((Integer) judgeResult.getOrDefault("score", null));
         // oi_rank_score
         judge.setOiRankScore((Integer) judgeResult.getOrDefault("oiRankScore", null));
-
-        return judge;
     }
 
     public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)

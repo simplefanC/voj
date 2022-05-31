@@ -39,4 +39,14 @@ public class TestCaseController {
         testCaseService.downloadTestcase(pid, response);
     }
 
+    @GetMapping("/download-single-testcase")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    public void downloadSingleTestCase(@RequestParam("pid") Long pid,
+                                       @RequestParam("inputData") String inputData,
+                                       @RequestParam("outputData") String outputData,
+                                       HttpServletResponse response) {
+        testCaseService.downloadSingleTestCase(pid, inputData, outputData, response);
+    }
+
 }

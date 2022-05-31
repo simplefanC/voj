@@ -9,6 +9,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
+import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
@@ -17,6 +18,7 @@ import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestConstant;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -39,6 +41,8 @@ public class ContestCalculateRankService {
     private final RedisUtil redisUtil;
 
     private final ContestRecordEntityService contestRecordEntityService;
+
+    private final ContestRegisterEntityService contestRegisterEntityService;
 
     private final ContestValidator contestValidator;
 
@@ -350,8 +354,11 @@ public class ContestCalculateRankService {
                 .stream()
                 .filter(contestRecord -> !contestRecord.getUid().equals(contest.getUid()) && !superAdminUidList.contains(contestRecord.getUid()))
                 .collect(Collectors.toList());
+        Set<String> hasRecordUserNameSet = oiContestRecordList.stream()
+                .map(ContestRecordVo::getUsername)
+                .collect(Collectors.toSet());
 
-        Map<String, OIContestRankVo> uidContestRankVoMap = initContestRankVo(contest, oiContestRecordList);
+        Map<String, OIContestRankVo> uidContestRankVoMap = initContestRankVo(hasRecordUserNameSet);
 
         List<OIContestRankVo> result = new ArrayList<>(uidContestRankVoMap.values());
 
@@ -363,25 +370,46 @@ public class ContestCalculateRankService {
         setTimeInfoToResult(result, uidTimeInfoMap);
 
         // 根据总得分进行降序，再根据总时耗升序排序
-        return result.stream()
+        result = result.stream()
                 .sorted(Comparator.comparing(OIContestRankVo::getTotalScore, Comparator.reverseOrder())
                         .thenComparing(OIContestRankVo::getTotalTime, Comparator.naturalOrder()))
                 .collect(Collectors.toList());
-    }
-
-    private Map<String, OIContestRankVo> initContestRankVo(Contest contest, List<ContestRecordVo> oiContestRecordList) {
-        Set<String> userNameSet = oiContestRecordList.stream()
-                .map(ContestRecordVo::getUsername)
-                .collect(Collectors.toSet());
 
         if (contestValidator.isContestAdmin(contest)) {
-            String extra = ReUtil.getGroup1("<extra>([\\S\\s]*?)<\\/extra>", contest.getAccountLimitRule());
-            final Set<String> extraUserNameSet = Arrays.stream(extra.split("\n"))
-                    .collect(Collectors.toSet());
-            userNameSet.addAll(extraUserNameSet);
+            result.addAll(getNoRecordUserContestRankVos(contest, hasRecordUserNameSet));
+        }
+        return result;
+    }
+
+    private List<OIContestRankVo> getNoRecordUserContestRankVos(Contest contest, Set<String> userNameSet) {
+        String extra = ReUtil.getGroup1("<extra>([\\S\\s]*?)<\\/extra>", contest.getAccountLimitRule());
+        final Set<String> extraUserNameSet = Arrays.stream(extra.split("\n"))
+                .filter(u -> !userNameSet.contains(u))
+                .collect(Collectors.toSet());
+        if (CollUtil.isEmpty(extraUserNameSet)) {
+            return new ArrayList<>();
         }
 
-        if(CollUtil.isEmpty(userNameSet)) {
+        final Set<String> registeredUsers = contestRegisterEntityService.lambdaQuery()
+                .select(ContestRegister::getUid)
+                .eq(ContestRegister::getCid, contest.getId())
+                .list()
+                .stream()
+                .map(ContestRegister::getUid)
+                .collect(Collectors.toSet());
+
+        return userInfoEntityService.lambdaQuery()
+                .in(UserInfo::getUsername, extraUserNameSet)
+                .list()
+                .stream()
+                .map(this::initOiContestRankVo)
+                .map(contestRankVo -> contestRankVo.setRegistered(registeredUsers.contains(contestRankVo.getUid())))
+                .sorted(Comparator.comparing(OIContestRankVo::getRegistered, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, OIContestRankVo> initContestRankVo(Set<String> userNameSet) {
+        if (CollUtil.isEmpty(userNameSet)) {
             return new HashMap<>();
         }
 
@@ -403,6 +431,7 @@ public class ContestCalculateRankService {
                 .setGender(userInfo.getGender())
                 .setNickname(userInfo.getNickname())
                 .setTotalScore(0)
+                .setTotalTime(0)
                 .setSubmissionInfo(new HashMap<>());
     }
 
@@ -492,15 +521,11 @@ public class ContestCalculateRankService {
      * @param uidMapTime
      */
     private void setTimeInfoToResult(List<OIContestRankVo> result, HashMap<String, Map<String, Integer>> uidMapTime) {
-        result.stream().forEach(oiContestRankVo -> {
+        result.forEach(oiContestRankVo -> {
             Map<String, Integer> pidMapTime = uidMapTime.get(oiContestRankVo.getUid());
-            int sumTime = 0;
-            if (pidMapTime != null) {
-                for (String key : pidMapTime.keySet()) {
-                    Integer time = pidMapTime.get(key);
-                    sumTime += time == null ? 0 : time;
-                }
-            }
+            int sumTime = Optional.ofNullable(pidMapTime)
+                    .map(val -> val.values().stream().reduce(0, Integer::sum))
+                    .orElse(0);
             oiContestRankVo.setTotalTime(sumTime);
             oiContestRankVo.setTimeInfo(pidMapTime);
         });

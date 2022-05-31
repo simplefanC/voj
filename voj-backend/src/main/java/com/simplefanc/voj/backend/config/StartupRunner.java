@@ -53,7 +53,7 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${MYSQL_USERNAME:root}")
     private String mysqlUsername;
 
-    @Value("${MYSQL_ROOT_PASSWORD:voj123456}")
+    @Value("${MYSQL_ROOT_PASSWORD:root}")
     private String mysqlPassword;
 
     @Value("${MYSQL_DATABASE_NAME:voj}")
@@ -77,7 +77,7 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${REDIS_PORT:6379}")
     private Integer redisPort;
 
-    @Value("${REDIS_PASSWORD:voj123456}")
+    @Value("${REDIS_PASSWORD:}")
     private String redisPassword;
 
     /**

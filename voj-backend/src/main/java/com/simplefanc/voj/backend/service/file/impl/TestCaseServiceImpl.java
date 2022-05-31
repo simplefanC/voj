@@ -50,8 +50,7 @@ public class TestCaseServiceImpl implements TestCaseService {
         if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请上传zip格式的测试数据压缩包！");
         }
-        String fileDirId = IdUtil.simpleUUID();
-        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
+        String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + IdUtil.simpleUUID();
         String filePath = fileDir + File.separator + file.getOriginalFilename();
         // 文件夹不存在就新建
         FileUtil.mkdir(fileDir);
@@ -79,7 +78,7 @@ public class TestCaseServiceImpl implements TestCaseService {
 
         // 遍历读取与检查是否in和out文件一一对应，否则报错
         for (File tmp : files) {
-            String tmpPreName = null;
+            String tmpPreName;
             if (tmp.getName().endsWith(".in")) {
                 tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".in"));
                 inputData.put(tmpPreName, tmp.getName());
@@ -137,7 +136,6 @@ public class TestCaseServiceImpl implements TestCaseService {
 
     @Override
     public void downloadTestcase(Long pid, HttpServletResponse response) {
-
         String workDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
         File file = new File(workDir);
         // 本地为空 尝试去数据库查找
@@ -160,6 +158,7 @@ public class TestCaseServiceImpl implements TestCaseService {
                 throw new StatusFailException("对不起，该题目的评测数据为空！");
             }
 
+            // 为手动输入的测试用例
             FileUtil.mkdir(workDir);
             // 写入本地
             for (int i = 0; i < problemCaseList.size(); i++) {
@@ -175,10 +174,28 @@ public class TestCaseServiceImpl implements TestCaseService {
 
         String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
-        ZipUtil.zip(workDir, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
-        DownloadFileUtil.download(response, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
+        final String zipPath = filePathProps.getFileDownloadTmpFolder() + File.separator + fileName;
+        ZipUtil.zip(workDir, zipPath);
+        DownloadFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
         // 清空临时文件
-        FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
+        FileUtil.del(zipPath);
+    }
+
+    @Override
+    public void downloadSingleTestCase(Long pid, String inputData, String outputData, HttpServletResponse response) {
+        String workDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + pid;
+        String fileName = "problem_" + pid + "_testcase_" + System.currentTimeMillis() + ".zip";
+        // 将对应文件夹的文件压缩成zip
+        final String zipPath = filePathProps.getFileDownloadTmpFolder() + File.separator + fileName;
+
+        ZipUtil.zip(FileUtil.file(zipPath), false,
+                FileUtil.file(workDir + File.separator + inputData),
+                FileUtil.file(workDir + File.separator + outputData)
+        );
+
+        DownloadFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
+        // 清空临时文件
+        FileUtil.del(zipPath);
     }
 
 }

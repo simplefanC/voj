@@ -208,8 +208,6 @@ public class ContestServiceImpl implements ContestService {
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
-
-        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest);
 
         // 根据cid和displayId获取pid
@@ -298,11 +296,8 @@ public class ContestServiceImpl implements ContestService {
                                                    String displayId, Integer searchStatus, String searchUsername, Long searchCid, Boolean beforeContestSubmit,
                                                    Boolean completeProblemId) {
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(searchCid);
-
-        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest);
 
         // 页数，每页题数若为空，设置默认值
@@ -313,44 +308,44 @@ public class ContestServiceImpl implements ContestService {
 
         String uid = null;
         // 只查看当前用户的提交
+        final String userId = UserSessionUtil.getUserInfo().getUid();
         if (onlyMine) {
-            // 需要获取一下该token对应用户的数据（有token便能获取到）
-            uid = userRolesVo.getUid();
+            uid = userId;
         }
 
-        String rule;
+        String contestType;
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-            rule = ContestEnum.TYPE_ACM.getName();
+            contestType = ContestEnum.TYPE_ACM.getName();
         } else {
-            rule = ContestEnum.TYPE_OI.getName();
+            contestType = ContestEnum.TYPE_OI.getName();
         }
-        Date sealRankTime = null;
 
+        Date sealRankTime = null;
         // 需要判断是否需要封榜
         if (contestValidator.isOpenSealRank(contest, true)) {
             sealRankTime = contest.getSealRankTime();
         }
-        // OI比赛封榜期间不更新，ACM比赛封榜期间可看到自己的提交，但是其它人的不可见
+
+        // OI比赛封榜期间不更新; ACM比赛封榜期间可看到自己的提交(sealTimeUid)，但是其它人的不可见
         IPage<JudgeVo> contestJudgeList = judgeEntityService.getContestJudgeList(limit, currentPage, displayId,
-                searchCid, searchStatus, searchUsername, uid, beforeContestSubmit, rule, contest.getStartTime(),
-                sealRankTime, userRolesVo.getUid(), completeProblemId);
+                searchCid, searchStatus, searchUsername, uid, beforeContestSubmit, contestType, contest.getStartTime(),
+                sealRankTime, userId, completeProblemId);
 
         // 未查询到一条数据
         if (contestJudgeList.getTotal() == 0) {
             return contestJudgeList;
-        } else {
-            // 比赛还是进行阶段，同时不是超级管理员与比赛管理员，需要将除自己之外的提交的时间、空间、长度隐藏
-            if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode() && !contestValidator.isContestAdmin(contest)) {
-                contestJudgeList.getRecords().forEach(judgeVo -> {
-                    if (!judgeVo.getUid().equals(userRolesVo.getUid())) {
-                        judgeVo.setTime(null);
-                        judgeVo.setMemory(null);
-                        judgeVo.setLength(null);
-                    }
-                });
-            }
-            return contestJudgeList;
         }
+        // 比赛还是进行阶段，同时不是超级管理员与比赛管理员，需要将除自己之外的提交的时间、空间、长度隐藏
+        if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode() && !contestValidator.isContestAdmin(contest)) {
+            contestJudgeList.getRecords().forEach(judgeVo -> {
+                if (!judgeVo.getUid().equals(userId)) {
+                    judgeVo.setTime(null);
+                    judgeVo.setMemory(null);
+                    judgeVo.setLength(null);
+                }
+            });
+        }
+        return contestJudgeList;
     }
 
     @Override
@@ -383,8 +378,6 @@ public class ContestServiceImpl implements ContestService {
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestRankDto.getCid());
-
-        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest);
 
         // 校验该比赛是否开启了封榜模式，超级管理员和比赛创建者可以直接看到实际榜单
@@ -455,8 +448,6 @@ public class ContestServiceImpl implements ContestService {
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestPrintDto.getCid());
-
-        // 需要对该比赛做判断，是否处于开始或结束状态才可以获取题目，同时若是私有赛需要判断是否已注册（比赛管理员包括超级管理员可以直接获取）
         contestValidator.validateContestAuth(contest);
 
         String lockKey = AccountConstant.CONTEST_ADD_PRINT_LOCK + userRolesVo.getUid();

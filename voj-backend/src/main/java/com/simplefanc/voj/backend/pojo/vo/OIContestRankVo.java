@@ -55,4 +55,7 @@ public class OIContestRankVo {
     @ApiModelProperty(value = "OI的题得满分后对应提交最优耗时")
     private Map<String, Integer> timeInfo;
 
+    @ApiModelProperty(value = "是否已注册")
+    private Boolean registered;
+
 }

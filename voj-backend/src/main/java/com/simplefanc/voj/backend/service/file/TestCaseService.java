@@ -16,4 +16,6 @@ public interface TestCaseService {
 
     void downloadTestcase(Long pid, HttpServletResponse response);
 
+    void downloadSingleTestCase(Long caseId, String inputData, String outputData, HttpServletResponse response);
+
 }

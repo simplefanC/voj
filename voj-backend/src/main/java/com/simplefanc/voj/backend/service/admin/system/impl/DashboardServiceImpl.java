@@ -35,7 +35,6 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public Session getRecentSession() {
-        // 需要获取一下该token对应用户的数据
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         QueryWrapper<Session> wrapper = new QueryWrapper<Session>().eq("uid", userRolesVo.getUid())
