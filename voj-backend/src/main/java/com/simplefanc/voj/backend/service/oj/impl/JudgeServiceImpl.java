@@ -19,6 +19,7 @@ import com.simplefanc.voj.backend.judge.local.JudgeDispatcher;
 import com.simplefanc.voj.backend.judge.remote.RemoteJudgeDispatcher;
 import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
 import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
+import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
 import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -38,6 +39,7 @@ import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.common.utils.IpUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -82,8 +84,7 @@ public class JudgeServiceImpl implements JudgeService {
 
     private final BeforeDispatchInitService beforeDispatchInitService;
 
-    @Value("${voj.web-config.code-visible-start-time}")
-    private Long codeVisibleStartTime;
+    private final ConfigVo configVo;
 
     /**
      * @MethodName submitProblemJudge
@@ -219,7 +220,7 @@ public class JudgeServiceImpl implements JudgeService {
         // 是否为题目管理员
         boolean problemAdmin = UserSessionUtil.isProblemAdmin();
         // 限制：后台配置的时间 之前的代码 都不能查看
-        if (!isRoot && !problemAdmin && judge.getSubmitTime().getTime() < codeVisibleStartTime) {
+        if (!isRoot && !problemAdmin && judge.getSubmitTime().getTime() < configVo.getCodeVisibleStartTime()) {
             throw new StatusNotFoundException("此提交数据当前时间无法查看！");
         }
         // 清空vj信息

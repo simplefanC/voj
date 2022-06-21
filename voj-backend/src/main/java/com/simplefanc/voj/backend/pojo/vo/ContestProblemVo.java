@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 @ApiModel(value = "比赛题目列表格式数据ContestProblemVo", description = "")
 @Data
-public class ContestProblemVo implements Serializable {
+public class ContestProblemVo implements Serializable, Comparable<ContestProblemVo>  {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
@@ -41,4 +41,11 @@ public class ContestProblemVo implements Serializable {
     @ApiModelProperty(value = "该题目的总提交数")
     private Integer total;
 
+    @Override
+    public int compareTo(ContestProblemVo cp) {
+        if (this.displayId.length() == cp.displayId.length()) {
+            return this.displayId.compareTo(cp.getDisplayId());
+        }
+        return Integer.compare(this.displayId.length(), cp.displayId.length());
+    }
 }

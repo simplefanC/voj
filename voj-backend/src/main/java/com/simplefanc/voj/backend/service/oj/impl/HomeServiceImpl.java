@@ -34,13 +34,9 @@ public class HomeServiceImpl implements HomeService {
 
     private final ContestEntityService contestEntityService;
 
-    private final ConfigVo configVo;
-
     private final AnnouncementEntityService announcementEntityService;
 
-    @Autowired
-
-    private UserRecordEntityService userRecordEntityService;
+    private final UserRecordEntityService userRecordEntityService;
 
     private final RedisUtil redisUtil;
 

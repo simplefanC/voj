@@ -195,11 +195,12 @@ public class ContestServiceImpl implements ContestService {
         // 如果比赛开启封榜
         if (contestValidator.isOpenSealRank(contest, true)) {
             return contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
-                    // TODO getAuthor参数
-                    contest.getEndTime(), contest.getSealRankTime(), isAdmin, contest.getAuthor());
+                    contest.getEndTime(), contest.getSealRankTime(), isAdmin, contest.getAuthor())
+                    .stream().sorted().collect(Collectors.toList());
         }
         return contestProblemEntityService.getContestProblemList(cid, contest.getStartTime(),
-                contest.getEndTime(), null, isAdmin, contest.getAuthor());
+                contest.getEndTime(), null, isAdmin, contest.getAuthor())
+                .stream().sorted().collect(Collectors.toList());
     }
 
     @Override

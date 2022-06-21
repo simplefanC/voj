@@ -41,6 +41,7 @@ public class JwtFilter extends AuthenticatingFilter {
 
     /**
      * 拦截请求之后，用于把令牌字符串封装成令牌对象
+     *
      * @param servletRequest
      * @param servletResponse
      * @return
@@ -58,6 +59,7 @@ public class JwtFilter extends AuthenticatingFilter {
 
     /**
      * 该方法用于处理所有应该被Shiro处理的请求
+     *
      * @param servletRequest
      * @param servletResponse
      * @return
@@ -69,17 +71,16 @@ public class JwtFilter extends AuthenticatingFilter {
         String token = request.getHeader("Authorization");
         if (StrUtil.isEmpty(token)) {
             return true;
-        } else {
-            if(!jwtUtil.verifyToken(token)){
-                return true;
-            }
-            String userId = jwtUtil.getClaimByToken(token);
-            if (!redisUtil.hasKey(TOKEN_REFRESH + userId) && redisUtil.hasKey(TOKEN_KEY + userId)) {
-                // 过了需更新token时间，但是还未过期，则进行token刷新
-                HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-                HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-                this.refreshToken(httpRequest, httpResponse, userId);
-            }
+        }
+        if (!jwtUtil.verifyToken(token)) {
+            return true;
+        }
+        String userId = jwtUtil.getClaimByToken(token);
+        if (!redisUtil.hasKey(TOKEN_REFRESH + userId) && redisUtil.hasKey(TOKEN_KEY + userId)) {
+            // 过了需更新token时间，但是还未过期，则进行token刷新
+            HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
+            HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+            this.refreshToken(httpRequest, httpResponse, userId);
         }
         // 执行自动登录
         return executeLogin(servletRequest, servletResponse);
@@ -117,19 +118,19 @@ public class JwtFilter extends AuthenticatingFilter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         try {
-            // 处理登录失败的异常
-            Throwable throwable = e.getCause() == null ? e : e.getCause();
-            CommonResult<Void> result = CommonResult.errorResponse(throwable.getMessage(), ResultStatus.ACCESS_DENIED);
-            String json = JSONUtil.toJsonStr(result);
+            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpResponse.setContentType("application/json;charset=utf-8");
             // 让前端可用访问
             httpResponse.setHeader("Access-Control-Expose-Headers", "Refresh-Token,Authorization,Url-Type");
             httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
             // 为了前端能区别请求来源
             httpResponse.setHeader("Url-Type", httpRequest.getHeader("Url-Type"));
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.getWriter().print(json);
-        } catch (IOException e1) {
+
+            // 处理登录失败的异常
+            Throwable throwable = e.getCause() == null ? e : e.getCause();
+            CommonResult<Void> result = CommonResult.errorResponse(throwable.getMessage(), ResultStatus.ACCESS_DENIED);
+            httpResponse.getWriter().print(JSONUtil.toJsonStr(result));
+        } catch (IOException exception) {
         }
         return false;
     }

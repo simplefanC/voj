@@ -50,6 +50,6 @@
         </where>
         ) as ac
         from contest_problem cp,problem p
-        where cp.cid = #{cid} and cp.pid=p.id and p.auth!=2 order by cp.display_id asc
+        where cp.cid = #{cid} and cp.pid=p.id and p.auth!=2
     </select>
 </mapper>

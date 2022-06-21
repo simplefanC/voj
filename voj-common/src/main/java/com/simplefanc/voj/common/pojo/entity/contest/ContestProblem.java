@@ -25,7 +25,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value = "ContestProblem对象", description = "")
-public class ContestProblem implements Serializable {
+public class ContestProblem implements Serializable, Comparable<ContestProblem> {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,4 +53,11 @@ public class ContestProblem implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date gmtModified;
 
+    @Override
+    public int compareTo(ContestProblem cp) {
+        if (this.displayId.length() == cp.displayId.length()) {
+            return this.displayId.compareTo(cp.getDisplayId());
+        }
+        return Integer.compare(this.displayId.length(), cp.displayId.length());
+    }
 }

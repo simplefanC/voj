@@ -2,6 +2,7 @@ package com.simplefanc.voj.backend.config;
 
 import com.simplefanc.voj.backend.shiro.AccountRealm;
 import com.simplefanc.voj.backend.shiro.JwtFilter;
+import lombok.RequiredArgsConstructor;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
 import org.apache.shiro.mgt.SecurityManager;
@@ -28,10 +29,10 @@ import java.util.Map;
  * shiro启用注解拦截控制器
  */
 @Configuration
+@RequiredArgsConstructor
 public class ShiroConfig {
 
-    @Autowired
-    JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
 
     @Bean
     public static DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator() {
@@ -62,6 +63,20 @@ public class ShiroConfig {
         return securityManager;
     }
 
+    @Bean("shiroFilterFactoryBean")
+    public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager,
+                                                         ShiroFilterChainDefinition shiroFilterChainDefinition) {
+        ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
+        shiroFilter.setSecurityManager(securityManager);
+
+        Map<String, Filter> filters = new HashMap<>();
+        filters.put("jwt", jwtFilter);
+        shiroFilter.setFilters(filters);
+
+        shiroFilter.setFilterChainDefinitionMap(shiroFilterChainDefinition.getFilterChainMap());
+        return shiroFilter;
+    }
+
     @Bean
     public ShiroFilterChainDefinition shiroFilterChainDefinition() {
         DefaultShiroFilterChainDefinition chainDefinition = new DefaultShiroFilterChainDefinition();
@@ -72,20 +87,7 @@ public class ShiroConfig {
         return chainDefinition;
     }
 
-    @Bean("shiroFilterFactoryBean")
-    public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager,
-                                                         ShiroFilterChainDefinition shiroFilterChainDefinition) {
-        ShiroFilterFactoryBean shiroFilter = new ShiroFilterFactoryBean();
-        shiroFilter.setSecurityManager(securityManager);
-        Map<String, Filter> filters = new HashMap<>();
-        filters.put("jwt", jwtFilter);
-        shiroFilter.setFilters(filters);
-        Map<String, String> filterMap = shiroFilterChainDefinition.getFilterChainMap();
-        shiroFilter.setFilterChainDefinitionMap(filterMap);
-        return shiroFilter;
-    }
-
-    // 开启注解代理（默认好像已经开启，可以不要）
+    // 开启注解代理
     @Bean
     public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(SecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();

@@ -1,5 +1,6 @@
 package com.simplefanc.voj.backend.common.utils;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.json.JSONUtil;
@@ -11,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,16 +24,11 @@ import java.util.Map;
 @UtilityClass
 public class DownloadFileUtil {
     public void download(HttpServletResponse response, String filePath, String fileName, String errMsg) {
-        // 将zip变成io流返回给前端
-        FileReader fileReader = new FileReader(filePath);
-        // 放到缓冲流里面
-        BufferedInputStream bins = new BufferedInputStream(fileReader.getInputStream());
-        // 获取文件输出IO流
-        OutputStream outs = null;
-        BufferedOutputStream bouts = null;
-        try {
-            outs = response.getOutputStream();
-            bouts = new BufferedOutputStream(outs);
+        try(// 放到缓冲流里面
+            BufferedInputStream bins = new BufferedInputStream(new FileReader(filePath).getInputStream());
+            // 获取文件输出IO流
+            BufferedOutputStream bouts = new BufferedOutputStream(response.getOutputStream())
+        ) {
             response.setContentType("application/x-download");
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, CharsetUtil.UTF_8));
             int bytesRead = 0;
@@ -56,18 +51,6 @@ public class DownloadFileUtil {
                 response.getWriter().println(JSONUtil.toJsonStr(map));
             } catch (IOException ioException) {
                 ioException.printStackTrace();
-            }
-        } finally {
-            try {
-                bins.close();
-                if (outs != null) {
-                    outs.close();
-                }
-                if (bouts != null) {
-                    bouts.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }

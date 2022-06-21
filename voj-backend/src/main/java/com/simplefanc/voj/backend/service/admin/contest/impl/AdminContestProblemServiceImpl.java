@@ -62,18 +62,16 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             limit = 10;
         IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据cid在ContestProblem表中查询到对应pid集合
-        QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
-        contestProblemQueryWrapper.eq("cid", cid);
-        List<Long> pidList = new LinkedList<>();
-
-        List<ContestProblem> contestProblemList = contestProblemEntityService.list(contestProblemQueryWrapper);
         HashMap<Long, ContestProblem> contestProblemMap = new HashMap<>();
-        contestProblemList.forEach(contestProblem -> {
-            contestProblemMap.put(contestProblem.getPid(), contestProblem);
-            pidList.add(contestProblem.getPid());
-        });
-        // TODO put 键
-        HashMap<String, Object> contestProblem = new HashMap<>();
+        List<Long> pidList = new LinkedList<>();
+        contestProblemEntityService.lambdaQuery()
+                .eq(ContestProblem::getCid, cid)
+                .list()
+                .forEach(contestProblem -> {
+                    contestProblemMap.put(contestProblem.getPid(), contestProblem);
+                    pidList.add(contestProblem.getPid());
+                });
+
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
         // 必备条件 隐藏的不可取来做比赛题目
         if (problemType != null) {
@@ -81,6 +79,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                     // vj题目不限制赛制
                     .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
                     // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
+                    // TODO 魔法
                     .ne("auth", 2);
         }
 
@@ -119,22 +118,14 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                     .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
                         ContestProblem x = contestProblemMap.get(a);
                         ContestProblem y = contestProblemMap.get(b);
-                        if (x == null && y != null) {
-                            return 1;
-                        } else if (x != null && y == null) {
-                            return -1;
-                        } else if (x == null) {
-                            return -1;
-                        } else {
-                            return x.getDisplayId().compareTo(y.getDisplayId());
-                        }
+                        return x.compareTo(y);
                     })).collect(Collectors.toList());
             problemListPage.setRecords(sortedProblemList);
         }
 
+        HashMap<String, Object> contestProblem = new HashMap<>();
         contestProblem.put("problemList", problemListPage);
         contestProblem.put("contestProblemMap", contestProblemMap);
-
         return contestProblem;
     }
 
