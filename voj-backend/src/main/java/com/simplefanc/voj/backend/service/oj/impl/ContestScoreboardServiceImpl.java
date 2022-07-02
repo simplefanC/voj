@@ -112,14 +112,14 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
 
             // 获取ACM比赛排行榜外榜
-            return contestRankService.getACMContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
+            return contestRankService.getAcmContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
                     !forceRefresh,
                     // 默认15s缓存
                     15L);
 
         } else {
             // 获取OI比赛排行榜外榜
-            return contestRankService.getOIContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
+            return contestRankService.getOiContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
                     !forceRefresh,
                     // 默认15s缓存
                     15L);

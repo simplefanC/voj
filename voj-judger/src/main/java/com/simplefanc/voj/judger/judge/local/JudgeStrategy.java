@@ -231,10 +231,10 @@ public class JudgeStrategy {
                                                      Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
         HashMap<String, Object> result = new HashMap<>();
         // 用时和内存占用保存为多个测试点中最长的
-        allTestCaseResultList.stream().max(Comparator.comparing(t -> t.getTime()))
+        allTestCaseResultList.stream().max(Comparator.comparing(JudgeCase::getTime))
                 .ifPresent(t -> result.put("time", t.getTime()));
 
-        allTestCaseResultList.stream().max(Comparator.comparing(t -> t.getMemory()))
+        allTestCaseResultList.stream().max(Comparator.comparing(JudgeCase::getMemory))
                 .ifPresent(t -> result.put("memory", t.getMemory()));
 
         // OI题目计算得分

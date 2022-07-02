@@ -11,7 +11,7 @@ import com.simplefanc.voj.common.pojo.entity.user.UserRole;
  * </p>
  *
  * @Author: chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 public interface UserRoleEntityService extends IService<UserRole> {
 

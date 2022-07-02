@@ -387,14 +387,21 @@ public class ContestServiceImpl implements ContestService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
             // ACM比赛
             // 进行排行榜计算以及排名分页
-            return contestRankService.getContestACMRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
+            return contestRankService.getContestAcmRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
                     concernedList, contest, currentPage, limit);
 
         } else {
             // OI比赛
-            return contestRankService.getContestOIRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
+            return contestRankService.getContestOiRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
                     concernedList, contest, currentPage, limit);
         }
+    }
+
+    @Override
+    public Set<String> getContestAdminUidList(Contest contest) {
+        List<String> contestAdminUidList = userInfoEntityService.getSuperAdminUidList();
+        contestAdminUidList.add(contest.getUid());
+        return new HashSet<>(contestAdminUidList);
     }
 
     @Override

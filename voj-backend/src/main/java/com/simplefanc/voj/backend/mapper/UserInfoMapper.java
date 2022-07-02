@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -14,7 +15,7 @@ import java.util.List;
  * </p>
  *
  * @Author: chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 @Mapper
 public interface UserInfoMapper extends BaseMapper<UserInfo> {

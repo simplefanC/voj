@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @Author: chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 @Service
 public class RoleEntityServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleEntityService {

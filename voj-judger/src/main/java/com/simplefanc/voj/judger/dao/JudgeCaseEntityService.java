@@ -9,7 +9,7 @@ import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
  * </p>
  *
  * @author chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 public interface JudgeCaseEntityService extends IService<JudgeCase> {
 

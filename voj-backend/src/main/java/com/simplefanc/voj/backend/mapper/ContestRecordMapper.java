@@ -15,7 +15,7 @@ import java.util.List;
  * </p>
  *
  * @Author: chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 @Mapper
 public interface ContestRecordMapper extends BaseMapper<ContestRecord> {

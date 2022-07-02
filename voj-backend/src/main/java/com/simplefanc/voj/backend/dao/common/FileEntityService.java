@@ -15,12 +15,4 @@ public interface FileEntityService extends IService<File> {
 
     List<File> queryCarouselFileList();
 
-    List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIdList, Boolean isACM);
-
-    List<List<Object>> changeACMContestRankToExcelRowList(List<ACMContestRankVo> acmContestRankVoList,
-                                                          List<String> contestProblemDisplayIdList, String rankShowName);
-
-    List<List<Object>> changeOIContestRankToExcelRowList(List<OIContestRankVo> oiContestRankVoList,
-                                                         List<String> contestProblemDisplayIdList, String rankShowName);
-
 }

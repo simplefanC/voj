@@ -5,12 +5,13 @@ import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
 import com.simplefanc.voj.backend.common.utils.ExcelUtil;
-import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
@@ -18,9 +19,11 @@ import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
+import com.simplefanc.voj.backend.pojo.vo.ExcelIpVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.backend.service.file.ContestFileService;
 import com.simplefanc.voj.backend.service.oj.ContestCalculateRankService;
+import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -65,7 +68,7 @@ public class ContestFileServiceImpl implements ContestFileService {
 
     private final ContestPrintEntityService contestPrintEntityService;
 
-    private final FileEntityService fileEntityService;
+    private final ContestService contestService;
 
     private final JudgeEntityService judgeEntityService;
 
@@ -149,32 +152,57 @@ public class ContestFileServiceImpl implements ContestFileService {
 
         // 检查是否开启封榜模式
         boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
-        final String fileName = "contest_" + contest.getId() + "_rank";
-
-        ExcelUtil.wrapExcelResponse(response, fileName);
 
         // 获取题目displayID列表
         QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
         contestProblemQueryWrapper.eq("cid", contest.getId()).select("display_id").orderByAsc("display_id");
-        List<String> contestProblemDisplayIdList = contestProblemEntityService.list(contestProblemQueryWrapper).stream()
-                .map(ContestProblem::getDisplayId).collect(Collectors.toList());
+        List<String> contestProblemDisplayIdList = contestProblemEntityService.list(contestProblemQueryWrapper)
+                .stream()
+                .sorted()
+                .map(ContestProblem::getDisplayId)
+                .collect(Collectors.toList());
 
+        List<List<String>> head;
+        List data;
         // ACM比赛
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-            List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calculateACMRank(isOpenSealRank,
+            List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calculateAcmRank(isOpenSealRank,
                     removeStar, contest, null, null);
-            EasyExcel.write(response.getOutputStream())
-                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIdList, true)).sheet("rank")
-                    .doWrite(fileEntityService.changeACMContestRankToExcelRowList(acmContestRankVoList,
-                            contestProblemDisplayIdList, contest.getRankShowName()));
+            head = getContestRankExcelHead(contestProblemDisplayIdList, true);
+            data = changeACMContestRankToExcelRowList(acmContestRankVoList,
+                            contestProblemDisplayIdList, contest.getRankShowName());
         } else {
-            List<OIContestRankVo> oiContestRankVoList = contestCalculateRankService.calculateOIRank(isOpenSealRank,
+            List<OIContestRankVo> oiContestRankVoList = contestCalculateRankService.calculateOiRank(isOpenSealRank,
                     removeStar, contest, null, null);
-            EasyExcel.write(response.getOutputStream())
-                    .head(fileEntityService.getContestRankExcelHead(contestProblemDisplayIdList, false)).sheet("rank")
-                    .doWrite(fileEntityService.changeOIContestRankToExcelRowList(oiContestRankVoList,
-                            contestProblemDisplayIdList, contest.getRankShowName()));
+            head = getContestRankExcelHead(contestProblemDisplayIdList, false);
+            data = changeOIContestRankToExcelRowList(oiContestRankVoList, contestProblemDisplayIdList, contest.getRankShowName());
         }
+
+        final String fileName = "contest_" + contest.getId() + "_rank";
+        ExcelUtil.wrapExcelResponse(response, fileName);
+        final ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
+        WriteSheet rankSheet = EasyExcel.writerSheet(0, "rank").head(head).build();
+        WriteSheet ipSheet = EasyExcel.writerSheet(1, "ip").head(ExcelIpVo.class).build();
+        excelWriter.write(data, rankSheet)
+                .write(getExcelIpVo(contest), ipSheet);
+        excelWriter.finish();
+    }
+
+    private List<ExcelIpVo> getExcelIpVo(Contest contest) {
+        final Set<String> contestAdminUidList = contestService.getContestAdminUidList(contest);
+        final List<Judge> judgeList = judgeEntityService.list(new QueryWrapper<Judge>().select("DISTINCT username, ip")
+                .eq("cid", contest.getId())
+                .between("submit_time", contest.getStartTime(), contest.getEndTime()));
+
+        final Map<String, String> userNameIpMap = judgeList.stream()
+                .filter(judge -> !contestAdminUidList.contains(judge.getUid()))
+                .collect(Collectors.groupingBy(Judge::getUsername,
+                        Collectors.mapping(Judge::getIp,
+                                Collectors.joining(" & "))));
+        return userNameIpMap.entrySet().stream()
+                .map(entry -> new ExcelIpVo(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(ExcelIpVo::getUsername))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -334,6 +362,145 @@ public class ContestFileServiceImpl implements ContestFileService {
         }
 
         DownloadFileUtil.download(response, filePath, filename, "下载比赛打印文本文件失败，请重新尝试！");
+    }
+
+    public List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIdList, Boolean isACM) {
+        List<List<String>> headList = new LinkedList<>();
+        List<String> head = new LinkedList<>();
+        head.add("No");
+
+        List<String> head0 = new LinkedList<>();
+        head0.add("Rank");
+
+        List<String> head1 = new LinkedList<>();
+        head1.add("Username");
+//        List<String> head2 = new LinkedList<>();
+//        head2.add("ShowName");
+        List<String> head3 = new LinkedList<>();
+        head3.add("Real Name");
+        List<String> head4 = new LinkedList<>();
+        head4.add("School");
+
+        headList.add(head);
+        headList.add(head0);
+        headList.add(head1);
+//        headList.add(head2);
+        headList.add(head3);
+        headList.add(head4);
+
+        List<String> head5 = new LinkedList<>();
+        if (isACM) {
+            head5.add("AC");
+            List<String> head6 = new LinkedList<>();
+            head6.add("Total Submission");
+            List<String> head7 = new LinkedList<>();
+            head7.add("Total Penalty Time");
+            headList.add(head5);
+            headList.add(head6);
+            headList.add(head7);
+        } else {
+            head5.add("Total Score");
+            headList.add(head5);
+        }
+
+        // 添加题目头
+        for (String displayId : contestProblemDisplayIdList) {
+            List<String> tmp = new LinkedList<>();
+            tmp.add(displayId);
+            headList.add(tmp);
+        }
+        return headList;
+    }
+
+    public List<List<Object>> changeACMContestRankToExcelRowList(List<ACMContestRankVo> acmContestRankVoList,
+                                                                 List<String> contestProblemDisplayIdList, String rankShowName) {
+        List<List<Object>> allRowDataList = new LinkedList<>();
+        for (ACMContestRankVo acmContestRankVo : acmContestRankVoList) {
+            List<Object> rowData = new LinkedList<>();
+            rowData.add(acmContestRankVo.getSeq());
+            rowData.add(acmContestRankVo.getRank() == -1 ? "*" : acmContestRankVo.getRank().toString());
+            rowData.add(acmContestRankVo.getUsername());
+//            if ("username".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getUsername());
+//            } else if ("realname".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getRealname());
+//            } else if ("nickname".equals(rankShowName)) {
+//                rowData.add(acmContestRankVo.getNickname());
+//            } else {
+//                rowData.add("");
+//            }
+            rowData.add(acmContestRankVo.getRealname());
+            rowData.add(acmContestRankVo.getSchool());
+            rowData.add(acmContestRankVo.getAc());
+            rowData.add(acmContestRankVo.getTotal());
+            rowData.add(acmContestRankVo.getTotalTime());
+            HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVo.getSubmissionInfo();
+            for (String displayId : contestProblemDisplayIdList) {
+                HashMap<String, Object> problemInfo = submissionInfo.getOrDefault(displayId, null);
+                // 如果是有提交记录的
+                if (problemInfo != null) {
+                    boolean isAC = (boolean) problemInfo.getOrDefault("isAC", false);
+                    String info = "";
+                    int errorNum = (int) problemInfo.getOrDefault("errorNum", 0);
+                    int tryNum = (int) problemInfo.getOrDefault("tryNum", 0);
+                    if (isAC) {
+                        if (errorNum == 0) {
+                            info = "+(1)";
+                        } else {
+                            info = "-(" + (errorNum + 1) + ")";
+                        }
+                    } else {
+                        if (tryNum != 0 && errorNum != 0) {
+                            info = "-(" + errorNum + "+" + tryNum + ")";
+                        } else if (errorNum != 0) {
+                            info = "-(" + errorNum + ")";
+                        } else if (tryNum != 0) {
+                            info = "?(" + tryNum + ")";
+                        }
+                    }
+                    rowData.add(info);
+                } else {
+                    rowData.add("");
+                }
+            }
+            allRowDataList.add(rowData);
+        }
+        return allRowDataList;
+    }
+
+    public List<List<Object>> changeOIContestRankToExcelRowList(List<OIContestRankVo> oiContestRankVoList,
+                                                                List<String> contestProblemDisplayIdList, String rankShowName) {
+        List<List<Object>> allRowDataList = new LinkedList<>();
+        for (OIContestRankVo oiContestRankVo : oiContestRankVoList) {
+            List<Object> rowData = new LinkedList<>();
+            rowData.add(oiContestRankVo.getSeq());
+            rowData.add(oiContestRankVo.getRank() == -1 ? "*" : oiContestRankVo.getRank().toString());
+            rowData.add(oiContestRankVo.getUsername());
+//            if ("username".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getUsername());
+//            } else if ("realname".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getRealname());
+//            } else if ("nickname".equals(rankShowName)) {
+//                rowData.add(oiContestRankVo.getNickname());
+//            } else {
+//                rowData.add("");
+//            }
+            rowData.add(oiContestRankVo.getRealname());
+            rowData.add(oiContestRankVo.getSchool());
+            rowData.add(oiContestRankVo.getTotalScore());
+            Map<String, Integer> submissionInfo = oiContestRankVo.getSubmissionInfo();
+            for (String displayId : contestProblemDisplayIdList) {
+                Integer score = submissionInfo.getOrDefault(displayId, null);
+                // 如果是有提交记录的就写最后一次提交的分数，没有的就写空
+                if (score != null) {
+                    rowData.add(score);
+                } else {
+                    rowData.add("");
+                }
+            }
+            allRowDataList.add(rowData);
+        }
+        return allRowDataList;
     }
 
 }

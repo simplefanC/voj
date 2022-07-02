@@ -36,7 +36,7 @@ public class ContestFileController {
     @GetMapping("/download-contest-ac-submission")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public void downloadContestACSubmission(@RequestParam("cid") Long cid,
+    public void downloadContestAcSubmission(@RequestParam("cid") Long cid,
                                             @RequestParam(value = "excludeAdmin", defaultValue = "false") Boolean excludeAdmin,
                                             @RequestParam(value = "splitType", defaultValue = "user") String splitType, HttpServletResponse response) {
 

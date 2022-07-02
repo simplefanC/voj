@@ -20,7 +20,7 @@ import java.util.List;
  * </p>
  *
  * @author chenfan
- * @since 2020-10-23
+ * @since 2021-10-23
  */
 @Service
 @RequiredArgsConstructor
@@ -56,7 +56,9 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
         updateWrapper.set("use_time", judge.getTime());
         // submit_id一定只有一个
-        updateWrapper.eq("submit_id", judge.getSubmitId()).eq("cid", judge.getCid()).eq("uid", judge.getUid());
+        updateWrapper.eq("submit_id", judge.getSubmitId())
+                .eq("cid", judge.getCid())
+                .eq("uid", judge.getUid());
         boolean result = contestRecordMapper.update(null, updateWrapper) > 0;
         if (!result) {
             tryAgainUpdate(updateWrapper);

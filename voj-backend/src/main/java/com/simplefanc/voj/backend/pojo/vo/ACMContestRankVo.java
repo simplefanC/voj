@@ -14,6 +14,8 @@ import java.util.HashMap;
 @Data
 @Accessors(chain = true)
 public class ACMContestRankVo {
+    @ApiModelProperty(value = "序号")
+    private Integer seq;
 
     @ApiModelProperty(value = "排名,排名为-1则为打星队伍")
     private Integer rank;
@@ -51,4 +53,6 @@ public class ACMContestRankVo {
     @ApiModelProperty(value = "有提交的题的提交详情")
     private HashMap<String, HashMap<String, Object>> submissionInfo;
 
+    @ApiModelProperty(value = "是否已注册")
+    private Boolean registered;
 }

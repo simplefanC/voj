@@ -7,8 +7,10 @@ import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
 import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
+import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Author: chenfan
@@ -35,6 +37,8 @@ public interface ContestService {
                                             Boolean completeProblemId);
 
     IPage getContestRank(ContestRankDto contestRankDto);
+
+    Set<String> getContestAdminUidList(Contest contest);
 
     IPage<AnnouncementVo> getContestAnnouncement(Long cid, Integer limit, Integer currentPage);
 
