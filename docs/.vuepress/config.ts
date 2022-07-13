@@ -1,9 +1,11 @@
-import { defineUserConfig } from "vuepress";
+import {defineUserConfig} from "vuepress";
 import theme from "./theme";
+
+// const { searchPlugin } = require('@vuepress/plugin-search')
 
 export default defineUserConfig({
   lang: "zh-CN",
-  title: "",
+  title: "VOJ",
   description: "Virtual Online Judge",
 
   base: "/",
@@ -18,5 +20,21 @@ export default defineUserConfig({
     ],
   ],
 
+  plugins: [
+    // searchPlugin({
+    //   // https://v2.vuepress.vuejs.org/zh/reference/plugin/search.html
+    //   // 排除首页
+    //   isSearchable: (page) => page.path !== "/",
+    //   maxSuggestions: 10,
+    //   hotKeys: ["s", "/"],
+    //   // 用于在页面的搜索索引中添加额外字段
+    //   getExtraFields: () => [],
+    //   locales: {
+    //     "/": {
+    //       placeholder: "搜索",
+    //     },
+    //   },
+    // }),
+  ],
   theme,
 });

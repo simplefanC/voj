@@ -1,4 +1,4 @@
-# 单体部署⑤——后端部署
+# 后端部署
 
 ## 前言
 
@@ -8,13 +8,13 @@
 git clone https://github.com/simplefanc/voj-deploy.git && cd voj-deploy/src/backend
 ```
 
-当前文件夹为打包`voj-backend`镜像的相关文件，将这些文件复制到同一个文件夹内，**然后打包[DataBackup](https://github.com/simplefanc/voj/tree/master/voj-springboot/DataBackup)（SpringBoot项目）成jar包也放到当前文件夹**，之后执行以下命令进行打包成镜像
+当前文件夹为打包`voj-backend`镜像的相关文件，将这些文件复制到同一个文件夹内，**然后打包[voj-backend](https://github.com/simplefanc/voj-springboot/tree/main/voj-backend)（SpringBoot项目）成jar包也放到当前文件夹**，之后执行以下命令进行打包成镜像
 
 ```shell
 docker build -t voj-backend .
 ```
 
-**项目依赖于voj-redis，voj-nacos，voj-mysql等镜像成功启动，以及根据前面三个镜像的配置修改环境参数才可正常启动**
+**项目依赖于`voj-redis`，`voj-nacos`，`voj-mysql`等镜像成功启动，以及根据前面三个镜像的配置修改环境参数才可正常启动**
 
 docker-compose 启动
 
@@ -22,7 +22,7 @@ docker-compose 启动
 version: "3"
 services:
   voj-backend:
-#    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_backend
+#    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_backend
 	image: voj-backend
     container_name: voj-backend
     restart: always
@@ -58,18 +58,6 @@ services:
       - REDIS_HOST=172.20.0.2 # voj-redis的host
       - REDIS_PORT=6379 # voj-redis的port
       - REDIS_PASSWORD=voj123456 #voj-redis的密码
-      - OPEN_REMOTE_JUDGE=true # 是否开启对hdu和codeforces的虚拟判题
-      # 开启虚拟判题请提供对应oj的账号密码 格式为 
-      # username1,username2,...
-      # password1,password2,...
-      - HDU_ACCOUNT_USERNAME_LIST=
-      - HDU_ACCOUNT_PASSWORD_LIST=
-      - CF_ACCOUNT_USERNAME_LIST=
-      - CF_ACCOUNT_USERNAME_LIST=
-      - ATCODER_ACCOUNT_USERNAME_LIST=
-	  - ATCODER_ACCOUNT_PASSWORD_LIST=
-      - SPOJ_ACCOUNT_USERNAME_LIST=
-      - SPOJ_ACCOUNT_PASSWORD_LIST=
     ports:
       - "6688:6688"
     networks:
@@ -90,7 +78,7 @@ services:
     command: redis-server --requirepass "voj123456" --appendonly yes
         
   voj-mysql:
-    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_database
+    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_database
     container_name: voj-mysql
     restart: always
     volumes:

@@ -1,14 +1,16 @@
 import {sidebar} from "vuepress-theme-hope";
 
 export default sidebar([
-  "/",
+  // "/",
   // "/home",
   // "/slide",
   {
-    text: '开始介绍',
+    text: '序章',
     collapsable: true,
+    prefix: "/introduction/",
     children: [
-      'introducition'
+      '',
+      'architecture'
     ]
   },
   {
@@ -20,7 +22,7 @@ export default sidebar([
       'docker',
       'open-https',
       'multi-judgeserver',
-      'update',
+      // 'update',
       'how-to-backup'
     ]
   },
@@ -30,7 +32,7 @@ export default sidebar([
     prefix: "/monomer/",
     children: [
       'mysql',
-      'mysql-checker',
+      // 'mysql-checker',
       'redis',
       'nacos',
       'backend',
@@ -45,7 +47,9 @@ export default sidebar([
     prefix: "/develop/",
     children: [
       'db',
-      'sandbox'
+      'judge_dispatcher',
+      'sandbox',
+      'update-fe'
     ]
   },
   {
@@ -58,14 +62,13 @@ export default sidebar([
       'testcase',
       'training',
       'contest',
-      'group',
+      // 'group',
       'import-user',
       'admin-user',
       'notice-announcement',
-      'discussion-admin',
-      'update-fe',
-      'custom-difficulty',
-      'close-free-cdn'
+      'discussion-admin'
+      // 'custom-difficulty',
+      // 'close-free-cdn'
     ]
   },
   // {

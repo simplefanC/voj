@@ -1,4 +1,4 @@
-# 单体部署②——MySQL更新工具
+# MySQL更新工具
 
 :::tip
 本镜像主要是为了跟随VOJ主仓库更新，使用固定镜像来检查是否有更新，以达到MySQL数据库的平滑升级
@@ -9,7 +9,7 @@
 
 ```yaml
   voj-mysql-checker:
-    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_database_checker
+    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_database_checker
     container_name: voj-mysql-checker
     depends_on:
       - voj-mysql
@@ -39,7 +39,7 @@ docker-compose启动
 version: "3"
 services:
    voj-mysql-checker:
-    #image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_database_checker
+    #image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_database_checker
     image: voj-mysql-checker # 自己的镜像名称
     container_name: voj-mysql-checker
     depends_on:

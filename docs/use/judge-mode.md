@@ -2,7 +2,7 @@
 
 ### 一、普通判题
 
-**普通模式是程序在线评测平台(OJ)通用的判题模式**，主要的实现逻辑步骤如下：
+**普通模式是程序在线评测系统(OJ)通用的判题模式**，主要的实现逻辑步骤如下：
 
 :::tip
 
@@ -194,8 +194,6 @@ int main(int argc, char* argv[])
 :::
 
 需要给选手的程序添加交互库，在后台的题目管理可以选择添加。
-
-![函数交互题](https://img-blog.csdnimg.cn/e6f17df56f26488c895944713a80e9ed.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)
 
 **交互库**：提供写好的方法给选手调用
 

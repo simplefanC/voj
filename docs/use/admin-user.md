@@ -45,14 +45,4 @@
 
 1. 进入后台管理
 
-
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210614144542595.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzg1MzA5Nw==,size_16,color_FFFFFF,t_70)
-
-
-
 2. 点击编辑后，可修改用户角色
-
-
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210614144409579.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzg1MzA5Nw==,size_16,color_FFFFFF,t_70)

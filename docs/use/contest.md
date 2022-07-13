@@ -37,11 +37,11 @@
   :::info
 
   1. 封榜期间，**超级管理员与比赛创建者**不受影响，正常可查看题目统计数据，提交数据等，排行榜需自行开启强制刷新，同时提交结果可以及时看到评测结果，但不会纳入排行榜！
-  2. 封榜期间：**普通用户与非比赛创建者**（包括其它管理员角色），看不到自己和其它所有人**封榜后**的提交结果，不能看到题目的统计情况，排行榜保持**封榜前**的排名数据。
-   :::
+  2. 封榜期间：**普通用户与非比赛创建者**（包括其它管理员角色），可以及时看到自己的提交结果，但不可看到别人**封榜后**的提交，不能看到题目的统计情况，排行榜保持**封榜前**的排名数据。
+      :::
 
   **比赛一结束，默认所有数据变成正常显示，但后台可以设置比赛结束继续封榜！**
-  
+
 :::warning
 注意：管理员可以选择强制刷新，查看实时的排行榜数据！通过`Force Update`来强制刷新榜，且刷新后的榜仅对管理者可见。
 :::
@@ -58,10 +58,6 @@
 
 **后台比赛题目列表管理页面如下**
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2a8354a553d547d786e37d41050d3b95.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)
-
 ## 比赛管理
 
 **后台比赛管理页面如下**
-
-![比赛管理](https://img-blog.csdnimg.cn/da52c1fe08e34be6be79fbe5c2b758d2.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)

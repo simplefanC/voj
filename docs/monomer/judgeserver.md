@@ -1,4 +1,4 @@
-# 单体部署⑥——判题服务部署
+# 判题服务部署
 
 > VOJ使用安全沙盒的是开源的[go-judge](https://github.com/criyle/go-judge)，具体使用可看该项目文档。
 
@@ -6,12 +6,12 @@
 
 ## 一、常规部署
 
-1. [下载本项目](https://github.com/simplefanc/voj/tree/master/voj-springboot)，git clone或者download zip
+1. [下载本项目](https://github.com/simplefanc/voj-springboot)，git clone或者download zip
 
-2. 修改本项目路径下`/voj-springboot/JudgeServer/src/main/resources/bootstrap.yml`的相关配置
+2. 修改本项目路径下`voj-judger`模块的`application.yml`的相关配置
 
    ```yaml
-   voj-judge-server:
+   voj-judgr:
      max-task-num: -1 # -1表示最大并行任务数为cpu核心数+1
      ip: 127.0.0.1 # -1表示使用默认本地ipv4，若是部署其它服务器，务必使用公网ip
      port: 8088  # 端口号
@@ -28,7 +28,7 @@
    mvn clean package -Dmaven.test.skip=true
    ```
 
-4. 打包成功后在路径`/voj-springboot/JudgeServer/target/` 文件夹内找到类似JudgeServer.jar的jar包
+4. 打包成功后在路径`/voj-springboot/voj-judger/target/` 文件夹内找到类似`voj-judger.jar`的jar包
 
 5. 在需要部署判题服务的云服务器上创建文件夹来存储jar包和沙盒文件,同时还要判题过程中需要的文件夹
 
@@ -45,7 +45,7 @@
    mkdir -p /voj/testcase
    ```
 
-6. 将`JudgeServer.jar`与`/judger`文件夹内或的[判题沙盒](https://github.com/simplefanc/voj/tree/master/judger)的Judger-SandBox文件（go打包的linux系统下可执行文件）一起上传到云服务器的`/voj/server`
+6. 将`JudgeServer.jar`与[判题沙盒](https://github.com/criyle/go-judge/releases)的可执行文件一起上传到云服务器的`/voj/server`
 
 7. 同时在该文件夹内创建一个JudgeServer.json的文件，JVM的配置可以直接配置，内容如下：
 
@@ -133,7 +133,7 @@
 
 10. 使用了第5步的就可以启动判题服务和判题安全沙盒了，操作如下：
 
-   - 启动沙盒，确保不要出错，不然无法进行自身题目判题（远程虚拟判题vj无影响）,Judger-SandBox为文件名，即是刚刚上传的。
+   - 启动沙盒，确保不要出错，不然无法进行自身题目判题（远程虚拟判题vj无影响），Judger-SandBox为文件名，即是刚刚上传的。
 
      ```shell
      pm2 start Judger-SandBox
@@ -155,20 +155,20 @@
 
 
 
-## 二、docker部署
+## 二、Docker部署
 
 ### 前言
 
 下载打包所需文件
 
 ```shell
-git clone https://github.com/simplefanc/voj-deploy.git && cd voj-deploy/src/judgeserver
+git clone https://github.com/simplefanc/voj-deploy.git && cd voj-deploy/src/judger
 ```
 
-当前文件夹为打包`voj-judgeserver`镜像的相关文件，将这些文件复制到同一个文件夹内，**然后打包[JudgeServer](https://github.com/simplefanc/voj/tree/master/voj-springboot/JudgeServer)（SpringBoot项目）成jar包也放到当前文件夹**，之后执行以下命令进行打包成镜像.
+当前文件夹为打包`voj-judger`镜像的相关文件，将这些文件复制到同一个文件夹内，**然后打包[voj-judger](https://github.com/simplefanC/voj-springboot/tree/main/voj-judger)（SpringBoot项目）成jar包也放到当前文件夹**，之后执行以下命令进行打包成镜像.
 
 ```shell
-docker build -t voj-judgeserver .
+docker build -t voj-judger .
 ```
 
 docker-compose 启动
@@ -177,10 +177,10 @@ docker-compose 启动
 version: "3"
 services:
 
-  voj-judgeserver:
-#    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_judgeserver
-	image: voj-judgeserver
-    container_name: voj-judgeserver
+  voj-judger:
+#    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_judger
+	image: voj-judger
+    container_name: voj-judger
     restart: always
     volumes:
       - ./judge/test_case:/judge/test_case
@@ -217,7 +217,7 @@ go语言写的判题安全沙盒，基于cgroup权限控制，高性能可复用
 
 ### 2.  check_nacos.sh
 
-用于检测nacos是否启动完成，然后再执行启动judgeserver
+用于检测Nacos是否启动完成，然后再执行启动`voj-judger`
 
 ```shell
 #!/bin/bash

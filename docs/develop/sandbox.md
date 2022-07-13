@@ -2,15 +2,15 @@
 
 > Judger-SandBox使用的是开源项目[go-judge](https://github.com/criyle/go-judge)Linux版本的可执行文件，更多调用方式请自行浏览[go-judge](https://github.com/criyle/go-judge)
 
-VOJ用的是java来调用此沙盒，请看[JudgeServer-judge](https://github.com/simplefanc/voj/tree/master/voj-springboot/JudgeServer/src/main/java/top/hcode/voj/judge)下的SandboxRun.java
+VOJ使用Java来调用此沙盒，详见[voj-judger](https://github.com/simplefanc/voj-springboot/blob/main/voj-judger/src/main/java/com/simplefanc/voj/judger/judge/local)模块下的`SandboxRun.java`
 
-启动[Judger-SandBox](https://github.com/simplefanc/voj/blob/master/judger/Judger-SandBox)，默认监听5050端口
+启动[SandBox](https://github.com/criyle/go-judge/releases)，默认监听5050端口
 
-#### 验证是否启动
+### 验证是否启动
 
 访问：`http://localhost:5050/version`
 
-#### 编译
+### 编译
 
 1.1 请求的url为 
 
@@ -94,7 +94,7 @@ VOJ用的是java来调用此沙盒，请看[JudgeServer-judge](https://github.co
      ]
 ```
 
-#### 运行与评测
+### 运行与评测
 
 2.1 请求的url为 
 
@@ -151,7 +151,7 @@ VOJ用的是java来调用此沙盒，请看[JudgeServer-judge](https://github.co
 }]
 ```
 
-#### 交互判题
+### 交互判题
 
 3.1 请求的url为 
 

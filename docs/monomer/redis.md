@@ -1,10 +1,11 @@
-# 单体部署③——Redis部署
+# Redis部署
 
-## docker部署
+## Docker部署
 
 ```shell
 docker run -d --name redis -p 6379:6379 \
 -v $PWD/voj/data/redis/data:/data \
+--name voj-redis \
 --restart="always" \
 redis \
 --requirepass "redis_password" 
@@ -12,4 +13,4 @@ redis \
 
 ## 常规部署
 
-请自行百度。。
+请自行探索。

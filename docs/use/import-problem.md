@@ -2,8 +2,6 @@
 
 ## 一、VOJ题目
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/f059e38d31c44906b35ad4ff0d488013.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)
-
 #### 1. 导出题目
 
 点击选择需要的题目，便可以批量导出成一个zip压缩包，分别对应一个json格式的题目数据，一个对应名字的文件夹存放评测数据文件，具体的文件结构如下：
@@ -108,38 +106,22 @@
 
 ## 二、导入QDUOJ或FPS格式的题目
 
-1. 请严格按照青岛oj的后台导出的压缩文件来上传。
+1. 请严格按照青岛OJ的后台导出的压缩文件来上传。
 2. 请使用标准的FPS格式的题目数据文件(.xml)
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/57c6518fb9fe426088c064d85dd110d3.png?x-oss-process=image/watermark,type_ZHJvaWRzYW5zZmFsbGJhY2s,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)
-
-
 
 ## 三、导入其它OJ题目
 
-导入HDU、Codeforces、POJ、GYM、AtCoder、SPOJ的题目，只需提供该题目的题号便可一键导入。
+导入HDU、POJ、MXT、JSK、TKOJ的题目，只需提供该题目的题号便可一键导入。
 
 :::tip
 
-- HDU和POJ的题号一般是 `1000`以上的数字
-- Codeforces和GYM的题号是`1000A`、`1000B`、这种数字加大写英文字母的格式，具体请到[https://codeforces.com](https://codeforces.com)查看
-- SPOJ的题号是大写英文字母，如`TEST`，具体请到[https://www.spoj.com](https://www.spoj.com)查看
-- AtCoder的题号是类似`abc110_a`这种格式，具体请到 [https://atcoder.jp](https://atcoder.jp) 查看
+- HDU、POJ、MXT、TKOJ的题号一般是 `1000`以上的数字
+- JSK的题号是`A1000`或`T1000`格式，具体请到 [https://nanti.jisuanke.com](https://nanti.jisuanke.com/) 查看
 
 :::
 
-**管理员进入后台，点击题目列表**
+1. 管理员进入后台，点击题目列表
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/5304425397f249808b7ea0ea2a0153cc.png?x-oss-process=image/watermark,type_d3F5LXplbmhlaQ,shadow_50,text_Q1NETiBASGltaXRfWkg=,size_20,color_FFFFFF,t_70,g_se,x_16)
+2. 然后添加上方的添加按钮
 
-然后添加上方的添加按钮
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210523222914722.png)
-
-
-
-**在弹出窗中选择OJ名字及题号，便可导入**
-
-
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210523223042100.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzg1MzA5Nw==,size_16,color_FFFFFF,t_70)
+3. 在弹出窗中选择OJ名称及题号，即可导入

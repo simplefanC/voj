@@ -1,4 +1,4 @@
-# 单体部署⑧——评测数据同步（分布式才需要）
+# 评测数据同步（分布式才需要）
 
 :::tip
 本镜像主要是用在于后端服务与判題服务不在同一机器，为了让题目评测数据从主服务器同步于判題服务所在机器而使用的，也就是分布式部署都需要本服务来同步评测数据，包括多台判题机。
@@ -58,7 +58,7 @@
    echo "/usr/bin/rsync --daemon --config=/etc/rsyncd/rsyncd.conf" >> /etc/rc.local
    ```
 
-3. 之后在运行JudgeServer判题服务的服务器上使用rsync每60秒同步一次指定文件夹的评测数据（同步周期可自己改）
+3. 之后在运行`voj-judger`判题服务的服务器上使用rsync每60秒同步一次指定文件夹的评测数据（同步周期可自己改）
 
    新建密码配置文件，同时写入与主服务端的rsync一样的密码
 
@@ -100,7 +100,7 @@
 
 
 
-## 二、docker部署
+## 二、Docker部署
 
 ### 前言
 
@@ -131,10 +131,10 @@ docker run启动
   -p 873:873 \
   --restart=always \
   voj-rsync
-  # registry.cn-shenzhen.aliyuncs.com/hcode/voj_rsync:1.0
+  # registry.cn-shanghai.aliyuncs.com/simplefanc/voj_rsync:1.0
   ```
 
-- 从服务器（Judgeserver所在的服务器）
+- 从服务器（`voj-judger`所在的服务器）
 
   ```shell
   docker run -d --name voj-rsync \
@@ -146,7 +146,7 @@ docker run启动
   -p 873:873 \
   --restart=always \
   voj-rsync
-  # registry.cn-shenzhen.aliyuncs.com/hcode/voj_rsync:1.0
+  # registry.cn-shanghai.aliyuncs.com/simplefanc/voj_rsync:1.0
   ```
 
   
@@ -159,7 +159,7 @@ docker-compose启动
   version: "3"
   services:
     voj-rsync-master:
-  #    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_rsync:1.0
+  #    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_rsync:1.0
       image: voj-rsync
       container_name: voj-rsync-master
       volumes:
@@ -172,13 +172,13 @@ docker-compose启动
         - "0.0.0.0:873:873"
   ```
 
-- 从服务器（Judgeserver所在的服务器）
+- 从服务器（`voj-judger`所在的服务器）
 
   ```yaml
   version: "3"
   services:
     voj-rsync-slave:
-  #    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_rsync:1.0
+  #    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_rsync:1.0
       image: voj-rsync
       container_name: voj-rsync-slave
       restart: always
@@ -250,5 +250,4 @@ COPY rsyncd.conf /voj/rsyncd/rsyncd.conf
 
 CMD /bin/bash /voj/rsyncd/run.sh
 ```
-
 

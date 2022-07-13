@@ -55,7 +55,7 @@ https://github.com/simplefanc/voj-deploy/blob/master/standAlone/docker-compose.y
 
 ```yaml
   voj-mysql-checker:
-    image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_database_checker
+    image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_database_checker
     container_name: voj-mysql-checker
     depends_on:
       - voj-mysql

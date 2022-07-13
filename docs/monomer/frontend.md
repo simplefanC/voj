@@ -1,8 +1,8 @@
-# 单体部署⑦——前端部署
+# 前端部署
 
 ## 一、常规部署
 
-### (1). 安装nginx
+### (1). 安装Nginx
 :::warning
 注意：apt下载太慢的话，建议换阿里云源，请自行百度or谷歌
 :::
@@ -31,7 +31,7 @@
 
 ### (2). 部署
 
-1. [下载本项目](https://github.com/simplefanc/voj/tree/master/voj-vue)，git clone或者download zip
+1. [下载本项目](https://github.com/simplefanC/voj-vue)，git clone或者download zip
 
 2. 前提是本地有vue-cli4与npm，请自行百度下载
 
@@ -99,7 +99,7 @@
 
 
 
-## 二、docker部署
+## 二、Docker部署
 
 :::tip
 html文件夹下为voj的vue前端打包的静态资源
@@ -132,12 +132,12 @@ docker build -t voj-frontend .
   -p 80:80 \
   --restart="always" \
   voj-frontend
-  # registry.cn-shenzhen.aliyuncs.com/hcode/voj_frontend
+  # registry.cn-shanghai.aliyuncs.com/simplefanc/voj_frontend
   ```
 
 - Https方式
 
-  **需将SSL证书与公钥文件（server.crt、server.kry）放置当前目录** 
+  **需将SSL证书与公钥文件（server.pem、server.key）放置当前目录** 
 
   ```shell
   docker run -d --name voj-frontend \
@@ -145,13 +145,13 @@ docker build -t voj-frontend .
   -e BACKEND_SERVER_HOST=backend_server_host \
   -e BACKEND_SERVER_PORT=backend_server_port \
   -e USE_HTTPS=true \
-  -e ./server.crt:/etc/nginx/etc/crt/server.crt \
+  -e ./server.crt:/etc/nginx/etc/crt/server.pem \
   -e ./server.key:/etc/nginx/etc/crt/server.key \
   -p 80:80 \
   -p 443:443 \
   --restart="always" \
   voj-frontend
-  # registry.cn-shenzhen.aliyuncs.com/hcode/voj_frontend
+  # registry.cn-shanghai.aliyuncs.com/simplefanc/voj_frontend
   ```
 
 **docker-compose 启动**
@@ -160,7 +160,7 @@ docker build -t voj-frontend .
 version: "3"
 services:
   voj-frontend:
-    # image: registry.cn-shenzhen.aliyuncs.com/hcode/voj_frontend
+    # image: registry.cn-shanghai.aliyuncs.com/simplefanc/voj_frontend
     image: voj-frontend
     container_name: voj-frontend
     restart: always
