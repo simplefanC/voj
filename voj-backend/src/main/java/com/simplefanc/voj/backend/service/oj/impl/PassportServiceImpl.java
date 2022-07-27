@@ -109,7 +109,7 @@ public class PassportServiceImpl implements PassportService {
         }
 
         if (userRolesVo.getStatus() != 0) {
-            throw new StatusFailException("该账户已被封禁，请联系管理员进行处理！");
+            throw new StatusFailException("该账户暂未开放，请联系管理员进行处理！");
         }
 
         String jwt = jwtUtil.generateToken(userRolesVo.getUid());

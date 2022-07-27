@@ -28,7 +28,7 @@ public class JSKQuerier implements Querier {
     /**
      * 统计计蒜客的所有静态原生状态 --> unkown error 暂时未统计
      */
-    private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {
+    private static final Map<String, JudgeStatus> STATUS_MAP = new HashMap<>() {
         {
             put("AC", JudgeStatus.STATUS_ACCEPTED);
             put("PE", JudgeStatus.STATUS_PRESENTATION_ERROR);
@@ -69,7 +69,7 @@ public class JSKQuerier implements Querier {
         } else {
             status.rawStatus = "pending";
         }
-        status.statusType = statusMap.get(status.rawStatus);
+        status.statusType = STATUS_MAP.get(status.rawStatus);
         if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
             // 执行时间和内存
             HttpGet get = new HttpGet("/t/" + info.remotePid + "/submissions");

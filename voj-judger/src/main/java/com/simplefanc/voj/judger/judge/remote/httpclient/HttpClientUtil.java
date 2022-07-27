@@ -57,14 +57,14 @@ public class HttpClientUtil {
     // 配置服务器响应超时时间
     private static final int SOCKET_TIMEOUT = 20 * 1000;
 
-    private static int maxConnTotal = 20;
+    private static final int MAX_CONN_TOTAL = 20;
 
-    private static int maxConnPerRoute = 4;
+    private static final int MAX_CONN_PER_ROUTE = 4;
 
     // 默认返回null串
     private static String EMPTY_STR = "";
 
-    private static String userAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36";
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36";
 
     private static SSLConnectionSocketFactory sslConnectionSocketFactory = null;
 
@@ -109,9 +109,9 @@ public class HttpClientUtil {
                     .build();
             poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager(registryBuilder);
             // 最大连接数
-            poolingHttpClientConnectionManager.setMaxTotal(maxConnTotal);
+            poolingHttpClientConnectionManager.setMaxTotal(MAX_CONN_TOTAL);
             // 最大并发数
-            poolingHttpClientConnectionManager.setDefaultMaxPerRoute(maxConnPerRoute);
+            poolingHttpClientConnectionManager.setDefaultMaxPerRoute(MAX_CONN_PER_ROUTE);
         } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
             e.printStackTrace();
         }
@@ -156,7 +156,7 @@ public class HttpClientUtil {
                     HeaderElement he = it.nextElement();
                     String param = he.getName();
                     String value = he.getValue();
-                    if (value != null && param.equalsIgnoreCase("timeout")) {
+                    if (value != null && "timeout".equalsIgnoreCase(param)) {
                         return Long.parseLong(value) * 1000;
                     }
                 }
@@ -167,7 +167,7 @@ public class HttpClientUtil {
     }
 
     /**
-     * 从池子中获取获取httpclient连接
+     * 从池中获取获取httpclient连接
      */
     public static CloseableHttpClient getHttpClient() {
         return HttpClients.custom()
@@ -178,8 +178,8 @@ public class HttpClientUtil {
                 // 设置http请求规则
                 .setDefaultRequestConfig(getDefaultRequestConfig())
                 // 设置keep-Alive
-                // .setKeepAliveStrategy(getKeepAliveStrategy())
-                .setUserAgent(userAgent).build();
+//                .setKeepAliveStrategy(getKeepAliveStrategy())
+                .setUserAgent(USER_AGENT).build();
     }
 
     /**

@@ -21,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class POJQuerier implements Querier {
 
-    private static final Map<String, JudgeStatus> statusMap = new HashMap<String, JudgeStatus>() {
+    private static final Map<String, JudgeStatus> statusMap = new HashMap<>() {
         {
             put("Compiling", JudgeStatus.STATUS_COMPILING);
             put("Accepted", JudgeStatus.STATUS_ACCEPTED);

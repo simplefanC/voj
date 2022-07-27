@@ -11,6 +11,8 @@ public enum RemoteOj {
 
     CF("CF"),
 
+    AtCoder("AC"),
+
     POJ("POJ"),
 
     JSK("JSK"),

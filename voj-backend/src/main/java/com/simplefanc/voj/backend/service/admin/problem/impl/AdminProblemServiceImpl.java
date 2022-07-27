@@ -28,6 +28,7 @@ import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ import java.util.List;
 @Service
 @RefreshScope
 @RequiredArgsConstructor
+@Slf4j(topic = "voj")
 public class AdminProblemServiceImpl implements AdminProblemService {
 
     private final ProblemEntityService problemEntityService;
@@ -231,6 +233,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
                 throw new StatusFailException("导入新题目失败！原因：可能是与该OJ链接超时或题号格式错误！");
             }
         } catch (Exception e) {
+            log.error("导入远程题目异常-------------->", e);
             throw new StatusFailException(e.getMessage());
         }
     }

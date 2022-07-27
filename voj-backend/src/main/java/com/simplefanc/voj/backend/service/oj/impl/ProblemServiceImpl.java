@@ -124,48 +124,21 @@ public class ProblemServiceImpl implements ProblemService {
 
         List<Judge> judges = judgeEntityService.list(queryWrapper);
 
-        boolean isACMContest = true;
+        boolean isAcmContest = true;
         Contest contest = null;
         if (pidListDto.getIsContestProblemList()) {
             contest = contestEntityService.getById(pidListDto.getCid());
             if (contest == null) {
                 throw new StatusNotFoundException("错误：该比赛不存在！");
             }
-            isACMContest = contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode();
+            isAcmContest = contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode();
         }
 
         for (Judge judge : judges) {
             // 如果是比赛的题目列表状态
             HashMap<String, Object> temp = new HashMap<>();
             if (pidListDto.getIsContestProblemList()) {
-                if (!isACMContest) {
-                    // IO比赛的，如果还未写入，则使用最新一次提交的结果
-                    if (!result.containsKey(judge.getPid())) {
-                        // 判断该提交是否为封榜之后的提交,OI赛制封榜后的提交看不到提交结果，
-                        // 只有比赛结束可以看到,比赛管理员与超级管理员的提交除外
-                        if (contestValidator.isOpenSealRank(contest, true)) {
-                            temp.put("status", JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus());
-                            temp.put("score", null);
-                        } else {
-                            temp.put("status", judge.getStatus());
-                            temp.put("score", judge.getScore());
-                        }
-                        result.put(judge.getPid(), temp);
-                    }
-                } else {
-                    // 如果该题目已通过，且同时是为不封榜前提交的，则强制写为通过（0）
-                    if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
-                        temp.put("status", JudgeStatus.STATUS_ACCEPTED.getStatus());
-                        temp.put("score", null);
-                        result.put(judge.getPid(), temp);
-                    } else if (!result.containsKey(judge.getPid())) {
-                        // 还未写入，则使用最新一次提交的结果
-                        temp.put("status", judge.getStatus());
-                        temp.put("score", null);
-                        result.put(judge.getPid(), temp);
-                    }
-                }
-
+                processContestJudge(result, isAcmContest, contest, judge, temp);
             } else { // 不是比赛题目
                 // 如果该题目已通过，则强制写为通过（0）
                 if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
@@ -181,7 +154,6 @@ public class ProblemServiceImpl implements ProblemService {
 
         // 再次检查，应该可能从未提交过该题，则状态写为-10
         for (Long pid : pidListDto.getPidList()) {
-
             // 如果是比赛的题目列表状态
             if (pidListDto.getIsContestProblemList()) {
                 if (!result.containsKey(pid)) {
@@ -200,6 +172,36 @@ public class ProblemServiceImpl implements ProblemService {
         }
         return result;
 
+    }
+
+    private void processContestJudge(HashMap<Long, Object> result, boolean isACMContest, Contest contest, Judge judge, HashMap<String, Object> temp) {
+        // IO比赛的，如果还未写入，则使用最新一次提交的结果
+//        if (!isACMContest) {
+//            if (!result.containsKey(judge.getPid())) {
+//                // 判断该提交是否为封榜之后的提交,OI赛制封榜后的提交看不到提交结果，
+//                // 只有比赛结束可以看到,比赛管理员与超级管理员的提交除外
+//                if (contestValidator.isOpenSealRank(contest, true)) {
+//                    temp.put("status", JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus());
+//                    temp.put("score", null);
+//                } else {
+//                    temp.put("status", judge.getStatus());
+//                    temp.put("score", judge.getScore());
+//                }
+//                result.put(judge.getPid(), temp);
+//            }
+//        } else {
+            // 如果该题目已通过，且同时是为不封榜前提交的，则强制写为通过（0）
+            if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
+                temp.put("status", JudgeStatus.STATUS_ACCEPTED.getStatus());
+                temp.put("score", judge.getScore());
+                result.put(judge.getPid(), temp);
+            } else if (!result.containsKey(judge.getPid())) {
+                // 还未写入，则使用最新一次提交的结果
+                temp.put("status", judge.getStatus());
+                temp.put("score", judge.getScore());
+                result.put(judge.getPid(), temp);
+            }
+//        }
     }
 
     /**

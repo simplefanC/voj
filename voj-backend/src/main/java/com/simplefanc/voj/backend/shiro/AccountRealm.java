@@ -76,7 +76,7 @@ public class AccountRealm extends AuthorizingRealm {
             throw new UnknownAccountException("账户不存在！");
         }
         if (userRoles.getStatus() == 1) {
-            throw new LockedAccountException("该账户已被封禁，请联系管理员进行处理！");
+            throw new LockedAccountException("该账户暂未开放，请联系管理员进行处理！");
         }
         AccountProfile profile = new AccountProfile();
         BeanUtil.copyProperties(userRoles, profile);

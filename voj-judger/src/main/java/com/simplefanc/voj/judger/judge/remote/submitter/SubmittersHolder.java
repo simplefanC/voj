@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j(topic = "voj")
 public class SubmittersHolder {
 
-    private static HashMap<RemoteOj, Submitter> submitters = new HashMap<>();
+    private static final HashMap<RemoteOj, Submitter> submitters = new HashMap<>();
 
     public static Submitter getSubmitter(RemoteOj remoteOj) {
         if (!submitters.containsKey(remoteOj)) {

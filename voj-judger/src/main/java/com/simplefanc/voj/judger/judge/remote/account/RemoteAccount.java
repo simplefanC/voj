@@ -8,6 +8,9 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
+import java.net.HttpCookie;
+import java.util.List;
+
 @Data
 public class RemoteAccount {
 
@@ -18,6 +21,13 @@ public class RemoteAccount {
     private final RemoteOj remoteOj;
 
     private final HttpContext context;
+
+    /**
+     * 远程测评的csrfToken
+     */
+    private String csrfToken;
+
+    private List<HttpCookie> cookies;
 
     public RemoteAccount(RemoteOj remoteOj, String accountId, String password) {
         this.remoteOj = remoteOj;

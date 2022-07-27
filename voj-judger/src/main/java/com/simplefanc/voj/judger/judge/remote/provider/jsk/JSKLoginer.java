@@ -27,8 +27,10 @@ public class JSKLoginer extends RetentiveLoginer {
         if (client.get("/?n=https://nanti.jisuanke.com/oi#/").getBody().contains("i.jisuanke.com/setting/basic")) {
             return;
         }
-        HttpEntity entity = SimpleNameValueEntityFactory.create("account", account.accountId, "pwd",
-                SecureUtil.md5(account.password), "save", "1");
+        HttpEntity entity = SimpleNameValueEntityFactory.create(
+                "account", account.accountId,
+                "pwd", SecureUtil.md5(account.password),
+                "save", "1");
 
         HttpPost post = new HttpPost("/auth/login");
         post.setEntity(entity);

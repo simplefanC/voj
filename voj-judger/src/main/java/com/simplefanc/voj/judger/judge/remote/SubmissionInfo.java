@@ -28,7 +28,14 @@ public class SubmissionInfo {
 
     public RemoteOj remoteJudge;
 
+    /**
+     * 如CF的1540C1
+     */
     public String remotePid;
+
+    public String remoteContestId;
+
+    public String remoteProblemIndex;
 
     public String language;
 

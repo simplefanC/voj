@@ -20,7 +20,7 @@ public class HDUProblemCrawler extends ProblemCrawler {
 
     public static final String JUDGE_NAME = "HDU";
 
-    public static final String HOST = "https://acm.dingbacode.com";
+    public static final String HOST = "http://acm.hdu.edu.cn";
 
     public static final String PROBLEM_URL = "/showproblem.php?pid=%s";
 
@@ -38,7 +38,7 @@ public class HDUProblemCrawler extends ProblemCrawler {
         String url = HOST + String.format(PROBLEM_URL, problemId);
         String html = HttpUtil.get(url);
         info.setProblemId(JUDGE_NAME + "-" + problemId);
-        info.setTitle(ReUtil.get("color:#1A5CC8\">([\\s\\S]*?)</h1>", html, 1).trim());
+        info.setTitle(ReUtil.get("color:#1A5CC8'>([\\s\\S]*?)</h1>", html, 1).trim());
         info.setTimeLimit(Integer.parseInt(ReUtil.get("(\\d*) MS", html, 1)));
         info.setMemoryLimit(Integer.parseInt(ReUtil.get("/(\\d*) K", html, 1)) / 1024);
         info.setDescription(ReUtil.get(">Problem Description</div> <div class=.*?>([\\s\\S]*?)</div>", html, 1)

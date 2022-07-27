@@ -40,6 +40,7 @@
         <emoji.version>4.0.0</emoji.version>
         <swagger.version>2.9.2</swagger.version>
         <spring.checkstyle.plugin>0.0.29</spring.checkstyle.plugin>
+        <jsoup.version>1.14.3</jsoup.version>
     </properties>
 
     <dependencyManagement>
@@ -138,6 +139,11 @@
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -4,6 +4,7 @@ import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
 import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
@@ -13,6 +14,7 @@ import com.simplefanc.voj.judger.service.RemoteJudgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -29,7 +31,7 @@ public class RemoteJudgeQuerier {
     private final static ScheduledExecutorService SCHEDULER = Executors
             .newScheduledThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
-    private final static Map<String, Future> FUTURE_TASK_MAP = new ConcurrentHashMap<>(
+    private final static Map<String, ScheduledFuture<?>> FUTURE_TASK_MAP = new ConcurrentHashMap<>(
             Runtime.getRuntime().availableProcessors() * 2);
 
     private final JudgeEntityService judgeEntityService;
@@ -37,6 +39,8 @@ public class RemoteJudgeQuerier {
     private final JudgeService judgeService;
 
     private final RemoteJudgeService remoteJudgeService;
+
+    private final JudgeCaseEntityService judgeCaseEntityService;
 
     public void process(SubmissionInfo info, RemoteAccount account) {
         String key = UUID.randomUUID().toString() + info.submitId;
@@ -90,11 +94,18 @@ public class RemoteJudgeQuerier {
         private void checkSubmissionResult(SubmissionRemoteStatus result) {
             JudgeStatus status = result.getStatusType() != null ? result.getStatusType()
                     : JudgeStatus.STATUS_SYSTEM_ERROR;
-            if (status != JudgeStatus.STATUS_PENDING && status != JudgeStatus.STATUS_JUDGING
-                    && status != JudgeStatus.STATUS_COMPILING) {
+            if (status == JudgeStatus.STATUS_PENDING || status == JudgeStatus.STATUS_JUDGING
+                    || status == JudgeStatus.STATUS_COMPILING) {
+                recordMidResult(status);
+            } else {
                 log.info("[{}] Get Result Successfully! Status:[{}]", info.remoteJudge, status);
 
                 releaseRemoteJudgeAccount(info.remoteJudge.getName(), account.accountId, info.remoteRunId);
+
+                // 保留各个测试点的结果数据
+                if (!CollectionUtils.isEmpty(result.getJudgeCaseList())) {
+                    judgeCaseEntityService.saveBatch(result.getJudgeCaseList());
+                }
 
                 Judge judge = wrapResultToJudge(result, status);
                 // 写回数据库
@@ -102,8 +113,6 @@ public class RemoteJudgeQuerier {
                 // 同步其它表
                 judgeService.updateOtherTable(judge);
                 cancelFutureTask();
-            } else {
-                recordMidResult(status);
             }
         }
 
@@ -148,7 +157,7 @@ public class RemoteJudgeQuerier {
         }
 
         private void cancelFutureTask() {
-            Future future = FUTURE_TASK_MAP.get(key);
+            ScheduledFuture<?> future = FUTURE_TASK_MAP.get(key);
             if (future != null) {
                 boolean isCanceled = future.cancel(true);
                 if (isCanceled) {

@@ -2,6 +2,7 @@ package com.simplefanc.voj.backend.service.admin.account.impl;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.crypto.SecureUtil;
+import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.JwtUtil;
@@ -53,7 +54,7 @@ public class AdminAccountServiceImpl implements AdminAccountService {
         }
 
         if (userRoles.getStatus() != 0) {
-            throw new StatusFailException("该账户已被封禁，请联系管理员进行处理！");
+            throw new StatusFailException("该账户暂未开放，请联系管理员进行处理！");
         }
 
         // 查询用户角色
@@ -61,7 +62,7 @@ public class AdminAccountServiceImpl implements AdminAccountService {
         userRoles.getRoles().forEach(role -> rolesList.add(role.getRole()));
 
         // 超级管理员或管理员、题目管理员
-        if (rolesList.contains("admin") || rolesList.contains("root") || rolesList.contains("problem_admin")) {
+        if (rolesList.contains(RoleEnum.ADMIN.getName()) || rolesList.contains(RoleEnum.ROOT.getName()) || rolesList.contains(RoleEnum.PROBLEM_ADMIN.getName())) {
             String jwt = jwtUtil.generateToken(userRoles.getUid());
 
             ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder

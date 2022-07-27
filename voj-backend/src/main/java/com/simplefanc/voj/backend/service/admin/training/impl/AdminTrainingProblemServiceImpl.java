@@ -22,6 +22,7 @@ import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "voj")
 public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemService {
 
     private final TrainingProblemEntityService trainingProblemEntityService;
@@ -200,6 +202,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
                     throw new StatusFailException("导入新题目失败！原因：可能是与该OJ链接超时或题号格式错误！");
                 }
             } catch (Exception e) {
+                log.error("导入远程题目异常-------------->", e);
                 throw new StatusFailException(e.getMessage());
             }
         }

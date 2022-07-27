@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JSKSubmitter implements Submitter {
 
-    private static final Map<String, String> FILE_MAP = new HashMap<String, String>() {
+    private static final Map<String, String> FILE_MAP = new HashMap<>() {
         {
             put("FAILED", "Failed");
             put("c", "main.c");
