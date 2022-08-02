@@ -19,9 +19,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import java.net.HttpCookie;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -116,6 +114,13 @@ public class AtCoderSubmitter implements Submitter {
         return ReUtil.get("<a href=\"/contests/" + info.remoteContestId + "/submissions/(\\d+)\">Detail</a>", body, 1);
     }
 
+    private String getRunId(SubmissionInfo info, String username) {
+        HttpRequest.getCookieManager().getCookieStore().removeAll();
+        String url = getOjInfo().mainHost + String.format("/contests/%s/submissions?f.Task=%s&f.User=%s", info.remoteContestId, info.remotePid, username);
+        String body = HttpUtil.get(url);
+        return ReUtil.get("<a href=\"/contests/" + info.remoteContestId + "/submissions/(\\d+)\">Detail</a>", body, 1);
+    }
+
     private HttpResponse trySubmit(SubmissionInfo info, RemoteAccount account) {
         String submitUrl = getOjInfo().mainHost + String.format(SUBMIT_URL, info.remoteContestId);
         HttpRequest request = HttpUtil.createPost(submitUrl);
@@ -130,7 +135,7 @@ public class AtCoderSubmitter implements Submitter {
 
     @Override
     public void submit(SubmissionInfo info, RemoteAccount account) throws Exception {
-        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
+//        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
         String[] arr = info.remotePid.split("_");
         info.remoteContestId = arr[0];
         info.remoteProblemIndex = arr[1];
@@ -161,7 +166,8 @@ public class AtCoderSubmitter implements Submitter {
             e.printStackTrace();
         }
 
-        info.remoteRunId = getRunId(client, info, account.getAccountId());
+//        info.remoteRunId = getRunId(client, info, account.getAccountId());
+        info.remoteRunId = getRunId(info, account.getAccountId());
     }
 
 //    @Override

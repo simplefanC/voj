@@ -21,6 +21,7 @@ spring:
   config:
     import:
       - nacos:voj-${spring.profiles.active}.yml
+      - nacos:voj-remote.yml
   profiles:
     active: @profiles.active@
 

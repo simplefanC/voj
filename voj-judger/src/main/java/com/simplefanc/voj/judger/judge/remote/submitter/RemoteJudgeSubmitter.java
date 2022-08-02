@@ -9,10 +9,8 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.loginer.LoginersHolder;
 import com.simplefanc.voj.judger.service.JudgeService;
-import com.simplefanc.voj.judger.service.RemoteJudgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
@@ -27,24 +25,19 @@ public class RemoteJudgeSubmitter {
 
     private final JudgeEntityService judgeEntityService;
 
-    private final RemoteJudgeService remoteJudgeService;
-
     private final JudgeService judgeService;
-
-    @Value("${voj-judge-server.name}")
-    private String judgeServerName;
 
     public boolean process(SubmissionInfo info, RemoteAccount account) {
         log.info(
                 "Ready Send Task to RemoteJudge[{}] => submit_id: [{}], uid: [{}],"
                         + " pid: [{}], vjudge_username: [{}], vjudge_password: [{}]",
-                info.remoteJudge, info.submitId, info.uid, info.pid, account.accountId, account.password);
+                info.remoteOj, info.submitId, info.uid, info.pid, account.accountId, account.password);
 
         String errLog = null;
         try {
             // account的context存储了相关cookie等
-            LoginersHolder.getLoginer(info.remoteJudge).login(account);
-            SubmittersHolder.getSubmitter(info.remoteJudge).submit(info, account);
+            LoginersHolder.getLoginer(info.remoteOj).login(account);
+            SubmittersHolder.getSubmitter(info.remoteOj).submit(info, account);
         } catch (Exception e) {
             log.error("Submit Failed! Error:", e);
             errLog = e.getMessage();
@@ -52,9 +45,7 @@ public class RemoteJudgeSubmitter {
 
         // 提交失败 前端手动按按钮再次提交 修改状态 STATUS_SUBMITTED_FAILED
         if (StrUtil.isBlank(info.remoteRunId)) {
-            // 将使用的账号放回对应列表
-            log.error("[{}] Submit Failed! Begin to return the account to other task!", info.remoteJudge);
-            remoteJudgeService.changeAccountStatus(info.remoteJudge.getName(), account.accountId);
+            log.error("[{}] Submit Failed! The submit_id of remote judge is blank.", info.remoteOj);
 
             // 更新此次提交状态为提交失败！
             UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
@@ -62,19 +53,19 @@ public class RemoteJudgeSubmitter {
                     .set("error_message", errLog).eq("submit_id", info.submitId);
             judgeEntityService.update(judgeUpdateWrapper);
             // 更新其它表
-            judgeService.updateOtherTable(
-                    new Judge().setSubmitId(info.submitId).setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus())
-                            .setCid(info.cid).setUid(info.uid).setPid(info.pid));
+//            judgeService.updateOtherTable(
+//                    new Judge().setSubmitId(info.submitId).setStatus(JudgeStatus.STATUS_SYSTEM_ERROR.getStatus())
+//                            .setCid(info.cid).setUid(info.uid).setPid(info.pid));
             return false;
         }
 
-        // 提交成功顺便更新状态为-->STATUS_PENDING 判题中...
+        // 提交成功顺便更新状态为-->STATUS_JUDGING 判题中...
         judgeEntityService.updateById(new Judge().setSubmitId(info.submitId)
-                .setStatus(JudgeStatus.STATUS_PENDING.getStatus()).setVjudgeSubmitId(info.remoteRunId)
-                .setVjudgeUsername(account.accountId).setVjudgePassword(account.password).setJudger(judgeServerName));
+                .setStatus(JudgeStatus.STATUS_JUDGING.getStatus()).setVjudgeSubmitId(info.remoteRunId)
+                .setVjudgeUsername(account.accountId).setVjudgePassword(account.password));
 
         log.info("[{}] Submit Successfully! The submit_id of remote judge is [{}]. Waiting the result of the task!",
-                info.remoteRunId, info.remoteJudge);
+                info.remoteRunId, info.remoteOj);
         return true;
     }
 

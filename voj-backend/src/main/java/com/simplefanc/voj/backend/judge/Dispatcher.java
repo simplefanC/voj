@@ -124,11 +124,11 @@ public class Dispatcher {
         boolean isOk = judgeServerEntityService.update(judgeServerUpdateWrapper);
         if (!isOk) {
             // 重试八次
-            tryAgainUpdateJudge(judgeServerUpdateWrapper);
+            tryAgainUpdateJudgeServer(judgeServerUpdateWrapper);
         }
     }
 
-    public void tryAgainUpdateJudge(UpdateWrapper<JudgeServer> updateWrapper) {
+    public void tryAgainUpdateJudgeServer(UpdateWrapper<JudgeServer> updateWrapper) {
         boolean retryable;
         int attemptNumber = 0;
         do {
@@ -153,8 +153,10 @@ public class Dispatcher {
 
     public void changeRemoteJudgeStatus(String remoteJudge, String username) {
         UpdateWrapper<RemoteJudgeAccount> remoteJudgeAccountUpdateWrapper = new UpdateWrapper<>();
-        remoteJudgeAccountUpdateWrapper.set("status", true).eq("status", false).eq("username", username);
-        remoteJudgeAccountUpdateWrapper.eq("oj", remoteJudge);
+        remoteJudgeAccountUpdateWrapper.set("status", true)
+                .eq("status", false)
+                .eq("username", username)
+                .eq("oj", remoteJudge);
 
         boolean isOk = remoteJudgeAccountService.update(remoteJudgeAccountUpdateWrapper);
 
@@ -242,19 +244,20 @@ public class Dispatcher {
         private void handleJudgeProcess(JudgeServer judgeServer) {
             data.setJudgeServerIp(judgeServer.getIp());
             data.setJudgeServerPort(judgeServer.getPort());
+            data.getJudge().setJudger(judgeServer.getName());
             CommonResult result = null;
             try {
                 // https://blog.csdn.net/qq_35893120/article/details/118637987
                 result = restTemplate.postForObject("http://" + judgeServer.getUrl() + path, data, CommonResult.class);
             } catch (Exception e) {
                 log.error("调用判题服务器[" + judgeServer.getUrl() + "]发送异常-------------->", e);
-                if (isRemote) {
-                    changeRemoteJudgeStatus(oj, data.getUsername());
-                }
             } finally {
                 checkResult(result, submitId);
                 // 无论成功与否，都要将对应的当前判题机当前判题数减1
                 reduceCurrentTaskNum(judgeServer.getId());
+                if (isRemote) {
+                    changeRemoteJudgeStatus(oj, data.getUsername());
+                }
                 cancelFutureTask(key);
             }
         }

@@ -81,10 +81,14 @@ management:
       exposure:
         include: '*'
 
-voj:
-  judgedir:
-    run-workplace-dir: "/judge/run"
-    test-case-dir: "/judge/testcase"
-    spj-workplace-dir: "/judge/spj"
-    interactive-workplace-dir: "/judge/interactive"
-    tmpfs-dir: "/w"
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+logging:
+  level:
+    com.alibaba.nacos: error
+    root: info
+  file:
+    path: ./log

@@ -30,9 +30,6 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class JudgeServiceImpl implements JudgeService {
 
-    @Value("${voj-judge-server.name}")
-    private String judgeServerName;
-
     private final JudgeEntityService judgeEntityService;
 
     private final ProblemEntityService problemEntityService;
@@ -47,21 +44,16 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Override
     public void judge(Judge judge) {
-        // 标志该判题过程进入编译阶段
-        judge.setStatus(JudgeStatus.STATUS_COMPILING.getStatus());
-        // 写入当前判题服务的名字
-        judge.setJudger(judgeServerName);
-        judgeEntityService.updateById(judge);
         Problem problem = problemEntityService.getById(judge.getPid());
         // 【进行判题操作】！！！
-        Judge finalJudge = judgeContext.judge(problem, judge);
+        Judge finalJudgeResult = judgeContext.judge(problem, judge);
 
         // 更新该次提交
-        judgeEntityService.updateById(finalJudge);
+        judgeEntityService.updateById(finalJudgeResult);
 
-        if (finalJudge.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
+        if (finalJudgeResult.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
             // 更新其它表
-            updateOtherTable(finalJudge);
+            updateOtherTable(finalJudgeResult);
         }
     }
 
@@ -86,7 +78,7 @@ public class JudgeServiceImpl implements JudgeService {
     public void updateOtherTable(Judge judge) {
         // 非比赛提交
         if (judge.getCid() == 0) {
-            // 如果是AC，就更新user_acproblem表
+            // 如果是AC，就更新 user_acproblem表
             if (JudgeStatus.STATUS_ACCEPTED.getStatus().equals(judge.getStatus())) {
                 userAcproblemEntityService.saveOrUpdate(new UserAcproblem().setPid(judge.getPid())
                         .setUid(judge.getUid()).setSubmitId(judge.getSubmitId()));

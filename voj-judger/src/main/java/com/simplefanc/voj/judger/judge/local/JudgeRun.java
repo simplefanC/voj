@@ -69,7 +69,7 @@ public class JudgeRun {
                     // 任务完成移除任务
                     iterable.remove();
                 } else {
-                    // 避免CPU高速运转，这里休息10毫秒
+                    // 避免CPU高速运转，这里休息10ms
                     Thread.sleep(10);
                 }
             }
@@ -78,12 +78,10 @@ public class JudgeRun {
     }
 
     private List<FutureTask<JSONObject>> getFutureTasks(JudgeGlobalDTO judgeGlobalDTO) {
-        JSONObject testCasesInfo = judgeGlobalDTO.getTestCaseInfo();
         List<FutureTask<JSONObject>> futureTasks = new ArrayList<>();
-        JSONArray testcaseList = (JSONArray) testCasesInfo.get("testCases");
+        final JSONArray testcaseList = (JSONArray) judgeGlobalDTO.getTestCaseInfo().get("testCases");
         for (int index = 0; index < testcaseList.size(); index++) {
             JSONObject testcase = (JSONObject) testcaseList.get(index);
-            // 将每个需要测试的线程任务加入任务列表中
             final int testCaseId = index + 1;
             // 输入文件名
             final String inputFileName = testcase.getStr("inputName");
@@ -102,7 +100,7 @@ public class JudgeRun {
 
             JudgeDTO judgeDTO = JudgeDTO.builder().testCaseId(testCaseId).testCaseInputPath(testCaseInputPath)
                     .testCaseOutputPath(testCaseOutputPath).maxOutputSize(maxOutputSize).build();
-
+            // 将每个需要测试的线程任务加入任务列表中
             futureTasks.add(new FutureTask<>(
                     new JudgeTask(judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
         }
@@ -182,13 +180,13 @@ public class JudgeRun {
             JSONObject result;
             switch (judgeGlobalDTO.getJudgeMode()) {
                 case DEFAULT:
-                    result = defaultJudge.judge(judgeDTO, judgeGlobalDTO);
+                    result = defaultJudge.judgeCase(judgeDTO, judgeGlobalDTO);
                     break;
                 case SPJ:
-                    result = specialJudge.judge(judgeDTO, judgeGlobalDTO);
+                    result = specialJudge.judgeCase(judgeDTO, judgeGlobalDTO);
                     break;
                 case INTERACTIVE:
-                    result = interactiveJudge.judge(judgeDTO, judgeGlobalDTO);
+                    result = interactiveJudge.judgeCase(judgeDTO, judgeGlobalDTO);
                     break;
                 default:
                     throw new RuntimeException("The problem mode is error:" + judgeGlobalDTO.getJudgeMode());

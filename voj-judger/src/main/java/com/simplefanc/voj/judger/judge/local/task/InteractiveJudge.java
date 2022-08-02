@@ -25,7 +25,7 @@ import java.io.File;
 public class InteractiveJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
 
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         RunConfig interactiveRunConfig = judgeGlobalDTO.getInteractiveRunConfig();
@@ -50,14 +50,14 @@ public class InteractiveJudge extends AbstractJudge {
     }
 
     @Override
-    public JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
+    public JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
             throws SystemError {
         return null;
     }
 
     @Override
-    public JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
-                                          JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
+    public JSONObject processMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
+                                            JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
 
         JSONObject result = new JSONObject();
 

@@ -26,7 +26,7 @@ public class SubmissionInfo {
 
     public Integer serverPort;
 
-    public RemoteOj remoteJudge;
+    public RemoteOj remoteOj;
 
     /**
      * 如CF的1540C1

@@ -137,7 +137,8 @@ public class JudgeServiceImpl implements JudgeService {
         // 将提交加入任务队列
         if (judgeDto.getIsRemote()) {
             // 如果是远程oj判题
-            remoteJudgeDispatcher.sendTask(judge, judge.getDisplayPid(), isContestSubmission);
+            final String remoteJudgeProblem = judge.getDisplayPid();
+            remoteJudgeDispatcher.sendTask(judge, remoteJudgeProblem, isContestSubmission);
         } else {
             judgeDispatcher.sendTask(judge, isContestSubmission);
         }

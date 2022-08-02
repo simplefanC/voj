@@ -49,8 +49,8 @@ public class AtCoderLoginer extends RetentiveLoginer {
         final String body = HttpUtil.createGet("https://atcoder.jp/login").execute().body();
         String csrfToken = ReUtil.get("var csrfToken = \"([\\s\\S]*?)\"", body, 1);
         final HttpResponse response = HttpUtil.createPost("https://atcoder.jp/login").form(MapUtil.builder(new HashMap<String, Object>())
-                .put("username", "ecnuv1")
-                .put("password", "123456Ecnu")
+                .put("username", account.getAccountId())
+                .put("password", account.getPassword())
                 .put("csrf_token", csrfToken).map()).execute();
         Assert.isTrue(response.getStatus() == HttpStatus.SC_MOVED_TEMPORARILY,
                 String.format("expected=%s, received=%s", HttpStatus.SC_MOVED_TEMPORARILY, response.getStatus()));

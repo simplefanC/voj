@@ -33,35 +33,34 @@ public abstract class AbstractJudge {
 
     protected static final int SPJ_ERROR = 103;
 
-    public JSONObject judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONObject judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
         // 判题
-        JSONArray judgeResultList = judgeCase(judgeDTO, judgeGlobalDTO);
+        JSONArray judgeResultList = judge(judgeDTO, judgeGlobalDTO);
 
         // 处理判题结果
         switch (judgeGlobalDTO.getJudgeMode()) {
             case SPJ:
             case DEFAULT:
-                return process(judgeDTO, judgeGlobalDTO, judgeResultList);
+                return handle(judgeDTO, judgeGlobalDTO, judgeResultList);
             case INTERACTIVE:
-                return processMultiple(judgeDTO, judgeGlobalDTO, judgeResultList);
+                return handleMultiple(judgeDTO, judgeGlobalDTO, judgeResultList);
             default:
                 throw new RuntimeException("The problem mode is error:" + judgeGlobalDTO.getJudgeMode());
         }
 
     }
 
-    public abstract JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
+    public abstract JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
 
-    public abstract JSONObject checkResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
+    public abstract JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
             throws SystemError;
 
-    public abstract JSONObject checkMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
-                                                   JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO);
+    public abstract JSONObject processMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
+                                                     JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO);
 
-    private JSONObject process(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
-            throws SystemError {
-        JSONObject judgeResult = (JSONObject) judgeResultList.get(0);
-        SandBoxRes sandBoxRes = SandBoxRes.builder()
+
+    private SandBoxRes wrapToSandBoxRes(JSONObject judgeResult) {
+        return SandBoxRes.builder()
                 .stdout(((JSONObject) judgeResult.get("files")).getStr("stdout"))
                 .stderr(((JSONObject) judgeResult.get("files")).getStr("stderr"))
                 // ns->ms
@@ -70,35 +69,21 @@ public abstract class AbstractJudge {
                 .memory(judgeResult.getLong("memory") / 1024).exitCode(judgeResult.getInt("exitStatus"))
                 .status(judgeResult.getInt("status"))
                 .build();
-
-        return checkResult(sandBoxRes, judgeDTO, judgeGlobalDTO);
     }
 
-    private JSONObject processMultiple(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
+    private JSONObject handle(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
             throws SystemError {
+        SandBoxRes sandBoxRes = wrapToSandBoxRes((JSONObject)judgeResultList.get(0));
+        return processResult(sandBoxRes, judgeDTO, judgeGlobalDTO);
+    }
 
+    private JSONObject handleMultiple(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList) {
         JSONObject userJudgeResult = (JSONObject) judgeResultList.get(0);
-        SandBoxRes userSandBoxRes = SandBoxRes.builder()
-                .stdout(((JSONObject) userJudgeResult.get("files")).getStr("stdout"))
-                .stderr(((JSONObject) userJudgeResult.get("files")).getStr("stderr"))
-                // ns->ms
-                .time(userJudgeResult.getLong("time") / 1000000)
-                // b-->kb
-                .memory(userJudgeResult.getLong("memory") / 1024)
-                .exitCode(userJudgeResult.getInt("exitStatus")).status(userJudgeResult.getInt("status")).build();
+        SandBoxRes userSandBoxRes = wrapToSandBoxRes(userJudgeResult);
 
         JSONObject interactiveJudgeResult = (JSONObject) judgeResultList.get(1);
-        SandBoxRes interactiveSandBoxRes = SandBoxRes.builder()
-                .stdout(((JSONObject) interactiveJudgeResult.get("files")).getStr("stdout"))
-                .stderr(((JSONObject) interactiveJudgeResult.get("files")).getStr("stderr"))
-                // ns->ms
-                .time(interactiveJudgeResult.getLong("time") / 1000000)
-                // b-->kb
-                .memory(interactiveJudgeResult.getLong("memory") / 1024)
-                .exitCode(interactiveJudgeResult.getInt("exitStatus")).status(interactiveJudgeResult.getInt("status"))
-                .build();
-
-        return checkMultipleResult(userSandBoxRes, interactiveSandBoxRes, judgeDTO, judgeGlobalDTO);
+        SandBoxRes interactiveSandBoxRes = wrapToSandBoxRes(interactiveJudgeResult);
+        return processMultipleResult(userSandBoxRes, interactiveSandBoxRes, judgeDTO, judgeGlobalDTO);
     }
 
     protected List<String> parseRunCommand(RunConfig runConfig, String testCaseInputName,

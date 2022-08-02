@@ -31,19 +31,17 @@ public class JudgeContext {
             problem.setMemoryLimit(problem.getMemoryLimit() * 2);
         }
 
-        HashMap<String, Object> judgeResult = judgeStrategy.judge(problem, judge);
+        HashMap<String, Object> judgeResult = judgeStrategy.execute(problem, judge);
 
-        handleJudgeResult(problem, judge, judgeResult);
-
-        return judge;
+        return wrapJudgeResult(problem, judge, judgeResult);
     }
 
-    private void handleJudgeResult(Problem problem, Judge judge, HashMap<String, Object> judgeResult) {
-        // 如果是编译失败、提交错误或者系统错误就有错误提醒
+    private Judge wrapJudgeResult(Problem problem, Judge judge, HashMap<String, Object> judgeResult) {
+        // 如果是编译失败、提交错误、系统错误、运行错误 就有错误提醒
         if (judgeResult.get("code") == JudgeStatus.STATUS_COMPILE_ERROR.getStatus()
+                || judgeResult.get("code") == JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()
                 || judgeResult.get("code") == JudgeStatus.STATUS_SYSTEM_ERROR.getStatus()
-                || judgeResult.get("code") == JudgeStatus.STATUS_RUNTIME_ERROR.getStatus()
-                || judgeResult.get("code") == JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
+                || judgeResult.get("code") == JudgeStatus.STATUS_RUNTIME_ERROR.getStatus()) {
             judge.setErrorMessage((String) judgeResult.getOrDefault("errMsg", ""));
         }
         // 设置最终结果状态码
@@ -59,6 +57,7 @@ public class JudgeContext {
         judge.setScore((Integer) judgeResult.getOrDefault("score", null));
         // oi_rank_score
         judge.setOiRankScore((Integer) judgeResult.getOrDefault("oiRankScore", null));
+        return judge;
     }
 
     public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)

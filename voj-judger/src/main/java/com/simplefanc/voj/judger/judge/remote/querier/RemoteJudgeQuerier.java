@@ -10,7 +10,6 @@ import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.service.JudgeService;
-import com.simplefanc.voj.judger.service.RemoteJudgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -38,8 +37,6 @@ public class RemoteJudgeQuerier {
 
     private final JudgeService judgeService;
 
-    private final RemoteJudgeService remoteJudgeService;
-
     private final JudgeCaseEntityService judgeCaseEntityService;
 
     public void process(SubmissionInfo info, RemoteAccount account) {
@@ -48,13 +45,6 @@ public class RemoteJudgeQuerier {
         ScheduledFuture<?> beeperHandle = SCHEDULER.scheduleWithFixedDelay(new QueryTask(info, account, key), 0, 3,
                 TimeUnit.SECONDS);
         FUTURE_TASK_MAP.put(key, beeperHandle);
-    }
-
-    private void releaseRemoteJudgeAccount(String remoteJudge, String username, String resultSubmitId) {
-        log.info("After Get Result,remote_judge:[{}],submit_id: [{}]! Begin to return the account to other task!",
-                remoteJudge, resultSubmitId);
-        // 将账号变为可用
-        remoteJudgeService.changeAccountStatus(remoteJudge, username);
     }
 
     class QueryTask implements Runnable {
@@ -83,7 +73,7 @@ public class RemoteJudgeQuerier {
 
             count.getAndIncrement();
             try {
-                Querier querier = QueriersHolder.getQuerier(info.remoteJudge);
+                Querier querier = QueriersHolder.getQuerier(info.remoteOj);
                 final SubmissionRemoteStatus result = querier.query(info, account);
                 checkSubmissionResult(result);
             } catch (Exception e) {
@@ -98,9 +88,7 @@ public class RemoteJudgeQuerier {
                     || status == JudgeStatus.STATUS_COMPILING) {
                 recordMidResult(status);
             } else {
-                log.info("[{}] Get Result Successfully! Status:[{}]", info.remoteJudge, status);
-
-                releaseRemoteJudgeAccount(info.remoteJudge.getName(), account.accountId, info.remoteRunId);
+                log.info("[{}] Get Result Successfully! Status:[{}]", info.remoteOj, status);
 
                 // 保留各个测试点的结果数据
                 if (!CollectionUtils.isEmpty(result.getJudgeCaseList())) {
@@ -126,7 +114,7 @@ public class RemoteJudgeQuerier {
                 judge.setErrorMessage(result.getCompilationErrorInfo());
             } else if (status == JudgeStatus.STATUS_SYSTEM_ERROR) {
                 judge.setErrorMessage(
-                        "There is something wrong with the " + info.remoteJudge + ", please try again later");
+                        "There is something wrong with the " + info.remoteOj + ", please try again later");
             }
 
             // 如果是比赛题目，需要特别适配OI比赛的得分 除AC给100 其它结果给0分
@@ -151,8 +139,7 @@ public class RemoteJudgeQuerier {
                     .eq("submit_id", info.submitId);
             judgeEntityService.update(judgeUpdateWrapper);
 
-            log.error("[{}] Get Result Failed!", info.remoteJudge);
-            releaseRemoteJudgeAccount(info.remoteJudge.getName(), account.accountId, info.remoteRunId);
+            log.error("[{}] Get Result Failed!", info.remoteOj);
             cancelFutureTask();
         }
 

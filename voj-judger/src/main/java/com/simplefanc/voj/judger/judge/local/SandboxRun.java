@@ -107,7 +107,7 @@ public class SandboxRun {
         }
     };
 
-    private static final RestTemplate restTemplate;
+    private static final RestTemplate REST_TEMPLATE;
 
     /**
      * 单例模式
@@ -139,7 +139,7 @@ public class SandboxRun {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(20000);
         requestFactory.setReadTimeout(180000);
-        restTemplate = new RestTemplate(requestFactory);
+        REST_TEMPLATE = new RestTemplate(requestFactory);
     }
 
     static {
@@ -159,7 +159,7 @@ public class SandboxRun {
     }
 
     public static RestTemplate getRestTemplate() {
-        return restTemplate;
+        return REST_TEMPLATE;
     }
 
     public static String getSandboxBaseUrl() {
@@ -172,7 +172,7 @@ public class SandboxRun {
         HttpEntity<String> request = new HttpEntity<>(JSONUtil.toJsonStr(param), headers);
         ResponseEntity<String> postForEntity;
         try {
-            postForEntity = restTemplate.postForEntity(SANDBOX_BASE_URL + uri, request, String.class);
+            postForEntity = REST_TEMPLATE.postForEntity(SANDBOX_BASE_URL + uri, request, String.class);
             // TODO 疑似出现OOM
             return JSONUtil.parseArray(postForEntity.getBody());
         } catch (RestClientResponseException ex) {
@@ -187,7 +187,7 @@ public class SandboxRun {
 
     public static void delFile(String fileId) {
         try {
-            restTemplate.delete(SANDBOX_BASE_URL + "/file/{0}", fileId);
+            REST_TEMPLATE.delete(SANDBOX_BASE_URL + "/file/{0}", fileId);
         } catch (RestClientResponseException ex) {
             if (ex.getRawStatusCode() != 200) {
                 log.error("安全沙箱判题的删除内存中的文件缓存操作异常----------------->{}", ex.getResponseBodyAsString());
