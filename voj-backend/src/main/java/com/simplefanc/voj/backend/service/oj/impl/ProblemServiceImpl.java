@@ -61,7 +61,7 @@ public class ProblemServiceImpl implements ProblemService {
      * @Since 2021/10/27
      */
     @Override
-    public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId,
+    public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagIds,
                                           Integer difficulty, String oj) {
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1)
@@ -76,7 +76,8 @@ public class ProblemServiceImpl implements ProblemService {
         if (oj != null && !RemoteOj.isRemoteOJ(oj)) {
             oj = Constant.LOCAL;
         }
-        return problemEntityService.getProblemList(limit, currentPage, null, keyword, difficulty, tagId, oj);
+        boolean isAdmin = UserSessionUtil.isRoot() || UserSessionUtil.isProblemAdmin();
+        return problemEntityService.getProblemList(limit, currentPage, keyword, difficulty, tagIds, oj, isAdmin);
     }
 
     /**
@@ -190,17 +191,17 @@ public class ProblemServiceImpl implements ProblemService {
 //                result.put(judge.getPid(), temp);
 //            }
 //        } else {
-            // 如果该题目已通过，且同时是为不封榜前提交的，则强制写为通过（0）
-            if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
-                temp.put("status", JudgeStatus.STATUS_ACCEPTED.getStatus());
-                temp.put("score", judge.getScore());
-                result.put(judge.getPid(), temp);
-            } else if (!result.containsKey(judge.getPid())) {
-                // 还未写入，则使用最新一次提交的结果
-                temp.put("status", judge.getStatus());
-                temp.put("score", judge.getScore());
-                result.put(judge.getPid(), temp);
-            }
+        // 如果该题目已通过，且同时是为不封榜前提交的，则强制写为通过（0）
+        if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
+            temp.put("status", JudgeStatus.STATUS_ACCEPTED.getStatus());
+            temp.put("score", judge.getScore());
+            result.put(judge.getPid(), temp);
+        } else if (!result.containsKey(judge.getPid())) {
+            // 还未写入，则使用最新一次提交的结果
+            temp.put("status", judge.getStatus());
+            temp.put("score", judge.getScore());
+            result.put(judge.getPid(), temp);
+        }
 //        }
     }
 
@@ -218,7 +219,8 @@ public class ProblemServiceImpl implements ProblemService {
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
         }
-        if (!problem.getAuth().equals(ProblemEnum.AUTH_PUBLIC.getCode())) {
+        boolean isAdmin = UserSessionUtil.isRoot() || UserSessionUtil.isProblemAdmin();
+        if (!isAdmin && !problem.getAuth().equals(ProblemEnum.AUTH_PUBLIC.getCode())) {
             throw new StatusForbiddenException("该题号对应题目并非公开题目，不支持访问！");
         }
 
@@ -253,18 +255,17 @@ public class ProblemServiceImpl implements ProblemService {
         QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
         codeTemplateQueryWrapper.eq("pid", problem.getId()).eq("status", true);
         List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
-        HashMap<String, String> LangNameAndCode = new HashMap<>();
+        HashMap<String, String> langNameAndCode = new HashMap<>();
         if (codeTemplates.size() > 0) {
             for (CodeTemplate codeTemplate : codeTemplates) {
-                LangNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
+                langNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
             }
         }
         // 屏蔽一些题目参数
         problem.setJudgeExtraFile(null).setSpjCode(null).setSpjLanguage(null);
 
         // 将数据统一写入到一个Vo返回数据实体类中
-        ProblemInfoVo problemInfoVo = new ProblemInfoVo(problem, tags, languagesStr, problemCount, LangNameAndCode);
-        return problemInfoVo;
+        return new ProblemInfoVo(problem, tags, languagesStr, problemCount, langNameAndCode);
     }
 
 }

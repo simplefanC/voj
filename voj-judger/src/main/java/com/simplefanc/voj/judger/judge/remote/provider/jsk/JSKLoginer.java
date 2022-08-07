@@ -1,7 +1,7 @@
 package com.simplefanc.voj.judger.judge.remote.provider.jsk;
 
 import cn.hutool.crypto.SecureUtil;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.*;
 import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;

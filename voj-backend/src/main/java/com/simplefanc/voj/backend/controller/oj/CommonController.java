@@ -1,6 +1,7 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
+import com.simplefanc.voj.backend.pojo.vo.ProblemTagVo;
 import com.simplefanc.voj.backend.service.oj.CommonService;
 import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
@@ -43,6 +44,11 @@ public class CommonController {
     public CommonResult<List<Tag>> getAllProblemTagsList(
             @RequestParam(value = "oj", defaultValue = Constant.LOCAL) String oj) {
         return CommonResult.successResponse(commonService.getAllProblemTagsList(oj));
+    }
+
+    @GetMapping("/get-problem-tags-and-classification")
+    public CommonResult<List<ProblemTagVo>> getProblemTagsAndClassification(@RequestParam(value = "oj", defaultValue = Constant.LOCAL) String oj) {
+        return CommonResult.successResponse(commonService.getProblemTagsAndClassification(oj));
     }
 
     @GetMapping("/get-problem-tags")

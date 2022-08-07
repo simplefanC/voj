@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.remote;
+package com.simplefanc.voj.judger.judge.remote.pojo;
 
 import com.simplefanc.voj.common.constants.RemoteOj;
 import org.apache.http.HttpHost;
@@ -6,7 +6,7 @@ import org.apache.http.HttpHost;
 /**
  * Once initiated, don't modify it. I don't bother implementing an immutable one.
  *
- * @author Isun
+ * @author chenfan
  */
 public class RemoteOjInfo {
 

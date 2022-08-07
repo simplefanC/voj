@@ -2,8 +2,8 @@ package com.simplefanc.voj.judger.judge.remote.provider.mxt;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;

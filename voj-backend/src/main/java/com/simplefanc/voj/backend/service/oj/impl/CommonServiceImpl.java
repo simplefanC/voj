@@ -6,6 +6,7 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
+import com.simplefanc.voj.backend.pojo.vo.ProblemTagVo;
 import com.simplefanc.voj.backend.service.oj.CommonService;
 import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
@@ -14,11 +15,9 @@ import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.base.Captcha;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +30,8 @@ import java.util.stream.Collectors;
 public class CommonServiceImpl implements CommonService {
 
     private final TagEntityService tagEntityService;
+
+    private final TagClassificationEntityService tagClassificationEntityService;
 
     private final ProblemTagEntityService problemTagEntityService;
 
@@ -70,7 +71,7 @@ public class CommonServiceImpl implements CommonService {
     public List<Tag> getAllProblemTagsList(String oj) {
         List<Tag> tagList;
         oj = oj.toUpperCase();
-        if (oj.equals("ALL")) {
+        if ("ALL".equals(oj)) {
             tagList = tagEntityService.list();
         } else {
             QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
@@ -78,6 +79,61 @@ public class CommonServiceImpl implements CommonService {
             tagList = tagEntityService.list(tagQueryWrapper);
         }
         return tagList;
+    }
+
+    @Override
+    public List<ProblemTagVo> getProblemTagsAndClassification(String oj) {
+        oj = oj.toUpperCase();
+        List<ProblemTagVo> problemTagVoList = new ArrayList<>();
+        List<TagClassification> classificationList = null;
+        List<Tag> tagList = null;
+        if ("ALL".equals(oj)) {
+            classificationList = tagClassificationEntityService.list();
+            QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
+            tagList = tagEntityService.list(tagQueryWrapper);
+        } else {
+            QueryWrapper<TagClassification> tagClassificationQueryWrapper = new QueryWrapper<>();
+            tagClassificationQueryWrapper.eq("oj", oj)
+                    .orderByAsc("`rank`");
+            classificationList = tagClassificationEntityService.list(tagClassificationQueryWrapper);
+
+            QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
+            tagQueryWrapper.eq("oj", oj);
+            tagList = tagEntityService.list(tagQueryWrapper);
+        }
+        if (CollectionUtils.isEmpty(classificationList)) {
+            ProblemTagVo problemTagVo = new ProblemTagVo();
+            problemTagVo.setTagList(tagList);
+            problemTagVoList.add(problemTagVo);
+        } else {
+            for (TagClassification classification : classificationList) {
+                ProblemTagVo problemTagVo = new ProblemTagVo();
+                problemTagVo.setClassification(classification);
+                List<Tag> tags = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(tagList)) {
+                    Iterator<Tag> it = tagList.iterator();
+                    while (it.hasNext()) {
+                        Tag tag = it.next();
+                        if (classification.getId().equals(tag.getTcid())) {
+                            tags.add(tag);
+                            it.remove();
+                        }
+                    }
+                }
+                problemTagVo.setTagList(tags);
+                problemTagVoList.add(problemTagVo);
+            }
+            if (tagList.size() > 0) {
+                ProblemTagVo problemTagVo = new ProblemTagVo();
+                problemTagVo.setTagList(tagList);
+                problemTagVoList.add(problemTagVo);
+            }
+        }
+
+        if ("ALL".equals(oj)) {
+            Collections.sort(problemTagVoList, problemTagVoComparator);
+        }
+        return problemTagVoList;
     }
 
     @Override
@@ -121,5 +177,33 @@ public class CommonServiceImpl implements CommonService {
         queryWrapper.eq("pid", pid);
         return codeTemplateEntityService.list(queryWrapper);
     }
+
+    private Comparator<ProblemTagVo> problemTagVoComparator = (p1, p2) -> {
+        if (p1 == null) {
+            return 1;
+        }
+        if (p2 == null) {
+            return 1;
+        }
+        if (p1.getClassification() == null) {
+            return 1;
+        }
+        if (p2.getClassification() == null) {
+            return -1;
+        }
+        TagClassification p1Classification = p1.getClassification();
+        TagClassification p2Classification = p2.getClassification();
+        if (Objects.equals(p1Classification.getOj(), p2Classification.getOj())) {
+            return p1Classification.getRank().compareTo(p2Classification.getRank());
+        } else {
+            if (Constant.LOCAL.equals(p1Classification.getOj())) {
+                return -1;
+            } else if (Constant.LOCAL.equals(p2Classification.getOj())) {
+                return 1;
+            } else {
+                return p1Classification.getOj().compareTo(p2Classification.getOj());
+            }
+        }
+    };
 
 }

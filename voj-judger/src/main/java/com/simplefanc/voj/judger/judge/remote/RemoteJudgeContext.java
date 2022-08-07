@@ -9,6 +9,7 @@ import com.simplefanc.voj.judger.dao.JudgeEntityService;
 import com.simplefanc.voj.judger.dao.ProblemEntityService;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccountRepository;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.querier.RemoteJudgeQuerier;
 import com.simplefanc.voj.judger.judge.remote.submitter.RemoteJudgeSubmitter;
 import lombok.RequiredArgsConstructor;

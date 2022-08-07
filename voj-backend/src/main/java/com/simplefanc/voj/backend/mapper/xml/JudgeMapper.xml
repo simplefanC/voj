@@ -48,7 +48,10 @@
                 </if>
             </if>
             <if test="username!='' and username!=null">
-                AND j.username like concat('%',#{username},'%')
+                AND (
+                j.username like concat('%',#{username},'%') OR
+                u.realname like concat('%',#{username},'%')
+                )
             </if>
             <if test="status!=null">
                 AND j.status = #{status}

@@ -1,6 +1,9 @@
 package com.simplefanc.voj.backend.service.admin.tag;
 
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
+import com.simplefanc.voj.common.pojo.entity.problem.TagClassification;
+
+import java.util.List;
 
 /**
  * @Author: chenfan
@@ -10,10 +13,17 @@ import com.simplefanc.voj.common.pojo.entity.problem.Tag;
 
 public interface AdminTagService {
 
-    Tag addProblem(Tag tag);
+    Tag addTag(Tag tag);
 
     void updateTag(Tag tag);
 
     void deleteTag(Long tid);
 
+    List<TagClassification> getTagClassification(String oj);
+
+    TagClassification addTagClassification(TagClassification tagClassification);
+
+    void updateTagClassification(TagClassification tagClassification);
+
+    void deleteTagClassification(Long tcid);
 }

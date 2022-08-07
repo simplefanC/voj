@@ -33,13 +33,12 @@
             ON p.id = pt.pid
         </if>
         <where>
-            p.auth = 1
+            <if test="!isAdmin">
+                p.auth = 1
+            </if>
             <if test="keyword != null and keyword != ''">
                 and (
                 p.title like concat('%',#{keyword},'%') or p.problem_id like concat('%',#{keyword},'%')
-                <if test="pid != null and pid != ''">
-                    or p.id = #{pid}
-                </if>
                 )
             </if>
             <if test="difficulty != null">

@@ -3,9 +3,9 @@ package com.simplefanc.voj.judger.judge.remote.provider.hdu;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ReUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
@@ -39,8 +39,8 @@ public class HDUQuerier implements Querier {
 
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = matcher.group(1).replaceAll("<[\\s\\S]*?>", "").trim();
-        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_PENDING);
-        if (status.statusType == JudgeStatus.STATUS_PENDING) {
+        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
+        if (status.statusType == JudgeStatus.STATUS_JUDGING) {
             return status;
         }
         if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
@@ -55,11 +55,11 @@ public class HDUQuerier implements Querier {
 
     private static final Map<String, JudgeStatus> STATUS_MAP = new HashMap<>() {
         {
-            put("Submitted", JudgeStatus.STATUS_PENDING);
+            put("Submitted", JudgeStatus.STATUS_JUDGING);
             put("Accepted", JudgeStatus.STATUS_ACCEPTED);
             put("Wrong Answer", JudgeStatus.STATUS_WRONG_ANSWER);
             put("Compilation Error", JudgeStatus.STATUS_COMPILE_ERROR);
-            put("Queuing", JudgeStatus.STATUS_PENDING);
+            put("Queuing", JudgeStatus.STATUS_JUDGING);
             put("Running", JudgeStatus.STATUS_JUDGING);
             put("Compiling", JudgeStatus.STATUS_COMPILING);
             put("Runtime Error", JudgeStatus.STATUS_RUNTIME_ERROR);

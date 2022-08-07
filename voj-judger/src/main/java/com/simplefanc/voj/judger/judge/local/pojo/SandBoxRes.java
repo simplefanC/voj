@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.local.entity;
+package com.simplefanc.voj.judger.judge.local.pojo;
 
 import lombok.Builder;
 import lombok.Data;

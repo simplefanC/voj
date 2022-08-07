@@ -38,7 +38,7 @@ public class ProblemController {
      * @Return CommonResult
      * @Since 2021/10/27
      */
-    @RequestMapping(value = "/get-problem-list", method = RequestMethod.GET)
+    @GetMapping(value = "/get-problem-list")
     public CommonResult<Page<ProblemVo>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
                                                         @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                         @RequestParam(value = "keyword", required = false) String keyword,

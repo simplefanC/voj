@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.remote;
+package com.simplefanc.voj.judger.judge.remote.pojo;
 
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;

@@ -1,13 +1,17 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.simplefanc.voj.backend.service.admin.tag.AdminTagService;
+import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
+import com.simplefanc.voj.common.pojo.entity.problem.TagClassification;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Author: chenfan
@@ -25,8 +29,8 @@ public class AdminTagController {
     @PostMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Tag> addProblem(@RequestBody Tag tag) {
-        return CommonResult.successResponse(adminTagService.addProblem(tag));
+    public CommonResult<Tag> addTag(@RequestBody Tag tag) {
+        return CommonResult.successResponse(adminTagService.addTag(tag));
     }
 
     @PutMapping("")
@@ -42,6 +46,36 @@ public class AdminTagController {
     @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> deleteTag(@RequestParam("tid") Long tid) {
         adminTagService.deleteTag(tid);
+        return CommonResult.successResponse();
+    }
+
+    @GetMapping("/classification")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    public CommonResult<List<TagClassification>> getTagClassification(@RequestParam(value = "oj", defaultValue = Constant.LOCAL) String oj) {
+        return CommonResult.successResponse(adminTagService.getTagClassification(oj));
+    }
+
+    @PostMapping("/classification")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    public CommonResult<TagClassification> addTagClassification(@RequestBody TagClassification tagClassification) {
+        return CommonResult.successResponse(adminTagService.addTagClassification(tagClassification));
+    }
+
+    @PutMapping("/classification")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    public CommonResult<Void> updateTagClassification(@RequestBody TagClassification tagClassification) {
+        adminTagService.updateTagClassification(tagClassification);
+        return CommonResult.successResponse();
+    }
+
+    @DeleteMapping("/classification")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    public CommonResult<Void> deleteTagClassification(@RequestParam("tcid") Long tcid) {
+        adminTagService.deleteTagClassification(tcid);
         return CommonResult.successResponse();
     }
 

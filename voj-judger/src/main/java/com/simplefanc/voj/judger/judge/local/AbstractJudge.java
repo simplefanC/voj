@@ -8,9 +8,9 @@ import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
 import com.simplefanc.voj.judger.common.exception.SystemError;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
-import com.simplefanc.voj.judger.judge.local.entity.JudgeDTO;
-import com.simplefanc.voj.judger.judge.local.entity.JudgeGlobalDTO;
-import com.simplefanc.voj.judger.judge.local.entity.SandBoxRes;
+import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.SandBoxRes;
 
 import java.io.File;
 import java.text.MessageFormat;

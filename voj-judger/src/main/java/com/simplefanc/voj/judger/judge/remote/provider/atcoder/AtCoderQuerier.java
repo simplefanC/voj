@@ -3,9 +3,9 @@ package com.simplefanc.voj.judger.judge.remote.provider.atcoder;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.http.HtmlUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
@@ -32,8 +32,8 @@ public class AtCoderQuerier implements Querier {
         put("AC", JudgeStatus.STATUS_ACCEPTED);
         put("TLE", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED);
         put("MLE", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
-        put("WJ", JudgeStatus.STATUS_PENDING);
-        put("WR", JudgeStatus.STATUS_PENDING); // Waiting Rejudge
+        put("WJ", JudgeStatus.STATUS_JUDGING);
+        put("WR", JudgeStatus.STATUS_JUDGING); // Waiting Rejudge
         put("Judging", JudgeStatus.STATUS_JUDGING); // Waiting Rejudge
     }};
 
@@ -51,8 +51,8 @@ public class AtCoderQuerier implements Querier {
         String url = String.format(SUBMISSION_RESULT_URL, info.remoteContestId, info.remoteRunId);
         String body = client.get(url).getBody();
         status.rawStatus = ReUtil.get("<th>Status</th>[\\s\\S]*?<td id=\"judge-status\" class=\"[\\s\\S]*?\"><span [\\s\\S]*?>([\\s\\S]*?)</span></td>", body, 1);
-        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_PENDING);
-        if (status.statusType == JudgeStatus.STATUS_JUDGING || status.statusType == JudgeStatus.STATUS_PENDING) {
+        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
+        if (status.statusType == JudgeStatus.STATUS_JUDGING) {
             return status;
         }
         if (status.statusType == JudgeStatus.STATUS_COMPILE_ERROR) {

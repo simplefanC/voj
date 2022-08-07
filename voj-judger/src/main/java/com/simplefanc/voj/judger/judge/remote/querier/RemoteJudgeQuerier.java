@@ -6,8 +6,8 @@ import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
-import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.service.JudgeService;
 import lombok.RequiredArgsConstructor;
@@ -84,8 +84,7 @@ public class RemoteJudgeQuerier {
         private void checkSubmissionResult(SubmissionRemoteStatus result) {
             JudgeStatus status = result.getStatusType() != null ? result.getStatusType()
                     : JudgeStatus.STATUS_SYSTEM_ERROR;
-            if (status == JudgeStatus.STATUS_PENDING || status == JudgeStatus.STATUS_JUDGING
-                    || status == JudgeStatus.STATUS_COMPILING) {
+            if (status == JudgeStatus.STATUS_COMPILING || status == JudgeStatus.STATUS_JUDGING) {
                 recordMidResult(status);
             } else {
                 log.info("[{}] Get Result Successfully! Status:[{}]", info.remoteOj, status);

@@ -21,8 +21,8 @@ import java.util.List;
 
 public interface ProblemEntityService extends IService<Problem> {
 
-    Page<ProblemVo> getProblemList(int limit, int currentPage, Long pid, String title, Integer difficulty,
-                                   List<Long> tid, String oj);
+    Page<ProblemVo> getProblemList(int limit, int currentPage, String title, Integer difficulty,
+                                   List<Long> tagIds, String oj, boolean isAdmin);
 
     boolean adminUpdateProblem(ProblemDto problemDto);
 

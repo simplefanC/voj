@@ -20,8 +20,8 @@ import java.util.List;
 @Mapper
 public interface ProblemMapper extends BaseMapper<Problem> {
 
-    List<ProblemVo> getProblemList(IPage page, @Param("pid") Long pid, @Param("keyword") String keyword,
+    List<ProblemVo> getProblemList(IPage page, @Param("keyword") String keyword,
                                    @Param("difficulty") Integer difficulty, @Param("tid") List<Long> tid,
-                                   @Param("tagListSize") Integer tagListSize, @Param("oj") String oj);
+                                   @Param("tagListSize") Integer tagListSize, @Param("oj") String oj, @Param("isAdmin") boolean isAdmin);
 
 }

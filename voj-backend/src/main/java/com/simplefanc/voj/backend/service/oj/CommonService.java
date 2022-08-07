@@ -1,6 +1,7 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
+import com.simplefanc.voj.backend.pojo.vo.ProblemTagVo;
 import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
@@ -22,6 +23,8 @@ public interface CommonService {
     List<TrainingCategory> getTrainingCategory();
 
     List<Tag> getAllProblemTagsList(String oj);
+
+    List<ProblemTagVo> getProblemTagsAndClassification(String oj);
 
     Collection<Tag> getProblemTags(Long pid);
 

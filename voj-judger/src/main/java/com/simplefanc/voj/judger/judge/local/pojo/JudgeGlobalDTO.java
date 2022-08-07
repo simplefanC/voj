@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.local.entity;
+package com.simplefanc.voj.judger.judge.local.pojo;
 
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeMode;

@@ -2,9 +2,9 @@ package com.simplefanc.voj.judger.judge.remote.provider.tkoj;
 
 import cn.hutool.core.util.ReUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionInfo;
-import com.simplefanc.voj.judger.judge.remote.SubmissionRemoteStatus;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
@@ -27,7 +27,7 @@ public class TKOJQuerier implements Querier {
 
     private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {
         {
-            put(0, JudgeStatus.STATUS_PENDING);
+            put(0, JudgeStatus.STATUS_JUDGING);
             put(1, JudgeStatus.STATUS_JUDGING);
             put(2, JudgeStatus.STATUS_COMPILING);
             put(3, JudgeStatus.STATUS_JUDGING);

@@ -1,7 +1,7 @@
 package com.simplefanc.voj.judger.judge.remote.provider.codefores;
 
 import cn.hutool.core.util.ReUtil;
-import com.simplefanc.voj.judger.judge.remote.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
