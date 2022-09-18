@@ -76,16 +76,16 @@
     </resultMap>
 
     <select id="getUserHomeInfo" resultMap="map_UserHomeVo">
-        SELECT u.uuid as uid,u.username,u.nickname,u.gender,u.signature,u.school,u.github,u.blog,u.avatar,ur.rating,
-        (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid AND cid=0) AS total
-        FROM user_info u,user_record ur
+        SELECT uuid as uid,username,nickname,gender,signature,school,github,blog,avatar,
+        (SELECT COUNT(uid) FROM judge WHERE uid=uuid AND cid=0) AS total
+        FROM user_info
         <where>
-            u.uuid = ur.uid AND u.status = 0
+            status = 0
             <if test="uid!=null">
-                AND u.uuid = #{uid}
+                AND uuid = #{uid}
             </if>
             <if test="username!=null">
-                AND u.username = #{username}
+                AND username = #{username}
             </if>
         </where>
     </select>

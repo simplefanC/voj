@@ -10,9 +10,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
+import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
@@ -71,7 +73,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         }
 
         // 只有超级管理员和比赛拥有者才能操作
-        if(!contestValidator.isContestAdmin(contest)){
+        if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
         AdminContestVo adminContestVo = BeanUtil.copyProperties(contest, AdminContestVo.class, "starAccount");
@@ -150,6 +152,20 @@ public class AdminContestServiceImpl implements AdminContestService {
         if (!isOK) {
             throw new StatusFailException("修改失败");
         }
+    }
+
+    @Override
+    public void cloneContest(Long cid) {
+        Contest contest = contestEntityService.getById(cid);
+        if (contest == null) {
+            throw new StatusSystemErrorException("该比赛不存在，无法克隆！");
+        }
+        final UserRolesVo userInfo = UserSessionUtil.getUserInfo();
+        contest.setUid(userInfo.getUid())
+                .setAuthor(userInfo.getUsername())
+                .setSource(cid.intValue())
+                .setTitle(contest.getTitle() + " [Clone]");
+        boolean isOk = contestEntityService.save(contest);
     }
 
 }

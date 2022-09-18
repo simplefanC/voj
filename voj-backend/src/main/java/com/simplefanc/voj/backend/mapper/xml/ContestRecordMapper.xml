@@ -95,7 +95,7 @@
         WHERE cr.uid = u.uuid
           AND cr.cid = #{cid}
           AND cr.status IS NOT NULL
-          AND cr.username != #{username}
+          AND cr.submit_time >= #{startTime}
         ORDER BY cr.time ASC
     </select>
 </mapper>

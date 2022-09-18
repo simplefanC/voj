@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.service.oj.RankService;
@@ -32,7 +32,7 @@ public class RankServiceImpl implements RankService {
     // 排行榜缓存时间 60s
     private static final long cacheRankSecond = 60;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final UserInfoEntityService userInfoEntityService;
 
@@ -84,7 +84,7 @@ public class RankServiceImpl implements RankService {
         if (uidList != null) {
             Page<ACMRankVo> page = new Page<>(currentPage, limit);
             if (uidList.size() > 0) {
-                data = userRecordEntityService.getACMRankList(page, uidList);
+                data = userRecordService.getACMRankList(page, uidList);
             } else {
                 data = page;
             }
@@ -93,7 +93,7 @@ public class RankServiceImpl implements RankService {
             data = (IPage<ACMRankVo>) redisUtil.get(key);
             if (data == null) {
                 Page<ACMRankVo> page = new Page<>(currentPage, limit);
-                data = userRecordEntityService.getACMRankList(page, null);
+                data = userRecordService.getACMRankList(page, null);
                 redisUtil.set(key, data, cacheRankSecond);
             }
         }
@@ -107,7 +107,7 @@ public class RankServiceImpl implements RankService {
         if (uidList != null) {
             Page<OIRankVo> page = new Page<>(currentPage, limit);
             if (uidList.size() > 0) {
-                data = userRecordEntityService.getOIRankList(page, uidList);
+                data = userRecordService.getOIRankList(page, uidList);
             } else {
                 data = page;
             }
@@ -116,7 +116,7 @@ public class RankServiceImpl implements RankService {
             data = (IPage<OIRankVo>) redisUtil.get(key);
             if (data == null) {
                 Page<OIRankVo> page = new Page<>(currentPage, limit);
-                data = userRecordEntityService.getOIRankList(page, null);
+                data = userRecordService.getOIRankList(page, null);
                 redisUtil.set(key, data, cacheRankSecond);
             }
         }

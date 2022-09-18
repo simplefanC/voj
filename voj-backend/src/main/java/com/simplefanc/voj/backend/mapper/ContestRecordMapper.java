@@ -30,6 +30,6 @@ public interface ContestRecordMapper extends BaseMapper<ContestRecord> {
                                                                 @Param("isOpenSealRank") Boolean isOpenSealRank,
                                                                 @Param("sealTime") Date sealTime, @Param("startTime") Date startTime, @Param("endTime") Date endTime);
 
-    List<ContestRecordVo> getACMContestRecord(@Param("username") String username, @Param("cid") Long cid);
+    List<ContestRecordVo> getACMContestRecord(@Param("cid") Long cid, @Param("startTime") Date startTime);
 
 }

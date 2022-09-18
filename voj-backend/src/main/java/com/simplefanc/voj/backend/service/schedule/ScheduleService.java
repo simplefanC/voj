@@ -12,7 +12,7 @@ import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -53,7 +53,7 @@ public class ScheduleService {
 
     private final UserInfoEntityService userInfoEntityService;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final SessionEntityService sessionEntityService;
 

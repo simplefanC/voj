@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.UserInfoMapper">
     <insert id="addUser" parameterType="com.simplefanc.voj.backend.pojo.dto.RegisterDto">
-        insert into user_info(uuid, username, password, email)
-        values (#{uuid}, #{username}, #{password}, #{email})
+        insert into user_info(uuid, username, password, email, realname, school, `number`)
+        values (#{uuid}, #{username}, #{password}, #{email}, #{realname}, #{school}, #{number})
     </insert>
     <select id="getSuperAdminUidList" resultType="java.lang.String" useCache="true">
         select u.uuid

@@ -75,14 +75,20 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                 });
 
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
-        // 必备条件 隐藏的不可取来做比赛题目
         if (problemType != null) {
             problemQueryWrapper
+                    // 同时需要与比赛相同类型的题目
                     // vj题目不限制赛制
                     .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
-                    // 同时需要与比赛相同类型的题目，权限需要是公开的（隐藏的不可加入！）
-                    // TODO 魔法
-                    .ne("auth", 2);
+                    // 题目权限为隐藏的不可加入！
+                    .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode())
+                    // TODO 普通管理员：所有的 PUBLIC 和 自己的 CONTEST 题目
+//                    .and(wrapper ->
+//                            wrapper.eq("auth", ProblemEnum.AUTH_PUBLIC.getCode())
+//                            .or()
+//                            .eq("auth", ProblemEnum.AUTH_CONTEST.getCode()).eq("author", UserSessionUtil.getUserInfo().getUsername())
+//                    )
+            ;
         }
 
         // 逻辑判断，如果是查询已有的就应该是in，如果是查询不要重复的，使用not in

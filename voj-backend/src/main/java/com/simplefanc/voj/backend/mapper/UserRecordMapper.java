@@ -1,12 +1,10 @@
 package com.simplefanc.voj.backend.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -21,7 +19,7 @@ import java.util.List;
  * @since 2021-10-23
  */
 @Mapper
-public interface UserRecordMapper extends BaseMapper<UserRecord> {
+public interface UserRecordMapper {
 
     IPage<ACMRankVo> getACMRankList(Page<ACMRankVo> page, @Param("uidList") List<String> uidList);
 

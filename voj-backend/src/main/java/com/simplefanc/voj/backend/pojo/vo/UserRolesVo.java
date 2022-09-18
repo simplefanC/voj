@@ -65,7 +65,7 @@ public class UserRolesVo implements Serializable {
     @ApiModelProperty(value = "个性签名")
     private String signature;
 
-    @ApiModelProperty(value = "0可用，1不可用")
+    @ApiModelProperty(value = "0正常，1封禁，2申请中，3拒绝")
     private int status;
 
     @ApiModelProperty(value = "创建时间")

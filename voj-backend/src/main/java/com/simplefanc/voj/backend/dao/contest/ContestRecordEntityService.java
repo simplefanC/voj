@@ -6,6 +6,7 @@ import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,6 +24,6 @@ public interface ContestRecordEntityService extends IService<ContestRecord> {
 
     List<ContestRecordVo> getOIContestRecord(Contest contest, Boolean isOpenSealRank);
 
-    List<ContestRecordVo> getACMContestRecord(String username, Long cid);
+    List<ContestRecordVo> getACMContestRecord(Long cid, Date startTime);
 
 }

@@ -131,8 +131,8 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
     }
 
     @Override
-    public List<ContestRecordVo> getACMContestRecord(String username, Long cid) {
-        return contestRecordMapper.getACMContestRecord(username, cid);
+    public List<ContestRecordVo> getACMContestRecord(Long cid, Date startTime) {
+        return contestRecordMapper.getACMContestRecord(cid, startTime);
     }
 
 }

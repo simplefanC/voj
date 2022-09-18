@@ -1,7 +1,6 @@
 package com.simplefanc.voj.judger.judge.local;
 
 import cn.hutool.core.util.ReUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
@@ -11,6 +10,7 @@ import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.SandBoxRes;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -73,7 +73,7 @@ public abstract class AbstractJudge {
 
     private JSONObject handle(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
             throws SystemError {
-        SandBoxRes sandBoxRes = wrapToSandBoxRes((JSONObject)judgeResultList.get(0));
+        SandBoxRes sandBoxRes = wrapToSandBoxRes((JSONObject) judgeResultList.get(0));
         return processResult(sandBoxRes, judgeDTO, judgeGlobalDTO);
     }
 
@@ -97,33 +97,33 @@ public abstract class AbstractJudge {
         return JudgeUtil.translateCommandline(command);
     }
 
-    protected JSONObject parseTestLibErr(String err) {
+    protected JSONObject parseTestLibErr(String msg) {
 
         JSONObject res = new JSONObject(2);
-
-        if (err.startsWith("ok ")) {
+        String output = msg.substring(0, Math.min(1024, msg.length()));
+        if (output.startsWith("ok ")) {
             res.set("code", SPJ_AC);
-            res.set("errMsg", err.split("ok ")[1]);
-        } else if (err.startsWith("wrong answer ")) {
+            res.set("errMsg", output.split("ok ")[1]);
+        } else if (output.startsWith("wrong answer ")) {
             res.set("code", SPJ_WA);
-            res.set("errMsg", err.split("wrong answer ")[1]);
-        } else if (err.startsWith("wrong output format ")) {
+            res.set("errMsg", output.split("wrong answer ")[1]);
+        } else if (output.startsWith("wrong output format ")) {
             res.set("code", SPJ_WA);
-            res.set("errMsg", "May be output presentation error. " + err.split("wrong output format")[1]);
-        } else if (err.startsWith("partially correct ")) {
-            res.set("errMsg", err.split("partially correct ")[1]);
-            String numStr = ReUtil.get("partially correct \\(([\\s\\S]*?)\\) ", err, 1);
+            res.set("errMsg", "May be output presentation error. " + output.split("wrong output format")[1]);
+        } else if (output.startsWith("partially correct ")) {
+            res.set("errMsg", output.split("partially correct ")[1]);
+            String numStr = ReUtil.get("partially correct \\(([\\s\\S]*?)\\) ", output, 1);
             double percentage = 0.0;
-            if (!StrUtil.isEmpty(numStr)) {
+            if (!StringUtils.isEmpty(numStr)) {
                 percentage = Integer.parseInt(numStr) * 1.0 / 100;
             }
             res.set("percentage", percentage);
             res.set("code", SPJ_PC);
-        } else if (err.startsWith("points ")) {
+        } else if (output.startsWith("points ")) {
             res.set("code", SPJ_PC);
-            String numStr = err.split("points ")[1].split(" ")[0];
+            String numStr = output.split("points ")[1].split(" ")[0];
             double percentage = 0.0;
-            if (!StrUtil.isEmpty(numStr)) {
+            if (!StringUtils.isEmpty(numStr)) {
                 percentage = Double.parseDouble(numStr) / 100;
             }
             if (percentage == 1) {
@@ -131,14 +131,14 @@ public abstract class AbstractJudge {
             } else {
                 res.set("percentage", percentage);
             }
-            String tmp = err.split("points ")[1];
+            String tmp = output.split("points ")[1];
             res.set("errMsg", tmp.substring(0, Math.min(1024, tmp.length())));
-        } else if (err.startsWith("FAIL ")) {
+        } else if (output.startsWith("FAIL ")) {
             res.set("code", SPJ_ERROR);
-            res.set("errMsg", err.split("FAIL ")[1]);
+            res.set("errMsg", output.split("FAIL ")[1]);
         } else {
             res.set("code", SPJ_ERROR);
-            res.set("errMsg", err);
+            res.set("errMsg", output);
         }
         return res;
     }

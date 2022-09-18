@@ -78,6 +78,9 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "比赛结束是否自动解除封榜,自动转换成真实榜单")
     private Boolean autoRealRank;
 
+    @ApiModelProperty(value = "比赛管理员是否参与排名")
+    private Boolean contestAdminRank;
+
     @ApiModelProperty(value = "-1为未开始，0为进行中，1为已结束")
     private Integer status;
 

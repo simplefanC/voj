@@ -14,7 +14,7 @@ import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.backend.pojo.vo.ExcelUserVo;
@@ -23,7 +23,6 @@ import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final AdminNoticeService adminNoticeService;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final RedisUtil redisUtil;
 
@@ -128,7 +127,6 @@ public class AdminUserServiceImpl implements AdminUserService {
     public void insertBatchUser(List<List<String>> users) {
         List<UserInfo> userInfoList = new LinkedList<>();
         List<UserRole> userRoleList = new LinkedList<>();
-        List<UserRecord> userRecordList = new LinkedList<>();
         if (users != null) {
             for (List<String> user : users) {
                 String uuid = IdUtil.simpleUUID();
@@ -170,12 +168,10 @@ public class AdminUserServiceImpl implements AdminUserService {
                 userRoleList.add(new UserRole()
                         .setRoleId(RoleEnum.DEFAULT_USER.getId())
                         .setUid(uuid));
-                userRecordList.add(new UserRecord().setUid(uuid));
             }
             boolean result1 = userInfoEntityService.saveBatch(userInfoList);
             boolean result2 = userRoleEntityService.saveBatch(userRoleList);
-            boolean result3 = userRecordEntityService.saveBatch(userRecordList);
-            if (result1 && result2 && result3) {
+            if (result1 && result2) {
                 // 异步同步系统通知
                 List<String> uidList = userInfoList.stream().map(UserInfo::getUuid).collect(Collectors.toList());
                 adminNoticeService.syncNoticeToNewRegisterBatchUser(uidList);
@@ -199,7 +195,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         List<UserInfo> userInfoList = new LinkedList<>();
         List<UserRole> userRoleList = new LinkedList<>();
-        List<UserRecord> userRecordList = new LinkedList<>();
         List<ExcelUserVo> userVoList = new LinkedList<>();
         // 存储账号密码放入redis中，等待导出excel
         final int numLen = String.valueOf(numberTo).length();
@@ -212,12 +207,10 @@ public class AdminUserServiceImpl implements AdminUserService {
             userRoleList.add(new UserRole()
                     .setRoleId(RoleEnum.DEFAULT_USER.getId())
                     .setUid(uuid));
-            userRecordList.add(new UserRecord().setUid(uuid));
         }
         boolean result1 = userInfoEntityService.saveBatch(userInfoList);
         boolean result2 = userRoleEntityService.saveBatch(userRoleList);
-        boolean result3 = userRecordEntityService.saveBatch(userRecordList);
-        if (result1 && result2 && result3) {
+        if (result1 && result2) {
             String key = IdUtil.simpleUUID();
             // 存储半小时
             redisUtil.hset(Constant.GENERATE_USER_INFO_LIST, key, userVoList, 1800);

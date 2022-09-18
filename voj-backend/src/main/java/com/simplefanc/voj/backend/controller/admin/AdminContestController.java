@@ -81,6 +81,14 @@ public class AdminContestController {
         return CommonResult.successResponse();
     }
 
+    @GetMapping("/clone")
+    @RequiresAuthentication
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
+    public CommonResult<Void> cloneContest(@RequestParam("cid") Long cid) {
+        adminContestService.cloneContest(cid);
+        return CommonResult.successResponse();
+    }
+
     @PutMapping("/change-contest-visible")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
@@ -93,6 +101,14 @@ public class AdminContestController {
 
     /**
      * 以下为比赛的题目的增删改查操作接口
+     *
+     * @param limit
+     * @param currentPage
+     * @param keyword
+     * @param cid
+     * @param problemType: 0:ACM; 1:OI
+     * @param oj
+     * @return
      */
     @GetMapping("/get-problem-list")
     @RequiresAuthentication

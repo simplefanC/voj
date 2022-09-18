@@ -1,14 +1,12 @@
-package com.simplefanc.voj.backend.dao.user.impl;
+package com.simplefanc.voj.backend.service.admin.user.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.mapper.UserRecordMapper;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +22,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class UserRecordEntityServiceImpl extends ServiceImpl<UserRecordMapper, UserRecord>
-        implements UserRecordEntityService {
+public class UserRecordServiceImpl implements UserRecordService {
 
     private final UserRecordMapper userRecordMapper;
 

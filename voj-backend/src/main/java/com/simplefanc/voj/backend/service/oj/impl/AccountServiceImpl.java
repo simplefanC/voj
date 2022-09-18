@@ -16,6 +16,7 @@ import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDto;
 import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.service.oj.AccountService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
@@ -47,7 +48,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final UserRoleEntityService userRoleEntityService;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final UserAcproblemEntityService userAcproblemEntityService;
 
@@ -126,7 +127,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        UserHomeVo userHomeInfo = userRecordEntityService.getUserHomeInfo(uid, username);
+        UserHomeVo userHomeInfo = userRecordService.getUserHomeInfo(uid, username);
         if (userHomeInfo == null) {
             throw new StatusFailException("用户不存在");
         }

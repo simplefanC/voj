@@ -9,5 +9,5 @@ ${AnsiColor.BRIGHT_YELLOW}
     \|__|/       \|_______|\|________|
     Virtual Online Judge(VOJ) - Judger
            @Author chenfan
-           @Latest Update 2022/08/02
+           @Latest Update 2022/09/18
 

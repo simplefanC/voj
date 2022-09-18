@@ -37,6 +37,7 @@ public class JSKQuerier implements Querier {
             put("ML", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
             put("OL", JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
             put("RE", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("RE_FPE", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("SF", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("AE", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("CE", JudgeStatus.STATUS_COMPILE_ERROR);
@@ -66,10 +67,8 @@ public class JSKQuerier implements Querier {
         if ("finished".equals(jsonObject.getStr("status"))) {
             // AC
             status.rawStatus = ((JSONObject) jsonObject.get("data")).getStr("reason");
-        } else {
-            status.rawStatus = "pending";
         }
-        status.statusType = STATUS_MAP.get(status.rawStatus);
+        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
         if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
             // 执行时间和内存
             HttpGet get = new HttpGet("/t/" + info.remotePid + "/submissions");

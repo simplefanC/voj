@@ -150,6 +150,8 @@ public class CFProblemCrawler extends ProblemCrawler {
             String input = inputExampleList.get(i)
                     .replaceAll("<br>", "\n")
                     .replaceAll("<br />", "\n")
+                    .replaceAll("<div .*?>", "")
+                    .replaceAll("</div>", "\n")
                     .trim();
             sb.append(HtmlUtil.unescape(input)).append("</input>");
             sb.append("<output>");

@@ -33,7 +33,7 @@ spring:
   redis:
     host: ${voj.redis.host}
     port: ${voj.redis.port}
-    password: ${voj.redis.password}
+    password:
     # 连接超时时间（毫秒）
     timeout: 3000
     pool:
@@ -79,7 +79,7 @@ shiro-redis:
   enabled: true
   redis-manager:
     host: ${voj.redis.host}:${voj.redis.port}
-    password: ${voj.redis.password}
+    password:
 
 mybatis-plus:
   mapper-locations: classpath*:com/simplefanc/voj/backend/mapper/xml/**Mapper.xml

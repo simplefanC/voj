@@ -18,7 +18,7 @@ import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.pojo.bo.EmailRuleBo;
 import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
@@ -63,7 +63,7 @@ public class PassportServiceImpl implements PassportService {
 
     private final UserRoleEntityService userRoleEntityService;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final SessionEntityService sessionEntityService;
 
@@ -76,13 +76,6 @@ public class PassportServiceImpl implements PassportService {
         // 去掉账号密码首尾的空格
         loginDto.setPassword(loginDto.getPassword().trim());
         loginDto.setUsername(loginDto.getUsername().trim());
-        if (loginDto.getPassword().length() < 6 || loginDto.getPassword().length() > 20) {
-            // TODO 加入 validation
-            throw new StatusFailException("密码长度应该为6~20位！");
-        }
-        if (loginDto.getUsername().length() > 20) {
-            throw new StatusFailException("用户名长度不能超过20位!");
-        }
 
         String userIpAddr = IpUtil.getUserIpAddr(request);
         String key = AccountConstant.TRY_LOGIN_NUM + loginDto.getUsername() + "_" + userIpAddr;
@@ -200,14 +193,6 @@ public class PassportServiceImpl implements PassportService {
             throw new StatusFailException("验证码不正确");
         }
 
-        if (registerDto.getPassword().length() < 6 || registerDto.getPassword().length() > 20) {
-            throw new StatusFailException("密码长度应该为6~20位！");
-        }
-
-        if (registerDto.getUsername().length() > 20) {
-            throw new StatusFailException("用户名长度不能超过20位!");
-        }
-
         String uuid = IdUtil.simpleUUID();
         // 为新用户设置uuid
         registerDto.setUuid(uuid);
@@ -222,10 +207,7 @@ public class PassportServiceImpl implements PassportService {
         // 往user_role表插入数据
         boolean addUserRole = userRoleEntityService.save(new UserRole().setRoleId(RoleEnum.DEFAULT_USER.getId()).setUid(uuid));
 
-        // 往user_record表插入数据
-        boolean addUserRecord = userRecordEntityService.save(new UserRecord().setUid(uuid));
-
-        if (addUser && addUserRole && addUserRecord) {
+        if (addUser && addUserRole) {
             redisUtil.del(registerDto.getEmail());
             noticeService.syncNoticeToNewRegisterUser(uuid);
         } else {

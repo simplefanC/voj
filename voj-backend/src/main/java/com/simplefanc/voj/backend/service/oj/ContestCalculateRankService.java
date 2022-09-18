@@ -126,12 +126,22 @@ public class ContestCalculateRankService {
         return topOiRankVoList;
     }
 
+    /**
+     * ACM机制的比赛排名规则：先按AC的题目数量排名，若AC的题目数量一样，则按罚时排名。
+     * @param contest
+     * @param isOpenSealRank
+     * @return
+     */
     private List<ACMContestRankVo> getAcmOrderRank(Contest contest, Boolean isOpenSealRank) {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
-        List<ContestRecordVo> contestRecordList = contestRecordEntityService.getACMContestRecord(contest.getAuthor(),
-                contest.getId())
+        List<String> contestAdminUidList = new ArrayList<>(superAdminUidList);
+        contestAdminUidList.add(contest.getUid());
+
+        List<ContestRecordVo> contestRecordList = contestRecordEntityService.getACMContestRecord(contest.getId(), contest.getStartTime())
                 .stream()
-                .filter(contestRecord -> !contestRecord.getUid().equals(contest.getUid()) && !superAdminUidList.contains(contestRecord.getUid()))
+                .filter(contestRecord ->
+                        contest.getContestAdminRank() || !contestAdminUidList.contains(contestRecord.getUid())
+                )
                 .collect(Collectors.toList());
         Set<String> hasRecordUserNameSet = contestRecordList.stream()
                 .map(ContestRecordVo::getUsername)
@@ -180,9 +190,12 @@ public class ContestCalculateRankService {
 
     private List<OIContestRankVo> getOiOrderRank(Contest contest, Boolean isOpenSealRank) {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
+        List<String> contestAdminUidList = new ArrayList<>(superAdminUidList);
+        contestAdminUidList.add(contest.getUid());
+
         final List<ContestRecordVo> oiContestRecordList = contestRecordEntityService.getOIContestRecord(contest, isOpenSealRank)
                 .stream()
-                .filter(contestRecord -> !contestRecord.getUid().equals(contest.getUid()) && !superAdminUidList.contains(contestRecord.getUid()))
+                .filter(contestRecord -> contest.getContestAdminRank() || !contestAdminUidList.contains(contestRecord.getUid()))
                 .collect(Collectors.toList());
         Set<String> hasRecordUserNameSet = oiContestRecordList.stream()
                 .map(ContestRecordVo::getUsername)
@@ -212,6 +225,7 @@ public class ContestCalculateRankService {
     }
 
     private void processContestRecordVo(ContestRecordVo contestRecord, HashMap<String, Long> firstAcMap, ACMContestRankVo acmContestRankVo, HashMap<String, Object> problemSubmissionInfo) {
+        int errorNumber = (int) problemSubmissionInfo.getOrDefault("errorNum", 0);
         // 记录已经按题目提交耗时time升序了
         // 通过的话
         if (contestRecord.getStatus().intValue() == ContestEnum.RECORD_AC.getCode()) {
@@ -231,21 +245,19 @@ public class ContestCalculateRankService {
                 }
             }
 
-            int errorNumber = (int) problemSubmissionInfo.getOrDefault("errorNum", 0);
             problemSubmissionInfo.put("isAC", true);
             problemSubmissionInfo.put("isFirstAC", isFirstAc);
             problemSubmissionInfo.put("ACTime", contestRecord.getTime());
             problemSubmissionInfo.put("errorNum", errorNumber);
 
-            // 同时计算总耗时，总耗时加上 该题目未AC前的错误次数*20*60+题目AC耗时
+            // 所谓“罚时”指的是做出题目所用的总时间，加上提交错误所付出的代价，每提交错误一次，会罚时20分钟。
+            // 同时计算总耗时，总耗时加上 题目AC耗时+该题目未AC前的错误次数*20*60
             acmContestRankVo.setTotalTime(
                     acmContestRankVo.getTotalTime() + errorNumber * 20 * 60 + contestRecord.getTime());
         } else if (contestRecord.getStatus().intValue() == ContestEnum.RECORD_NOT_AC_PENALTY.getCode()) {
             // 未通过同时需要记录罚时次数
-            int errorNumber = (int) problemSubmissionInfo.getOrDefault("errorNum", 0);
             problemSubmissionInfo.put("errorNum", errorNumber + 1);
         } else {
-            int errorNumber = (int) problemSubmissionInfo.getOrDefault("errorNum", 0);
             problemSubmissionInfo.put("errorNum", errorNumber);
         }
     }
@@ -356,7 +368,7 @@ public class ContestCalculateRankService {
 
     private List<UserInfo> getNoRecordUserInfos(Contest contest, Set<String> userNameSet) {
         String extra = ReUtil.getGroup1("<extra>([\\S\\s]*?)<\\/extra>", contest.getAccountLimitRule());
-        if(StrUtil.isBlank(extra)){
+        if (StrUtil.isBlank(extra)) {
             return new ArrayList<>();
         }
         final Set<String> extraUserNameSet = Arrays.stream(extra.split("\n"))

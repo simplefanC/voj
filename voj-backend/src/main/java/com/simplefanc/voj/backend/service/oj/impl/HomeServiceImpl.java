@@ -6,16 +6,14 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
-import com.simplefanc.voj.backend.dao.user.UserRecordEntityService;
+import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.service.oj.HomeService;
 import com.simplefanc.voj.common.pojo.entity.common.File;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,7 +34,7 @@ public class HomeServiceImpl implements HomeService {
 
     private final AnnouncementEntityService announcementEntityService;
 
-    private final UserRecordEntityService userRecordEntityService;
+    private final UserRecordService userRecordService;
 
     private final RedisUtil redisUtil;
 
@@ -85,7 +83,7 @@ public class HomeServiceImpl implements HomeService {
      */
     @Override
     public List<ACMRankVo> getRecentSevenACRank() {
-        return userRecordEntityService.getRecent7ACRank();
+        return userRecordService.getRecent7ACRank();
     }
 
     /**

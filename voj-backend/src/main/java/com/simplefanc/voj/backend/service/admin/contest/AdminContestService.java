@@ -24,4 +24,5 @@ public interface AdminContestService {
 
     void changeContestVisible(Long cid, String uid, Boolean visible);
 
+    void cloneContest(Long cid);
 }

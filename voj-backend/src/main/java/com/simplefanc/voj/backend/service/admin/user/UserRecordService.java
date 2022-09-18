@@ -1,12 +1,10 @@
-package com.simplefanc.voj.backend.dao.user;
+package com.simplefanc.voj.backend.service.admin.user;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
-import com.simplefanc.voj.common.pojo.entity.user.UserRecord;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ import java.util.List;
  * @Author: chenfan
  * @since 2021-10-23
  */
-public interface UserRecordEntityService extends IService<UserRecord> {
+public interface UserRecordService {
 
     List<ACMRankVo> getRecent7ACRank();
 
