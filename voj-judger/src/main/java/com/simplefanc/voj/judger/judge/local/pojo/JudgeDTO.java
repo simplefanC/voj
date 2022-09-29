@@ -23,7 +23,12 @@ public class JudgeDTO implements Serializable {
     /**
      * 当前题目评测点的的编号
      */
-    private Integer testCaseId;
+    private Integer testCaseNum;
+
+    /**
+     * 当前题目评测点的输入文件的名字
+     */
+    private String testCaseInputFileName;
 
     /**
      * 当前题目评测点的输入文件的绝对路径
@@ -31,9 +36,24 @@ public class JudgeDTO implements Serializable {
     private String testCaseInputPath;
 
     /**
+     * 当前题目评测点的输出文件的名字
+     */
+    private String testCaseOutputFileName;
+
+    /**
      * 当前题目评测点的输出文件的绝对路径
      */
     private String testCaseOutputPath;
+
+    /**
+     * 数据库表的测试样例id
+     */
+    private Long problemCaseId;
+
+    /**
+     * 当前题目评测点的分数（OI题目的测试点才有）
+     */
+    private Integer score;
 
     /**
      * 当前题目评测点的输出字符大小限制 kb

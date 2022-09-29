@@ -1,12 +1,16 @@
 package com.simplefanc.voj.backend.dao.contest.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
+import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,13 +33,17 @@ import java.util.stream.Collectors;
 public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest> implements ContestEntityService {
 
     private final ContestMapper contestMapper;
+    private final ContestValidator contestValidator;
 
     @Override
     public List<ContestVo> getWithinNext14DaysContests() {
-        List<ContestVo> contestList = contestMapper.getWithinNext14DaysContests();
-        setRegisterCount(contestList);
+        List<Contest> contestList = contestMapper.getWithinNext14DaysContests();
 
-        return contestList;
+        final List<ContestVo> contestVoList = getContestVos(contestList);
+
+        setRegisterCount(contestVoList);
+
+        return contestVoList;
     }
 
     @Override
@@ -44,10 +52,25 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
         // 新建分页
         IPage<ContestVo> page = new Page<>(currentPage, limit);
 
-        List<ContestVo> contestList = contestMapper.getContestList(page, type, status, keyword);
-        setRegisterCount(contestList);
+        List<Contest> contestList = contestMapper.getContestList(page, type, status, keyword);
 
-        return page.setRecords(contestList);
+        final List<ContestVo> contestVoList = getContestVos(contestList);
+
+        setRegisterCount(contestVoList);
+
+        return page.setRecords(contestVoList);
+    }
+
+    /**
+     * 过滤仅比赛管理员可见比赛
+     * @param contestList
+     * @return
+     */
+    private List<ContestVo> getContestVos(List<Contest> contestList) {
+        return contestList.stream().filter(contest ->
+                !contest.getContestAdminVisible() || contestValidator.isContestAdmin(contest))
+                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -64,6 +87,10 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
         return contestVo;
     }
 
+    /**
+     * 获取比赛注册人数
+     * @param contestList
+     */
     private void setRegisterCount(List<ContestVo> contestList) {
         List<Long> cidList = contestList.stream().map(ContestVo::getId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(cidList)) {

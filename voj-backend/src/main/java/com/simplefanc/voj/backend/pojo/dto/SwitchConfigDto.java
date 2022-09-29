@@ -6,58 +6,48 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+
 /**
  * @Author chenfan
- * @Date 2022/4/2 19:44
- * @Description
+ * @Date 2022/9/20
  */
 @Data
 @Accessors(chain = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WebConfigDto {
+public class SwitchConfigDto {
 
     /**
-     * 基础 URL
+     * 是否开启公开评论区
      */
-    private String baseUrl;
+//    private Boolean openPublicDiscussion;
 
     /**
-     * 网站名称
+     * 是否开启比赛讨论区
      */
-    private String name;
+//    private Boolean openContestComment;
 
     /**
-     * 网站简称
+     * 是否开启公开评测
      */
-    private String shortName;
+    private Boolean openPublicJudge;
 
     /**
-     * 网站简介
+     * 是否开启比赛评测
      */
-    private String description;
+    private Boolean openContestJudge;
 
     /**
-     * 备案名
+     * 非比赛的提交间隔秒数
      */
-    private String recordName;
+    private Integer defaultSubmitInterval;
+
+    private Long codeVisibleStartTime;
 
     /**
-     * 备案地址
+     * 是否允许注册
      */
-    private String recordUrl;
-
-    /**
-     * 项目名
-     */
-    private String projectName;
-
-    /**
-     * 项目地址
-     */
-    private String projectUrl;
-
     private Boolean register;
 
     private Boolean problem;
@@ -73,4 +63,5 @@ public class WebConfigDto {
     private Boolean discussion;
 
     private Boolean introduction;
+
 }

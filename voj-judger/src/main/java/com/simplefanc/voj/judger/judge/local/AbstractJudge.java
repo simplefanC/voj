@@ -33,9 +33,9 @@ public abstract class AbstractJudge {
 
     protected static final int SPJ_ERROR = 103;
 
-    public JSONObject judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONObject judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
         // 判题
-        JSONArray judgeResultList = judge(judgeDTO, judgeGlobalDTO);
+        JSONArray judgeResultList = judgeCase(judgeDTO, judgeGlobalDTO);
 
         // 处理判题结果
         switch (judgeGlobalDTO.getJudgeMode()) {
@@ -50,7 +50,7 @@ public abstract class AbstractJudge {
 
     }
 
-    public abstract JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
+    public abstract JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
 
     public abstract JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
             throws SystemError;

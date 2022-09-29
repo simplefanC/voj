@@ -3,6 +3,10 @@ package com.simplefanc.voj.backend.common.utils;
 import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.StringRedisConnection;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -640,4 +644,23 @@ public final class RedisUtil {
         redisTemplate.convertAndSend(channel, message);
     }
 
+
+    /**
+     * 批量查询优化：pipeline
+     *
+     * @param keys
+     * @return
+     */
+    public List<Object> batchGet(List<String> keys) {
+        return redisTemplate.executePipelined(new RedisCallback<Object>() {
+            @Override
+            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                StringRedisConnection src = (StringRedisConnection) connection;
+                for (String k : keys) {
+                    src.get(k);
+                }
+                return null;
+            }
+        });
+    }
 }

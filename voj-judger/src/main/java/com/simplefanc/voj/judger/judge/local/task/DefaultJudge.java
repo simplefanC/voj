@@ -25,7 +25,7 @@ import java.util.List;
 public class DefaultJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
         final List<String> args = parseRunCommand(runConfig, null, null, null);
@@ -88,7 +88,7 @@ public class DefaultJudge extends AbstractJudge {
         } else {
             // 与原测试数据输出的md5进行对比 AC或者是WA
             JSONObject testcaseInfo = (JSONObject) ((JSONArray) judgeGlobalDTO.getTestCaseInfo().get("testCases"))
-                    .get(judgeDTO.getTestCaseId() - 1);
+                    .get(judgeDTO.getTestCaseNum() - 1);
             result.set("status",
                     compareOutput(sandBoxRes.getStdout(), judgeGlobalDTO.getRemoveEOLBlank(), testcaseInfo));
         }

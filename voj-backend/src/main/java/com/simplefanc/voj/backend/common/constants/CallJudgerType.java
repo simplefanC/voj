@@ -5,6 +5,6 @@ package com.simplefanc.voj.backend.common.constants;
  */
 public enum CallJudgerType {
 
-    JUDGE, COMPILE;
-
+    JUDGE,
+    COMPILE
 }

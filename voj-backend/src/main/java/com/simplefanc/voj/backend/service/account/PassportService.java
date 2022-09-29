@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.service.oj;
+package com.simplefanc.voj.backend.service.account;
 
 import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;

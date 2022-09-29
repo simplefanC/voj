@@ -29,7 +29,7 @@ import java.io.File;
 public class SpecialJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
         return SandboxRun.testCase(parseRunCommand(runConfig, null, null, null),
@@ -93,7 +93,7 @@ public class SpecialJudge extends AbstractJudge {
             result.set("status", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
         } else {
             // 对于当前测试样例，用户程序的输出对应生成的文件
-            String userOutputFilePath = judgeGlobalDTO.getRunDir() + File.separator + judgeDTO.getTestCaseId()
+            String userOutputFilePath = judgeGlobalDTO.getRunDir() + File.separator + judgeDTO.getTestCaseNum()
                     + ".out";
             FileWriter stdWriter = new FileWriter(userOutputFilePath);
             stdWriter.write(sandBoxRes.getStdout());

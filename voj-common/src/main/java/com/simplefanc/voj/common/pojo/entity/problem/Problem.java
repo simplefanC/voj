@@ -47,6 +47,9 @@ public class Problem implements Serializable {
     @ApiModelProperty(value = "default,spj,interactive")
     private String judgeMode;
 
+    @ApiModelProperty(value = "default,iterate_until_wrong")
+    private String judgeCaseMode;
+
     @ApiModelProperty(value = "单位ms")
     private Integer timeLimit;
 

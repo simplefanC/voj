@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.ContestMapper">
-    <select id="getContestList" resultType="com.simplefanc.voj.backend.pojo.vo.ContestVo" useCache="true">
-        select c.id,c.author,c.title,c.description,c.type,c.status,c.source,c.auth,c.start_time,
-        c.end_time,c.duration,c.open_rank,c.oi_rank_score_type
+    <select id="getContestList" resultType="com.simplefanc.voj.common.pojo.entity.contest.Contest" useCache="true">
+        select c.id,c.uid,c.author,c.title,c.type,c.description,c.source,c.auth,c.status,c.start_time,
+        c.end_time,c.duration,c.open_rank,c.oi_rank_score_type,c.contest_admin_visible
         from contest c
         <where>
             c.visible=true
@@ -55,8 +55,9 @@
           and c.visible = true
     </select>
 
-    <select id="getWithinNext14DaysContests" resultType="com.simplefanc.voj.backend.pojo.vo.ContestVo">
+    <select id="getWithinNext14DaysContests" resultType="com.simplefanc.voj.common.pojo.entity.contest.Contest">
         SELECT c.id,
+               c.uid,
                c.author,
                c.title,
                c.type,
@@ -66,7 +67,8 @@
                c.start_time,
                c.end_time,
                c.duration,
-               c.oi_rank_score_type
+               c.oi_rank_score_type,
+               c.contest_admin_visible
         FROM contest c
         WHERE DATE_ADD(CURDATE(), INTERVAL 14 DAY) >= DATE (start_time) AND c.status != 1 AND c.visible= true
         order by c.start_time DESC

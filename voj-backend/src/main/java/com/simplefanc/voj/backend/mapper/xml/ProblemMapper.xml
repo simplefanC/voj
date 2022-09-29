@@ -33,7 +33,7 @@
             ON p.id = pt.pid
         </if>
         <where>
-            <if test="!isAdmin">
+            <if test="!allProblemVisible">
                 p.auth = 1
             </if>
             <if test="keyword != null and keyword != ''">

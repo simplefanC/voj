@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.pojo.vo;
+package com.simplefanc.voj.backend.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,33 +99,6 @@ public class ConfigVo {
     @Value("${voj.web-config.description}")
     private String description;
 
-    @Value("${voj.web-config.register}")
-    private Boolean register;
-
-    @Value("${voj.web-config.problem}")
-    private Boolean problem;
-
-    @Value("${voj.web-config.training}")
-    private Boolean training;
-
-    @Value("${voj.web-config.contest}")
-    private Boolean contest;
-
-    @Value("${voj.web-config.status}")
-    private Boolean status;
-
-    @Value("${voj.web-config.rank}")
-    private Boolean rank;
-
-    @Value("${voj.web-config.discussion}")
-    private Boolean discussion;
-
-    @Value("${voj.web-config.introduction}")
-    private Boolean introduction;
-
-    @Value("${voj.web-config.code-visible-start-time}")
-    private Long codeVisibleStartTime;
-
     @Value("${voj.web-config.footer.record.name}")
     private String recordName;
 
@@ -138,4 +111,64 @@ public class ConfigVo {
     @Value("${voj.web-config.footer.project.url}")
     private String projectUrl;
 
+    /**
+     * 系统开关
+     */
+    @Value("${voj.switch.register}")
+    private Boolean register;
+
+    @Value("${voj.switch.problem}")
+    private Boolean problem;
+
+    @Value("${voj.switch.training}")
+    private Boolean training;
+
+    @Value("${voj.switch.contest}")
+    private Boolean contest;
+
+    @Value("${voj.switch.status}")
+    private Boolean status;
+
+    @Value("${voj.switch.rank}")
+    private Boolean rank;
+
+    @Value("${voj.switch.discussion}")
+    private Boolean discussion;
+
+    @Value("${voj.switch.introduction}")
+    private Boolean introduction;
+
+    /**
+     * 是否开启公开评论区
+     */
+//    @Value("${voj.switch.discussion.public:true}")
+//    private Boolean openPublicDiscussion;
+
+    /**
+     * 是否开启比赛讨论区
+     */
+//    @Value("${voj.switch.discussion.contest:true}")
+//    private Boolean openContestComment;
+
+
+    /**
+     * 是否开启公开评测
+     */
+    @Value("${voj.switch.judge.public:true}")
+    private Boolean openPublicJudge;
+
+    /**
+     * 是否开启比赛评测
+     */
+    @Value("${voj.switch.judge.contest:true}")
+    private Boolean openContestJudge;
+
+    @Value("${voj.switch.judge.code-visible-start-time}")
+    private Long codeVisibleStartTime;
+
+    /**
+     * 非比赛的提交间隔秒数
+     */
+    @Value("${voj.switch.judge.submit-interval:8}")
+    private Integer defaultSubmitInterval;
 }

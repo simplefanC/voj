@@ -24,7 +24,7 @@ public interface ProblemService {
      * @Since 2021/10/27
      */
     Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId,
-                                   Integer difficulty, String oj);
+                                   Integer difficulty, String oj, Boolean problemVisible);
 
     /**
      * @MethodName getRandomProblem

@@ -1,10 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.system;
 
 import cn.hutool.json.JSONObject;
-import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.*;
+import com.simplefanc.voj.common.result.CommonResult;
 
 import java.util.List;
 
@@ -44,4 +42,7 @@ public interface ConfigService {
 
     boolean sendNewConfigToNacos();
 
+    SwitchConfigDto getSwitchConfig();
+
+    void setSwitchConfig(SwitchConfigDto config);
 }

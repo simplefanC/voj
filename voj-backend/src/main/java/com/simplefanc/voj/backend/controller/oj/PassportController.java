@@ -6,7 +6,7 @@ import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
 import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
 import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
-import com.simplefanc.voj.backend.service.oj.PassportService;
+import com.simplefanc.voj.backend.service.account.PassportService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;

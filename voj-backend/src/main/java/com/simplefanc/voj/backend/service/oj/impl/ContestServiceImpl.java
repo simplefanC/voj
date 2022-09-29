@@ -358,6 +358,7 @@ public class ContestServiceImpl implements ContestService {
         Integer limit = contestRankDto.getLimit();
         Boolean removeStarUser = contestRankDto.getRemoveStar();
         Boolean forceRefresh = contestRankDto.getForceRefresh();
+        final String keyword = contestRankDto.getKeyword();
 
         if (cid == null) {
             throw new StatusFailException("错误：cid不能为空");
@@ -374,9 +375,6 @@ public class ContestServiceImpl implements ContestService {
         if (limit == null || limit < 1)
             limit = 30;
 
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(contestRankDto.getCid());
         contestValidator.validateContestAuth(contest);
@@ -387,13 +385,13 @@ public class ContestServiceImpl implements ContestService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
             // ACM比赛
             // 进行排行榜计算以及排名分页
-            return contestRankService.getContestAcmRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
-                    concernedList, contest, currentPage, limit);
+            return contestRankService.getContestAcmRankPage(isOpenSealRank, removeStarUser,
+                    concernedList, contest, keyword, currentPage, limit);
 
         } else {
             // OI比赛
-            return contestRankService.getContestOiRankPage(isOpenSealRank, removeStarUser, userRolesVo.getUid(),
-                    concernedList, contest, currentPage, limit);
+            return contestRankService.getContestOiRankPage(isOpenSealRank, removeStarUser,
+                    concernedList, contest, keyword, currentPage, limit);
         }
     }
 

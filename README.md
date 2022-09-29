@@ -47,7 +47,7 @@ VOJ 是基于微服务、前后端分离的高性能在线评测系统。采用�
 voj
 ├── voj-common -- 工具类及通用代码
 ├── voj-backend -- 业务服务模块
-├── voj-judger -- 评测服务模块
+└── voj-judger -- 评测服务模块
 ```
 
 ## 技术选型
@@ -56,7 +56,7 @@ voj
 | -------------------- | ------------------- | ----------------------------------------------- |
 | Spring Boot          | 容器+MVC框架        | https://spring.io/projects/spring-boot          |
 | Spring Cloud         | 微服务框架          | https://spring.io/projects/spring-cloud         |
-| Spring Cloud Alibaba | 微服务框架          | https://github.com/alibaba/spring-cloud-alibaba |
+| Spring Cloud Alibaba | 微服务框架          | https://spring.io/projects/spring-cloud-alibaba |
 | MyBatis-Plus         | ORM框架             | https://baomidou.com                            |
 | Druid                | 数据库连接池        | https://github.com/alibaba/druid                |
 | Redis                | 分布式缓存          | https://redis.io                                |
@@ -64,11 +64,11 @@ voj
 | JWT                  | JWT登录支持         | https://github.com/jwtk/jjwt                    |
 | Hibernator-Validator | 验证框架            | http://hibernate.org/validator                  |
 | EasyExcel            | JAVA解析Excel工具   | https://github.com/alibaba/easyexcel            |
-| PageHelper           | MyBatis物理分页插件 | http://git.oschina.net/free/Mybatis_PageHelper  |
+| PageHelper           | MyBatis物理分页插件 | https://github.com/pagehelper/Mybatis-PageHelper  |
 | Hutool               | Java工具类库        | https://github.com/looly/hutool                 |
 | Lombok               | 简化对象封装工具    | https://github.com/rzwitserloot/lombok          |
 | Swagger-UI           | 文档生成工具        | https://github.com/swagger-api/swagger-ui       |
-| Nginx                | 静态资源服务器      | https://www.nginx.com/                          |
+| Nginx                | 静态资源服务器      | https://www.nginx.com                          |
 | Docker               | 应用容器引擎        | https://www.docker.com     
 
 ## 部署

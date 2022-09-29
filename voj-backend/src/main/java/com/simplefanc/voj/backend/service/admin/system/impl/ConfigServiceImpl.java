@@ -1,5 +1,6 @@
 package com.simplefanc.voj.backend.service.admin.system.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.UnicodeUtil;
@@ -13,11 +14,8 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.ConfigUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
-import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
+import com.simplefanc.voj.backend.pojo.dto.*;
+import com.simplefanc.voj.backend.config.ConfigVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.common.pojo.entity.common.File;
@@ -27,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.LinkedList;
@@ -133,10 +132,16 @@ public class ConfigServiceImpl implements ConfigService {
     public WebConfigDto getWebConfig() {
         return WebConfigDto.builder().baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
                 .name(UnicodeUtil.toString(configVo.getName())).shortName(UnicodeUtil.toString(configVo.getShortName()))
-                .description(UnicodeUtil.toString(configVo.getDescription())).register(configVo.getRegister())
-                .codeVisibleStartTime(configVo.getCodeVisibleStartTime()).problem(configVo.getProblem())
-                .training(configVo.getTraining()).contest(configVo.getContest()).status(configVo.getStatus())
-                .rank(configVo.getRank()).discussion(configVo.getDiscussion()).introduction(configVo.getIntroduction())
+                .description(UnicodeUtil.toString(configVo.getDescription()))
+                .register(configVo.getRegister())
+//                .codeVisibleStartTime(configVo.getCodeVisibleStartTime())
+                .problem(configVo.getProblem())
+                .training(configVo.getTraining())
+                .contest(configVo.getContest())
+                .status(configVo.getStatus())
+                .rank(configVo.getRank())
+                .discussion(configVo.getDiscussion())
+//              .introduction(configVo.getIntroduction())
                 .recordName(UnicodeUtil.toString(configVo.getRecordName()))
                 .recordUrl(UnicodeUtil.toString(configVo.getRecordUrl()))
                 .projectName(UnicodeUtil.toString(configVo.getProjectName()))
@@ -157,12 +162,12 @@ public class ConfigServiceImpl implements ConfigService {
         if (!StrUtil.isEmpty(webConfigDto.getDescription())) {
             configVo.setDescription(webConfigDto.getDescription());
         }
-        if (webConfigDto.getRegister() != null) {
-            configVo.setRegister(webConfigDto.getRegister());
-        }
-        if (webConfigDto.getCodeVisibleStartTime() != null) {
-            configVo.setCodeVisibleStartTime(webConfigDto.getCodeVisibleStartTime());
-        }
+//        if (webConfigDto.getRegister() != null) {
+//            configVo.setRegister(webConfigDto.getRegister());
+//        }
+//        if (webConfigDto.getCodeVisibleStartTime() != null) {
+//            configVo.setCodeVisibleStartTime(webConfigDto.getCodeVisibleStartTime());
+//        }
         if (!StrUtil.isEmpty(webConfigDto.getRecordName())) {
             configVo.setRecordName(webConfigDto.getRecordName());
         }
@@ -310,6 +315,74 @@ public class ConfigServiceImpl implements ConfigService {
             log.error("通过 Nacos 修改网站配置异常--------------->", e);
         }
         return isOk;
+    }
+
+    @Override
+    public SwitchConfigDto getSwitchConfig() {
+        return BeanUtil.copyProperties(configVo, SwitchConfigDto.class);
+//        return SwitchConfigDto.builder()
+//                .openPublicDiscussion(configVo.getOpenPublicDiscussion())
+//                .openContestComment(configVo.getOpenContestComment())
+//                .openPublicJudge(configVo.getOpenPublicJudge())
+//                .openContestJudge(configVo.getOpenContestJudge())
+//                .defaultSubmitInterval(configVo.getDefaultSubmitInterval())
+//                .build();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void setSwitchConfig(SwitchConfigDto config) {
+//        if (config.getOpenPublicDiscussion() != null) {
+//            configVo.setOpenPublicDiscussion(config.getOpenPublicDiscussion());
+//        }
+//        if (config.getOpenContestComment() != null) {
+//            configVo.setOpenContestComment(config.getOpenContestComment());
+//        }
+        if (config.getOpenPublicJudge() != null) {
+            configVo.setOpenPublicJudge(config.getOpenPublicJudge());
+        }
+        if (config.getOpenContestJudge() != null) {
+            configVo.setOpenContestJudge(config.getOpenContestJudge());
+        }
+        if (config.getDefaultSubmitInterval() != null) {
+            if (config.getDefaultSubmitInterval() >= 0) {
+                configVo.setDefaultSubmitInterval(config.getDefaultSubmitInterval());
+            } else {
+                configVo.setDefaultSubmitInterval(0);
+            }
+        }
+        if (config.getCodeVisibleStartTime() != null) {
+            configVo.setCodeVisibleStartTime(config.getCodeVisibleStartTime());
+        }
+
+        if (config.getRegister() != null) {
+            configVo.setRegister(config.getRegister());
+        }
+        if (config.getProblem() != null) {
+            configVo.setProblem(config.getProblem());
+        }
+        if (config.getTraining() != null) {
+            configVo.setTraining(config.getTraining());
+        }
+        if (config.getContest() != null) {
+            configVo.setContest(config.getContest());
+        }
+        if (config.getStatus() != null) {
+            configVo.setStatus(config.getStatus());
+        }
+        if (config.getRank() != null) {
+            configVo.setRank(config.getRank());
+        }
+        if (config.getDiscussion() != null) {
+            configVo.setDiscussion(config.getDiscussion());
+        }
+        if (config.getIntroduction() != null) {
+            configVo.setIntroduction(config.getIntroduction());
+        }
+        boolean isOk = sendNewConfigToNacos();
+        if (!isOk) {
+            throw new StatusFailException("修改失败");
+        }
     }
 
 }

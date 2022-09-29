@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.judge.local;
+package com.simplefanc.voj.backend.judge.remote;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -13,45 +13,40 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
-/**
- * @Author: chenfan
- * @Date: 2021/2/5 16:44
- * @Description:
- */
 @Component
 @Slf4j(topic = "voj")
 @RefreshScope
 @RequiredArgsConstructor
-public class JudgeDispatcher {
+public class RemoteJudgeTaskDispatcher {
 
     private final RedisUtil redisUtil;
 
     private final JudgeEntityService judgeEntityService;
 
-    private final JudgeReceiver judgeReceiver;
+    private final RemoteJudgeTaskTaskReceiver remoteJudgeTaskReceiver;
 
     @Value("${voj.judge.token}")
     private String judgeToken;
 
-    public void sendTask(Judge judge, Boolean isContest) {
+    public void sendTask(Judge judge, String remoteJudgeProblem, Boolean isContest) {
         JSONObject task = new JSONObject();
         task.set("judge", judge);
+        task.set("remoteJudgeProblem", remoteJudgeProblem);
         task.set("token", judgeToken);
         task.set("isContest", isContest);
         try {
             boolean isOk;
             if (isContest) {
-                isOk = redisUtil.llPush(QueueConstant.CONTEST_JUDGE_WAITING, JSONUtil.toJsonStr(task));
+                isOk = redisUtil.llPush(QueueConstant.CONTEST_REMOTE_JUDGE_WAITING_HANDLE, JSONUtil.toJsonStr(task));
             } else {
-                isOk = redisUtil.llPush(QueueConstant.GENERAL_JUDGE_WAITING, JSONUtil.toJsonStr(task));
+                isOk = redisUtil.llPush(QueueConstant.GENERAL_REMOTE_JUDGE_WAITING_HANDLE, JSONUtil.toJsonStr(task));
             }
             if (!isOk) {
                 judgeEntityService.updateById(new Judge().setSubmitId(judge.getSubmitId())
                         .setStatus(JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus())
                         .setErrorMessage("Please try to submit again!"));
             }
-            // 调用判题任务处理
-            judgeReceiver.processWaitingTask();
+            remoteJudgeTaskReceiver.processWaitingTask();
         } catch (Exception e) {
             log.error("调用redis将判题纳入判题等待队列异常,此次判题任务判为系统错误--------------->", e);
             judgeEntityService.failToUseRedisPublishJudge(judge.getSubmitId(), judge.getPid(), isContest);

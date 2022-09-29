@@ -13,13 +13,13 @@ import java.util.HashMap;
 /**
  * @Author: chenfan
  * @Date: 2022/3/12 15:49
- * @Description:
+ * @Description: 判题上下文
  */
 @Component
 @RequiredArgsConstructor
 public class JudgeContext {
 
-    private final JudgeStrategy judgeStrategy;
+    private final JudgeProcess judgeProcess;
 
     public Judge judge(Problem problem, Judge judge) {
         // c和c++为一倍时间和空间，其它语言为2倍时间和空间
@@ -31,7 +31,7 @@ public class JudgeContext {
             problem.setMemoryLimit(problem.getMemoryLimit() * 2);
         }
 
-        HashMap<String, Object> judgeResult = judgeStrategy.execute(problem, judge);
+        HashMap<String, Object> judgeResult = judgeProcess.execute(problem, judge);
 
         return wrapJudgeResult(problem, judge, judgeResult);
     }

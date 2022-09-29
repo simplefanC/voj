@@ -34,7 +34,10 @@ public class ContestValidator {
 
     public boolean isContestOwner(String uid) {
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        return userRolesVo.getUid().equals(uid);
+        if(userRolesVo == null) {
+            return false;
+        }
+        return uid.equals(userRolesVo.getUid());
     }
 
     public boolean isOpenSealRank(Contest contest, Boolean forceRefresh) {

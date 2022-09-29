@@ -5,19 +5,19 @@ package com.simplefanc.voj.backend.judge;
  * @Date: 2021/12/22 12:40
  * @Description:
  */
-public abstract class AbstractReceiver {
+public abstract class AbstractTaskReceiver {
 
     public void handleWaitingTask(String... queues) {
         for (String queue : queues) {
-            String taskJsonStr = getTaskByRedis(queue);
+            String taskJsonStr = getTaskFromRedis(queue);
             if (taskJsonStr != null) {
-                handleJudgeMsg(taskJsonStr);
+                handleJudgeTask(taskJsonStr);
             }
         }
     }
 
-    public abstract String getTaskByRedis(String queue);
+    public abstract String getTaskFromRedis(String queue);
 
-    public abstract void handleJudgeMsg(String taskJsonStr);
+    public abstract void handleJudgeTask(String taskJsonStr);
 
 }

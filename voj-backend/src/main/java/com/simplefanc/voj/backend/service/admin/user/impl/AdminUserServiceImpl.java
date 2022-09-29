@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.constants.Constant;
 import com.simplefanc.voj.backend.common.constants.RoleEnum;
+import com.simplefanc.voj.backend.common.constants.UserStatusEnum;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
@@ -48,12 +49,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final AdminNoticeService adminNoticeService;
 
-    private final UserRecordService userRecordService;
-
     private final RedisUtil redisUtil;
 
     @Override
-    public IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin, String keyword) {
+    public IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, String keyword, Long roleId, Integer status) {
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
         if (limit == null || limit < 1)
@@ -61,31 +60,30 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (keyword != null) {
             keyword = keyword.trim();
         }
-        return userRoleEntityService.getUserList(limit, currentPage, keyword, onlyAdmin);
+        return userRoleEntityService.getUserList(limit, currentPage, keyword, roleId, status);
     }
 
     @Override
     public void editUser(AdminEditUserDto adminEditUserDto) {
-
-        String username = adminEditUserDto.getUsername();
         String uid = adminEditUserDto.getUid();
-        String realname = adminEditUserDto.getRealname();
-        String email = adminEditUserDto.getEmail();
-        String password = adminEditUserDto.getPassword();
-        int type = adminEditUserDto.getType();
-        int status = adminEditUserDto.getStatus();
-        boolean setNewPwd = adminEditUserDto.getSetNewPwd();
 
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
 
-        userInfoUpdateWrapper.eq("uuid", uid).set("username", username).set("realname", realname).set("email", email)
-                .set(setNewPwd, "password", SecureUtil.md5(password)).set("status", status);
+        userInfoUpdateWrapper.eq("uuid", uid)
+                .set("username", adminEditUserDto.getUsername())
+                .set("realname", adminEditUserDto.getRealname())
+                .set("school", adminEditUserDto.getSchool())
+                .set("number", adminEditUserDto.getNumber())
+                .set("email", adminEditUserDto.getEmail())
+                .set(adminEditUserDto.getSetNewPwd(), "password", SecureUtil.md5(adminEditUserDto.getPassword()))
+                .set("status", adminEditUserDto.getStatus());
         boolean addUserInfo = userInfoEntityService.update(userInfoUpdateWrapper);
 
         QueryWrapper<UserRole> userRoleQueryWrapper = new QueryWrapper<>();
         userRoleQueryWrapper.eq("uid", uid);
         UserRole userRole = userRoleEntityService.getOne(userRoleQueryWrapper, false);
         boolean addUserRole = false;
+        int type = adminEditUserDto.getType();
         int oldType = userRole.getRoleId().intValue();
         if (userRole.getRoleId().intValue() != type) {
             userRole.setRoleId((long) type);
@@ -119,6 +117,17 @@ public class AdminUserServiceImpl implements AdminUserService {
         boolean isOk = userInfoEntityService.removeByIds(deleteUserIdList);
         if (!isOk) {
             throw new StatusFailException("删除失败！");
+        }
+    }
+
+    @Override
+    public void forbidUser(List<String> userIdList) {
+        final boolean isOk = userInfoEntityService.lambdaUpdate()
+                .set(UserInfo::getStatus, UserStatusEnum.FORBID.getStatus())
+                .in(UserInfo::getUuid, userIdList)
+                .update();
+        if (!isOk) {
+            throw new StatusFailException("封禁失败！");
         }
     }
 

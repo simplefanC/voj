@@ -21,15 +21,21 @@ import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.*;
 
+/**
+ * @Author: chenfan
+ * @Date: 2022/3/12 15:49
+ * @Description: 执行判题流程
+ */
 @Slf4j(topic = "voj")
 @Component
 @RequiredArgsConstructor
-public class JudgeStrategy {
+public class JudgeProcess {
 
     private final JudgeEntityService judgeEntityService;
 
@@ -37,12 +43,16 @@ public class JudgeStrategy {
 
     private final JudgeRun judgeRun;
 
+    @Value("${voj-judge-server.name}")
+    private String judgeServerName;
+
     public HashMap<String, Object> execute(Problem problem, Judge judge) {
         HashMap<String, Object> result = new HashMap<>();
         // 编译好的临时代码文件id
         String userFileId = null;
         String userFileSrc = null;
         // 标志该判题过程进入编译阶段
+        judge.setJudger(judgeServerName);
         judge.setStatus(JudgeStatus.STATUS_COMPILING.getStatus());
         judgeEntityService.updateById(judge);
 
@@ -96,12 +106,6 @@ public class JudgeStrategy {
         return result;
     }
 
-    private void handleJudgeError(HashMap<String, Object> result, JudgeStatus status, String errMsg) {
-        result.put("code", status.getStatus());
-        result.put("errMsg", errMsg);
-        result.put("time", 0);
-        result.put("memory", 0);
-    }
 
     private Boolean checkOrCompileExtraProgram(Problem problem) throws CompileError, SystemError {
         JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
@@ -123,6 +127,13 @@ public class JudgeStrategy {
         }
 
         return true;
+    }
+
+    private void handleJudgeError(HashMap<String, Object> result, JudgeStatus status, String errMsg) {
+        result.put("code", status.getStatus());
+        result.put("errMsg", errMsg);
+        result.put("time", 0);
+        result.put("memory", 0);
     }
 
     private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemError {
@@ -161,7 +172,6 @@ public class JudgeStrategy {
         return null;
     }
 
-
     private Boolean isCompileSpjOk(Problem problem, String currentVersion) throws SystemError {
         CompileConfig compiler;
         String programFilePath;
@@ -198,41 +208,6 @@ public class JudgeStrategy {
         return null;
     }
 
-    // 获取判题的运行时间，运行空间，OI得分
-    public HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList, Boolean isACM,
-                                                     Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
-        HashMap<String, Object> result = new HashMap<>();
-        // 用时和内存占用保存为多个测试点中最长的
-        allTestCaseResultList.stream()
-                .max(Comparator.comparing(JudgeCase::getTime))
-                .ifPresent(t -> result.put("time", t.getTime()));
-
-        allTestCaseResultList.stream()
-                .max(Comparator.comparing(JudgeCase::getMemory))
-                .ifPresent(t -> result.put("memory", t.getMemory()));
-
-        // OI题目计算得分
-        if (!isACM) {
-            // 全对的直接用总分*0.1+2*题目难度
-            if (errorCaseNum == 0) {
-                int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
-                result.put("score", totalScore);
-                result.put("oiRankScore", oiRankScore);
-            } else {
-                int sumScore = 0;
-                for (JudgeCase testcaseResult : allTestCaseResultList) {
-                    sumScore += testcaseResult.getScore();
-                }
-                // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
-                int oiRankScore = (int) Math
-                        .round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
-                result.put("score", sumScore);
-                result.put("oiRankScore", oiRankScore);
-            }
-        }
-        return result;
-    }
-
     /**
      * 进行最终测试结果的判断（除编译失败外的评测状态码，时间，空间，OI题目的得分）
      *
@@ -241,7 +216,7 @@ public class JudgeStrategy {
      * @param judge
      * @return
      */
-    public HashMap<String, Object> getJudgeInfo(List<JSONObject> testCaseResultList, Problem problem, Judge judge) {
+    private HashMap<String, Object> getJudgeInfo(List<JSONObject> testCaseResultList, Problem problem, Judge judge) {
         boolean isACM = problem.getType().equals(ContestEnum.TYPE_ACM.getCode());
 
         List<JSONObject> errorTestCaseList = new LinkedList<>();
@@ -321,6 +296,41 @@ public class JudgeStrategy {
         allCaseResList.add(judgeCase);
     }
 
+    // 获取判题的运行时间，运行空间，OI得分
+    private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList, Boolean isACM,
+                                                     Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
+        HashMap<String, Object> result = new HashMap<>();
+        // 用时和内存占用保存为多个测试点中最长的
+        allTestCaseResultList.stream()
+                .max(Comparator.comparing(JudgeCase::getTime))
+                .ifPresent(t -> result.put("time", t.getTime()));
+
+        allTestCaseResultList.stream()
+                .max(Comparator.comparing(JudgeCase::getMemory))
+                .ifPresent(t -> result.put("memory", t.getMemory()));
+
+        // OI题目计算得分
+        if (!isACM) {
+            // 全对的直接用总分*0.1+2*题目难度
+            if (errorCaseNum == 0) {
+                int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
+                result.put("score", totalScore);
+                result.put("oiRankScore", oiRankScore);
+            } else {
+                int sumScore = 0;
+                for (JudgeCase testcaseResult : allTestCaseResultList) {
+                    sumScore += testcaseResult.getScore();
+                }
+                // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
+                int oiRankScore = (int) Math
+                        .round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
+                result.put("score", sumScore);
+                result.put("oiRankScore", oiRankScore);
+            }
+        }
+        return result;
+    }
+
     private String getUserFileName(String language) {
         switch (language) {
             case "PHP":
@@ -332,7 +342,7 @@ public class JudgeStrategy {
         return "main";
     }
 
-    public String mergeNonEmptyStrings(String... strings) {
+    private String mergeNonEmptyStrings(String... strings) {
         StringBuilder sb = new StringBuilder();
         for (String str : strings) {
             if (!StrUtil.isEmpty(str)) {
@@ -341,5 +351,4 @@ public class JudgeStrategy {
         }
         return sb.toString();
     }
-
 }

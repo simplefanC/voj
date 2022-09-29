@@ -14,11 +14,13 @@ import java.util.Map;
  */
 public interface AdminUserService {
 
-    IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, Boolean onlyAdmin, String keyword);
+    IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, String keyword, Long role, Integer status);
 
     void editUser(AdminEditUserDto adminEditUserDto);
 
     void deleteUser(List<String> deleteUserIdList);
+
+    void forbidUser(List<String> deleteUserIdList);
 
     void insertBatchUser(List<List<String>> users);
 

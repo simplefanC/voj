@@ -22,6 +22,6 @@ public interface ProblemMapper extends BaseMapper<Problem> {
 
     List<ProblemVo> getProblemList(IPage page, @Param("keyword") String keyword,
                                    @Param("difficulty") Integer difficulty, @Param("tid") List<Long> tid,
-                                   @Param("tagListSize") Integer tagListSize, @Param("oj") String oj, @Param("isAdmin") boolean isAdmin);
+                                   @Param("tagListSize") Integer tagListSize, @Param("oj") String oj, @Param("allProblemVisible") boolean allProblemVisible);
 
 }

@@ -36,16 +36,14 @@ public class AdminProblemController {
                                                        @RequestParam(value = "keyword", required = false) String keyword,
                                                        @RequestParam(value = "auth", required = false) Integer auth,
                                                        @RequestParam(value = "oj", required = false) String oj) {
-        IPage<Problem> problemList = adminProblemService.getProblemList(limit, currentPage, keyword, auth, oj);
-        return CommonResult.successResponse(problemList);
+        return CommonResult.successResponse(adminProblemService.getProblemList(limit, currentPage, keyword, auth, oj));
     }
 
     @GetMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Problem> getProblem(@RequestParam("pid") Long pid) {
-        Problem problem = adminProblemService.getProblem(pid);
-        return CommonResult.successResponse(problem);
+        return CommonResult.successResponse(adminProblemService.getProblem(pid));
     }
 
     @DeleteMapping("")
@@ -112,7 +110,7 @@ public class AdminProblemController {
 
     @PutMapping("/change-problem-auth")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin", "admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> changeProblemAuth(@RequestBody Problem problem) {
         adminProblemService.changeProblemAuth(problem);
         return CommonResult.successResponse();

@@ -33,9 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class Dispatcher {
 
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(20);
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(20);
 
-    private final static Map<String, Future> futureTaskMap = new ConcurrentHashMap<>(20);
+    private final static Map<String, ScheduledFuture<?>> FUTURE_TASK_MAP = new ConcurrentHashMap<>(20);
 
     private final RestTemplate restTemplate;
 
@@ -68,17 +68,17 @@ public class Dispatcher {
             oj = data.getRemoteJudgeProblem().split("-")[0];
         }
         String key = UUID.randomUUID().toString() + submitId;
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(
+        ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(
                 new SubmitTask(path, data, submitId, isRemote, oj, key), 0, 2, TimeUnit.SECONDS);
-        futureTaskMap.put(key, scheduledFuture);
+        FUTURE_TASK_MAP.put(key, scheduledFuture);
     }
 
     private void cancelFutureTask(String key) {
-        Future future = futureTaskMap.get(key);
+        ScheduledFuture<?> future = FUTURE_TASK_MAP.get(key);
         if (future != null) {
             boolean isCanceled = future.cancel(true);
             if (isCanceled) {
-                futureTaskMap.remove(key);
+                FUTURE_TASK_MAP.remove(key);
             }
         }
     }
@@ -244,7 +244,6 @@ public class Dispatcher {
         private void handleJudgeProcess(JudgeServer judgeServer) {
             data.setJudgeServerIp(judgeServer.getIp());
             data.setJudgeServerPort(judgeServer.getPort());
-            data.getJudge().setJudger(judgeServer.getName());
             CommonResult result = null;
             try {
                 // https://blog.csdn.net/qq_35893120/article/details/118637987

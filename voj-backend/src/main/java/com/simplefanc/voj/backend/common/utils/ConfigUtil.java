@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.common.utils;
 
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
+import com.simplefanc.voj.backend.config.ConfigVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -48,12 +48,7 @@ public class ConfigUtil {
                 "    host: " + configVo.getRedisHost() + "\n" +
                 "    port: " + configVo.getRedisPort() + "\n" +
                 "    password: " + configVo.getRedisPassword() + "\n" +
-                "  web-config:\n" +
-                "    base-url: \"" + configVo.getBaseUrl() + "\"\n" +
-                "    name: \"" + configVo.getName() + "\"\n" +
-                "    short-name: \"" + configVo.getShortName() + "\"\n" +
-                "    description: \"" + configVo.getDescription() + "\"\n" +
-                "    register: " + configVo.getRegister() + "\n" +
+                "  switch:\n" +
                 "    problem: " + configVo.getProblem() + "\n" +
                 "    training: " + configVo.getTraining() + "\n" +
                 "    contest: " + configVo.getContest() + "\n" +
@@ -61,7 +56,17 @@ public class ConfigUtil {
                 "    rank: " + configVo.getRank() + "\n" +
                 "    discussion: " + configVo.getDiscussion() + "\n" +
                 "    introduction: " + configVo.getIntroduction() + "\n" +
-                "    code-visible-start-time: " + configVo.getCodeVisibleStartTime() + "\n" +
+                "    register: " + configVo.getRegister() + "\n" +
+                "    judge:\n" +
+                "      public: "  + configVo.getOpenPublicJudge() + "\n" +
+                "      contest: "  + configVo.getOpenContestJudge() + "\n" +
+                "      submit-interval: "  + configVo.getDefaultSubmitInterval() + "\n" +
+                "      code-visible-start-time: "  + configVo.getCodeVisibleStartTime() + "\n" +
+                "  web-config:\n" +
+                "    base-url: \"" + configVo.getBaseUrl() + "\"\n" +
+                "    name: \"" + configVo.getName() + "\"\n" +
+                "    short-name: \"" + configVo.getShortName() + "\"\n" +
+                "    description: \"" + configVo.getDescription() + "\"\n" +
                 "    footer:\n" +
                 "      record:\n" +
                 "        name: \"" + configVo.getRecordName() + "\"\n" +

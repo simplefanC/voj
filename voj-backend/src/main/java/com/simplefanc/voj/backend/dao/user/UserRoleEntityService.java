@@ -17,7 +17,7 @@ public interface UserRoleEntityService extends IService<UserRole> {
 
     UserRolesVo getUserRoles(String uid, String username);
 
-    IPage<UserRolesVo> getUserList(int limit, int currentPage, String keyword, Boolean onlyAdmin);
+    IPage<UserRolesVo> getUserList(int limit, int currentPage, String keyword, Long role, Integer status);
 
     void deleteCache(String uid, boolean isRemoveSession);
 

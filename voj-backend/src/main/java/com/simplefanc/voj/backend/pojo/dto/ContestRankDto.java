@@ -30,4 +30,6 @@ public class ContestRankDto {
 
     private List<String> concernedList;
 
+    private String keyword;
+
 }

@@ -81,7 +81,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     @Override
     public Page<ProblemVo> getProblemList(int limit, int currentPage, String title, Integer difficulty,
-                                          List<Long> tagIds, String oj, boolean isAdmin) {
+                                          List<Long> tagIds, String oj, boolean allProblemVisible) {
 
         // 新建分页
         Page<ProblemVo> page = new Page<>(currentPage, limit);
@@ -91,7 +91,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             tagListSize = tagIds.size();
         }
 
-        List<ProblemVo> problemList = problemMapper.getProblemList(page, title, difficulty, tagIds, tagListSize, oj, isAdmin);
+        List<ProblemVo> problemList = problemMapper.getProblemList(page, title, difficulty, tagIds, tagListSize, oj, allProblemVisible);
 
         if (problemList.size() > 0) {
             List<Long> pidList = problemList.stream().map(ProblemVo::getPid).collect(Collectors.toList());

@@ -4,7 +4,6 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.backend.pojo.bo.RemoteAccountProps;
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import lombok.RequiredArgsConstructor;

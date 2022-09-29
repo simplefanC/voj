@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.service.oj.impl;
+package com.simplefanc.voj.backend.service.account.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
@@ -18,20 +18,19 @@ import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.pojo.bo.EmailRuleBo;
 import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
 import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
+import com.simplefanc.voj.backend.config.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
 import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.service.account.PassportService;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
-import com.simplefanc.voj.backend.service.oj.PassportService;
 import com.simplefanc.voj.common.pojo.entity.user.*;
 import com.simplefanc.voj.common.utils.IpUtil;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +61,6 @@ public class PassportServiceImpl implements PassportService {
     private final UserInfoEntityService userInfoEntityService;
 
     private final UserRoleEntityService userRoleEntityService;
-
-    private final UserRecordService userRecordService;
 
     private final SessionEntityService sessionEntityService;
 
@@ -120,7 +117,7 @@ public class PassportServiceImpl implements PassportService {
         }
 
         // 异步检查是否异地登录
-        sessionEntityService.checkRemoteLogin(userRolesVo.getUid());
+//        sessionEntityService.checkRemoteLogin(userRolesVo.getUid());
 
         UserInfoVo userInfoVo = new UserInfoVo();
         BeanUtil.copyProperties(userRolesVo, userInfoVo, "roles");

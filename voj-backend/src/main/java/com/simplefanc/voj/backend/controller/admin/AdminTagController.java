@@ -18,7 +18,6 @@ import java.util.List;
  * @Date: 2021/11/2 23:24
  * @Description: 处理tag的增删改
  */
-
 @RestController
 @RequestMapping("/api/admin/tag")
 @RequiredArgsConstructor
@@ -28,14 +27,14 @@ public class AdminTagController {
 
     @PostMapping("")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Tag> addTag(@RequestBody Tag tag) {
         return CommonResult.successResponse(adminTagService.addTag(tag));
     }
 
     @PutMapping("")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> updateTag(@RequestBody Tag tag) {
         adminTagService.updateTag(tag);
         return CommonResult.successResponse();
@@ -51,21 +50,21 @@ public class AdminTagController {
 
     @GetMapping("/classification")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<List<TagClassification>> getTagClassification(@RequestParam(value = "oj", defaultValue = Constant.LOCAL) String oj) {
         return CommonResult.successResponse(adminTagService.getTagClassification(oj));
     }
 
     @PostMapping("/classification")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<TagClassification> addTagClassification(@RequestBody TagClassification tagClassification) {
         return CommonResult.successResponse(adminTagService.addTagClassification(tagClassification));
     }
 
     @PutMapping("/classification")
     @RequiresAuthentication
-    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
+    @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> updateTagClassification(@RequestBody TagClassification tagClassification) {
         adminTagService.updateTagClassification(tagClassification);
         return CommonResult.successResponse();

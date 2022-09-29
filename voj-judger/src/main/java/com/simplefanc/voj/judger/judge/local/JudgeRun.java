@@ -2,7 +2,9 @@ package com.simplefanc.voj.judger.judge.local;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import com.simplefanc.voj.common.constants.JudgeCaseMode;
 import com.simplefanc.voj.common.constants.JudgeMode;
+import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
@@ -31,7 +33,7 @@ import java.util.concurrent.FutureTask;
 /**
  * @Author: chenfan
  * @Date: 2021/4/16 12:15
- * @Description: 判题流程解耦重构3.0，该类负责输入数据进入程序进行测评
+ * @Description: 运行判题任务
  */
 @Component
 @RequiredArgsConstructor
@@ -51,7 +53,39 @@ public class JudgeRun {
         JudgeGlobalDTO judgeGlobalDTO = getJudgeGlobalDTO(judge, problem, userFileId, userFileSrc, getUserOutput);
 
         List<FutureTask<JSONObject>> futureTasks = getFutureTasks(judgeGlobalDTO);
+        if (JudgeCaseMode.ITERATE_UNTIL_WRONG.getMode().equals(problem.getJudgeCaseMode())) {
+            // 顺序评测测试点，遇到非AC就停止！
+            return iterateJudgeAllCase(futureTasks);
+        } else {
+            return defaultJudgeAllCase(futureTasks);
+        }
+    }
 
+    private List<JSONObject> iterateJudgeAllCase(List<FutureTask<JSONObject>> futureTasks) throws ExecutionException, InterruptedException {
+        List<JSONObject> result = new LinkedList<>();
+        for (FutureTask<JSONObject> futureTask : futureTasks) {
+            // 提交到线程池进行执行
+            ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
+            JSONObject judgeRes;
+            while (true) {
+                if (futureTask.isDone() && !futureTask.isCancelled()) {
+                    // 获取线程返回结果
+                    judgeRes = futureTask.get();
+                    break;
+                } else {
+                    Thread.sleep(10);
+                }
+            }
+            result.add(judgeRes);
+            Integer status = judgeRes.getInt("status");
+            if (!JudgeStatus.STATUS_ACCEPTED.getStatus().equals(status)) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private List<JSONObject> defaultJudgeAllCase(List<FutureTask<JSONObject>> futureTasks) throws InterruptedException, ExecutionException {
         // 提交到线程池进行执行
         for (FutureTask<JSONObject> futureTask : futureTasks) {
             ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
@@ -82,7 +116,7 @@ public class JudgeRun {
         final JSONArray testcaseList = (JSONArray) judgeGlobalDTO.getTestCaseInfo().get("testCases");
         for (int index = 0; index < testcaseList.size(); index++) {
             JSONObject testcase = (JSONObject) testcaseList.get(index);
-            final int testCaseId = index + 1;
+            final int testCaseNum = index + 1;
             // 输入文件名
             final String inputFileName = testcase.getStr("inputName");
             // 输出文件名
@@ -98,11 +132,18 @@ public class JudgeRun {
 
             final Long maxOutputSize = Math.max(testcase.getLong("outputSize", 0L) * 2, 16 * 1024 * 1024L);
 
-            JudgeDTO judgeDTO = JudgeDTO.builder().testCaseId(testCaseId).testCaseInputPath(testCaseInputPath)
-                    .testCaseOutputPath(testCaseOutputPath).maxOutputSize(maxOutputSize).build();
+            JudgeDTO judgeDTO = JudgeDTO.builder()
+                    .testCaseNum(testCaseNum)
+                    .testCaseInputFileName(inputFileName)
+                    .testCaseInputPath(testCaseInputPath)
+                    .testCaseOutputFileName(outputFileName)
+                    .testCaseOutputPath(testCaseOutputPath)
+                    .problemCaseId(caseId)
+                    .score(score)
+                    .maxOutputSize(maxOutputSize)
+                    .build();
             // 将每个需要测试的线程任务加入任务列表中
-            futureTasks.add(new FutureTask<>(
-                    new JudgeTask(judgeDTO, judgeGlobalDTO, caseId, score, inputFileName, outputFileName)));
+            futureTasks.add(new FutureTask<>(new JudgeTask(judgeDTO, judgeGlobalDTO)));
         }
         return futureTasks;
     }
@@ -160,42 +201,35 @@ public class JudgeRun {
     class JudgeTask implements Callable<JSONObject> {
         JudgeDTO judgeDTO;
         JudgeGlobalDTO judgeGlobalDTO;
-        Long caseId;
-        Integer score;
-        String inputFileName;
-        String outputFileName;
 
-        public JudgeTask(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, Long caseId,
-                         Integer score, String inputFileName, String outputFileName) {
+        public JudgeTask(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
             this.judgeDTO = judgeDTO;
             this.judgeGlobalDTO = judgeGlobalDTO;
-            this.caseId = caseId;
-            this.score = score;
-            this.inputFileName = inputFileName;
-            this.outputFileName = outputFileName;
         }
 
         @Override
-        public JSONObject call() throws Exception {
-            JSONObject result;
-            switch (judgeGlobalDTO.getJudgeMode()) {
-                case DEFAULT:
-                    result = defaultJudge.judgeCase(judgeDTO, judgeGlobalDTO);
-                    break;
-                case SPJ:
-                    result = specialJudge.judgeCase(judgeDTO, judgeGlobalDTO);
-                    break;
-                case INTERACTIVE:
-                    result = interactiveJudge.judgeCase(judgeDTO, judgeGlobalDTO);
-                    break;
-                default:
-                    throw new RuntimeException("The problem mode is error:" + judgeGlobalDTO.getJudgeMode());
-            }
-            result.set("caseId", caseId);
-            result.set("score", score);
-            result.set("inputFileName", inputFileName);
-            result.set("outputFileName", outputFileName);
+        public JSONObject call() throws SystemError {
+            final AbstractJudge abstractJudge = getAbstractJudge(judgeGlobalDTO.getJudgeMode());
+
+            JSONObject result = abstractJudge.judge(judgeDTO, judgeGlobalDTO);
+            result.set("caseId", judgeDTO.getProblemCaseId());
+            result.set("score", judgeDTO.getScore());
+            result.set("inputFileName", judgeDTO.getTestCaseInputFileName());
+            result.set("outputFileName", judgeDTO.getTestCaseOutputFileName());
             return result;
+        }
+
+        private AbstractJudge getAbstractJudge(JudgeMode judgeMode) {
+            switch (judgeMode) {
+                case DEFAULT:
+                    return defaultJudge;
+                case SPJ:
+                    return specialJudge;
+                case INTERACTIVE:
+                    return interactiveJudge;
+                default:
+                    throw new RuntimeException("The problem judge mode is error:" + judgeMode);
+            }
         }
 
     }

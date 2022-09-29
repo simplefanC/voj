@@ -20,12 +20,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ContestRankService {
 
-    private final ContestCalculateRankService contestCalculateRankService;
+    private final ContestCalculateAcmRankService contestCalculateAcmRankService;
+
+    private final ContestCalculateOiRankService contestCalculateOiRankService;
 
     /**
      * @param isOpenSealRank
      * @param removeStar
-     * @param currentUserId
      * @param concernedList
      * @param contest
      * @param currentPage
@@ -33,10 +34,10 @@ public class ContestRankService {
      * @desc 获取ACM比赛排行榜，有分页
      */
     public IPage<ACMContestRankVo> getContestAcmRankPage(Boolean isOpenSealRank, Boolean removeStar,
-                                                         String currentUserId, List<String> concernedList, Contest contest, int currentPage, int limit) {
+                                                         List<String> concernedList, Contest contest, String keyword, int currentPage, int limit) {
         // 进行排序计算
-        List<ACMContestRankVo> orderResultList = contestCalculateRankService.calculateAcmRank(isOpenSealRank, removeStar,
-                contest, currentUserId, concernedList);
+        List<ACMContestRankVo> orderResultList = contestCalculateAcmRankService.calculateAcmRank(isOpenSealRank, removeStar,
+                contest, concernedList, keyword);
 
         // 计算好排行榜，然后进行分页
         Page<ACMContestRankVo> page = new Page<>(currentPage, limit);
@@ -58,18 +59,17 @@ public class ContestRankService {
     /**
      * @param isOpenSealRank
      * @param removeStarUser
-     * @param currentUserId
      * @param concernedList
      * @param contest
      * @param currentPage
      * @param limit
      * @desc 获取OI比赛排行榜，有分页
      */
-    public IPage<OIContestRankVo> getContestOiRankPage(Boolean isOpenSealRank, Boolean removeStarUser, String currentUserId,
-                                                       List<String> concernedList, Contest contest, int currentPage, int limit) {
+    public IPage<OIContestRankVo> getContestOiRankPage(Boolean isOpenSealRank, Boolean removeStarUser,
+                                                       List<String> concernedList, Contest contest, String keyword, int currentPage, int limit) {
 
-        List<OIContestRankVo> orderResultList = contestCalculateRankService.calculateOiRank(isOpenSealRank, removeStarUser,
-                contest, currentUserId, concernedList);
+        List<OIContestRankVo> orderResultList = contestCalculateOiRankService.calculateOiRank(isOpenSealRank, removeStarUser,
+                contest, concernedList, keyword);
 
         // 计算好排行榜，然后进行分页
         Page<OIContestRankVo> page = new Page<>(currentPage, limit);
@@ -91,33 +91,31 @@ public class ContestRankService {
      * @param isOpenSealRank
      * @param removeStar
      * @param contest
-     * @param currentUserId
      * @param concernedList
      * @param useCache
      * @param cacheTime
      * @desc 获取ACM比赛排行榜外榜
      */
     public List<ACMContestRankVo> getAcmContestScoreboard(Boolean isOpenSealRank, Boolean removeStar, Contest contest,
-                                                          String currentUserId, List<String> concernedList, Boolean useCache, Long cacheTime) {
+                                                          List<String> concernedList, String keyword, Boolean useCache, Long cacheTime) {
 
-        return contestCalculateRankService.calculateAcmRank(isOpenSealRank, removeStar, contest, currentUserId,
-                concernedList, useCache, cacheTime);
+        return contestCalculateAcmRankService.calculateAcmRank(isOpenSealRank, removeStar, contest,
+                concernedList, keyword, useCache, cacheTime);
     }
 
     /**
      * @param isOpenSealRank
      * @param removeStar
      * @param contest
-     * @param currentUserId
      * @param concernedList
      * @param useCache
      * @param cacheTime
      * @desc 获取OI比赛排行榜外榜
      */
     public List<OIContestRankVo> getOiContestScoreboard(Boolean isOpenSealRank, Boolean removeStar, Contest contest,
-                                                        String currentUserId, List<String> concernedList, Boolean useCache, Long cacheTime) {
+                                                        List<String> concernedList, String keyword, Boolean useCache, Long cacheTime) {
 
-        return contestCalculateRankService.calculateOiRank(isOpenSealRank, removeStar, contest, currentUserId, concernedList,
+        return contestCalculateOiRankService.calculateOiRank(isOpenSealRank, removeStar, contest, concernedList, keyword,
                 useCache, cacheTime);
     }
 

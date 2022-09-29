@@ -21,13 +21,13 @@ import java.util.List;
 @Mapper
 public interface ContestMapper extends BaseMapper<Contest> {
 
-    List<ContestVo> getContestList(IPage page, @Param("type") Integer type, @Param("status") Integer status,
+    List<Contest> getContestList(IPage page, @Param("type") Integer type, @Param("status") Integer status,
                                    @Param("keyword") String keyword);
 
     List<ContestRegisterCountVo> getContestRegisterCount(@Param("cidList") List<Long> cidList);
 
     ContestVo getContestInfoById(@Param("cid") long cid);
 
-    List<ContestVo> getWithinNext14DaysContests();
+    List<Contest> getWithinNext14DaysContests();
 
 }

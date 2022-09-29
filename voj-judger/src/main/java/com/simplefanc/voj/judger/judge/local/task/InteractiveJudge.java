@@ -26,7 +26,7 @@ import java.io.File;
 public class InteractiveJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
 
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         RunConfig interactiveRunConfig = judgeGlobalDTO.getInteractiveRunConfig();

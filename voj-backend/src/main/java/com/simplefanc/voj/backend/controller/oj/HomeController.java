@@ -38,7 +38,6 @@ public class HomeController {
      * @Return CommonResult
      * @Since 2021/12/29
      */
-
     @GetMapping("/get-recent-contest")
     public CommonResult<List<ContestVo>> getRecentContest() {
         return CommonResult.successResponse(homeService.getRecentContest());

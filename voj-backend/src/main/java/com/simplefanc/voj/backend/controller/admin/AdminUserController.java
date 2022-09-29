@@ -30,9 +30,10 @@ public class AdminUserController {
     @RequiresPermissions("user_admin")
     public CommonResult<IPage<UserRolesVo>> getUserList(@RequestParam(value = "limit", required = false) Integer limit,
                                                         @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                                        @RequestParam(value = "onlyAdmin", defaultValue = "false") Boolean onlyAdmin,
+                                                        @RequestParam(value = "roleId", required = false) Long roleId,
+                                                        @RequestParam(value = "status", required = false) Integer status,
                                                         @RequestParam(value = "keyword", required = false) String keyword) {
-        return CommonResult.successResponse(adminUserService.getUserList(limit, currentPage, onlyAdmin, keyword));
+        return CommonResult.successResponse(adminUserService.getUserList(limit, currentPage, keyword, roleId, status));
     }
 
     @PutMapping("/edit-user")
@@ -49,6 +50,15 @@ public class AdminUserController {
     public CommonResult<Void> deleteUser(@RequestBody Map<String, Object> params) {
         // TODO 参数
         adminUserService.deleteUser((List<String>) params.get("ids"));
+        return CommonResult.successResponse();
+    }
+
+    @PostMapping("/forbid-user")
+    @RequiresPermissions("user_admin")
+    @RequiresAuthentication
+    public CommonResult<Void> forbidUser(@RequestBody Map<String, Object> params) {
+        // TODO 参数
+        adminUserService.forbidUser((List<String>) params.get("ids"));
         return CommonResult.successResponse();
     }
 

@@ -22,7 +22,8 @@ import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ExcelIpVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.backend.service.file.ContestFileService;
-import com.simplefanc.voj.backend.service.oj.ContestCalculateRankService;
+import com.simplefanc.voj.backend.service.oj.ContestCalculateAcmRankService;
+import com.simplefanc.voj.backend.service.oj.ContestCalculateOiRankService;
 import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -74,7 +75,9 @@ public class ContestFileServiceImpl implements ContestFileService {
 
     private final UserInfoEntityService userInfoEntityService;
 
-    private final ContestCalculateRankService contestCalculateRankService;
+    private final ContestCalculateAcmRankService contestCalculateAcmRankService;
+
+    private final ContestCalculateOiRankService contestCalculateOiRankService;
 
     private final ContestValidator contestValidator;
 
@@ -166,13 +169,13 @@ public class ContestFileServiceImpl implements ContestFileService {
         List data;
         // ACM比赛
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-            List<ACMContestRankVo> acmContestRankVoList = contestCalculateRankService.calculateAcmRank(isOpenSealRank,
+            List<ACMContestRankVo> acmContestRankVoList = contestCalculateAcmRankService.calculateAcmRank(isOpenSealRank,
                     removeStar, contest, null, null);
             head = getContestRankExcelHead(contestProblemDisplayIdList, true);
             data = changeACMContestRankToExcelRowList(acmContestRankVoList,
                             contestProblemDisplayIdList, contest.getRankShowName());
         } else {
-            List<OIContestRankVo> oiContestRankVoList = contestCalculateRankService.calculateOiRank(isOpenSealRank,
+            List<OIContestRankVo> oiContestRankVoList = contestCalculateOiRankService.calculateOiRank(isOpenSealRank,
                     removeStar, contest, null, null);
             head = getContestRankExcelHead(contestProblemDisplayIdList, false);
             data = changeOIContestRankToExcelRowList(oiContestRankVoList, contestProblemDisplayIdList, contest.getRankShowName());

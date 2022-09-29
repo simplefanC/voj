@@ -15,11 +15,11 @@ import com.simplefanc.voj.backend.dao.judge.JudgeCaseEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
-import com.simplefanc.voj.backend.judge.local.JudgeDispatcher;
-import com.simplefanc.voj.backend.judge.remote.RemoteJudgeDispatcher;
+import com.simplefanc.voj.backend.judge.local.JudgeTaskDispatcher;
+import com.simplefanc.voj.backend.judge.remote.RemoteJudgeTaskDispatcher;
 import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
 import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
-import com.simplefanc.voj.backend.pojo.vo.ConfigVo;
+import com.simplefanc.voj.backend.config.ConfigVo;
 import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
 import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -38,8 +38,6 @@ import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
 import com.simplefanc.voj.common.utils.IpUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -72,9 +70,9 @@ public class JudgeServiceImpl implements JudgeService {
 
     private final UserAcproblemEntityService userAcproblemEntityService;
 
-    private final JudgeDispatcher judgeDispatcher;
+    private final JudgeTaskDispatcher judgeTaskDispatcher;
 
-    private final RemoteJudgeDispatcher remoteJudgeDispatcher;
+    private final RemoteJudgeTaskDispatcher remoteJudgeTaskDispatcher;
 
     private final RedisUtil redisUtil;
 
@@ -88,7 +86,7 @@ public class JudgeServiceImpl implements JudgeService {
 
     /**
      * @MethodName submitProblemJudge
-     * @Description 核心方法 判题通过openfeign调用判题系统服务
+     * @Description 核心方法
      * @Since 2021/10/30
      */
     @Override
@@ -103,14 +101,14 @@ public class JudgeServiceImpl implements JudgeService {
 
         boolean isTrainingSubmission = judgeDto.getTid() != null && judgeDto.getTid() != 0;
 
-        // 非比赛提交限制8秒提交一次
-        if (!isContestSubmission) {
+        // 非比赛提交有限制
+        if (!isContestSubmission && configVo.getDefaultSubmitInterval() > 0) {
             String lockKey = AccountConstant.SUBMIT_NON_CONTEST_LOCK + userRolesVo.getUid();
             long count = redisUtil.incr(lockKey, 1);
             if (count > 1) {
                 throw new StatusForbiddenException("对不起，您的提交频率过快，请稍后再尝试！");
             }
-            redisUtil.expire(lockKey, 8);
+            redisUtil.expire(lockKey, configVo.getDefaultSubmitInterval());
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes()))
@@ -138,9 +136,9 @@ public class JudgeServiceImpl implements JudgeService {
         if (judgeDto.getIsRemote()) {
             // 如果是远程oj判题
             final String remoteJudgeProblem = judge.getDisplayPid();
-            remoteJudgeDispatcher.sendTask(judge, remoteJudgeProblem, isContestSubmission);
+            remoteJudgeTaskDispatcher.sendTask(judge, remoteJudgeProblem, isContestSubmission);
         } else {
-            judgeDispatcher.sendTask(judge, isContestSubmission);
+            judgeTaskDispatcher.sendTask(judge, isContestSubmission);
         }
 
         return judge;
@@ -191,9 +189,9 @@ public class JudgeServiceImpl implements JudgeService {
         // 将提交加入任务队列
         if (problem.getIsRemote()) {
             // 如果是远程oj判题
-            remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(), judge.getCid() != 0);
+            remoteJudgeTaskDispatcher.sendTask(judge, problem.getProblemId(), judge.getCid() != 0);
         } else {
-            judgeDispatcher.sendTask(judge, judge.getCid() != 0);
+            judgeTaskDispatcher.sendTask(judge, judge.getCid() != 0);
         }
         return judge;
     }

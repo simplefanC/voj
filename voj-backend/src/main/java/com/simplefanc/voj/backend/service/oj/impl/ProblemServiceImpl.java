@@ -62,7 +62,7 @@ public class ProblemServiceImpl implements ProblemService {
      */
     @Override
     public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagIds,
-                                          Integer difficulty, String oj) {
+                                          Integer difficulty, String oj, Boolean problemVisible) {
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
@@ -76,8 +76,8 @@ public class ProblemServiceImpl implements ProblemService {
         if (oj != null && !RemoteOj.isRemoteOJ(oj)) {
             oj = Constant.LOCAL;
         }
-        boolean isAdmin = UserSessionUtil.isRoot() || UserSessionUtil.isProblemAdmin();
-        return problemEntityService.getProblemList(limit, currentPage, keyword, difficulty, tagIds, oj, isAdmin);
+        boolean allProblemVisible = problemVisible && (UserSessionUtil.isRoot() || UserSessionUtil.isProblemAdmin());
+        return problemEntityService.getProblemList(limit, currentPage, keyword, difficulty, tagIds, oj, allProblemVisible);
     }
 
     /**

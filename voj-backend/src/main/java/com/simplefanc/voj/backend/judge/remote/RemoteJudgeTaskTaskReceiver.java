@@ -7,7 +7,7 @@ import com.simplefanc.voj.backend.common.constants.CallJudgerType;
 import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
-import com.simplefanc.voj.backend.judge.AbstractReceiver;
+import com.simplefanc.voj.backend.judge.AbstractTaskReceiver;
 import com.simplefanc.voj.backend.judge.ChooseUtils;
 import com.simplefanc.voj.backend.judge.Dispatcher;
 import com.simplefanc.voj.common.constants.JudgeStatus;
@@ -24,11 +24,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
-public class RemoteJudgeReceiver extends AbstractReceiver {
+public class RemoteJudgeTaskTaskReceiver extends AbstractTaskReceiver {
 
-    private final static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+    private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(10);
 
-    private final static Map<String, Future> futureTaskMap = new ConcurrentHashMap<>(10);
+    private final static Map<String, ScheduledFuture<?>> FUTURE_TASK_MAP = new ConcurrentHashMap<>(10);
 
     private final JudgeEntityService judgeEntityService;
 
@@ -42,12 +42,12 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
     public void processWaitingTask() {
         // 优先处理比赛的提交
         // 其次处理普通提交的提交
-        handleWaitingTask(QueueConstant.CONTEST_REMOTE_JUDGE_WAITING_HANDLE,
+        this.handleWaitingTask(QueueConstant.CONTEST_REMOTE_JUDGE_WAITING_HANDLE,
                 QueueConstant.GENERAL_REMOTE_JUDGE_WAITING_HANDLE);
     }
 
     @Override
-    public String getTaskByRedis(String queue) {
+    public String getTaskFromRedis(String queue) {
         if (redisUtil.lGetListSize(queue) > 0) {
             return (String) redisUtil.lrPop(queue);
         } else {
@@ -56,7 +56,7 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
     }
 
     @Override
-    public void handleJudgeMsg(String taskJsonStr) {
+    public void handleJudgeTask(String taskJsonStr) {
         JSONObject task = JSONUtil.parseObj(taskJsonStr);
 
         Judge judge = task.get("judge", Judge.class);
@@ -78,9 +78,9 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
 
     private void commonJudge(String ojName, ToJudge toJudge, Judge judge) {
         String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
-        ScheduledFuture<?> scheduledFuture = scheduler.scheduleWithFixedDelay(
+        ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(
                 new RemoteJudgeAccountTask(ojName, toJudge, judge, key), 0, 3, TimeUnit.SECONDS);
-        futureTaskMap.put(key, scheduledFuture);
+        FUTURE_TASK_MAP.put(key, scheduledFuture);
     }
 
     class RemoteJudgeAccountTask implements Runnable {
@@ -125,11 +125,11 @@ public class RemoteJudgeReceiver extends AbstractReceiver {
         }
 
         private void cancelFutureTask() {
-            Future future = futureTaskMap.get(key);
+            ScheduledFuture<?> future = FUTURE_TASK_MAP.get(key);
             if (future != null) {
                 boolean isCanceled = future.cancel(true);
                 if (isCanceled) {
-                    futureTaskMap.remove(key);
+                    FUTURE_TASK_MAP.remove(key);
                 }
             }
         }

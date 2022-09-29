@@ -9,6 +9,7 @@ import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.backend.service.oj.ContestRankService;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
@@ -112,14 +113,14 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
 
             // 获取ACM比赛排行榜外榜
-            return contestRankService.getAcmContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
+            return contestRankService.getAcmContestScoreboard(isOpenSealRank, removeStar, contest, concernedList, contestRankDto.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
                     15L);
 
         } else {
             // 获取OI比赛排行榜外榜
-            return contestRankService.getOiContestScoreboard(isOpenSealRank, removeStar, contest, null, concernedList,
+            return contestRankService.getOiContestScoreboard(isOpenSealRank, removeStar, contest, concernedList, contestRankDto.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
                     15L);

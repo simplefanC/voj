@@ -5,7 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.backend.common.constants.CallJudgerType;
 import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
-import com.simplefanc.voj.backend.judge.AbstractReceiver;
+import com.simplefanc.voj.backend.judge.AbstractTaskReceiver;
 import com.simplefanc.voj.backend.judge.Dispatcher;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j(topic = "voj")
 @RequiredArgsConstructor
-public class JudgeReceiver extends AbstractReceiver {
+public class JudgeTaskTaskReceiver extends AbstractTaskReceiver {
 
     private final Dispatcher dispatcher;
 
@@ -32,11 +32,11 @@ public class JudgeReceiver extends AbstractReceiver {
     public void processWaitingTask() {
         // 优先处理比赛的提交
         // 其次处理普通提交的提交
-        handleWaitingTask(QueueConstant.CONTEST_JUDGE_WAITING, QueueConstant.GENERAL_JUDGE_WAITING);
+        this.handleWaitingTask(QueueConstant.CONTEST_JUDGE_WAITING, QueueConstant.GENERAL_JUDGE_WAITING);
     }
 
     @Override
-    public String getTaskByRedis(String queue) {
+    public String getTaskFromRedis(String queue) {
         long size = redisUtil.lGetListSize(queue);
         if (size > 0) {
             return (String) redisUtil.lrPop(queue);
@@ -46,7 +46,7 @@ public class JudgeReceiver extends AbstractReceiver {
     }
 
     @Override
-    public void handleJudgeMsg(String taskJsonStr) {
+    public void handleJudgeTask(String taskJsonStr) {
         JSONObject task = JSONUtil.parseObj(taskJsonStr);
         Judge judge = task.get("judge", Judge.class);
         String token = task.getStr("token");

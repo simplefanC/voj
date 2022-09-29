@@ -44,9 +44,9 @@ public class ProblemController {
                                                         @RequestParam(value = "keyword", required = false) String keyword,
                                                         @RequestParam(value = "tagId", required = false) List<Long> tagId,
                                                         @RequestParam(value = "difficulty", required = false) Integer difficulty,
-                                                        @RequestParam(value = "oj", required = false) String oj) {
-        return CommonResult
-                .successResponse(problemService.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj));
+                                                        @RequestParam(value = "oj", required = false) String oj,
+                                                        @RequestParam(value = "problemVisible", required = false) Boolean problemVisible) {
+        return CommonResult.successResponse(problemService.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj, problemVisible));
     }
 
     /**

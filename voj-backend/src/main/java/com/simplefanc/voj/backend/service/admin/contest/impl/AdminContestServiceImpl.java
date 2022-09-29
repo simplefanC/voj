@@ -59,7 +59,7 @@ public class AdminContestServiceImpl implements AdminContestService {
             keyword = keyword.trim();
             queryWrapper.like("title", keyword).or().like("id", keyword);
         }
-        queryWrapper.orderByDesc("start_time");
+        queryWrapper.orderByAsc("status").orderByDesc("start_time");
         return contestEntityService.page(iPage, queryWrapper);
     }
 

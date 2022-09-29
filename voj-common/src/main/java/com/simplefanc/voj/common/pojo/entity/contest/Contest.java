@@ -87,6 +87,9 @@ public class Contest implements Serializable {
     @ApiModelProperty(value = "是否可见")
     private Boolean visible;
 
+    @ApiModelProperty(value = "是否仅对比赛管理员可见")
+    private Boolean contestAdminVisible;
+
     @ApiModelProperty(value = "是否打开打印功能")
     private Boolean openPrint;
 

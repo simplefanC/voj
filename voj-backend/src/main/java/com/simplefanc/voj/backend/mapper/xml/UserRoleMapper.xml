@@ -82,12 +82,20 @@
 
     <!-- 主查询  -->
     <select id="getUserList" resultMap="map_UserRolesList" resultType="list">
-        SELECT u.* FROM user_info u
+        SELECT u.* FROM user_info u, user_role ur
         <where>
+            ur.uid = u.uuid
             <if test="keyword!=null and keyword!=''">
-                u.username like CONCAT("%",#{keyword},"%")
-                or u.email like CONCAT("%",#{keyword},"%")
+                and (u.username like CONCAT("%",#{keyword},"%")
                 or u.realname like CONCAT("%",#{keyword},"%")
+                or u.school like CONCAT("%",#{keyword},"%")
+                or u.number like CONCAT("%",#{keyword},"%"))
+            </if>
+            <if test="status != null">
+                and u.status = #{status}
+            </if>
+            <if test="roleId != null">
+                and ur.role_id = #{roleId}
             </if>
         </where>
         order by u.gmt_create desc, u.uuid desc
@@ -106,10 +114,10 @@
     <select id="getAdminUserList" resultMap="map_UserRolesList" resultType="list">
         SELECT u.* FROM user_info u,
         (SELECT DISTINCT ur.uid AS uid FROM user_role ur
-        WHERE ur.role_id in
-        <foreach collection="roleIdList" item="roleId" open="(" separator="," close=")">
-              #{roleId}
-        </foreach>
+            WHERE ur.role_id in
+            <foreach collection="roleIdList" item="roleId" open="(" separator="," close=")">
+                #{roleId}
+            </foreach>
         ) t
         <where>
             t.uid = u.uuid

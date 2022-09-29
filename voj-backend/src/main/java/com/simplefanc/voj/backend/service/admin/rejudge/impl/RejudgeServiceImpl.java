@@ -8,8 +8,8 @@ import com.simplefanc.voj.backend.dao.judge.JudgeCaseEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
-import com.simplefanc.voj.backend.judge.local.JudgeDispatcher;
-import com.simplefanc.voj.backend.judge.remote.RemoteJudgeDispatcher;
+import com.simplefanc.voj.backend.judge.local.JudgeTaskDispatcher;
+import com.simplefanc.voj.backend.judge.remote.RemoteJudgeTaskDispatcher;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
@@ -44,9 +44,9 @@ public class RejudgeServiceImpl implements RejudgeService {
 
     private final ProblemEntityService problemEntityService;
 
-    private final JudgeDispatcher judgeDispatcher;
+    private final JudgeTaskDispatcher judgeTaskDispatcher;
 
-    private final RemoteJudgeDispatcher remoteJudgeDispatcher;
+    private final RemoteJudgeTaskDispatcher remoteJudgeTaskDispatcher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -90,9 +90,9 @@ public class RejudgeServiceImpl implements RejudgeService {
             Problem problem = problemEntityService.getById(judge.getPid());
             // 如果是远程oj判题
             if (problem.getIsRemote()) {
-                remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(), isContestSubmission);
+                remoteJudgeTaskDispatcher.sendTask(judge, problem.getProblemId(), isContestSubmission);
             } else {
-                judgeDispatcher.sendTask(judge, isContestSubmission);
+                judgeTaskDispatcher.sendTask(judge, isContestSubmission);
             }
             return judge;
         } else {
@@ -139,12 +139,12 @@ public class RejudgeServiceImpl implements RejudgeService {
             if (problem.getIsRemote()) {
                 for (Judge judge : rejudgeList) {
                     // 进入重判队列，等待调用判题服务
-                    remoteJudgeDispatcher.sendTask(judge, problem.getProblemId(), judge.getCid() != 0);
+                    remoteJudgeTaskDispatcher.sendTask(judge, problem.getProblemId(), judge.getCid() != 0);
                 }
             } else {
                 for (Judge judge : rejudgeList) {
                     // 进入重判队列，等待调用判题服务
-                    judgeDispatcher.sendTask(judge, judge.getCid() != 0);
+                    judgeTaskDispatcher.sendTask(judge, judge.getCid() != 0);
                 }
             }
         } else {

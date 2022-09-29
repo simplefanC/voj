@@ -27,7 +27,8 @@ public interface UserRoleMapper extends BaseMapper<UserRole> {
     List<Role> getRolesByUid(@Param("uid") String uid);
 
     IPage<UserRolesVo> getUserList(Page<UserRolesVo> page, @Param("limit") int limit,
-                                   @Param("currentPage") int currentPage, @Param("keyword") String keyword);
+                                   @Param("currentPage") int currentPage, @Param("keyword") String keyword,
+                                   @Param("roleId") Long roleId, @Param("status") Integer status);
 
     IPage<UserRolesVo> getAdminUserList(Page<UserRolesVo> page,
                                         @Param("limit") int limit,
