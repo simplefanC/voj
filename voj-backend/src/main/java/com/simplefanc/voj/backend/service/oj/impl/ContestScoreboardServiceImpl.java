@@ -1,16 +1,19 @@
 package com.simplefanc.voj.backend.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
+import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
-import com.simplefanc.voj.backend.service.oj.ContestRankService;
+import com.simplefanc.voj.backend.service.oj.ContestAcmRankService;
+import com.simplefanc.voj.backend.service.oj.ContestOiRankService;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -37,7 +40,9 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
 
     private final ContestValidator contestValidator;
 
-    private final ContestRankService contestRankService;
+    private final ContestAcmRankService contestAcmRankService;
+
+    private final ContestOiRankService contestOiRankService;
 
     @Override
     public ContestOutsideInfo getContestOutsideInfo(Long cid) {
@@ -70,12 +75,13 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
     }
 
     @Override
-    public List getContestOutsideScoreboard(ContestRankDto contestRankDto) {
-
+    public IPage getContestOutsideScoreboard(ContestRankDto contestRankDto) {
         Long cid = contestRankDto.getCid();
         List<String> concernedList = contestRankDto.getConcernedList();
         Boolean removeStar = contestRankDto.getRemoveStar();
         Boolean forceRefresh = contestRankDto.getForceRefresh();
+        Integer currentPage = contestRankDto.getCurrentPage();
+        Integer limit = contestRankDto.getLimit();
 
         if (cid == null) {
             throw new StatusFailException("错误：比赛id不能为空");
@@ -86,6 +92,11 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         if (forceRefresh == null) {
             forceRefresh = false;
         }
+        // 页数，每页题数若为空，设置默认值
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 30;
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
@@ -109,21 +120,19 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
 
         // 校验该比赛是否开启了封榜模式，超级管理员和比赛创建者可以直接看到实际榜单
         boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
-
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-
             // 获取ACM比赛排行榜外榜
-            return contestRankService.getAcmContestScoreboard(isOpenSealRank, removeStar, contest, concernedList, contestRankDto.getKeyword(),
+            return contestAcmRankService.getContestAcmRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDto.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
-                    15L);
+                    15L, currentPage, limit);
 
         } else {
             // 获取OI比赛排行榜外榜
-            return contestRankService.getOiContestScoreboard(isOpenSealRank, removeStar, contest, concernedList, contestRankDto.getKeyword(),
+            return contestOiRankService.getContestOiRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDto.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
-                    15L);
+                    15L, currentPage, limit);
         }
     }
 

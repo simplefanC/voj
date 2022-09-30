@@ -6,12 +6,15 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestConstant;
@@ -32,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class ContestCalculateOiRankService {
+public class ContestOiRankService {
 
     private final UserInfoEntityService userInfoEntityService;
 
@@ -44,11 +47,42 @@ public class ContestCalculateOiRankService {
 
     private final ContestValidator contestValidator;
 
-    public List<OIContestRankVo> calculateOiRank(Boolean isOpenSealRank, Boolean removeStar, Contest contest,
-                                                List<String> concernedList, String keyword) {
-        return calculateOiRank(isOpenSealRank, removeStar, contest, concernedList, keyword, false, null);
+    /**
+     * @param isOpenSealRank
+     * @param removeStarUser
+     * @param concernedList
+     * @param contest
+     * @param currentPage
+     * @param limit
+     * @desc 获取OI比赛排行榜，有分页
+     */
+    public IPage<OIContestRankVo> getContestOiRankPage(Contest contest, Boolean isOpenSealRank, Boolean removeStarUser,
+                                                       List<String> concernedList, String keyword,
+                                                       Boolean useCache, Long cacheTime,
+                                                       int currentPage, int limit) {
+
+        List<OIContestRankVo> orderResultList = this.calculateOiRank(isOpenSealRank, removeStarUser,
+                contest, concernedList, keyword, useCache, cacheTime);
+
+        return getOiContestRankVoPage(currentPage, limit, orderResultList);
     }
 
+    private Page<OIContestRankVo> getOiContestRankVoPage(int currentPage, int limit, List<OIContestRankVo> orderResultList) {
+        // 计算好排行榜，然后进行分页
+        Page<OIContestRankVo> page = new Page<>(currentPage, limit);
+        int count = orderResultList.size();
+        List<OIContestRankVo> pageList = new ArrayList<>();
+        // 计算当前页第一条数据的下标
+        int currId = currentPage > 1 ? (currentPage - 1) * limit : 0;
+        for (int i = 0; i < limit && i < count - currId; i++) {
+            pageList.add(orderResultList.get(currId + i));
+        }
+        page.setSize(limit);
+        page.setCurrent(currentPage);
+        page.setTotal(count);
+        page.setRecords(pageList);
+        return page;
+    }
 
     /**
      * @param isOpenSealRank 是否是查询封榜后的数据
@@ -153,7 +187,12 @@ public class ContestCalculateOiRankService {
         if (removeStar) {
             orderResultList.removeIf(contestRankVo -> starAccountMap.containsKey(contestRankVo.getUsername()));
         }
-        final String currentUserId = UserSessionUtil.getUserInfo().getUid();
+        String currentUserId = null;
+        final UserRolesVo userInfo = UserSessionUtil.getUserInfo();
+        // 外榜：可能未登录
+        if(userInfo != null) {
+            currentUserId = userInfo.getUid();
+        }
         boolean needAddConcernedUser = false;
         if (!CollectionUtils.isEmpty(concernedList)) {
             needAddConcernedUser = true;

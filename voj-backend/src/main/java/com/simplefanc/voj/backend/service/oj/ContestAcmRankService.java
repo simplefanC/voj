@@ -7,6 +7,8 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
@@ -14,6 +16,7 @@ import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestConstant;
@@ -34,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class ContestCalculateAcmRankService {
+public class ContestAcmRankService {
 
     private final UserInfoEntityService userInfoEntityService;
 
@@ -46,9 +49,41 @@ public class ContestCalculateAcmRankService {
 
     private final ContestValidator contestValidator;
 
-    public List<ACMContestRankVo> calculateAcmRank(boolean isOpenSealRank, boolean removeStar, Contest contest,
-                                                   List<String> concernedList, String keyword) {
-        return calculateAcmRank(isOpenSealRank, removeStar, contest, concernedList, keyword, false, null);
+    /**
+     * @param isOpenSealRank
+     * @param removeStar
+     * @param concernedList
+     * @param contest
+     * @param currentPage
+     * @param limit
+     * @desc 获取ACM比赛排行榜，有分页
+     */
+    public IPage<ACMContestRankVo> getContestAcmRankPage(Contest contest, Boolean isOpenSealRank, Boolean removeStar,
+                                                         List<String> concernedList, String keyword,
+                                                         Boolean useCache, Long cacheTime,
+                                                         int currentPage, int limit) {
+        List<ACMContestRankVo> orderResultList = this.calculateAcmRank(isOpenSealRank, removeStar, contest,
+                concernedList, keyword, useCache, cacheTime);
+
+        return getAcmContestRankVoPage(orderResultList, currentPage, limit);
+    }
+
+    private Page<ACMContestRankVo> getAcmContestRankVoPage(List<ACMContestRankVo> orderResultList, int currentPage, int limit) {
+        // 计算好排行榜，然后进行分页
+        Page<ACMContestRankVo> page = new Page<>(currentPage, limit);
+        int count = orderResultList.size();
+        List<ACMContestRankVo> pageList = new ArrayList<>();
+        // 计算当前页第一条数据的下标
+        int currId = currentPage > 1 ? (currentPage - 1) * limit : 0;
+        for (int i = 0; i < limit && i < count - currId; i++) {
+            pageList.add(orderResultList.get(currId + i));
+        }
+        page.setSize(limit);
+        page.setCurrent(currentPage);
+        page.setTotal(count);
+        page.setRecords(pageList);
+
+        return page;
     }
 
     /**
@@ -218,7 +253,12 @@ public class ContestCalculateAcmRankService {
         if (removeStar) {
             orderResultList.removeIf(acmContestRankVo -> starAccountMap.containsKey(acmContestRankVo.getUsername()));
         }
-        final String currentUserId = UserSessionUtil.getUserInfo().getUid();
+        String currentUserId = null;
+        final UserRolesVo userInfo = UserSessionUtil.getUserInfo();
+        // 外榜：可能未登录
+        if(userInfo != null) {
+            currentUserId = userInfo.getUid();
+        }
         boolean needAddConcernedUser = false;
         if (!CollectionUtils.isEmpty(concernedList)) {
             needAddConcernedUser = true;
@@ -250,7 +290,7 @@ public class ContestCalculateAcmRankService {
                 rankNum++;
             }
 
-            if (!StrUtil.isEmpty(currentUserId) && currentAcmRankVo.getUid().equals(currentUserId)) {
+            if (!StrUtil.isEmpty(currentUserId) && currentUserId.equals(currentAcmRankVo.getUid())) {
                 topAcmRankVoList.add(currentAcmRankVo);
             }
 

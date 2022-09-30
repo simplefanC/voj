@@ -17,7 +17,8 @@ import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
 import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
 import com.simplefanc.voj.backend.pojo.vo.*;
-import com.simplefanc.voj.backend.service.oj.ContestRankService;
+import com.simplefanc.voj.backend.service.oj.ContestAcmRankService;
+import com.simplefanc.voj.backend.service.oj.ContestOiRankService;
 import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
@@ -73,7 +74,9 @@ public class ContestServiceImpl implements ContestService {
 
     private final ContestValidator contestValidator;
 
-    private final ContestRankService contestRankService;
+    private final ContestAcmRankService contestAcmRankService;
+
+    private final ContestOiRankService contestOiRankService;
 
     @Override
     public IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer status, Integer type,
@@ -385,13 +388,13 @@ public class ContestServiceImpl implements ContestService {
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
             // ACM比赛
             // 进行排行榜计算以及排名分页
-            return contestRankService.getContestAcmRankPage(isOpenSealRank, removeStarUser,
-                    concernedList, contest, keyword, currentPage, limit);
+            return contestAcmRankService.getContestAcmRankPage(contest, isOpenSealRank, removeStarUser,
+                    concernedList, keyword, false, null, currentPage, limit);
 
         } else {
             // OI比赛
-            return contestRankService.getContestOiRankPage(isOpenSealRank, removeStarUser,
-                    concernedList, contest, keyword, currentPage, limit);
+            return contestOiRankService.getContestOiRankPage(contest, isOpenSealRank, removeStarUser,
+                    concernedList, keyword, false, null, currentPage, limit);
         }
     }
 
