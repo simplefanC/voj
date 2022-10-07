@@ -39,7 +39,11 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
     public List<ContestVo> getWithinNext14DaysContests() {
         List<Contest> contestList = contestMapper.getWithinNext14DaysContests();
 
-        final List<ContestVo> contestVoList = getContestVos(contestList);
+        final List<ContestVo> contestVoList = contestList.stream()
+                // 首页不显示仅比赛管理员可见的比赛
+                .filter(contest -> !contest.getContestAdminVisible())
+                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
+                .collect(Collectors.toList());
 
         setRegisterCount(contestVoList);
 
@@ -54,23 +58,15 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
 
         List<Contest> contestList = contestMapper.getContestList(page, type, status, keyword);
 
-        final List<ContestVo> contestVoList = getContestVos(contestList);
+        final List<ContestVo> contestVoList = contestList.stream().filter(contest ->
+                // 仅比赛管理员可见
+                !contest.getContestAdminVisible() || contestValidator.isContestAdmin(contest))
+                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
+                .collect(Collectors.toList());
 
         setRegisterCount(contestVoList);
 
         return page.setRecords(contestVoList);
-    }
-
-    /**
-     * 过滤仅比赛管理员可见比赛
-     * @param contestList
-     * @return
-     */
-    private List<ContestVo> getContestVos(List<Contest> contestList) {
-        return contestList.stream().filter(contest ->
-                !contest.getContestAdminVisible() || contestValidator.isContestAdmin(contest))
-                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
-                .collect(Collectors.toList());
     }
 
     @Override
