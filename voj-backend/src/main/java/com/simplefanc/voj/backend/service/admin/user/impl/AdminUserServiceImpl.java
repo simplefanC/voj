@@ -8,14 +8,12 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.constants.Constant;
 import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.constants.UserStatusEnum;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
 import com.simplefanc.voj.backend.pojo.vo.ExcelUserVo;
@@ -23,6 +21,7 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -90,7 +89,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             addUserRole = userRoleEntityService.updateById(userRole);
             if (type == RoleEnum.ROOT.getId() || oldType == RoleEnum.ROOT.getId()) {
                 // 新增或者去除超级管理员需要删除缓存
-                String cacheKey = AccountConstant.SUPER_ADMIN_UID_LIST_CACHE;
+                String cacheKey = RedisConstant.SUPER_ADMIN_UID_LIST_CACHE;
                 redisUtil.del(cacheKey);
             }
         }

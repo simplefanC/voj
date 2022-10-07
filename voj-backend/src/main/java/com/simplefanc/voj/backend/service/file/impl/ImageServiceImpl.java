@@ -9,7 +9,7 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ImageService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -40,7 +40,7 @@ public class ImageServiceImpl implements ImageService {
 
     private final UserInfoEntityService userInfoEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

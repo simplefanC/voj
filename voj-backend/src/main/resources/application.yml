@@ -114,3 +114,13 @@ filepath:
   testcase-tmp-folder: "/voj/file/zip"
   file-download-tmp-folder: "/voj/file/zip/download"
   contest-ac-submission-tmp-folder: "/voj/file/zip/contest_ac"
+
+voj:
+  cache:
+    allowNull: true
+    initialCapacity: 128
+    maximumSize: 1024
+    # Caffeine过期时间
+    expireAfterWrite: 30
+    # Redis缓存过期时间
+    redisExpire: 60

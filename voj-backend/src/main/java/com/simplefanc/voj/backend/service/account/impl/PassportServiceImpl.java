@@ -4,11 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.constants.EmailConstant;
 import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
@@ -19,7 +17,7 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
-import com.simplefanc.voj.backend.pojo.bo.EmailRuleBo;
+import com.simplefanc.voj.backend.config.property.EmailRuleBo;
 import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
 import com.simplefanc.voj.backend.pojo.dto.LoginDto;
 import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
@@ -31,6 +29,7 @@ import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.account.PassportService;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.user.*;
 import com.simplefanc.voj.common.utils.IpUtil;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +74,7 @@ public class PassportServiceImpl implements PassportService {
         loginDto.setUsername(loginDto.getUsername().trim());
 
         String userIpAddr = IpUtil.getUserIpAddr(request);
-        String key = AccountConstant.TRY_LOGIN_NUM + loginDto.getUsername() + "_" + userIpAddr;
+        String key = RedisConstant.TRY_LOGIN_NUM + loginDto.getUsername() + "_" + userIpAddr;
         Integer tryLoginCount = redisUtil.get(key, Integer.class);
 
         if (tryLoginCount != null && tryLoginCount >= 20) {
@@ -214,14 +213,9 @@ public class PassportServiceImpl implements PassportService {
 
     @Override
     public void applyResetPassword(ApplyResetPasswordDto applyResetPasswordDto) {
-
         String captcha = applyResetPasswordDto.getCaptcha();
         String captchaKey = applyResetPasswordDto.getCaptchaKey();
         String email = applyResetPasswordDto.getEmail();
-
-        if (StrUtil.isEmpty(captcha) || StrUtil.isEmpty(email) || StrUtil.isEmpty(captchaKey)) {
-            throw new StatusFailException("邮箱或验证码不能为空");
-        }
 
         if (!emailService.isOk()) {
             throw new StatusFailException("对不起！本站邮箱系统未配置，暂不支持重置密码！");
@@ -258,14 +252,6 @@ public class PassportServiceImpl implements PassportService {
         String username = resetPasswordDto.getUsername();
         String password = resetPasswordDto.getPassword();
         String code = resetPasswordDto.getCode();
-
-        if (StrUtil.isEmpty(password) || StrUtil.isEmpty(username) || StrUtil.isEmpty(code)) {
-            throw new StatusFailException("用户名、新密码或验证码不能为空");
-        }
-
-        if (password.length() < 6 || password.length() > 20) {
-            throw new StatusFailException("新密码长度应该为6~20位！");
-        }
 
         String codeKey = EmailConstant.RESET_PASSWORD_KEY_PREFIX + username;
         if (!redisUtil.hasKey(codeKey)) {

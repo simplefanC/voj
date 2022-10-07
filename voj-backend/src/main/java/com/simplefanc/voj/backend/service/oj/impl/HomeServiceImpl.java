@@ -7,7 +7,7 @@ import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestVo;
@@ -40,7 +40,7 @@ public class HomeServiceImpl implements HomeService {
 
     private final FileEntityService fileEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     /**
      * @MethodName getRecentContest

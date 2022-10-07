@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.pojo.bo;
+package com.simplefanc.voj.backend.config.property;
 
 import lombok.Data;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;

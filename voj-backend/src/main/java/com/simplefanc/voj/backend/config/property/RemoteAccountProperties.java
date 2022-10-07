@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.pojo.bo;
+package com.simplefanc.voj.backend.config.property;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 @ConfigurationProperties(prefix = "voj.remote")
 @Data
-public class RemoteAccountProps {
+public class RemoteAccountProperties {
 
     private List<RemoteOJ> ojs;
 

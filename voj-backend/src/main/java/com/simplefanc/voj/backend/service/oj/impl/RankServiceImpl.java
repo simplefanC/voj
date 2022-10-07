@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
@@ -13,8 +12,10 @@ import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
 import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
 import com.simplefanc.voj.backend.service.oj.RankService;
 import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,7 +48,6 @@ public class RankServiceImpl implements RankService {
      */
     @Override
     public IPage getRankList(Integer limit, Integer currentPage, String searchUser, Integer type) {
-
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1)
             currentPage = 1;
@@ -57,7 +57,8 @@ public class RankServiceImpl implements RankService {
         List<String> uidList = null;
         if (!StrUtil.isEmpty(searchUser)) {
             QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
-            userInfoQueryWrapper.and(wrapper -> wrapper.like("username", searchUser).or().like("nickname", searchUser)
+            userInfoQueryWrapper.and(wrapper -> wrapper.like("username", searchUser)
+                    .or().like("nickname", searchUser)
                     .or().like("realname", searchUser));
 
             userInfoQueryWrapper.eq("status", 0);
@@ -78,8 +79,8 @@ public class RankServiceImpl implements RankService {
         return rankList;
     }
 
-    private IPage<ACMRankVo> getACMRankList(int limit, int currentPage, List<String> uidList) {
-
+    @Cacheable(value = RedisConstant.ACM_RANK_CACHE, key = "#limit+'-'+#currentPage", condition="#uidList == null")
+    public IPage<ACMRankVo> getACMRankList(int limit, int currentPage, List<String> uidList) {
         IPage<ACMRankVo> data = null;
         if (uidList != null) {
             Page<ACMRankVo> page = new Page<>(currentPage, limit);
@@ -89,20 +90,20 @@ public class RankServiceImpl implements RankService {
                 data = page;
             }
         } else {
-            String key = AccountConstant.ACM_RANK_CACHE + "_" + limit + "_" + currentPage;
-            data = (IPage<ACMRankVo>) redisUtil.get(key);
-            if (data == null) {
+//            String key = AccountConstant.ACM_RANK_CACHE + "_" + limit + "_" + currentPage;
+//            data = (IPage<ACMRankVo>) redisUtil.get(key);
+//            if (data == null) {
                 Page<ACMRankVo> page = new Page<>(currentPage, limit);
                 data = userRecordService.getACMRankList(page, null);
-                redisUtil.set(key, data, cacheRankSecond);
-            }
+//                redisUtil.set(key, data, cacheRankSecond);
+//            }
         }
 
         return data;
     }
 
-    private IPage<OIRankVo> getOIRankList(int limit, int currentPage, List<String> uidList) {
-
+    @Cacheable(value = RedisConstant.OI_RANK_CACHE, key = "#limit+'-'+#currentPage", condition="#uidList == null")
+    public IPage<OIRankVo> getOIRankList(int limit, int currentPage, List<String> uidList) {
         IPage<OIRankVo> data = null;
         if (uidList != null) {
             Page<OIRankVo> page = new Page<>(currentPage, limit);
@@ -112,15 +113,14 @@ public class RankServiceImpl implements RankService {
                 data = page;
             }
         } else {
-            String key = AccountConstant.OI_RANK_CACHE + "_" + limit + "_" + currentPage;
-            data = (IPage<OIRankVo>) redisUtil.get(key);
-            if (data == null) {
+//            String key = AccountConstant.OI_RANK_CACHE + "_" + limit + "_" + currentPage;
+//            data = (IPage<OIRankVo>) redisUtil.get(key);
+//            if (data == null) {
                 Page<OIRankVo> page = new Page<>(currentPage, limit);
                 data = userRecordService.getOIRankList(page, null);
-                redisUtil.set(key, data, cacheRankSecond);
-            }
+//                redisUtil.set(key, data, cacheRankSecond);
+//            }
         }
-
         return data;
     }
 

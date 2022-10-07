@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.mapper.ProblemMapper;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
 import com.simplefanc.voj.backend.pojo.vo.ProblemCountVo;
@@ -65,7 +65,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     private final CodeTemplateEntityService codeTemplateEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     // 去除每行末尾的空白符
     public static String rtrim(String value) {

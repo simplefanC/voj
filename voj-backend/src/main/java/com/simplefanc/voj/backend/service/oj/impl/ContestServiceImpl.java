@@ -2,7 +2,6 @@ package com.simplefanc.voj.backend.service.oj.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
@@ -24,6 +23,7 @@ import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.ProblemEnum;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.pojo.entity.contest.*;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
@@ -459,7 +459,7 @@ public class ContestServiceImpl implements ContestService {
         Contest contest = contestEntityService.getById(contestPrintDto.getCid());
         contestValidator.validateContestAuth(contest);
 
-        String lockKey = AccountConstant.CONTEST_ADD_PRINT_LOCK + userRolesVo.getUid();
+        String lockKey = RedisConstant.CONTEST_ADD_PRINT_LOCK + userRolesVo.getUid();
         if (redisUtil.hasKey(lockKey)) {
             long expire = redisUtil.getExpire(lockKey);
             throw new StatusForbiddenException("提交打印功能限制，请在" + expire + "秒后再进行提交！");

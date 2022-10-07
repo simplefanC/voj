@@ -74,7 +74,6 @@ public class HomeController {
      * @Return CommonResult
      * @Since 2021/1/15
      */
-
     @GetMapping("/get-recent-other-contest")
     public CommonResult<List<HashMap<String, Object>>> getRecentOtherContest() {
         return CommonResult.successResponse(homeService.getRecentOtherContest());
@@ -87,7 +86,6 @@ public class HomeController {
      * @Return CommonResult
      * @Since 2021/12/29
      */
-
     @GetMapping("/get-common-announcement")
     public CommonResult<IPage<AnnouncementVo>> getCommonAnnouncement(
             @RequestParam(value = "limit", required = false) Integer limit,
@@ -102,7 +100,6 @@ public class HomeController {
      * @Return CommonResult
      * @Since 2021/12/29
      */
-
     @GetMapping("/get-website-config")
     public CommonResult<WebConfigDto> getWebConfig() {
         return CommonResult.successResponse(configService.getWebConfig());

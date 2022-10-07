@@ -1,4 +1,4 @@
-package com.simplefanc.voj.backend.pojo.bo;
+package com.simplefanc.voj.backend.config.property;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "filepath")
 @Data
-public class FilePathProps {
+public class FilePathProperties {
 
     private String userAvatarFolder;
 

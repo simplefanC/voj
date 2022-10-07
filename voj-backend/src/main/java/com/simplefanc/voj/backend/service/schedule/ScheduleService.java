@@ -13,7 +13,7 @@ import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.service.admin.rejudge.RejudgeService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.common.File;
@@ -65,7 +65,7 @@ public class ScheduleService {
 
     private final RejudgeService rejudgeService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     /**
      * @MethodName deleteAvatar

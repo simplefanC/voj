@@ -5,15 +5,13 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -52,7 +50,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     private final RemoteProblemService remoteProblemService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

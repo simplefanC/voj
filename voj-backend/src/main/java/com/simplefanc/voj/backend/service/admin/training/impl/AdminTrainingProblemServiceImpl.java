@@ -11,7 +11,7 @@ import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
@@ -50,7 +50,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
     private final RemoteProblemService remoteProblemService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
