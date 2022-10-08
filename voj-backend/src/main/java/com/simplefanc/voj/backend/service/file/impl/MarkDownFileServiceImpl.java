@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.MarkDownFileService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -32,7 +32,7 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
 
     private final FileEntityService fileEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     public Map<Object, Object> uploadMDImg(MultipartFile image) {

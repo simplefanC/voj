@@ -3,7 +3,6 @@ package com.simplefanc.voj.backend.service.oj.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
@@ -30,6 +29,7 @@ import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.backend.validator.JudgeValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -103,7 +103,7 @@ public class JudgeServiceImpl implements JudgeService {
 
         // 非比赛提交有限制
         if (!isContestSubmission && configVo.getDefaultSubmitInterval() > 0) {
-            String lockKey = AccountConstant.SUBMIT_NON_CONTEST_LOCK + userRolesVo.getUid();
+            String lockKey = RedisConstant.SUBMIT_NON_CONTEST_LOCK + userRolesVo.getUid();
             long count = redisUtil.incr(lockKey, 1);
             if (count > 1) {
                 throw new StatusForbiddenException("对不起，您的提交频率过快，请稍后再尝试！");

@@ -14,7 +14,7 @@ import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.judge.Dispatcher;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.problem.AdminProblemService;
@@ -62,7 +62,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
     private final RemoteProblemService remoteProblemService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     public IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj) {

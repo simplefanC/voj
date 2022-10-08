@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ImportFpsProblemService;
@@ -60,7 +60,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
     private final ProblemEntityService problemEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     /**
      * @param file

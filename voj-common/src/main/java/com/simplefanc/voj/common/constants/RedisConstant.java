@@ -1,10 +1,15 @@
-package com.simplefanc.voj.backend.common.constants;
+package com.simplefanc.voj.common.constants;
 
-/**
- * @Description 账户相关常量
- * @Since 2021/1/8
- */
-public interface AccountConstant {
+public interface RedisConstant {
+    String OI_CONTEST_RANK_CACHE = "oi_contest_rank_cache";
+
+    String CONTEST_RANK_CAL_RESULT_CACHE = "contest_rank_cal_result_cache";
+
+    String ACM_RANK_CACHE = "acm_rank_cache";
+
+    String OI_RANK_CACHE = "oi_rank_cache";
+
+    String SUPER_ADMIN_UID_LIST_CACHE = "super_admin_uid_list_cache";
 
     String CODE_CHANGE_PASSWORD_FAIL = "change-password-fail:";
 
@@ -18,12 +23,6 @@ public interface AccountConstant {
 
     String TRY_LOGIN_NUM = "try-login-num:";
 
-    String ACM_RANK_CACHE = "acm_rank_cache";
-
-    String OI_RANK_CACHE = "oi_rank_cache";
-
-    String SUPER_ADMIN_UID_LIST_CACHE = "super_admin_uid_list_case";
-
     String SUBMIT_NON_CONTEST_LOCK = "submit_non_contest_lock:";
 
     String SUBMIT_CONTEST_LOCK = "submit_contest_lock:";
@@ -31,5 +30,4 @@ public interface AccountConstant {
     String DISCUSSION_ADD_NUM_LOCK = "discussion_add_num_lock:";
 
     String CONTEST_ADD_PRINT_LOCK = "contest_add_print_lock:";
-
 }

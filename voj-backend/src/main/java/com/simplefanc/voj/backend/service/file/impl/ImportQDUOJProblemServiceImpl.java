@@ -14,7 +14,7 @@ import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.dto.QDOJProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -56,7 +56,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
 
     private final TagEntityService tagEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     /**
      * @param file

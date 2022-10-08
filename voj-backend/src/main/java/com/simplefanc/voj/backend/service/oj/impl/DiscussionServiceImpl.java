@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
@@ -19,6 +18,7 @@ import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.oj.DiscussionService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionLike;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
@@ -137,7 +137,7 @@ public class DiscussionServiceImpl implements DiscussionService {
                 throw new StatusForbiddenException("对不起，您暂时无权限发帖！请先去提交题目通过20道以上!");
             }
 
-            String lockKey = AccountConstant.DISCUSSION_ADD_NUM_LOCK + userRolesVo.getUid();
+            String lockKey = RedisConstant.DISCUSSION_ADD_NUM_LOCK + userRolesVo.getUid();
             Integer num = redisUtil.get(lockKey, Integer.class);
             if (num == null) {
                 redisUtil.set(lockKey, 1, 3600 * 24);

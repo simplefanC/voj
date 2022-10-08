@@ -17,7 +17,7 @@ import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ExcelIpVo;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
@@ -81,7 +81,7 @@ public class ContestFileServiceImpl implements ContestFileService {
 
     private final ContestValidator contestValidator;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();

@@ -3,7 +3,7 @@ package com.simplefanc.voj.backend.config;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.dao.judge.RemoteJudgeAccountEntityService;
-import com.simplefanc.voj.backend.pojo.bo.RemoteAccountProps;
+import com.simplefanc.voj.backend.config.property.RemoteAccountProperties;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import lombok.RequiredArgsConstructor;
@@ -103,7 +103,7 @@ public class StartupRunner implements CommandLineRunner {
     @Value("${spring.profiles.active}")
     private String profile;
 
-    private final RemoteAccountProps remoteAccountProps;
+    private final RemoteAccountProperties remoteAccountProps;
 
     @Override
     public void run(String... args) {
@@ -153,8 +153,8 @@ public class StartupRunner implements CommandLineRunner {
         // 初始化清空表
         remoteJudgeAccountEntityService.remove(new QueryWrapper<>());
         List<RemoteJudgeAccount> accountList = new LinkedList<>();
-        for (RemoteAccountProps.RemoteOJ remoteOj : remoteAccountProps.getOjs()) {
-            for (RemoteAccountProps.Account account : remoteOj.getAccounts()) {
+        for (RemoteAccountProperties.RemoteOJ remoteOj : remoteAccountProps.getOjs()) {
+            for (RemoteAccountProperties.Account account : remoteOj.getAccounts()) {
                 accountList.add(new RemoteJudgeAccount().setUsername(account.getUsername())
                         .setPassword(account.getPassword()).setStatus(true).setVersion(0L).setOj(remoteOj.getOj()));
             }

@@ -2,7 +2,6 @@ package com.simplefanc.voj.backend.service.oj;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
@@ -15,15 +14,15 @@ import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
-import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
-import com.simplefanc.voj.common.constants.ContestConstant;
 import com.simplefanc.voj.common.constants.ContestEnum;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -100,17 +99,17 @@ public class ContestAcmRankService {
      */
     public List<ACMContestRankVo> calculateAcmRank(boolean isOpenSealRank, boolean removeStar, Contest contest,
                                                    List<String> concernedList, String keyword, boolean useCache, Long cacheTime) {
-        List<ACMContestRankVo> orderResultList;
-        if (useCache) {
-            String key = ContestConstant.CONTEST_RANK_CAL_RESULT_CACHE + "_" + contest.getId();
-            orderResultList = (List<ACMContestRankVo>) redisUtil.get(key);
-            if (orderResultList == null) {
-                orderResultList = getAcmOrderRank(contest, isOpenSealRank);
-                redisUtil.set(key, orderResultList, cacheTime);
-            }
-        } else {
-            orderResultList = getAcmOrderRank(contest, isOpenSealRank);
-        }
+        List<ACMContestRankVo> orderResultList = getAcmOrderRank(contest, isOpenSealRank, useCache);
+//        if (useCache) {
+//            String key = ContestConstant.CONTEST_RANK_CAL_RESULT_CACHE + "_" + contest.getId();
+//            orderResultList = (List<ACMContestRankVo>) redisUtil.get(key);
+//            if (orderResultList == null) {
+//                orderResultList = getAcmOrderRank(contest, isOpenSealRank, useCache);
+//                redisUtil.set(key, orderResultList, cacheTime);
+//            }
+//        } else {
+//            orderResultList = getAcmOrderRank(contest, isOpenSealRank, useCache);
+//        }
         // 记录当前用户排名数据和关注列表的用户排名数据
         List<ACMContestRankVo> topAcmRankVoList = new ArrayList<>();
         computeAcmRankNo(removeStar, contest, concernedList, orderResultList, topAcmRankVoList);
@@ -151,7 +150,8 @@ public class ContestAcmRankService {
      * @param isOpenSealRank
      * @return
      */
-    private List<ACMContestRankVo> getAcmOrderRank(Contest contest, Boolean isOpenSealRank) {
+    @Cacheable(value = RedisConstant.CONTEST_RANK_CAL_RESULT_CACHE, key = "#contest.id", condition="#useCache")
+    public List<ACMContestRankVo> getAcmOrderRank(Contest contest, Boolean isOpenSealRank, boolean useCache) {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
         List<String> contestAdminUidList = new ArrayList<>(superAdminUidList);
         contestAdminUidList.add(contest.getUid());

@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.config;
 
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -16,7 +16,7 @@ import java.io.File;
 @RequiredArgsConstructor
 public class CorsConfig implements WebMvcConfigurer {
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

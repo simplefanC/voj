@@ -6,7 +6,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.simplefanc.voj.backend.common.constants.AccountConstant;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
@@ -19,6 +18,7 @@ import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.service.oj.AccountService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
+import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
@@ -183,9 +183,9 @@ public class AccountServiceImpl implements AccountService {
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
-        String lockKey = AccountConstant.CODE_CHANGE_PASSWORD_LOCK + userRolesVo.getUid();
+        String lockKey = RedisConstant.CODE_CHANGE_PASSWORD_LOCK + userRolesVo.getUid();
         // 统计失败的key
-        String countKey = AccountConstant.CODE_CHANGE_PASSWORD_FAIL + userRolesVo.getUid();
+        String countKey = RedisConstant.CODE_CHANGE_PASSWORD_FAIL + userRolesVo.getUid();
 
         ChangeAccountVo resp = new ChangeAccountVo();
         if (redisUtil.hasKey(lockKey)) {
@@ -265,9 +265,9 @@ public class AccountServiceImpl implements AccountService {
         UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
-        String lockKey = AccountConstant.CODE_CHANGE_EMAIL_LOCK + userRolesVo.getUid();
+        String lockKey = RedisConstant.CODE_CHANGE_EMAIL_LOCK + userRolesVo.getUid();
         // 统计失败的key
-        String countKey = AccountConstant.CODE_CHANGE_EMAIL_FAIL + userRolesVo.getUid();
+        String countKey = RedisConstant.CODE_CHANGE_EMAIL_FAIL + userRolesVo.getUid();
 
         ChangeAccountVo resp = new ChangeAccountVo();
         if (redisUtil.hasKey(lockKey)) {

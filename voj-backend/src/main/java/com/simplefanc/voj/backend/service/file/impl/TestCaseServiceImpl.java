@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
-import com.simplefanc.voj.backend.pojo.bo.FilePathProps;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.service.file.TestCaseService;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class TestCaseServiceImpl implements TestCaseService {
 
     private final ProblemCaseEntityService problemCaseEntityService;
 
-    private final FilePathProps filePathProps;
+    private final FilePathProperties filePathProps;
 
     // TODO 行数过多
     @Override
