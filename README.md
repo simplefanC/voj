@@ -37,10 +37,6 @@ VOJ 是基于微服务、前后端分离的高性能在线评测系统。采用�
 
 项目文档地址：[https://docs.voj.mobi](https://docs.voj.mobi)
 
-## 项目演示
-
-项目演示地址：[https://voj.mobi](https://voj.mobi)
-
 ## 项目结构
 
 ```

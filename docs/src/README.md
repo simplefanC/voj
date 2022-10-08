@@ -18,7 +18,7 @@ features:
   - title: 定制化
     details: 网站配置高度集中，支持定制化修改
   - title: 安全化
-    details: 判题使用 Cgroup 隔离用户程序，网站权限控制完善
+    details: 判题使用 Cgroups 隔离用户程序，网站权限控制完善
   - title: 多样化
     details: 独有本地判题服务，同时支持其它知名 OJ 题目的远程判题
 ---
@@ -34,8 +34,7 @@ features:
 
 Virtual Online Judge (VOJ) : 基于前后端分离、分布式架构的在线测评系统（VOJ），前端使用 Vue，后端主要使用 Spring Boot，Redis，MySQL，Nacos 等主流技术，**支持 HDU、POJ、CF、AtCoder、MXT、JSK、TKOJ 的虚拟判题，同时适配手机端、电脑端浏览，拥有讨论区与站内消息系统，支持私有训练、公开训练（题单），还有完善的判题模式（普通测评、特殊测评、交互测评）和完善的比赛功能（打星队伍、关注队伍、外榜）。**
 
-[GitHub 仓库](https://github.com/simplefanc/voj)  [Demo](https://voj.mobi/)
+[GitHub 仓库](https://github.com/simplefanc/voj)
 
-欢迎 Star 收藏本项目对开发者的支持，谢谢！  
 有任何部署问题或项目 Bug 请提 Issue！
 

@@ -59,7 +59,7 @@
 
 此外，如果用户提交了评测请求，则业务服务将通过Nacos查询健康可用的评测服务实例，将请求发送给指定的评测服务，评测服务则将进行评测操作，调用安全沙盒，编译运行用户代码，跑各个评测点数据得出最终结果，写回数据库。整个系统各个服务都是在Ubuntu系统下基于Docker来搭建的，保证各个服务之间互不干扰。
 
-![系统架构图](/sys_architecture.png)
+![系统架构图](https://simplefanc-oss.oss-cn-hangzhou.aliyuncs.com/voj/sys_architecture.png)
 
 ## 三、功能介绍
 

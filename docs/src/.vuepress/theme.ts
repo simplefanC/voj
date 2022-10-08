@@ -16,7 +16,7 @@ export default hopeTheme({
 
   repo: "simplefanC/voj",
 
-  docsDir: "document/docs",
+  docsDir: "docs/src",
 
   // navbar
   navbar: navbar,
