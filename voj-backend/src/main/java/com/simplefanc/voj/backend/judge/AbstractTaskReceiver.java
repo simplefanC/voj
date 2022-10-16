@@ -11,13 +11,13 @@ public abstract class AbstractTaskReceiver {
         for (String queue : queues) {
             String taskJsonStr = getTaskFromRedis(queue);
             if (taskJsonStr != null) {
-                handleJudgeTask(taskJsonStr);
+                handleTask(taskJsonStr);
             }
         }
     }
 
     public abstract String getTaskFromRedis(String queue);
 
-    public abstract void handleJudgeTask(String taskJsonStr);
+    public abstract void handleTask(String taskJsonStr);
 
 }

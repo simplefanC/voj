@@ -20,8 +20,6 @@ public class SystemConfigController {
 
     private final SystemConfigService systemConfigService;
 
-    private final JudgeServerEntityService judgeServerEntityService;
-
     @RequestMapping("/get-sys-config")
     public HashMap<String, Object> getSystemConfig() {
         return systemConfigService.getSystemConfig();
@@ -29,6 +27,6 @@ public class SystemConfigController {
 
     @RequestMapping("/version")
     public CommonResult<HashMap<String, Object>> getVersion() {
-        return CommonResult.successResponse(judgeServerEntityService.getJudgeServerInfo(), "运行正常");
+        return CommonResult.successResponse(systemConfigService.getJudgeServerInfo(), "运行正常");
     }
 }

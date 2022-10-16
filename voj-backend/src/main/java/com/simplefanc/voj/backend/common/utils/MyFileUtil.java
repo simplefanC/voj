@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.common.utils;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.common.result.ResultStatus;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -22,7 +22,11 @@ import java.util.Map;
  **/
 @Slf4j
 @UtilityClass
-public class DownloadFileUtil {
+public class MyFileUtil {
+    public String getFileSuffix(MultipartFile file){
+        return file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+    }
+
     public void download(HttpServletResponse response, String filePath, String fileName, String errMsg) {
         try(// 放到缓冲流里面
             BufferedInputStream bins = new BufferedInputStream(new FileReader(filePath).getInputStream());

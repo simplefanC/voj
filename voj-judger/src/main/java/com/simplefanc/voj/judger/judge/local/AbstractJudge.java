@@ -1,6 +1,7 @@
 package com.simplefanc.voj.judger.judge.local;
 
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
@@ -61,12 +62,14 @@ public abstract class AbstractJudge {
 
     private SandBoxRes wrapToSandBoxRes(JSONObject judgeResult) {
         return SandBoxRes.builder()
+                // 普通评测：如果沙盒运行程序不是 Accepted 可以不获取 stdout
                 .stdout(((JSONObject) judgeResult.get("files")).getStr("stdout"))
                 .stderr(((JSONObject) judgeResult.get("files")).getStr("stderr"))
                 // ns->ms
-                .time(judgeResult.getLong("time") / 1000000)
+                .time(judgeResult.getLong("time") / 1_000_000)
                 // b-->kb
-                .memory(judgeResult.getLong("memory") / 1024).exitCode(judgeResult.getInt("exitStatus"))
+                .memory(judgeResult.getLong("memory") / 1024)
+                .exitCode(judgeResult.getInt("exitStatus"))
                 .status(judgeResult.getInt("status"))
                 .build();
     }
@@ -114,7 +117,7 @@ public abstract class AbstractJudge {
             res.set("errMsg", output.split("partially correct ")[1]);
             String numStr = ReUtil.get("partially correct \\(([\\s\\S]*?)\\) ", output, 1);
             double percentage = 0.0;
-            if (!StringUtils.isEmpty(numStr)) {
+            if (!StrUtil.isEmpty(numStr)) {
                 percentage = Integer.parseInt(numStr) * 1.0 / 100;
             }
             res.set("percentage", percentage);
@@ -123,7 +126,7 @@ public abstract class AbstractJudge {
             res.set("code", SPJ_PC);
             String numStr = output.split("points ")[1].split(" ")[0];
             double percentage = 0.0;
-            if (!StringUtils.isEmpty(numStr)) {
+            if (!StrUtil.isEmpty(numStr)) {
                 percentage = Double.parseDouble(numStr) / 100;
             }
             if (percentage == 1) {

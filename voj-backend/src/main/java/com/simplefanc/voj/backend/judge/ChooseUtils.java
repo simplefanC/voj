@@ -1,6 +1,7 @@
 package com.simplefanc.voj.backend.judge;
 
 import com.alibaba.cloud.nacos.NacosDiscoveryProperties;
+import com.alibaba.cloud.nacos.NacosServiceManager;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
@@ -11,6 +12,7 @@ import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,8 @@ import java.util.List;
 @Slf4j(topic = "voj")
 @RequiredArgsConstructor
 public class ChooseUtils {
+
+    private final NacosServiceManager nacosServiceManager;
 
     private final NacosDiscoveryProperties discoveryProperties;
 
@@ -55,7 +59,7 @@ public class ChooseUtils {
         List<String> keyList = new ArrayList<>();
         // 获取当前健康实例取出ip和port拼接
         for (Instance instance : instances) {
-            keyList.add(instance.getIp() + ":" + instance.getPort());
+            keyList.add("http://" + instance.getIp() + ":" + instance.getPort());
         }
 
         // 过滤出小于或等于规定最大并发判题任务数的服务实例且健康的判题机
@@ -92,8 +96,10 @@ public class ChooseUtils {
      * @Since 2021/4/15
      */
     private List<Instance> getInstances(String serviceId) {
-        // 获取服务发现的相关API TODO 过时
-        NamingService namingService = discoveryProperties.namingServiceInstance();
+        // 获取服务发现的相关API
+
+//        NamingService namingService = discoveryProperties.namingServiceInstance();
+        NamingService namingService = nacosServiceManager.getNamingService(discoveryProperties.getNacosProperties());
         try {
             // 获取该微服务的所有健康实例
             return namingService.selectInstances(serviceId, true);

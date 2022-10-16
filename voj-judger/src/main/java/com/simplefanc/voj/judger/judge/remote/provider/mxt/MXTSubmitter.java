@@ -1,14 +1,15 @@
 package com.simplefanc.voj.judger.judge.remote.provider.mxt;
 
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
+import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
+import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.submitter.Submitter;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -55,10 +57,6 @@ public class MXTSubmitter implements Submitter {
         return MXTInfo.INFO;
     }
 
-    protected String getMaxRunId(SubmissionInfo info, DedicatedHttpClient client) throws Exception {
-        return info.remoteRunId;
-    }
-
     @Override
     public void submit(SubmissionInfo info, RemoteAccount account) throws Exception {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
@@ -66,9 +64,19 @@ public class MXTSubmitter implements Submitter {
                 "0", "source", info.userCode);
         HttpPost post = new HttpPost("/submit/7/" + info.remotePid + "/");
         post.setEntity(entity);
+        info.remoteRunId = getRunId(client, post);
+    }
+
+    private String getRunId(DedicatedHttpClient client, HttpPost post) throws InterruptedException {
         String result = client.execute(post, HttpStatusValidator.SC_OK).getBody();
-        final JSONObject jsonObject = JSONUtil.parseObj(result);
-        info.remoteRunId = jsonObject.getStr("solution_id");
+        JSONObject jsonObject = JSONUtil.parseObj(result);
+        if (!jsonObject.getBool("success")) {
+            int interval = Integer.parseInt(ReUtil.getGroup1("(\\d+)秒", jsonObject.getStr("msg")));
+            TimeUnit.SECONDS.sleep(interval);
+            result = client.execute(post, HttpStatusValidator.SC_OK).getBody();
+            jsonObject = JSONUtil.parseObj(result);
+        }
+        return jsonObject.getStr("solution_id");
     }
 
 }

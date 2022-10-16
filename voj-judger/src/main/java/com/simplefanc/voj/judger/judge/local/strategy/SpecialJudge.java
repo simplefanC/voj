@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.local.task;
+package com.simplefanc.voj.judger.judge.local.strategy;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileWriter;

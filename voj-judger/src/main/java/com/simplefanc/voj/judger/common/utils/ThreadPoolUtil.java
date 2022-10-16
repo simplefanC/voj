@@ -19,13 +19,14 @@ public class ThreadPoolUtil {
                 // 核心线程数
                 CPU_NUM,
                 // 最大线程数。最多几个线程并发。
-                CPU_NUM * 2,
+                CPU_NUM + 1,
                 // 当非核心线程无任务时，几秒后结束该线程
                 3,
                 // 结束线程时间单位
                 TimeUnit.SECONDS,
-                // 阻塞队列，限制等候线程数
-                new LinkedBlockingDeque<>(200 * CPU_NUM), Executors.defaultThreadFactory(),
+                // 工作队列：阻塞队列，限制等候线程数
+                new LinkedBlockingDeque<>(200 * CPU_NUM),
+                Executors.defaultThreadFactory(),
                 // 队列满了，尝试去和最早的竞争，也不会抛出异常！
                 new ThreadPoolExecutor.DiscardOldestPolicy());
     }

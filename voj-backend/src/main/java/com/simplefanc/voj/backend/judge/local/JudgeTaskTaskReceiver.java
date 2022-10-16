@@ -46,7 +46,7 @@ public class JudgeTaskTaskReceiver extends AbstractTaskReceiver {
     }
 
     @Override
-    public void handleJudgeTask(String taskJsonStr) {
+    public void handleTask(String taskJsonStr) {
         JSONObject task = JSONUtil.parseObj(taskJsonStr);
         Judge judge = task.get("judge", Judge.class);
         String token = task.getStr("token");

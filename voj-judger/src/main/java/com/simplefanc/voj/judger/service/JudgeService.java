@@ -18,6 +18,4 @@ public interface JudgeService {
     Boolean compileInteractive(String code, Long pid, String interactiveLanguage, HashMap<String, String> extraFiles)
             throws SystemError;
 
-    void updateOtherTable(Judge judge);
-
 }

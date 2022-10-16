@@ -5,6 +5,8 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
@@ -56,10 +58,11 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Transactional(rollbackFor = Exception.class)
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Long cid,
                                                   Integer problemType, String oj) {
-//        if (currentPage == null || currentPage < 1)
-//            currentPage = 1;
-//        if (limit == null || limit < 1)
-//            limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
+        IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据cid在ContestProblem表中查询到对应pid集合
         HashMap<Long, ContestProblem> contestProblemMap = new HashMap<>();
         List<Long> pidList = new LinkedList<>();
@@ -79,7 +82,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                     .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
                     // 题目权限为隐藏的不可加入！
                     .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode())
-                    // TODO 普通管理员：所有的 PUBLIC 和 自己的 CONTEST 题目
+            // TODO 普通管理员：所有的 PUBLIC 和 自己的 CONTEST 题目
 //                    .and(wrapper ->
 //                            wrapper.eq("auth", ProblemEnum.AUTH_PUBLIC.getCode())
 //                            .or()
@@ -114,23 +117,22 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             problemQueryWrapper.eq("id", null);
         }
 
-//        IPage<Problem> iPage = new Page<>(currentPage, limit);
-//        IPage<Problem> problemListPage = problemEntityService.page(iPage, problemQueryWrapper);
-        List<Problem> sortedProblemList = null;
+        IPage<Problem> problemListPage = problemEntityService.page(iPage, problemQueryWrapper);
+
         if (pidList.size() > 0 && problemType == null) {
-//            List<Problem> problemList = problemListPage.getRecords();
-            List<Problem> problemList = problemEntityService.list(problemQueryWrapper);
-            sortedProblemList = problemList.stream()
+            List<Problem> problemList = problemListPage.getRecords();
+
+            List<Problem> sortedProblemList = problemList.stream()
                     .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
                         ContestProblem x = contestProblemMap.get(a);
                         ContestProblem y = contestProblemMap.get(b);
                         return x.compareTo(y);
                     })).collect(Collectors.toList());
-//            problemListPage.setRecords(sortedProblemList);
+            problemListPage.setRecords(sortedProblemList);
         }
 
         HashMap<String, Object> contestProblem = new HashMap<>();
-        contestProblem.put("problemList", sortedProblemList);
+        contestProblem.put("problemList", problemListPage);
         contestProblem.put("contestProblemMap", contestProblemMap);
         return contestProblem;
     }

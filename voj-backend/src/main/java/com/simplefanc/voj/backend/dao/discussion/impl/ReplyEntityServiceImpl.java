@@ -31,7 +31,7 @@ public class ReplyEntityServiceImpl extends ServiceImpl<ReplyMapper, Reply> impl
 
         MsgRemind msgRemind = new MsgRemind();
         msgRemind.setAction("Reply").setSourceId(sourceId).setSourceType(sourceType).setSourceContent(content)
-                .setQuoteId(quoteId).setQuoteType(quoteType).setUrl(sourceType.equals("Discussion")
+                .setQuoteId(quoteId).setQuoteType(quoteType).setUrl("Discussion".equals(sourceType)
                 ? "/discussion-detail/" + sourceId : "/contest/" + sourceId + "/comment")
                 .setRecipientId(recipientId).setSenderId(senderId);
 

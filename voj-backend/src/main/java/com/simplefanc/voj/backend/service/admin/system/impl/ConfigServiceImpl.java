@@ -13,6 +13,7 @@ import com.alibaba.nacos.api.config.ConfigType;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.ConfigUtil;
+import com.simplefanc.voj.backend.common.utils.RestTemplateUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.pojo.dto.*;
 import com.simplefanc.voj.backend.config.ConfigVo;
@@ -50,9 +51,9 @@ public class ConfigServiceImpl implements ConfigService {
 
     private final ConfigUtil configUtil;
 
-    private final RestTemplate restTemplate;
-
     private final DiscoveryClient discoveryClient;
+
+    private final RestTemplateUtil restTemplateUtil;
 
     @Value("${service-url.name}")
     private String judgeServiceName;
@@ -84,13 +85,10 @@ public class ConfigServiceImpl implements ConfigService {
      */
     @Override
     public JSONObject getServiceInfo() {
-
         JSONObject result = new JSONObject();
 
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(currentServiceName);
-
-        // 获取nacos中心配置所在的机器环境
-        String response = restTemplate.getForObject(String.format("%s%s%s", "http://", nacosServerAddr, "/nacos/v1/ns/operator/metrics"), String.class);
+        String response = restTemplateUtil.get(nacosServerAddr, "/nacos/v1/ns/operator/metrics", String.class);
 
         JSONObject jsonObject = JSONUtil.parseObj(response);
         // 获取当前数据后台所在机器环境
@@ -106,12 +104,11 @@ public class ConfigServiceImpl implements ConfigService {
         double value = freePhysicalMemorySize / totalVirtualMemory;
         // 当前服务所在机器内存使用率
         String percentMemoryLoad = String.format("%.2f", (1 - value) * 100) + "%";
-        // TODO put 键
-        result.put("nacos", jsonObject);
-        result.put("backupCores", cores);
-        result.put("backupService", serviceInstances);
-        result.put("backupPercentCpuLoad", percentCpuLoad);
-        result.put("backupPercentMemoryLoad", percentMemoryLoad);
+        result.set("nacos", jsonObject);
+        result.set("backupCores", cores);
+        result.set("backupService", serviceInstances);
+        result.set("backupPercentCpuLoad", percentCpuLoad);
+        result.set("backupPercentMemoryLoad", percentMemoryLoad);
         return result;
     }
 
@@ -120,9 +117,9 @@ public class ConfigServiceImpl implements ConfigService {
         List<JSONObject> serviceInfoList = new LinkedList<>();
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(judgeServiceName);
         for (ServiceInstance serviceInstance : serviceInstances) {
-            String result = restTemplate.getForObject(serviceInstance.getUri() + "/get-sys-config", String.class);
+            String result = restTemplateUtil.get(serviceInstance.getUri(), "/get-sys-config", String.class);
             JSONObject jsonObject = JSONUtil.parseObj(result);
-            jsonObject.put("service", serviceInstance);
+            jsonObject.set("service", serviceInstance);
             serviceInfoList.add(jsonObject);
         }
         return serviceInfoList;
@@ -130,22 +127,23 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public WebConfigDto getWebConfig() {
-        return WebConfigDto.builder().baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
-                .name(UnicodeUtil.toString(configVo.getName())).shortName(UnicodeUtil.toString(configVo.getShortName()))
-                .description(UnicodeUtil.toString(configVo.getDescription()))
-                .register(configVo.getRegister())
-//                .codeVisibleStartTime(configVo.getCodeVisibleStartTime())
-                .problem(configVo.getProblem())
-                .training(configVo.getTraining())
-                .contest(configVo.getContest())
-                .status(configVo.getStatus())
-                .rank(configVo.getRank())
-                .discussion(configVo.getDiscussion())
-//              .introduction(configVo.getIntroduction())
-                .recordName(UnicodeUtil.toString(configVo.getRecordName()))
-                .recordUrl(UnicodeUtil.toString(configVo.getRecordUrl()))
-                .projectName(UnicodeUtil.toString(configVo.getProjectName()))
-                .projectUrl(UnicodeUtil.toString(configVo.getProjectUrl())).build();
+        return BeanUtil.copyProperties(configVo, WebConfigDto.class);
+//        return WebConfigDto.builder().baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
+//                .name(UnicodeUtil.toString(configVo.getName()))
+//                .shortName(UnicodeUtil.toString(configVo.getShortName()))
+//                .description(UnicodeUtil.toString(configVo.getDescription()))
+//                .register(configVo.getRegister())
+//                .problem(configVo.getProblem())
+//                .training(configVo.getTraining())
+//                .contest(configVo.getContest())
+//                .status(configVo.getStatus())
+//                .rank(configVo.getRank())
+//                .discussion(configVo.getDiscussion())
+//                .introduction(configVo.getIntroduction())
+//                .recordName(UnicodeUtil.toString(configVo.getRecordName()))
+//                .recordUrl(UnicodeUtil.toString(configVo.getRecordUrl()))
+//                .projectName(UnicodeUtil.toString(configVo.getProjectName()))
+//                .projectUrl(UnicodeUtil.toString(configVo.getProjectUrl())).build();
     }
 
     @Override
@@ -189,7 +187,6 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public void deleteHomeCarousel(Long id) {
-
         File imgFile = fileEntityService.getById(id);
         if (imgFile == null) {
             throw new StatusFailException("文件id错误，图片不存在");
@@ -204,9 +201,10 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public EmailConfigDto getEmailConfig() {
-        return EmailConfigDto.builder().emailUsername(configVo.getEmailUsername())
-                .emailPassword(configVo.getEmailPassword()).emailHost(configVo.getEmailHost())
-                .emailPort(configVo.getEmailPort()).emailSsl(configVo.getEmailSsl()).build();
+        return BeanUtil.copyProperties(configVo, EmailConfigDto.class);
+//        return EmailConfigDto.builder().emailUsername(configVo.getEmailUsername())
+//                .emailPassword(configVo.getEmailPassword()).emailHost(configVo.getEmailHost())
+//                .emailPort(configVo.getEmailPort()).emailSsl(configVo.getEmailSsl()).build();
     }
 
     @Override
@@ -252,10 +250,11 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public DbAndRedisConfigDto getDbAndRedisConfig() {
-        return DbAndRedisConfigDto.builder().dbName(configVo.getMysqlDbName()).dbHost(configVo.getMysqlHost())
-                .dbPort(configVo.getMysqlPort()).dbUsername(configVo.getMysqlUsername())
-                .dbPassword(configVo.getMysqlPassword()).redisHost(configVo.getRedisHost())
-                .redisPort(configVo.getRedisPort()).redisPassword(configVo.getRedisPassword()).build();
+        return BeanUtil.copyProperties(configVo, DbAndRedisConfigDto.class);
+//        return DbAndRedisConfigDto.builder().dbName(configVo.getMysqlDbName()).dbHost(configVo.getMysqlHost())
+//                .dbPort(configVo.getMysqlPort()).dbUsername(configVo.getMysqlUsername())
+//                .dbPassword(configVo.getMysqlPassword()).redisHost(configVo.getRedisHost())
+//                .redisPort(configVo.getRedisPort()).redisPassword(configVo.getRedisPassword()).build();
     }
 
     @Override
@@ -297,7 +296,6 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public boolean sendNewConfigToNacos() {
-
         Properties properties = new Properties();
         properties.put("serverAddr", nacosServerAddr);
 

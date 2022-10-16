@@ -4,8 +4,11 @@ import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
+import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
+import com.simplefanc.voj.judger.dao.ContestRecordEntityService;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
+import com.simplefanc.voj.judger.dao.UserAcproblemEntityService;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
@@ -35,9 +38,11 @@ public class RemoteJudgeQuerier {
 
     private final JudgeEntityService judgeEntityService;
 
-    private final JudgeService judgeService;
-
     private final JudgeCaseEntityService judgeCaseEntityService;
+
+    private final UserAcproblemEntityService userAcproblemEntityService;
+
+    private final ContestRecordEntityService contestRecordEntityService;
 
     public void process(SubmissionInfo info, RemoteAccount account) {
         String key = UUID.randomUUID().toString() + info.submitId;
@@ -98,7 +103,17 @@ public class RemoteJudgeQuerier {
                 // 写回数据库
                 judgeEntityService.updateById(judge);
                 // 同步其它表
-                judgeService.updateOtherTable(judge);
+                // 非比赛提交
+                if (judge.getCid() == 0) {
+                    // 如果是AC，就更新 user_acproblem表
+                    if (JudgeStatus.STATUS_ACCEPTED.getStatus().equals(judge.getStatus())) {
+                        userAcproblemEntityService.saveOrUpdate(new UserAcproblem().setPid(judge.getPid())
+                                .setUid(judge.getUid()).setSubmitId(judge.getSubmitId()));
+                    }
+                } else {
+                    // 如果是比赛提交
+                    contestRecordEntityService.updateContestRecord(judge);
+                }
                 cancelFutureTask();
             }
         }

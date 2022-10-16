@@ -10,7 +10,7 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
-import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.common.utils.ExcelUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
@@ -255,7 +255,7 @@ public class ContestFileServiceImpl implements ContestFileService {
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
         String zipPath = filePathProps.getContestAcSubmissionTmpFolder() + File.separator + zipFileName;
         ZipUtil.zip(tmpFilesDir, zipPath);
-        DownloadFileUtil.download(response, zipPath, zipFileName, "下载比赛AC代码失败，请重新尝试！");
+        MyFileUtil.download(response, zipPath, zipFileName, "下载比赛AC代码失败，请重新尝试！");
         FileUtil.del(tmpFilesDir);
         FileUtil.del(zipPath);
 
@@ -364,7 +364,7 @@ public class ContestFileServiceImpl implements ContestFileService {
             fileWriter.write(contestPrint.getContent());
         }
 
-        DownloadFileUtil.download(response, filePath, filename, "下载比赛打印文本文件失败，请重新尝试！");
+        MyFileUtil.download(response, filePath, filename, "下载比赛打印文本文件失败，请重新尝试！");
     }
 
     public List<List<String>> getContestRankExcelHead(List<String> contestProblemDisplayIdList, Boolean isACM) {

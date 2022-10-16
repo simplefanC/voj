@@ -23,7 +23,7 @@ public class RemoteJudgeTaskDispatcher {
 
     private final JudgeEntityService judgeEntityService;
 
-    private final RemoteJudgeTaskTaskReceiver remoteJudgeTaskReceiver;
+    private final RemoteJudgeTaskReceiver remoteJudgeTaskReceiver;
 
     @Value("${voj.judge.token}")
     private String judgeToken;

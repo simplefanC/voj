@@ -26,7 +26,6 @@ import java.util.HashMap;
  * @Description:
  */
 @Service
-@RefreshScope
 @RequiredArgsConstructor
 public class JudgeServiceImpl implements JudgeService {
 
@@ -34,13 +33,13 @@ public class JudgeServiceImpl implements JudgeService {
 
     private final ProblemEntityService problemEntityService;
 
-    private final JudgeContext judgeContext;
-
-    private final RemoteJudgeContext remoteJudgeContext;
-
     private final UserAcproblemEntityService userAcproblemEntityService;
 
     private final ContestRecordEntityService contestRecordEntityService;
+
+    private final JudgeContext judgeContext;
+
+    private final RemoteJudgeContext remoteJudgeContext;
 
     @Override
     public void judge(Judge judge) {
@@ -53,7 +52,17 @@ public class JudgeServiceImpl implements JudgeService {
 
         if (finalJudgeResult.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
             // 更新其它表
-            updateOtherTable(finalJudgeResult);
+            // 非比赛提交
+            if (judge.getCid() == 0) {
+                // 如果是AC，就更新 user_acproblem表
+                if (JudgeStatus.STATUS_ACCEPTED.getStatus().equals(judge.getStatus())) {
+                    userAcproblemEntityService.saveOrUpdate(new UserAcproblem().setPid(judge.getPid())
+                            .setUid(judge.getUid()).setSubmitId(judge.getSubmitId()));
+                }
+            } else {
+                // 如果是比赛提交
+                contestRecordEntityService.updateContestRecord(judge);
+            }
         }
     }
 
@@ -72,21 +81,6 @@ public class JudgeServiceImpl implements JudgeService {
     public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
                                       HashMap<String, String> extraFiles) throws SystemError {
         return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
-    }
-
-    @Override
-    public void updateOtherTable(Judge judge) {
-        // 非比赛提交
-        if (judge.getCid() == 0) {
-            // 如果是AC，就更新 user_acproblem表
-            if (JudgeStatus.STATUS_ACCEPTED.getStatus().equals(judge.getStatus())) {
-                userAcproblemEntityService.saveOrUpdate(new UserAcproblem().setPid(judge.getPid())
-                        .setUid(judge.getUid()).setSubmitId(judge.getSubmitId()));
-            }
-        } else {
-            // 如果是比赛提交
-            contestRecordEntityService.updateContestRecord(judge);
-        }
     }
 
 }

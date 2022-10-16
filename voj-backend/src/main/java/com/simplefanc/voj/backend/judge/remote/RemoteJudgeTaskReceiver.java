@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
-public class RemoteJudgeTaskTaskReceiver extends AbstractTaskReceiver {
+public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
 
     private final static ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(10);
 
@@ -56,7 +56,7 @@ public class RemoteJudgeTaskTaskReceiver extends AbstractTaskReceiver {
     }
 
     @Override
-    public void handleJudgeTask(String taskJsonStr) {
+    public void handleTask(String taskJsonStr) {
         JSONObject task = JSONUtil.parseObj(taskJsonStr);
 
         Judge judge = task.get("judge", Judge.class);

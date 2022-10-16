@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.utils.IpUtil;
 import com.simplefanc.voj.judger.dao.JudgeServerEntityService;
+import com.simplefanc.voj.judger.service.SystemConfigService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,6 +46,8 @@ public class StartupRunner implements CommandLineRunner {
 
     private final JudgeServerEntityService judgeServerEntityService;
 
+    private final SystemConfigService systemConfigService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void run(String... args) {
@@ -61,23 +64,23 @@ public class StartupRunner implements CommandLineRunner {
         UpdateWrapper<JudgeServer> judgeServerQueryWrapper = new UpdateWrapper<>();
         judgeServerQueryWrapper.eq("ip", ip).eq("port", port);
         judgeServerEntityService.remove(judgeServerQueryWrapper);
-        boolean isOk1 = judgeServerEntityService.save(new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port)
-                .setUrl(ip + ":" + port).setMaxTaskNumber(maxTaskNum).setIsRemote(false).setName(judgeServerName));
 
+        final JudgeServer entity = new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port).setUrl("http://" + ip + ":" + port).setName(judgeServerName)
+                .setMaxTaskNumber(maxTaskNum).setIsRemote(false);
+        boolean isOk1 = judgeServerEntityService.save(entity);
         boolean isOk2 = true;
         if (openRemoteJudge) {
             if (maxRemoteTaskNum == -1) {
                 maxRemoteTaskNum = CPU_NUM * 2 + 1;
             }
-            isOk2 = judgeServerEntityService
-                    .save(new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port).setUrl(ip + ":" + port)
-                            .setMaxTaskNumber(maxRemoteTaskNum).setIsRemote(true).setName(judgeServerName));
+            entity.setMaxTaskNumber(maxRemoteTaskNum).setIsRemote(true);
+            isOk2 = judgeServerEntityService.save(entity);
         }
 
         if (!isOk1 || !isOk2) {
             log.error("初始化判题机信息到数据库失败，请重新启动试试！");
         } else {
-            HashMap<String, Object> judgeServerInfo = judgeServerEntityService.getJudgeServerInfo();
+            HashMap<String, Object> judgeServerInfo = systemConfigService.getJudgeServerInfo();
             log.info("VOJ-JudgeServer had successfully started! The judge config and sandbox config Info: {}",
                     judgeServerInfo);
         }

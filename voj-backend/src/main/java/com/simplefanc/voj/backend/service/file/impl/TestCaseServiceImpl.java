@@ -8,7 +8,7 @@ import cn.hutool.core.util.ZipUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
-import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.service.file.TestCaseService;
@@ -46,7 +46,7 @@ public class TestCaseServiceImpl implements TestCaseService {
     @Override
     public Map<Object, Object> uploadTestcaseZip(MultipartFile file) {
         // 获取文件后缀
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+        String suffix = MyFileUtil.getFileSuffix(file);
         if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请上传zip格式的测试数据压缩包！");
         }
@@ -88,14 +88,15 @@ public class TestCaseServiceImpl implements TestCaseService {
             } else if (tmp.getName().endsWith(".ans")) {
                 tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".ans"));
                 outputData.put(tmpPreName, tmp.getName());
-            } else if (tmp.getName().endsWith(".txt")) {
-                tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".txt"));
-                if (tmpPreName.contains("input")) {
-                    inputData.put(tmpPreName.replaceAll("input", "$*$"), tmp.getName());
-                } else if (tmpPreName.contains("output")) {
-                    outputData.put(tmpPreName.replaceAll("output", "$*$"), tmp.getName());
-                }
             }
+//            else if (tmp.getName().endsWith(".txt")) {
+//                tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".txt"));
+//                if (tmpPreName.contains("input")) {
+//                    inputData.put(tmpPreName.replaceAll("input", "$*$"), tmp.getName());
+//                } else if (tmpPreName.contains("output")) {
+//                    outputData.put(tmpPreName.replaceAll("output", "$*$"), tmp.getName());
+//                }
+//            }
         }
 
         // 进行数据对应检查,同时生成返回数据
@@ -105,14 +106,15 @@ public class TestCaseServiceImpl implements TestCaseService {
             String inputFileName = inputData.get(key);
             testcaseMap.put("input", inputFileName);
 
-            String outputFileName = key + ".out";
-            if (inputFileName.endsWith(".txt")) {
-                outputFileName = inputFileName.replaceAll("input", "output");
-            }
+//            String outputFileName = key + ".out";
+//            if (inputFileName.endsWith(".txt")) {
+//                outputFileName = inputFileName.replaceAll("input", "output");
+//            }
 
             // 若有名字对应的out文件不存在的，直接生成对应的out文件
-            if (outputData.getOrDefault(key, null) == null) {
-                FileWriter fileWriter = new FileWriter(fileDir + File.separator + outputFileName);
+            final String outputFileName = outputData.getOrDefault(key, null);
+            if (outputFileName == null) {
+                FileWriter fileWriter = new FileWriter(fileDir + File.separator + key + ".out");
                 fileWriter.write("");
             }
 
@@ -176,7 +178,7 @@ public class TestCaseServiceImpl implements TestCaseService {
         // 将对应文件夹的文件压缩成zip
         final String zipPath = filePathProps.getFileDownloadTmpFolder() + File.separator + fileName;
         ZipUtil.zip(workDir, zipPath);
-        DownloadFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
+        MyFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
         // 清空临时文件
         FileUtil.del(zipPath);
     }
@@ -193,7 +195,7 @@ public class TestCaseServiceImpl implements TestCaseService {
                 FileUtil.file(workDir + File.separator + outputData)
         );
 
-        DownloadFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
+        MyFileUtil.download(response, zipPath, fileName, "下载题目测试数据的压缩文件失败，请重新尝试！");
         // 清空临时文件
         FileUtil.del(zipPath);
     }

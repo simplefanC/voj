@@ -56,6 +56,64 @@ import java.util.Map;
  */
 @Slf4j(topic = "voj")
 public class SandboxRun {
+    /**
+     * 单例模式
+     */
+    private static final SandboxRun INSTANCE = new SandboxRun();
+
+    private SandboxRun() {
+    }
+
+    private static final RestTemplate REST_TEMPLATE;
+
+    static {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(20000);
+        requestFactory.setReadTimeout(180000);
+        REST_TEMPLATE = new RestTemplate(requestFactory);
+    }
+
+    public static RestTemplate getRestTemplate() {
+        return REST_TEMPLATE;
+    }
+
+    private static final String SANDBOX_BASE_URL = "http://localhost:5050";
+
+    public static String getSandboxBaseUrl() {
+        return SANDBOX_BASE_URL;
+    }
+
+    private static final int MAX_PROCESS_NUMBER = 128;
+
+    private static final int TIME_LIMIT_MS = 16000;
+
+    private static final int MEMORY_LIMIT_MB = 512;
+
+    private static final int STACK_LIMIT_MB = 128;
+
+    private static final int STDIO_SIZE_MB = 32;
+
+    /**
+     * "files": [{ "content": "" }, { "name": "stdout", "max": 1024 * 1024 * 32 }, {
+     * "name": "stderr", "max": 1024 * 1024 * 32 }]
+     */
+    private static final JSONArray COMPILE_FILES = new JSONArray();
+
+    static {
+        JSONObject content = new JSONObject();
+        content.set("content", "");
+
+        JSONObject stdout = new JSONObject();
+        stdout.set("name", "stdout");
+        stdout.set("max", 1024 * 1024 * STDIO_SIZE_MB);
+
+        JSONObject stderr = new JSONObject();
+        stderr.set("name", "stderr");
+        stderr.set("max", 1024 * 1024 * STDIO_SIZE_MB);
+        COMPILE_FILES.put(content);
+        COMPILE_FILES.put(stdout);
+        COMPILE_FILES.put(stderr);
+    }
 
     public static final HashMap<String, Integer> RESULT_STATUS_MAP = new HashMap<>() {
         {
@@ -107,65 +165,6 @@ public class SandboxRun {
         }
     };
 
-    private static final RestTemplate REST_TEMPLATE;
-
-    /**
-     * 单例模式
-     */
-    private static final SandboxRun INSTANCE = new SandboxRun();
-
-    private SandboxRun() {
-    }
-
-    private static final String SANDBOX_BASE_URL = "http://localhost:5050";
-
-    private static final int MAX_PROCESS_NUMBER = 128;
-
-    private static final int TIME_LIMIT_MS = 16000;
-
-    private static final int MEMORY_LIMIT_MB = 512;
-
-    private static final int STACK_LIMIT_MB = 256;
-
-    private static final int STDIO_SIZE_MB = 32;
-
-    /**
-     * "files": [{ "content": "" }, { "name": "stdout", "max": 1024 * 1024 * 32 }, {
-     * "name": "stderr", "max": 1024 * 1024 * 32 }]
-     */
-    private static final JSONArray COMPILE_FILES = new JSONArray();
-
-    static {
-        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(20000);
-        requestFactory.setReadTimeout(180000);
-        REST_TEMPLATE = new RestTemplate(requestFactory);
-    }
-
-    static {
-        JSONObject content = new JSONObject();
-        content.set("content", "");
-
-        JSONObject stdout = new JSONObject();
-        stdout.set("name", "stdout");
-        stdout.set("max", 1024 * 1024 * STDIO_SIZE_MB);
-
-        JSONObject stderr = new JSONObject();
-        stderr.set("name", "stderr");
-        stderr.set("max", 1024 * 1024 * STDIO_SIZE_MB);
-        COMPILE_FILES.put(content);
-        COMPILE_FILES.put(stdout);
-        COMPILE_FILES.put(stderr);
-    }
-
-    public static RestTemplate getRestTemplate() {
-        return REST_TEMPLATE;
-    }
-
-    public static String getSandboxBaseUrl() {
-        return SANDBOX_BASE_URL;
-    }
-
     public JSONArray run(String uri, JSONObject param) throws SystemError {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -173,7 +172,9 @@ public class SandboxRun {
         ResponseEntity<String> postForEntity;
         try {
             postForEntity = REST_TEMPLATE.postForEntity(SANDBOX_BASE_URL + uri, request, String.class);
-            // TODO 疑似出现OOM
+            // TODO 疑似出现OOM 普通评测：如果沙盒运行程序不是 Accepted 可以不获取 stdout
+            // 临时解决：顺序评测 and 降低程序的并发数
+            // 如果测试数据标准输出真的特别大 只有增大JVM配置
             return JSONUtil.parseArray(postForEntity.getBody());
         } catch (RestClientResponseException ex) {
             if (ex.getRawStatusCode() != 200) {
@@ -309,11 +310,7 @@ public class SandboxRun {
         cmd.set("cpuLimit", maxTime * 1000 * 1000L);
         cmd.set("clockLimit", maxTime * 1000 * 1000L * 3);
         // byte
-        if (maxMemory >= MEMORY_LIMIT_MB) {
-            cmd.set("memoryLimit", (maxMemory + 100) * 1024 * 1024L);
-        } else {
-            cmd.set("memoryLimit", MEMORY_LIMIT_MB * 1024 * 1024L);
-        }
+        cmd.set("memoryLimit", (maxMemory + 100) * 1024 * 1024L);
         cmd.set("procLimit", MAX_PROCESS_NUMBER);
         cmd.set("stackLimit", maxStack * 1024 * 1024L);
 
@@ -335,8 +332,8 @@ public class SandboxRun {
         // 调用判题安全沙箱
         JSONArray result = INSTANCE.run("/run", param);
 
-        JSONObject tmp = (JSONObject) result.get(0);
-        ((JSONObject) result.get(0)).set("status", RESULT_STATUS_MAP.get(tmp.getStr("status")));
+        final JSONObject jsonObject = (JSONObject) result.get(0);
+        jsonObject.set("status", RESULT_STATUS_MAP.get(jsonObject.getStr("status")));
         return result;
     }
 

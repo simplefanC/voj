@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableDiscoveryClient // 开启服务注册发现功能
 @SpringBootApplication
 @EnableAsync(proxyTargetClass = true) // 开启异步注解
-@EnableCaching
+//@EnableCaching
 @EnableTransactionManagement
 public class BackendApplication {
 

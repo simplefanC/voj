@@ -6,4 +6,6 @@ public interface SystemConfigService {
 
     HashMap<String, Object> getSystemConfig();
 
+    HashMap<String, Object> getJudgeServerInfo();
+
 }

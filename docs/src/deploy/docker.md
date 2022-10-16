@@ -101,10 +101,9 @@
 4. 对依赖服务 MySQL 进行以下设置（分布式部署主服务器时同理）
     1. 将 voj.sql 和 nacos_config.sql 文件拷贝到容器/目录下：
        ```
-       cd sql
-       docker cp voj.sql voj-mysql:/
-       docker cp nacos_config.sql voj-mysql:/
-        ```
+       docker cp ../sql/voj.sql voj-mysql:/
+       docker cp ../sql/nacos_config.sql voj-mysql:/
+       ```
     2. 进入 voj-mysql 容器并执行如下操作：
         ```
         # 进入mysql容器
@@ -115,6 +114,8 @@
         source /voj.sql
         source /nacos_config.sql
         ```
+    3. 退出 voj-mysql 容器。
+    
 5. docker-compose restart
    
    等待命令执行完毕后，查看容器状态

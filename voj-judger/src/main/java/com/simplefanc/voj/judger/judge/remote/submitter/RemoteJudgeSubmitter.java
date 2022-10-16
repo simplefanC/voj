@@ -19,13 +19,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j(topic = "voj")
-@RefreshScope
 @RequiredArgsConstructor
 public class RemoteJudgeSubmitter {
 
     private final JudgeEntityService judgeEntityService;
-
-    private final JudgeService judgeService;
 
     public boolean process(SubmissionInfo info, RemoteAccount account) {
         log.info(

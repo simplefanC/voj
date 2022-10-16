@@ -14,7 +14,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @Description: 专用于判题的异步线程池
  */
 @Configuration
-@EnableAsync
 public class JudgeAsyncTaskConfig {
 
     @Bean

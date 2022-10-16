@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.local.task;
+package com.simplefanc.voj.judger.judge.local.strategy;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * @Author: chenfan
@@ -23,6 +24,7 @@ import java.util.List;
  */
 @Component
 public class DefaultJudge extends AbstractJudge {
+    private final static Pattern EOL_PATTERN = Pattern.compile("[^\\S\\n]+(?=\\n)");
 
     @Override
     public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
@@ -41,6 +43,7 @@ public class DefaultJudge extends AbstractJudge {
         StringBuilder errMsg = new StringBuilder();
         // 如果测试跑题无异常
         if (sandBoxRes.getStatus().equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
+            // 比对题目限制、测试数据
             success(sandBoxRes, judgeDTO, judgeGlobalDTO, result);
         } else if (sandBoxRes.getStatus().equals(JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus())) {
             result.set("status", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
@@ -115,20 +118,21 @@ public class DefaultJudge extends AbstractJudge {
             if (userOutputMd5.equals(testcaseInfo.getStr("EOFStrippedOutputMd5"))) {
                 return JudgeStatus.STATUS_ACCEPTED.getStatus();
             }
-        } else { // 不选择默认去掉文末空格 与原数据进行对比
-            String userOutputMd5 = DigestUtils.md5DigestAsHex(userOutput.getBytes());
-            if (userOutputMd5.equals(testcaseInfo.getStr("outputMd5"))) {
-                return JudgeStatus.STATUS_ACCEPTED.getStatus();
-            }
-        }
-        // 如果不AC, 进行PE判断, 否则为WA
-        String userOutputMd5 = DigestUtils.md5DigestAsHex(userOutput.replaceAll("\\s+", "").getBytes());
-        if (userOutputMd5.equals(testcaseInfo.getStr("allStrippedOutputMd5"))) {
-            return JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus();
-        } else {
             return JudgeStatus.STATUS_WRONG_ANSWER.getStatus();
         }
+        // 不选择默认去掉文末空格 与原数据进行对比
+        String userOutputMd5 = DigestUtils.md5DigestAsHex(userOutput.getBytes());
+        if (userOutputMd5.equals(testcaseInfo.getStr("outputMd5"))) {
+            return JudgeStatus.STATUS_ACCEPTED.getStatus();
+        }
+        // 如果不AC, 进行PE判断, 否则为WA
+        userOutputMd5 = DigestUtils.md5DigestAsHex(userOutput.replaceAll("\\s+", "").getBytes());
+        if (userOutputMd5.equals(testcaseInfo.getStr("allStrippedOutputMd5"))) {
+            return JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus();
+        }
+        return JudgeStatus.STATUS_WRONG_ANSWER.getStatus();
     }
+
 
     /**
      * 去除行末尾空白符
@@ -139,12 +143,7 @@ public class DefaultJudge extends AbstractJudge {
     private String rtrim(String value) {
         if (value == null)
             return null;
-        StringBuilder sb = new StringBuilder();
-        String[] strArr = value.split("\n");
-        for (String str : strArr) {
-            sb.append(str.replaceAll("\\s+$", "")).append("\n");
-        }
-        return sb.toString().replaceAll("\\s+$", "");
+        return EOL_PATTERN.matcher(StrUtil.trimEnd(value)).replaceAll("");
     }
 
 }

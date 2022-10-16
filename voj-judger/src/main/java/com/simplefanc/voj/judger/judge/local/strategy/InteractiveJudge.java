@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.local.task;
+package com.simplefanc.voj.judger.judge.local.strategy;
 
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;

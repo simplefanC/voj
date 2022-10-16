@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.XmlUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
@@ -72,7 +73,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importFPSProblem(MultipartFile file) throws IOException {
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+        String suffix = MyFileUtil.getFileSuffix(file);
         if (!"xml".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请上传xml后缀格式的fps题目文件！");
         }

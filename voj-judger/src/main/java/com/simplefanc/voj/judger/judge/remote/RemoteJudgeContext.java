@@ -15,6 +15,7 @@ import com.simplefanc.voj.judger.judge.remote.submitter.RemoteJudgeSubmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,7 +41,7 @@ public class RemoteJudgeContext {
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
 
-    // @Async // 去掉 异步注解 否则直接返回主服务器 无法实现对判题机的负载均衡
+//    @Async // 去掉 异步注解 否则直接返回主服务器 无法实现对判题机的负载均衡
     public void judge(ToJudge toJudge) {
         String[] source = toJudge.getRemoteJudgeProblem().split("-");
         // String remoteOj = source[0];

@@ -14,9 +14,9 @@ import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.common.utils.ThreadPoolUtil;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
-import com.simplefanc.voj.judger.judge.local.task.DefaultJudge;
-import com.simplefanc.voj.judger.judge.local.task.InteractiveJudge;
-import com.simplefanc.voj.judger.judge.local.task.SpecialJudge;
+import com.simplefanc.voj.judger.judge.local.strategy.DefaultJudge;
+import com.simplefanc.voj.judger.judge.local.strategy.InteractiveJudge;
+import com.simplefanc.voj.judger.judge.local.strategy.SpecialJudge;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.*;
 
 /**
  * @Author: chenfan
@@ -66,16 +67,17 @@ public class JudgeRun {
         for (FutureTask<JSONObject> futureTask : futureTasks) {
             // 提交到线程池进行执行
             ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
-            JSONObject judgeRes;
-            while (true) {
-                if (futureTask.isDone() && !futureTask.isCancelled()) {
-                    // 获取线程返回结果
-                    judgeRes = futureTask.get();
-                    break;
-                } else {
-                    Thread.sleep(10);
-                }
-            }
+//            JSONObject judgeRes;
+//            while (true) {
+//                if (futureTask.isDone() && !futureTask.isCancelled()) {
+//                    // 获取线程返回结果
+//                    judgeRes = futureTask.get();
+//                    break;
+//                } else {
+//                    Thread.sleep(10);
+//                }
+//            }
+            final JSONObject judgeRes = futureTask.get();
             result.add(judgeRes);
             Integer status = judgeRes.getInt("status");
             if (!JudgeStatus.STATUS_ACCEPTED.getStatus().equals(status)) {
@@ -83,6 +85,39 @@ public class JudgeRun {
             }
         }
         return result;
+    }
+
+    public List<JSONObject> t() throws ExecutionException, InterruptedException {
+        List<JudgeTask> taskList = new ArrayList<>();
+        ExecutorService executorService = null;
+        CompletableFuture[] futures = new CompletableFuture[taskList.size()];
+        for (int i = 0; i < taskList.size(); i++) {
+            final JudgeTask judgeTask = taskList.get(i);
+            futures[i]  = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return getJsonObject(judgeTask);
+                } catch (SystemError systemError) {
+                    systemError.printStackTrace();
+                }
+                return null;
+            }, executorService);
+        }
+        // anyOf() 方法不会等待所有的 CompletableFuture 都运行完成之后再返回，只要有一个执行完成即可！
+//        CompletableFuture<Object> f = CompletableFuture.anyOf(futures);
+
+        // allOf() 方法会等到所有的 CompletableFuture 都运行完成之后再返回
+        CompletableFuture<Void> headerFuture = CompletableFuture.allOf(futures);
+        // 都运行完了之后再继续执行
+        headerFuture.join();
+        List<JSONObject> res = new ArrayList<>();
+        for (int i = 0; i < taskList.size(); i++) {
+            res.add((JSONObject) futures[i].get());
+        }
+        return res;
+    }
+
+    private JSONObject getJsonObject(JudgeTask judgeTask) throws SystemError {
+        return judgeTask.call();
     }
 
     private List<JSONObject> defaultJudgeAllCase(List<FutureTask<JSONObject>> futureTasks) throws InterruptedException, ExecutionException {

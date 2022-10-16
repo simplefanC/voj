@@ -47,13 +47,13 @@ public class NacosConfig {
         // 此处只改了ip，其他参数可以根据自己的需求改变
         nacosDiscoveryProperties.setIp(IpUtil.getServiceIp());
         HashMap<String, String> meta = new HashMap<>();
-        int max = CPU_NUM * 2 + 1;
+        int max = CPU_NUM + 1;
         if (maxTaskNum != -1) {
             max = maxTaskNum;
         }
         meta.put("maxTaskNum", String.valueOf(max));
         if (openRemoteJudge) {
-            max = (CPU_NUM * 2 + 1) * 2;
+            max = CPU_NUM * 2 + 1;
             if (maxRemoteTaskNum != -1) {
                 max = maxRemoteTaskNum;
             }
@@ -66,7 +66,6 @@ public class NacosConfig {
         }
         nacosDiscoveryProperties.setPort(port);
 
-        nacosDiscoveryProperties.setService("voj-judge-server");
         return nacosDiscoveryProperties;
     }
 

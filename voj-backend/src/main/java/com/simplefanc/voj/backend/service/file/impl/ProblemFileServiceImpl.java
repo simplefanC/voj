@@ -12,7 +12,7 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
-import com.simplefanc.voj.backend.common.utils.DownloadFileUtil;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
@@ -68,8 +68,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importProblem(MultipartFile file) {
-
-        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+        String suffix = MyFileUtil.getFileSuffix(file);
         if (!"zip".toUpperCase().contains(suffix.toUpperCase())) {
             throw new StatusFailException("请上传zip格式的题目文件压缩包！");
         }
@@ -191,14 +190,13 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 }
             }
 
-            // TODO
-            Problem problem = BeanUtil.mapToBean(importProblemVo.getProblem(), Problem.class, true);
+            Problem problem = BeanUtil.toBeanIgnoreError(importProblemVo.getProblem(), Problem.class);
             if (problem.getAuthor() == null) {
                 problem.setAuthor(userRolesVo.getUsername());
             }
             List<ProblemCase> problemCaseList = new LinkedList<>();
             for (Map<String, Object> tmp : importProblemVo.getSamples()) {
-                problemCaseList.add(BeanUtil.mapToBean(tmp, ProblemCase.class, true));
+                problemCaseList.add(BeanUtil.toBeanIgnoreError(tmp, ProblemCase.class));
             }
 
             // 格式化用户额外文件和判题额外文件
@@ -289,7 +287,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         String fileName = "problem_export_" + System.currentTimeMillis() + ".zip";
         // 将对应文件夹的文件压缩成zip
         ZipUtil.zip(workDir, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);
-        DownloadFileUtil.download(response, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName, fileName, "导出题目数据的压缩文件异常，请重新尝试！");
+        MyFileUtil.download(response, filePathProps.getFileDownloadTmpFolder() + File.separator + fileName, fileName, "导出题目数据的压缩文件异常，请重新尝试！");
         // 清空临时文件
         FileUtil.del(workDir);
         FileUtil.del(filePathProps.getFileDownloadTmpFolder() + File.separator + fileName);

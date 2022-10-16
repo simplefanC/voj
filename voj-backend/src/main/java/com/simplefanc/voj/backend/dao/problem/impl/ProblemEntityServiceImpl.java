@@ -71,12 +71,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     public static String rtrim(String value) {
         if (value == null)
             return null;
-        StringBuilder sb = new StringBuilder();
-        String[] strArr = value.split("\n");
-        for (String str : strArr) {
-            sb.append(str.replaceAll("\\s+$", "")).append("\n");
-        }
-        return sb.toString().replaceAll("\\s+$", "");
+        return value.replaceAll("[^\\S\\r\\n]+(?=\\n|\\r)|\\s+(?=$)", "");
     }
 
     @Override
@@ -237,6 +232,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                 processTag(pid, problemDto, ojName) &&
                 processCodeTemplate(pid, problemDto) &&
                 processLanguage(pid, problemDto) &&
+                // 处理problem_case表的增加与删除
                 processProblemCase(pid, problemDto, problem)) {
             return true;
         }

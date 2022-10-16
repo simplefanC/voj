@@ -7,6 +7,7 @@ import com.simplefanc.voj.backend.common.constants.FileTypeEnum;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -118,7 +119,7 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         String suffix = "";
         String filename = "";
         if (file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")) {
-            suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
+            suffix = MyFileUtil.getFileSuffix(file);
             // 通过UUID生成唯一文件名
             filename = IdUtil.simpleUUID() + "." + suffix;
         } else {
