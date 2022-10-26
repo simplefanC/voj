@@ -59,7 +59,7 @@ public class ChooseUtils {
         List<String> keyList = new ArrayList<>();
         // 获取当前健康实例取出ip和port拼接
         for (Instance instance : instances) {
-            keyList.add("http://" + instance.getIp() + ":" + instance.getPort());
+            keyList.add(instance.getIp() + ":" + instance.getPort());
         }
 
         // 过滤出小于或等于规定最大并发判题任务数的服务实例且健康的判题机
@@ -70,7 +70,7 @@ public class ChooseUtils {
                 // 开启排他锁
                 .last("for update");
 
-        // 如果一个条件无法通过索引快速过滤，存储引擎层面就会将所有记录加锁后返回， 再由MySQL Server层进行过滤
+        // 如果一个条件无法通过索引快速过滤，存储引擎层面就会将所有记录加锁后返回，再由MySQL Server层进行过滤
         // 但在实际使用过程当中，MySQL做了一些改进，在MySQL Server过滤条件，发现不满足后，会调用unlock_row方法，把不满足条件的记录释放锁 (违背了二段锁协议的约束)。
         List<JudgeServer> judgeServerList = judgeServerEntityService.list(judgeServerQueryWrapper);
 

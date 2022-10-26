@@ -1,20 +1,19 @@
 package com.simplefanc.voj.judger.judge.remote.provider.jsk;
 
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
+import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
+import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
+import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
-import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
-import com.simplefanc.voj.judger.judge.remote.httpclient.*;
 import com.simplefanc.voj.judger.judge.remote.querier.Querier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -37,6 +36,7 @@ public class JSKQuerier implements Querier {
             put("ML", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED);
             put("OL", JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
             put("RE", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("RE_SEGV", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("RE_FPE", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("SF", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("AE", JudgeStatus.STATUS_RUNTIME_ERROR);
@@ -56,29 +56,20 @@ public class JSKQuerier implements Querier {
     @Override
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) {
         DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        HttpEntity entity = SimpleNameValueEntityFactory.create("id", info.remotePid);
-        HttpPost post = new HttpPost("/solve/check/" + info.remoteRunId);
-        post.setEntity(entity);
-        post.setHeader("X-XSRF-TOKEN", CookieUtil.getCookieValue(client, "XSRF-TOKEN"));
-        String body = client.execute(post, HttpStatusValidator.SC_OK).getBody();
-        JSONObject jsonObject = JSONUtil.parseObj(body);
-
+        // 执行时间和内存
+        HttpGet get = new HttpGet("/api/problem/solve/result?solveResultKey=" + info.remoteRunId);
+        String result = client.execute(get, HttpStatusValidator.SC_OK).getBody();
+        JSONObject data = JSONUtil.parseObj(result);
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
-        if ("finished".equals(jsonObject.getStr("status"))) {
-            // AC
-            status.rawStatus = ((JSONObject) jsonObject.get("data")).getStr("reason");
-        }
+        status.rawStatus = data.getStr("status");
         status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
-        if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
-            // 执行时间和内存
-            HttpGet get = new HttpGet("/t/" + info.remotePid + "/submissions");
-            String result = client.execute(get, HttpStatusValidator.SC_OK).getBody();
-            JSONObject data = (JSONObject) ((JSONArray) JSONUtil.parseObj(result).get("data")).get(0);
-            status.executionMemory = data.getInt("used_mem");
-            status.executionTime = data.getInt("used_time");
-        } else if (status.statusType == JudgeStatus.STATUS_COMPILE_ERROR) {
+        if (status.statusType != JudgeStatus.STATUS_JUDGING) {
+            status.executionMemory = data.getInt("usedMemory");
+            status.executionTime = data.getInt("usedTime");
+        }
+        if (status.statusType == JudgeStatus.STATUS_COMPILE_ERROR) {
             // 编译错误信息
-            status.compilationErrorInfo = ((JSONObject) jsonObject.get("data")).getStr("message");
+            status.compilationErrorInfo = data.getStr("compileError");
         }
         return status;
     }

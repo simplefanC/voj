@@ -15,10 +15,10 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class NacosConfig {
 
-    @Value("${voj-backend.BACKEND_SERVER_IP}")
+    @Value("${voj-backend.ip}")
     private String ip;
 
-    @Value("${voj-backend.BACKEND_SERVER_PORT}")
+    @Value("${voj-backend.port}")
     private Integer port;
 
     /**

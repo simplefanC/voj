@@ -65,7 +65,7 @@ public class StartupRunner implements CommandLineRunner {
         judgeServerQueryWrapper.eq("ip", ip).eq("port", port);
         judgeServerEntityService.remove(judgeServerQueryWrapper);
 
-        final JudgeServer entity = new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port).setUrl("http://" + ip + ":" + port).setName(judgeServerName)
+        final JudgeServer entity = new JudgeServer().setCpuCore(CPU_NUM).setIp(ip).setPort(port).setUrl(ip + ":" + port).setName(judgeServerName)
                 .setMaxTaskNumber(maxTaskNum).setIsRemote(false);
         boolean isOk1 = judgeServerEntityService.save(entity);
         boolean isOk2 = true;
