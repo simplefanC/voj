@@ -40,9 +40,6 @@ public class HDUQuerier implements Querier {
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = matcher.group(1).replaceAll("<[\\s\\S]*?>", "").trim();
         status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
-        if (status.statusType == JudgeStatus.STATUS_JUDGING) {
-            return status;
-        }
         if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
             status.executionTime = Integer.parseInt(matcher.group(2));
             status.executionMemory = Integer.parseInt(matcher.group(3));

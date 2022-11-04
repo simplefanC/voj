@@ -25,7 +25,7 @@ public class TKOJQuerier implements Querier {
             "Memory Limit Exceed", "Output Limit Exceed", "Runtime Error", "Compile Error", "Compile OK",
             "Runtime Finish"};
 
-    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<Integer, JudgeStatus>() {
+    private static final Map<Integer, JudgeStatus> STATUS_MAP = new HashMap<>() {
         {
             put(0, JudgeStatus.STATUS_JUDGING);
             put(1, JudgeStatus.STATUS_JUDGING);
@@ -59,7 +59,7 @@ public class TKOJQuerier implements Querier {
         String[] results = result.split(",");
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = statusArray[Integer.parseInt(results[0])];
-        status.statusType = statusMap.get(Integer.parseInt(results[0]));
+        status.statusType = STATUS_MAP.getOrDefault(Integer.parseInt(results[0]), JudgeStatus.STATUS_JUDGING);
         status.executionMemory = Integer.parseInt(results[1]);
         status.executionTime = Integer.parseInt(results[2]);
 

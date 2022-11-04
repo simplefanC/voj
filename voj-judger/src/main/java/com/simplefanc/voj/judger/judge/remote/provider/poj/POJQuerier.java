@@ -21,7 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class POJQuerier implements Querier {
 
-    private static final Map<String, JudgeStatus> statusMap = new HashMap<>() {
+    private static final Map<String, JudgeStatus> STATUS_MAP = new HashMap<>() {
         {
             put("Compiling", JudgeStatus.STATUS_COMPILING);
             put("Accepted", JudgeStatus.STATUS_ACCEPTED);
@@ -53,7 +53,7 @@ public class POJQuerier implements Querier {
 
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = ReUtil.getGroup1("<b>Result:</b>(.+?)</td>", html).replaceAll("<.*?>", "").trim();
-        status.statusType = statusMap.get(status.rawStatus);
+        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
         if (status.statusType == JudgeStatus.STATUS_ACCEPTED) {
             status.executionMemory = Integer.parseInt(ReUtil.getGroup1("<b>Memory:</b> ([-\\d]+)", html));
             status.executionTime = Integer.parseInt(ReUtil.getGroup1("<b>Time:</b> ([-\\d]+)", html));

@@ -22,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MXTQuerier implements Querier {
 
-    private static final Map<Integer, JudgeStatus> statusMap = new HashMap<>() {
+    private static final Map<Integer, JudgeStatus> STATUS_MAP = new HashMap<>() {
         {
             put(0, JudgeStatus.STATUS_JUDGING);
             put(1, JudgeStatus.STATUS_JUDGING);
@@ -95,7 +95,7 @@ public class MXTQuerier implements Querier {
         // 1156B = 1.13KB
         status.executionMemory = jsonObject.getInt("memory") / 1024;
         // 从原生状态映射到统一状态
-        status.statusType = statusMap.get(result);
+        status.statusType = STATUS_MAP.getOrDefault(result, JudgeStatus.STATUS_JUDGING);
         if (status.statusType == JudgeStatus.STATUS_COMPILE_ERROR) {
             String compileinfo = client.post("/compileinfo/" + info.remoteRunId + "/").getBody();
             status.compilationErrorInfo = JSONUtil.parseObj(compileinfo).getStr("error");
