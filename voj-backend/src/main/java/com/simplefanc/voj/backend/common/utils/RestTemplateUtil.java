@@ -1,7 +1,6 @@
 package com.simplefanc.voj.backend.common.utils;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,12 +20,11 @@ public class RestTemplateUtil {
     }
 
     public <T> T get(String uri, String path, Class<T> clazz) {
-        return restTemplate.getForObject(uri + path, clazz);
+        return restTemplate.getForObject("http://" + uri + path, clazz);
     }
 
     /**
-     *
-     * @param uri http://ip:port
+     * @param uri     http://ip:port
      * @param path
      * @param request
      * @param clazz
@@ -35,6 +33,6 @@ public class RestTemplateUtil {
      */
     public <T> T post(String uri, String path, Object request, Class<T> clazz) {
 //        String uri = String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort());
-        return restTemplate.postForObject(uri + path, request, clazz);
+        return restTemplate.postForObject("http://" + uri + path, request, clazz);
     }
 }
