@@ -9,10 +9,9 @@ import com.simplefanc.voj.judger.dao.ContestRecordEntityService;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
 import com.simplefanc.voj.judger.dao.UserAcproblemEntityService;
+import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
-import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
-import com.simplefanc.voj.judger.service.JudgeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,9 +46,9 @@ public class RemoteJudgeQuerier {
     public void process(SubmissionInfo info, RemoteAccount account) {
         String key = UUID.randomUUID().toString() + info.submitId;
 
-        ScheduledFuture<?> beeperHandle = SCHEDULER.scheduleWithFixedDelay(new QueryTask(info, account, key), 0, 3,
+        ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(new QueryTask(info, account, key), 0, 3,
                 TimeUnit.SECONDS);
-        FUTURE_TASK_MAP.put(key, beeperHandle);
+        FUTURE_TASK_MAP.put(key, scheduledFuture);
     }
 
     class QueryTask implements Runnable {

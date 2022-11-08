@@ -13,14 +13,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.MyFileUtil;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
-import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.file.ProblemFileService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.Constant;
@@ -104,7 +103,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
 
         for (File tmp : files) {
             if (tmp.isFile()) {
-                // 检查文件是否时json文件
+                // 检查文件是否是json文件
                 if (!tmp.getName().endsWith("json")) {
                     FileUtil.del(fileDir);
                     throw new StatusFailException("编号为：" + tmp.getName() + "的文件格式错误，请使用json文件！");
@@ -138,24 +137,15 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
         languageQueryWrapper.eq("oj", Constant.LOCAL);
         List<Language> languageList = languageEntityService.list(languageQueryWrapper);
-
         HashMap<String, Long> languageMap = new HashMap<>();
         for (Language language : languageList) {
             languageMap.put(language.getName(), language.getId());
         }
 
-        // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-
         List<ProblemDto> problemDtos = new LinkedList<>();
-        List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", Constant.LOCAL));
-        HashMap<String, Tag> tagMap = new HashMap<>();
-        for (Tag tag : tagList) {
-            tagMap.put(tag.getName().toUpperCase(), tag);
-        }
         for (String key : problemInfo.keySet()) {
             ImportProblemVo importProblemVo = problemVoMap.get(key);
-            // 格式化题目语言
+            // 1. 格式化题目语言
             List<Language> languages = new LinkedList<>();
             for (String lang : importProblemVo.getLanguages()) {
                 Long lid = languageMap.getOrDefault(lang, null);
@@ -166,7 +156,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 languages.add(new Language().setId(lid).setName(lang));
             }
 
-            // 格式化题目代码模板
+            // 2. 格式化题目代码模板
             List<CodeTemplate> codeTemplates = new LinkedList<>();
             for (Map<String, String> tmp : importProblemVo.getCodeTemplates()) {
                 String language = tmp.getOrDefault("language", null);
@@ -179,7 +169,12 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 codeTemplates.add(new CodeTemplate().setCode(code).setStatus(true).setLid(lid));
             }
 
-            // 格式化标签
+            // 3. 格式化标签
+            List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", Constant.LOCAL));
+            HashMap<String, Tag> tagMap = new HashMap<>();
+            for (Tag tag : tagList) {
+                tagMap.put(tag.getName().toUpperCase(), tag);
+            }
             List<Tag> tags = new LinkedList<>();
             for (String tagStr : importProblemVo.getTags()) {
                 Tag tag = tagMap.getOrDefault(tagStr.toUpperCase(), null);
@@ -190,16 +185,19 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 }
             }
 
-            Problem problem = BeanUtil.toBeanIgnoreError(importProblemVo.getProblem(), Problem.class);
-            if (problem.getAuthor() == null) {
-                problem.setAuthor(userRolesVo.getUsername());
-            }
+            // 4. 格式化测试样例
             List<ProblemCase> problemCaseList = new LinkedList<>();
             for (Map<String, Object> tmp : importProblemVo.getSamples()) {
                 problemCaseList.add(BeanUtil.toBeanIgnoreError(tmp, ProblemCase.class));
             }
 
-            // 格式化用户额外文件和判题额外文件
+            Problem problem = BeanUtil.toBeanIgnoreError(importProblemVo.getProblem(), Problem.class);
+            // 5. 获取当前登录的用户
+            if (problem.getAuthor() == null) {
+                problem.setAuthor(UserSessionUtil.getUserInfo().getUsername());
+            }
+
+            // 6. 格式化用户额外文件和判题额外文件
             if (importProblemVo.getUserExtraFile() != null) {
                 JSONObject userExtraFileJson = JSONUtil.parseObj(importProblemVo.getUserExtraFile());
                 problem.setUserExtraFile(userExtraFileJson.toString());

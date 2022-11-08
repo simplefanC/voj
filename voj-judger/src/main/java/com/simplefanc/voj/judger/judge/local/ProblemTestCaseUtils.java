@@ -69,7 +69,7 @@ public class ProblemTestCaseUtils {
      * @throws SystemError
      * @throws UnsupportedEncodingException
      */
-    public JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
+    private JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
             throws SystemError, UnsupportedEncodingException {
 
         QueryWrapper<ProblemCase> queryWrapper = new QueryWrapper<>();
@@ -112,7 +112,7 @@ public class ProblemTestCaseUtils {
      * @param problemCaseList
      * @return
      */
-    public JSONObject initLocalTestCase(String mode, String version, String testCasesDir,
+    private JSONObject initLocalTestCase(String mode, String version, String testCasesDir,
                                         List<ProblemCase> problemCaseList) {
         JSONObject result = new JSONObject();
         result.set("mode", mode);
@@ -156,7 +156,7 @@ public class ProblemTestCaseUtils {
      * @return
      * @throws SystemError
      */
-    public JSONObject initTestCase(List<HashMap<String, Object>> testCases, Long problemId, String version, String mode)
+    private JSONObject initTestCase(List<HashMap<String, Object>> testCases, Long problemId, String version, String mode)
             throws SystemError {
         // TODO 参数
         if (testCases == null || testCases.size() == 0) {
@@ -226,7 +226,7 @@ public class ProblemTestCaseUtils {
      * @param value
      * @return
      */
-    public static String rtrim(String value) {
+    private static String rtrim(String value) {
         if (value == null)
             return null;
         return value.replaceAll("[^\\S\\r\\n]+(?=\\n|\\r)|\\s+(?=$)", "");

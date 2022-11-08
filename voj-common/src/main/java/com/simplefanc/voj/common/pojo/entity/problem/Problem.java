@@ -3,8 +3,7 @@ package com.simplefanc.voj.common.pojo.entity.problem;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -22,6 +21,9 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @ApiModel(value = "Problem对象", description = "")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Problem implements Serializable {
 
     private static final long serialVersionUID = 1L;

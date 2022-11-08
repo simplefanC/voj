@@ -4,9 +4,6 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.constants.ProblemEnum;
-import com.simplefanc.voj.common.constants.ProblemLevelEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -33,15 +30,15 @@ public class JSKProblemCrawler extends ProblemCrawler {
 
     /**
      * @param problemId String的原因是因为某些题库题号不是纯数字
-     * @param author    导入该题目的管理员用户名
      * @return 返回Problem对象
      * @throws Exception
      */
     @Override
-    public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
+    public RemoteProblemInfo getProblemInfo(String problemId) throws Exception {
         // 验证题号是否符合规范 t/a开头+4位数字
         Assert.isTrue(problemId.matches("[TAta]\\d{4}"), "JSK题号格式错误！");
-        Problem info = new Problem();
+        RemoteProblemInfo problemInfo = new RemoteProblemInfo();
+        Problem info = problemInfo.getProblem();
         String url = HOST + String.format(PROBLEM_URL, problemId);
         String html = HttpUtil.get(url);
         html = html.replaceAll("<br>", "\n");
@@ -83,16 +80,9 @@ public class JSKProblemCrawler extends ProblemCrawler {
         info.setExamples(sb);
 
         info.setHint(jsonObject.getStr("hint"));
-        info.setIsRemote(true);
         info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>",
                 problemId, JUDGE_NAME + "-" + problemId));
-        info.setType(ContestEnum.TYPE_ACM.getCode())
-                .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
-                .setAuthor(author)
-                .setOpenCaseResult(false)
-                .setIsRemoveEndBlank(false)
-                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode());
-        return new RemoteProblemInfo().setProblem(info).setTagList(null);
+        return problemInfo;
     }
 
     @Override

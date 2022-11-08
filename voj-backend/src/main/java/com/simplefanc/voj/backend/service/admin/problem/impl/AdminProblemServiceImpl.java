@@ -220,10 +220,9 @@ public class AdminProblemServiceImpl implements AdminProblemService {
             throw new StatusFailException("该题目已添加，请勿重复添加！");
         }
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
         try {
             ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
-                    .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                    .getOtherOJProblemInfo(name.toUpperCase(), problemId);
             if (otherOJProblemInfo != null) {
                 Problem importProblem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                 if (importProblem == null) {

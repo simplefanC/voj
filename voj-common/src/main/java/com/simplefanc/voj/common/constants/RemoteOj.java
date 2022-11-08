@@ -11,6 +11,8 @@ public enum RemoteOj {
 
     CF("CF"),
 
+    GYM("GYM"),
+
     AtCoder("AC"),
 
     POJ("POJ"),
@@ -22,6 +24,8 @@ public enum RemoteOj {
     TKOJ("TKOJ"),
 
     EOJ("EOJ"),
+
+    LOJ("LOJ"),
     ;
 
     private final String name;

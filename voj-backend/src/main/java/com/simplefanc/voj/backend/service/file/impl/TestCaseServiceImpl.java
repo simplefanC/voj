@@ -61,7 +61,7 @@ public class TestCaseServiceImpl implements TestCaseService {
             throw new StatusSystemErrorException("服务器异常：评测数据上传失败！");
         }
 
-        // 将压缩包压缩到指定文件夹
+        // 将压缩包解压缩到指定文件夹
         ZipUtil.unzip(filePath, fileDir);
         // 删除zip文件
         FileUtil.del(filePath);
@@ -89,14 +89,6 @@ public class TestCaseServiceImpl implements TestCaseService {
                 tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".ans"));
                 outputData.put(tmpPreName, tmp.getName());
             }
-//            else if (tmp.getName().endsWith(".txt")) {
-//                tmpPreName = tmp.getName().substring(0, tmp.getName().lastIndexOf(".txt"));
-//                if (tmpPreName.contains("input")) {
-//                    inputData.put(tmpPreName.replaceAll("input", "$*$"), tmp.getName());
-//                } else if (tmpPreName.contains("output")) {
-//                    outputData.put(tmpPreName.replaceAll("output", "$*$"), tmp.getName());
-//                }
-//            }
         }
 
         // 进行数据对应检查,同时生成返回数据
@@ -105,11 +97,6 @@ public class TestCaseServiceImpl implements TestCaseService {
             HashMap<String, String> testcaseMap = new HashMap<>();
             String inputFileName = inputData.get(key);
             testcaseMap.put("input", inputFileName);
-
-//            String outputFileName = key + ".out";
-//            if (inputFileName.endsWith(".txt")) {
-//                outputFileName = inputFileName.replaceAll("input", "output");
-//            }
 
             // 若有名字对应的out文件不存在的，直接生成对应的out文件
             final String outputFileName = outputData.getOrDefault(key, null);

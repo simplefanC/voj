@@ -33,8 +33,7 @@ public class AtCoderProblemCrawler extends ProblemCrawler {
     }
 
     @Override
-    public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
-
+    public RemoteProblemInfo getProblemInfo(String problemId) throws Exception {
         problemId = problemId.toLowerCase();
         boolean isMatch = ReUtil.isMatch("[a-z]+[0-9]+_[a-z]*[0-9]*", problemId);
         if (!isMatch) {
@@ -54,17 +53,10 @@ public class AtCoderProblemCrawler extends ProblemCrawler {
 
         Problem problem = new Problem();
         problem.setProblemId(getOjInfo() + "-" + problemId)
-                .setAuthor(author)
                 .setTitle(title)
-                .setType(0)
                 .setTimeLimit(Integer.parseInt(timeLimit) * 1000)
                 .setMemoryLimit(Integer.parseInt(memoryLimit))
-                .setIsRemote(true)
-                .setSource(getProblemSource(problemId, contestId))
-                .setAuth(1)
-                .setOpenCaseResult(false)
-                .setIsRemoveEndBlank(false)
-                .setDifficulty(1);
+                .setSource(getProblemSource(problemId, contestId));
 
         if (body.contains("Problem Statement")) {
             String desc = ReUtil.get("<h3>Problem Statement</h3>([\\s\\S]*?)</section>[\\s\\S]*?</div>", body, 1);
@@ -91,7 +83,6 @@ public class AtCoderProblemCrawler extends ProblemCrawler {
 
 
             StringBuilder examples = new StringBuilder();
-
             for (int i = 0; i < sampleInput.size() && i < sampleOutput.size(); i++) {
                 examples.append("<input>");
                 String exampleInput = sampleInput.get(i).trim();
@@ -117,10 +108,7 @@ public class AtCoderProblemCrawler extends ProblemCrawler {
             problem.setDescription(desc);
         }
         return new RemoteProblemInfo()
-                .setProblem(problem)
-                .setTagList(null)
-                .setLangIdList(null)
-                .setRemoteOJ(RemoteOj.AtCoder);
+                .setProblem(problem);
     }
 
     @Override

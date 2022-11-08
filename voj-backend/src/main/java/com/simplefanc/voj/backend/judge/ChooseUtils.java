@@ -8,11 +8,11 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
 import com.simplefanc.voj.backend.mapper.RemoteJudgeAccountMapper;
+import com.simplefanc.voj.common.constants.RemoteOj;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,8 +97,6 @@ public class ChooseUtils {
      */
     private List<Instance> getInstances(String serviceId) {
         // 获取服务发现的相关API
-
-//        NamingService namingService = discoveryProperties.namingServiceInstance();
         NamingService namingService = nacosServiceManager.getNamingService(discoveryProperties.getNacosProperties());
         try {
             // 获取该微服务的所有健康实例
@@ -111,6 +109,10 @@ public class ChooseUtils {
 
     @Transactional(rollbackFor = Exception.class)
     public RemoteJudgeAccount chooseRemoteAccount(String remoteOjName) {
+        if (RemoteOj.GYM.getName().equals(remoteOjName)) {
+            remoteOjName = RemoteOj.CF.getName();
+        }
+
         // 过滤出当前远程oj可用的账号列表 悲观锁
         List<RemoteJudgeAccount> remoteJudgeAccountList = remoteJudgeAccountMapper.getAvailableAccount(remoteOjName);
 

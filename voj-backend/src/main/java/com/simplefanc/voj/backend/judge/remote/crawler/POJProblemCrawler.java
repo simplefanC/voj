@@ -2,9 +2,6 @@ package com.simplefanc.voj.backend.judge.remote.crawler;
 
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.http.HttpUtil;
-import com.simplefanc.voj.common.constants.ContestEnum;
-import com.simplefanc.voj.common.constants.ProblemEnum;
-import com.simplefanc.voj.common.constants.ProblemLevelEnum;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -24,11 +21,11 @@ public class POJProblemCrawler extends ProblemCrawler {
     public static final String PROBLEM_URL = "/problem?id=%s";
 
     @Override
-    public RemoteProblemInfo getProblemInfo(String problemId, String author) throws Exception {
-
+    public RemoteProblemInfo getProblemInfo(String problemId) throws Exception {
         // 验证题号是否符合规范 1-9开头的数字
         Assert.isTrue(problemId.matches("[1-9]\\d*"), "POJ题号格式错误！");
-        Problem info = new Problem();
+        RemoteProblemInfo problemInfo = new RemoteProblemInfo();
+        Problem info = problemInfo.getProblem();
         String url = HOST + String.format(PROBLEM_URL, problemId);
         String html = HttpUtil.get(url);
 
@@ -57,15 +54,9 @@ public class POJProblemCrawler extends ProblemCrawler {
         info.setExamples(sb);
 
         info.setHint(ReUtil.get("<p class=.*?>Hint</p><div class=.*?>([\\s\\S]*?)</div><p class=\"pst\">", html, 1));
-        info.setIsRemote(true);
         info.setSource(String.format("<a style='color:#1A5CC8' href='http://poj.org/problem?id=%s'>%s</a>", problemId,
                 JUDGE_NAME + "-" + problemId));
-        info.setType(ContestEnum.TYPE_ACM.getCode())
-                .setAuth(ProblemEnum.AUTH_PUBLIC.getCode())
-                .setAuthor(author).setOpenCaseResult(false)
-                .setIsRemoveEndBlank(false)
-                .setDifficulty(ProblemLevelEnum.PROBLEM_LEVEL_MID.getCode());
-        return new RemoteProblemInfo().setProblem(info).setTagList(null);
+        return problemInfo;
     }
 
     @Override

@@ -7,17 +7,15 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
-import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
@@ -189,10 +187,9 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
         // 如果该题目不存在，需要先导入
         if (problem == null) {
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
             try {
                 ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
-                        .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                        .getOtherOJProblemInfo(name.toUpperCase(), problemId);
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {

@@ -8,6 +8,7 @@ import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeServerEntityService;
 import com.simplefanc.voj.backend.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
+import com.simplefanc.voj.common.constants.RemoteOj;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -229,18 +230,22 @@ public class Dispatcher {
         while (retryable);
     }
 
-    public void changeRemoteJudgeStatus(String remoteJudge, String username) {
+    public void changeRemoteJudgeStatus(String remoteOjName, String username) {
+        if (RemoteOj.GYM.getName().equals(remoteOjName)) {
+            remoteOjName = RemoteOj.CF.getName();
+        }
+
         UpdateWrapper<RemoteJudgeAccount> remoteJudgeAccountUpdateWrapper = new UpdateWrapper<>();
         remoteJudgeAccountUpdateWrapper.set("status", true)
                 .eq("status", false)
                 .eq("username", username)
-                .eq("oj", remoteJudge);
+                .eq("oj", remoteOjName);
 
         boolean isOk = remoteJudgeAccountService.update(remoteJudgeAccountUpdateWrapper);
 
         if (!isOk) {
             // 重试8次
-            tryAgainUpdateAccount(remoteJudgeAccountUpdateWrapper, remoteJudge, username);
+            tryAgainUpdateAccount(remoteJudgeAccountUpdateWrapper, remoteOjName, username);
         }
     }
 

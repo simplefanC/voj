@@ -297,10 +297,9 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         // 如果该题目不存在，需要先导入
         if (problem == null) {
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
             try {
                 ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
-                        .getOtherOJProblemInfo(name.toUpperCase(), problemId, userRolesVo.getUsername());
+                        .getOtherOJProblemInfo(name.toUpperCase(), problemId);
                 if (otherOJProblemInfo != null) {
                     problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
                     if (problem == null) {

@@ -32,34 +32,32 @@ public class RemoteProblemService {
 
     private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId, String author)
+    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId)
             throws Exception {
-        return CrawlersHolder.getCrawler(ojName).getProblemInfo(problemId, author);
+        return CrawlersHolder.getCrawler(ojName).getProblemInfo(problemId);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public Problem adminAddOtherOJProblem(ProblemCrawler.RemoteProblemInfo remoteProblemInfo, String OJName) {
-
         Problem problem = remoteProblemInfo.getProblem();
+        // 1. 保存题目
         boolean addProblemResult = problemEntityService.save(problem);
-        // 为新的其它oj题目添加对应的language
+
+        // 2. 添加对应的language
         QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
         languageQueryWrapper.eq("oj", OJName);
         List<Language> OJLanguageList = languageEntityService.list(languageQueryWrapper);
         List<ProblemLanguage> problemLanguageList = new LinkedList<>();
-
         for (Language language : OJLanguageList) {
             problemLanguageList.add(new ProblemLanguage().setPid(problem.getId()).setLid(language.getId()));
         }
         boolean addProblemLanguageResult = problemLanguageEntityService.saveOrUpdateBatch(problemLanguageList);
 
+        // 3. 添加对应的tag
         boolean addProblemTagResult;
         List<Tag> addTagList = remoteProblemInfo.getTagList();
-
         List<Tag> needAddTagList = new LinkedList<>();
-
         HashMap<String, Tag> tagFlag = new HashMap<>();
-
         if (addTagList != null && addTagList.size() > 0) {
             QueryWrapper<Tag> tagQueryWrapper = new QueryWrapper<>();
             tagQueryWrapper.eq("oj", OJName);
@@ -100,9 +98,8 @@ public class RemoteProblemService {
 
         if (addProblemResult && addProblemTagResult && addProblemLanguageResult) {
             return problem;
-        } else {
-            return null;
         }
+        return null;
     }
 
 }

@@ -1,5 +1,5 @@
 voj-backend:
-  version: 2022/10/16
+  version: 2022/11/08
   ip: ${BACKEND_SERVER_IP:127.0.0.1}
   port: ${BACKEND_SERVER_PORT:6688}
 server:

@@ -1,4 +1,4 @@
-package com.simplefanc.voj.judger.judge.remote.provider.codefores;
+package com.simplefanc.voj.judger.judge.remote.provider.codeforcesgym;
 
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
@@ -6,20 +6,18 @@ import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.CFStyle
 import org.springframework.stereotype.Component;
 
 @Component
-public class CFSubmitter extends CFStyleSubmitter {
+public class GYMSubmitter extends CFStyleSubmitter {
 
-    public static final String SUBMIT_URL = "/contest/%s/submit";
-
-    public CFSubmitter(DedicatedHttpClientFactory dedicatedHttpClientFactory) {
+    public GYMSubmitter(DedicatedHttpClientFactory dedicatedHttpClientFactory) {
         super(dedicatedHttpClientFactory);
     }
 
     @Override
     public RemoteOjInfo getOjInfo() {
-        return CFInfo.INFO;
+        return GYMInfo.INFO;
     }
 
     protected String getSubmitUrl(String contestNum) {
-        return String.format(SUBMIT_URL, contestNum);
+        return "/gym/" + contestNum + "/submit";
     }
 }
