@@ -56,13 +56,8 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Long cid,
+    public Map<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Long cid,
                                                   Integer problemType, String oj) {
-        if (currentPage == null || currentPage < 1)
-            currentPage = 1;
-        if (limit == null || limit < 1)
-            limit = 10;
-        IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据cid在ContestProblem表中查询到对应pid集合
         HashMap<Long, ContestProblem> contestProblemMap = new HashMap<>();
         List<Long> pidList = new LinkedList<>();
@@ -75,26 +70,19 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                 });
 
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
+
         if (problemType != null) {
+            // 从公共题库添加题目
+            problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
+
             problemQueryWrapper
                     // 同时需要与比赛相同类型的题目
                     // vj题目不限制赛制
                     .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
                     // 题目权限为隐藏的不可加入！
-                    .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode())
-            // TODO 普通管理员：所有的 PUBLIC 和 自己的 CONTEST 题目
-//                    .and(wrapper ->
-//                            wrapper.eq("auth", ProblemEnum.AUTH_PUBLIC.getCode())
-//                            .or()
-//                            .eq("auth", ProblemEnum.AUTH_CONTEST.getCode()).eq("author", UserSessionUtil.getUserInfo().getUsername())
-//                    )
-            ;
-        }
-
-        // 逻辑判断，如果是查询已有的就应该是in，如果是查询不要重复的，使用not in
-        if (problemType != null) {
-            problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
+                    .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode());
         } else {
+            // 比赛题目列表
             problemQueryWrapper.in(pidList.size() > 0, "id", pidList);
         }
 
@@ -107,22 +95,30 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             }
         }
 
+        // 根据keyword筛选过滤
         if (!StrUtil.isEmpty(keyword)) {
             problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or().like("problem_id", keyword).or()
                     .like("author", keyword));
         }
 
+        // 比赛题目列表为空
         if (pidList.size() == 0 && problemType == null) {
             problemQueryWrapper = new QueryWrapper<>();
             problemQueryWrapper.eq("id", null);
         }
 
-        IPage<Problem> problemListPage = problemEntityService.page(iPage, problemQueryWrapper);
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
+        if (pidList.size() > 0 && problemType == null) {
+            limit = Integer.MAX_VALUE;
+        }
+
+        IPage<Problem> problemListPage = problemEntityService.page(new Page<>(currentPage, limit), problemQueryWrapper);
 
         if (pidList.size() > 0 && problemType == null) {
-            List<Problem> problemList = problemListPage.getRecords();
-
-            List<Problem> sortedProblemList = problemList.stream()
+            List<Problem> sortedProblemList = problemListPage.getRecords().stream()
                     .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
                         ContestProblem x = contestProblemMap.get(a);
                         ContestProblem y = contestProblemMap.get(b);
@@ -131,15 +127,13 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             problemListPage.setRecords(sortedProblemList);
         }
 
-        HashMap<String, Object> contestProblem = new HashMap<>();
-        contestProblem.put("problemList", problemListPage);
-        contestProblem.put("contestProblemMap", contestProblemMap);
-        return contestProblem;
+        return MapUtil.builder(new HashMap<String, Object>()).put("problemList", problemListPage)
+                .put("contestProblemMap", contestProblemMap)
+                .build();
     }
 
     @Override
     public Problem getProblem(Long pid) {
-
         Problem problem = problemEntityService.getById(pid);
 
         if (problem != null) {

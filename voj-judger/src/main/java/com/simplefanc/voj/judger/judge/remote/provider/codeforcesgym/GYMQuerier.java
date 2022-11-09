@@ -44,6 +44,7 @@ public class GYMQuerier extends CFStyleQuerier {
         Pattern pattern = PatternPool.get(regex, Pattern.DOTALL);
         final Matcher matcher = pattern.matcher(body);
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
+        status.statusType = JudgeStatus.STATUS_JUDGING;
         if (matcher.find()) {
             String statusStr = matcher.group(1);
             status.statusType = STATUS_MAP.getOrDefault(statusStr, JudgeStatus.STATUS_JUDGING);

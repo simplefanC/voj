@@ -19,7 +19,6 @@ import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -113,14 +112,14 @@ public class AdminContestController {
     @GetMapping("/get-problem-list")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<HashMap<String, Object>> getProblemList(
+    public CommonResult<Map<String, Object>> getProblemList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "keyword", required = false) String keyword,
             @RequestParam(value = "cid") Long cid,
             @RequestParam(value = "problemType", required = false) Integer problemType,
             @RequestParam(value = "oj", required = false) String oj) {
-        HashMap<String, Object> problemList = adminContestProblemService.getProblemList(limit, currentPage, keyword,
+        Map<String, Object> problemList = adminContestProblemService.getProblemList(limit, currentPage, keyword,
                 cid, problemType, oj);
         return CommonResult.successResponse(problemList);
     }

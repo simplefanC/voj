@@ -6,6 +6,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
+import com.simplefanc.voj.backend.common.exception.StatusFailException;
+import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
@@ -44,6 +46,12 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
 
 
     public boolean importLOJProblem(Integer problemId) {
+        Problem problem = problemEntityService.lambdaQuery()
+                .eq(Problem::getProblemId, JUDGE_NAME + "-" + problemId)
+                .one();
+        if (problem != null) {
+            throw new StatusFailException("该题目已添加，请勿重复添加！");
+        }
         return problemEntityService.adminAddProblem(getProblemDto(problemId));
     }
 
@@ -65,6 +73,9 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         String body = HttpRequest.post(GET_PROBLEM_URL).body(json).execute().body();
         LOJProblem lojProblem = JSONUtil.toBean(body, LOJProblem.class);
         Contents contents = lojProblem.getLocalizedContentsOfLocale();
+        if (contents == null) {
+            throw new StatusNotFoundException("该题号对应的题目不存在");
+        }
         JudgeInfo judgeInfo = lojProblem.getJudgeInfo();
         List<Sample> samples = lojProblem.getSamples();
         // 设置 tag
@@ -76,7 +87,7 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         problemInfo.setTagList(tagList);
         Problem problem = problemInfo.getProblem();
         String examples = samples.stream().map(sample -> "<input>" + sample.getInputData() + "</input>" +
-                "<output>" + sample.getOutputData() + "</output>")
+                        "<output>" + sample.getOutputData() + "</output>")
                 .collect(Collectors.joining(""));
         problem.setIsRemote(false)
                 .setProblemId(JUDGE_NAME + "-" + problemId)
@@ -141,7 +152,8 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         for (int i = 0; i < downloadInfos.size(); i++) {
             DownloadInfo.Info info = downloadInfos.get(i);
             futures[i] = CompletableFuture.supplyAsync(() ->
-                    HttpUtil.downloadFile(info.downloadUrl, FileUtil.file(fileDir + File.separator + info.filename)), threadPool);
+                            HttpUtil.downloadFile(info.downloadUrl, FileUtil.file(fileDir + File.separator + info.filename)),
+                    threadPool);
         }
 
         // allOf() 方法会等到所有的 CompletableFuture 都运行完成之后再返回
