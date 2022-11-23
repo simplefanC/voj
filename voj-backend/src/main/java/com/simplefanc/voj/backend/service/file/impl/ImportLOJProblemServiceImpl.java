@@ -15,6 +15,7 @@ import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.service.file.ImportLOJProblemService;
 import com.simplefanc.voj.common.constants.Constant;
+import com.simplefanc.voj.common.constants.JudgeMode;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
@@ -89,16 +90,20 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         String examples = samples.stream().map(sample -> "<input>" + sample.getInputData() + "</input>" +
                         "<output>" + sample.getOutputData() + "</output>")
                 .collect(Collectors.joining(""));
+        List<Contents.Section> contentSections = contents.contentSections;
         problem.setIsRemote(false)
                 .setProblemId(JUDGE_NAME + "-" + problemId)
                 .setTitle(contents.title)
                 .setTimeLimit(judgeInfo.timeLimit)
                 .setMemoryLimit(judgeInfo.memoryLimit)
-                .setDescription(contents.contentSections.get(0).text)
-                .setInput(contents.contentSections.get(1).text)
-                .setOutput(contents.contentSections.get(2).text)
+                .setDescription(contentSections.get(0).text)
+                .setInput(contentSections.get(1).text)
+                .setOutput(contentSections.get(2).text)
                 .setExamples(examples)
-                .setHint(contents.contentSections.get(4).text)
+                .setOpenCaseResult(true)
+                .setIsRemoveEndBlank(true)
+                // 数据范围及提示
+                .setHint(contentSections.size() > 4 ? contentSections.get(4).text : null)
                 .setSource(String.format("<a style='color:#1A5CC8' href='https://loj.ac/p/%d'>%s</a>", problemId, JUDGE_NAME + "-" + problemId));
         // 设置 Problem
         problemDto.setProblem(problem);
@@ -108,7 +113,7 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
 
         // 设置题目语言
         List<Language> languages = languageEntityService.lambdaQuery().eq(Language::getOj, Constant.LOCAL).list();
-        problemDto.setLanguages(languages);
+        problemDto.setLanguages(languages).setJudgeMode(JudgeMode.DEFAULT.getMode());
 
         return problemDto;
     }
@@ -166,6 +171,15 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         List<ProblemCase> problemCaseList = testcases.stream()
                 .map(testcase -> new ProblemCase().setInput(testcase.inputFile).setOutput(testcase.outputFile))
                 .collect(Collectors.toList());
+        int averageScore = 100 / problemCaseList.size();
+        int add_1_num = 100 - averageScore * problemCaseList.size();
+        for (int i = 0; i < problemCaseList.size(); i++) {
+            if (i >= problemCaseList.size() - add_1_num) {
+                problemCaseList.get(i).setScore(averageScore + 1);
+            } else {
+                problemCaseList.get(i).setScore(averageScore);
+            }
+        }
         problemDto.setUploadTestcaseDir(fileDir)
                 .setIsUploadTestCase(true)
                 .setSamples(problemCaseList);

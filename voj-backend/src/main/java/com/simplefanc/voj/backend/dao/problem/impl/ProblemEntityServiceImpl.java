@@ -287,7 +287,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             }
             // 设置oi总分数，根据每个测试点的加和
             if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setIoScore(sumScore);
+                problem.setOiScore(sumScore);
             }
             // 执行批量删除操作
             boolean deleteCasesFromProblemResult = true;
@@ -490,7 +490,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             }
             // 设置oi总分数，根据每个测试点的加和
             if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setIoScore(sumScore);
+                problem.setOiScore(sumScore);
             }
             addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemCases);
             // 获取代理bean对象 执行异步方法 ===》根据测试文件初始info
@@ -499,7 +499,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         } else {
             // oi题目需要求取平均值，给每个测试点初始oi的score值，默认总分100分
             if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setIoScore(100);
+                problem.setOiScore(100);
                 final int averScore = 100 / problemDto.getSamples().size();
                 // 设置好新题目的pid及分数
                 problemDto.getSamples().forEach(problemCase -> problemCase.setPid(pid).setScore(averScore));

@@ -236,7 +236,7 @@ public class JudgeProcess {
 
         // 获取判题的time，memory，OI score
         HashMap<String, Object> result = computeResultInfo(allCaseResList, isACM, errorTestCaseList.size(),
-                problem.getIoScore(), problem.getDifficulty());
+                problem.getOiScore(), problem.getDifficulty());
 
         // 如果该题为ACM类型的题目，多个测试点全部正确则AC，否则取第一个错误的测试点的状态
         // 如果该题为OI类型的题目，若多个测试点全部正确则AC，若全部错误则取第一个错误测试点状态，否则为部分正确
@@ -259,6 +259,7 @@ public class JudgeProcess {
         String inputFileName = jsonObject.getStr("inputFileName");
         String outputFileName = jsonObject.getStr("outputFileName");
         String msg = jsonObject.getStr("errMsg");
+        int oiScore = jsonObject.getInt("score");
 
         JudgeCase judgeCase = new JudgeCase();
         judgeCase.setTime(time).setMemory(memory).setStatus(status).setInputData(inputFileName)
@@ -269,36 +270,27 @@ public class JudgeProcess {
             judgeCase.setUserOutput(msg);
         }
 
-        if (isACM) {
-            if (!status.equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
-                errorTestCaseList.add(jsonObject);
-            }
-        } else {
-            int oiScore = jsonObject.getInt("score");
-            if (status.equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
-                judgeCase.setScore(oiScore);
-            } else if (status.equals(JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus())) {
-                errorTestCaseList.add(jsonObject);
+        int score = 0;
+        if (!status.equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
+            errorTestCaseList.add(jsonObject);
+            if (status.equals(JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus())) {
                 // SPJ_PC
                 Double percentage = jsonObject.getDouble("percentage");
                 if (percentage != null) {
-                    int score = (int) Math.floor(percentage * oiScore);
-                    judgeCase.setScore(score);
-                } else {
-                    judgeCase.setScore(0);
+                    score = (int) Math.floor(percentage * oiScore);
                 }
-            } else {
-                errorTestCaseList.add(jsonObject);
-                judgeCase.setScore(0);
             }
+        } else {
+            score = oiScore;
         }
+        judgeCase.setScore(score);
 
         allCaseResList.add(judgeCase);
     }
 
     // 获取判题的运行时间，运行空间，OI得分
     private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList, Boolean isACM,
-                                                     Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
+                                                      Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
         HashMap<String, Object> result = new HashMap<>();
         // 用时和内存占用保存为多个测试点中最长的
         allTestCaseResultList.stream()
@@ -310,24 +302,24 @@ public class JudgeProcess {
                 .ifPresent(t -> result.put("memory", t.getMemory()));
 
         // OI题目计算得分
-        if (!isACM) {
-            // 全对的直接用总分*0.1+2*题目难度
-            if (errorCaseNum == 0) {
-                int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
-                result.put("score", totalScore);
-                result.put("oiRankScore", oiRankScore);
-            } else {
-                int sumScore = 0;
-                for (JudgeCase testcaseResult : allTestCaseResultList) {
-                    sumScore += testcaseResult.getScore();
-                }
-                // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
-                int oiRankScore = (int) Math
-                        .round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
-                result.put("score", sumScore);
-                result.put("oiRankScore", oiRankScore);
+//        if (!isACM) {
+        // 全对的直接用总分*0.1+2*题目难度
+        if (errorCaseNum == 0) {
+            int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
+            result.put("score", totalScore);
+            result.put("oiRankScore", oiRankScore);
+        } else {
+            int sumScore = 0;
+            for (JudgeCase testcaseResult : allTestCaseResultList) {
+                sumScore += testcaseResult.getScore();
             }
+            // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
+            int oiRankScore = (int) Math
+                    .round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
+            result.put("score", sumScore);
+            result.put("oiRankScore", oiRankScore);
         }
+//        }
         return result;
     }
 

@@ -249,7 +249,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             }
         }
         problem.setIsRemote(false);
-        problem.setIoScore(sumScore);
+        problem.setOiScore(sumScore);
         qdojProblemDto.setSamples(problemSamples);
         qdojProblemDto.setProblem(problem);
         return qdojProblemDto;

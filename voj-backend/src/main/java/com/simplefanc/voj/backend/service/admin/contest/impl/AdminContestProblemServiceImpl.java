@@ -9,11 +9,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
@@ -57,7 +57,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword, Long cid,
-                                                  Integer problemType, String oj) {
+                                              Integer problemType, String oj) {
         // 根据cid在ContestProblem表中查询到对应pid集合
         HashMap<Long, ContestProblem> contestProblemMap = new HashMap<>();
         List<Long> pidList = new LinkedList<>();
@@ -76,9 +76,8 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
 
             problemQueryWrapper
-                    // 同时需要与比赛相同类型的题目
-                    // vj题目不限制赛制
-                    .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
+                    // 同时需要与比赛相同类型的题目或vj题目（20221123移除限制）
+//                    .and(wrapper -> wrapper.eq("type", problemType).or().eq("is_remote", true))
                     // 题目权限为隐藏的不可加入！
                     .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode());
         } else {
@@ -255,26 +254,25 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addProblemFromPublic(ContestProblemDto contestProblemDto) {
-
         Long pid = contestProblemDto.getPid();
         Long cid = contestProblemDto.getCid();
-        String displayId = contestProblemDto.getDisplayId();
 
-        QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
-        contestProblemQueryWrapper.eq("cid", cid)
-                .and(wrapper -> wrapper.eq("pid", pid).or().eq("display_id", displayId));
-        ContestProblem contestProblem = contestProblemEntityService.getOne(contestProblemQueryWrapper, false);
-        if (contestProblem != null) {
-            throw new StatusFailException("添加失败，该题目已添加或者题目的比赛展示ID已存在！");
+        List<ContestProblem> list = contestProblemEntityService.lambdaQuery().eq(ContestProblem::getCid, cid)
+                .orderByDesc(ContestProblem::getId).list();
+        boolean existed = list.stream().anyMatch(contestProblem -> pid.equals(contestProblem.getPid()));
+        if (existed) {
+            throw new StatusFailException("添加失败，该题目已添加！");
         }
 
         // 比赛中题目显示默认为原标题
         Problem problem = problemEntityService.getById(pid);
         String displayName = problem.getTitle();
-
         // 修改成比赛题目
         boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(ProblemEnum.AUTH_CONTEST.getCode()));
 
+        ContestProblem last = list.isEmpty() ? null : list.get(0);
+        // displayId 按顺序递增
+        String displayId = last == null ? "A" : Character.toString((char) (last.getDisplayId().charAt(0) + 1));
         boolean isOk = contestProblemEntityService.saveOrUpdate(
                 new ContestProblem().setCid(cid).setPid(pid).setDisplayTitle(displayName).setDisplayId(displayId));
         if (!isOk || !updateProblem) {
@@ -282,9 +280,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         }
     }
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId) {
+    public void importContestRemoteOJProblem(String name, String problemId, Long cid) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
         Problem problem = problemEntityService.getOne(queryWrapper, false);
@@ -308,27 +307,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             }
         }
 
-        QueryWrapper<ContestProblem> contestProblemQueryWrapper = new QueryWrapper<>();
-        Problem finalProblem = problem;
-        contestProblemQueryWrapper.eq("cid", cid)
-                .and(wrapper -> wrapper.eq("pid", finalProblem.getId()).or().eq("display_id", displayId));
-        ContestProblem contestProblem = contestProblemEntityService.getOne(contestProblemQueryWrapper, false);
-        if (contestProblem != null) {
-            throw new StatusFailException("添加失败，该题目已添加或者题目的比赛展示ID已存在！");
-        }
-
-        // 比赛中题目显示默认为原标题
-        String displayName = problem.getTitle();
-
-        // 修改成比赛题目
-        boolean updateProblem = problemEntityService.saveOrUpdate(problem.setAuth(ProblemEnum.AUTH_CONTEST.getCode()));
-
-        boolean isOk = contestProblemEntityService.saveOrUpdate(new ContestProblem().setCid(cid).setPid(problem.getId())
-                .setDisplayTitle(displayName).setDisplayId(displayId));
-
-        if (!isOk || !updateProblem) {
-            throw new StatusFailException("添加失败");
-        }
+        addProblemFromPublic(new ContestProblemDto(problem.getId(), cid));
     }
 
 }

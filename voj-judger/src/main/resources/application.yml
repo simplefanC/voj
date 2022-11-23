@@ -1,5 +1,5 @@
 voj-judge-server:
-  version: 2022/11/08
+  version: 2022/11/23
   name: ${JUDGE_SERVER_NAME:voj-judger-1} # 判题机名字 唯一不可重复！！！
   ip: ${JUDGE_SERVER_IP:127.0.0.1} # -1表示使用默认本地ipv4，若是部署其它服务器，务必使用公网ip
   port: ${JUDGE_SERVER_PORT:8080}

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,8 +36,7 @@ public class ProblemTestCaseUtils {
 
     private final ProblemCaseEntityService problemCaseEntityService;
 
-    public JSONObject loadTestCaseInfo(Problem problem)
-            throws SystemError, UnsupportedEncodingException {
+    public JSONObject loadTestCaseInfo(Problem problem) throws SystemError {
         Long problemId = problem.getId();
         String testCasesDir = JudgeDir.TEST_CASE_DIR + File.separator + "problem_" + problem.getId();
         String version = problem.getCaseVersion();
@@ -49,7 +47,7 @@ public class ProblemTestCaseUtils {
             String infoStr = fileReader.readString();
             JSONObject testcaseInfo = JSONUtil.parseObj(infoStr);
             // 测试样例被改动需要重新生成
-            if (!testcaseInfo.getStr("version", null).equals(version)) {
+            if (!version.equals(testcaseInfo.getStr("version", null))) {
                 return tryInitTestCaseInfo(testCasesDir, problemId, version, mode);
             }
             return testcaseInfo;
@@ -67,10 +65,9 @@ public class ProblemTestCaseUtils {
      * @param mode
      * @return
      * @throws SystemError
-     * @throws UnsupportedEncodingException
      */
     private JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
-            throws SystemError, UnsupportedEncodingException {
+            throws SystemError {
 
         QueryWrapper<ProblemCase> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", problemId);

@@ -185,9 +185,8 @@ public class AdminContestController {
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> importContestRemoteOJProblem(@RequestParam("name") String name,
-                                                           @RequestParam("problemId") String problemId, @RequestParam("cid") Long cid,
-                                                           @RequestParam("displayId") String displayId) {
-        adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid, displayId);
+                                                           @RequestParam("problemId") String problemId, @RequestParam("cid") Long cid) {
+        adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid);
         return CommonResult.successResponse();
     }
 

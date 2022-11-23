@@ -23,12 +23,8 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.*;
 
 /**
@@ -53,30 +49,21 @@ public class JudgeRun {
 
         JudgeGlobalDTO judgeGlobalDTO = getJudgeGlobalDTO(judge, problem, userFileId, userFileSrc, getUserOutput);
 
-        List<FutureTask<JSONObject>> futureTasks = getFutureTasks(judgeGlobalDTO);
+        List<JudgeTask> judgeTasks = getJudgeTasks(judgeGlobalDTO);
         if (JudgeCaseMode.ITERATE_UNTIL_WRONG.getMode().equals(problem.getJudgeCaseMode())) {
             // 顺序评测测试点，遇到非AC就停止！
-            return iterateJudgeAllCase(futureTasks);
+            return iterateJudgeAllCase(judgeTasks);
         } else {
-            return defaultJudgeAllCase(futureTasks);
+            return defaultJudgeAllCase(judgeTasks);
         }
     }
 
-    private List<JSONObject> iterateJudgeAllCase(List<FutureTask<JSONObject>> futureTasks) throws ExecutionException, InterruptedException {
+    private List<JSONObject> iterateJudgeAllCase(List<JudgeTask> judgeTasks) throws ExecutionException, InterruptedException {
         List<JSONObject> result = new LinkedList<>();
-        for (FutureTask<JSONObject> futureTask : futureTasks) {
+        for (JudgeTask judgeTask : judgeTasks) {
             // 提交到线程池进行执行
+            FutureTask<JSONObject> futureTask = new FutureTask<>(judgeTask);
             ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
-//            JSONObject judgeRes;
-//            while (true) {
-//                if (futureTask.isDone() && !futureTask.isCancelled()) {
-//                    // 获取线程返回结果
-//                    judgeRes = futureTask.get();
-//                    break;
-//                } else {
-//                    Thread.sleep(10);
-//                }
-//            }
             final JSONObject judgeRes = futureTask.get();
             result.add(judgeRes);
             Integer status = judgeRes.getInt("status");
@@ -87,67 +74,33 @@ public class JudgeRun {
         return result;
     }
 
-    public List<JSONObject> t() throws ExecutionException, InterruptedException {
-        List<JudgeTask> taskList = new ArrayList<>();
-        ExecutorService executorService = null;
-        CompletableFuture[] futures = new CompletableFuture[taskList.size()];
-        for (int i = 0; i < taskList.size(); i++) {
-            final JudgeTask judgeTask = taskList.get(i);
+    private List<JSONObject> defaultJudgeAllCase(List<JudgeTask> judgeTasks) throws InterruptedException, ExecutionException {
+        ExecutorService threadPool = ThreadPoolUtil.getInstance().getThreadPool();
+        CompletableFuture[] futures = new CompletableFuture[judgeTasks.size()];
+        for (int i = 0; i < judgeTasks.size(); i++) {
+            final JudgeTask judgeTask = judgeTasks.get(i);
             futures[i]  = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return getJsonObject(judgeTask);
-                } catch (SystemError systemError) {
-                    systemError.printStackTrace();
+                    // 普通方法
+                    return judgeTask.call();
+                } catch (SystemError e) {
+                    throw new RuntimeException(e);
                 }
-                return null;
-            }, executorService);
+            }, threadPool);
         }
-        // anyOf() 方法不会等待所有的 CompletableFuture 都运行完成之后再返回，只要有一个执行完成即可！
-//        CompletableFuture<Object> f = CompletableFuture.anyOf(futures);
-
         // allOf() 方法会等到所有的 CompletableFuture 都运行完成之后再返回
         CompletableFuture<Void> headerFuture = CompletableFuture.allOf(futures);
         // 都运行完了之后再继续执行
         headerFuture.join();
         List<JSONObject> res = new ArrayList<>();
-        for (int i = 0; i < taskList.size(); i++) {
+        for (int i = 0; i < judgeTasks.size(); i++) {
             res.add((JSONObject) futures[i].get());
         }
         return res;
     }
 
-    private JSONObject getJsonObject(JudgeTask judgeTask) throws SystemError {
-        return judgeTask.call();
-    }
-
-    private List<JSONObject> defaultJudgeAllCase(List<FutureTask<JSONObject>> futureTasks) throws InterruptedException, ExecutionException {
-        // 提交到线程池进行执行
-        for (FutureTask<JSONObject> futureTask : futureTasks) {
-            ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
-        }
-
-        List<JSONObject> result = new LinkedList<>();
-        while (futureTasks.size() > 0) {
-            Iterator<FutureTask<JSONObject>> iterable = futureTasks.iterator();
-            // 遍历一遍
-            while (iterable.hasNext()) {
-                FutureTask<JSONObject> future = iterable.next();
-                if (future.isDone() && !future.isCancelled()) {
-                    // 获取线程返回结果 TODO 报OOM异常
-                    result.add(future.get());
-                    // 任务完成移除任务
-                    iterable.remove();
-                } else {
-                    // 避免CPU高速运转，这里休息10ms
-                    Thread.sleep(10);
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<FutureTask<JSONObject>> getFutureTasks(JudgeGlobalDTO judgeGlobalDTO) {
-        List<FutureTask<JSONObject>> futureTasks = new ArrayList<>();
+    private List<JudgeTask> getJudgeTasks(JudgeGlobalDTO judgeGlobalDTO) {
+        List<JudgeTask> judgeTasks = new ArrayList<>();
         final JSONArray testcaseList = (JSONArray) judgeGlobalDTO.getTestCaseInfo().get("testCases");
         for (int index = 0; index < testcaseList.size(); index++) {
             JSONObject testcase = (JSONObject) testcaseList.get(index);
@@ -177,10 +130,9 @@ public class JudgeRun {
                     .score(score)
                     .maxOutputSize(maxOutputSize)
                     .build();
-            // 将每个需要测试的线程任务加入任务列表中
-            futureTasks.add(new FutureTask<>(new JudgeTask(judgeDTO, judgeGlobalDTO)));
+            judgeTasks.add(new JudgeTask(judgeDTO, judgeGlobalDTO));
         }
-        return futureTasks;
+        return judgeTasks;
     }
 
     private JudgeGlobalDTO getJudgeGlobalDTO(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput) throws SystemError, UnsupportedEncodingException {
@@ -191,7 +143,6 @@ public class JudgeRun {
         Long testTime = (long) problem.getTimeLimit() + 200;
 
         JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
-
         if (judgeMode == null) {
             throw new RuntimeException(
                     "The judge mode of problem " + problem.getProblemId() + " error:" + problem.getJudgeMode());

@@ -89,7 +89,7 @@ public class Problem implements Serializable {
     private Integer auth;
 
     @ApiModelProperty(value = "当该题目为oi题目时的分数")
-    private Integer ioScore;
+    private Integer oiScore;
 
     @ApiModelProperty(value = "该题目对应的相关提交代码，用户是否可用分享")
     private Boolean codeShare;

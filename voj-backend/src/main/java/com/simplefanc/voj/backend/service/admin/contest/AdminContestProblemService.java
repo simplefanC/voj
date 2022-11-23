@@ -32,6 +32,6 @@ public interface AdminContestProblemService {
 
     void addProblemFromPublic(ContestProblemDto contestProblemDto);
 
-    void importContestRemoteOJProblem(String name, String problemId, Long cid, String displayId);
+    void importContestRemoteOJProblem(String name, String problemId, Long cid);
 
 }
