@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
-import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
-import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
-import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDTO;
+import com.simplefanc.voj.backend.pojo.dto.ToJudgeDTO;
+import com.simplefanc.voj.backend.pojo.vo.JudgeVO;
+import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 
@@ -24,7 +24,7 @@ public interface JudgeService {
      * @Description 核心方法 判题通过openfeign调用判题系统服务
      * @Since 2021/10/30
      */
-    Judge submitProblemJudge(ToJudgeDto judgeDto);
+    Judge submitProblemJudge(ToJudgeDTO judgeDTO);
 
     /**
      * @MethodName resubmit
@@ -38,7 +38,7 @@ public interface JudgeService {
      * @Description 获取单个提交记录的详情
      * @Since 2021/1/2
      */
-    SubmissionInfoVo getSubmission(Long submitId);
+    SubmissionInfoVO getSubmission(Long submitId);
 
     /**
      * @MethodName updateSubmission
@@ -52,7 +52,7 @@ public interface JudgeService {
      * @Description 通用查询判题记录列表
      * @Since 2021/10/29
      */
-    IPage<JudgeVo> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
+    IPage<JudgeVO> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
                                 Integer searchStatus, String searchUsername, Boolean completeProblemId);
 
     /**
@@ -60,14 +60,14 @@ public interface JudgeService {
      * @Description 对提交列表状态为Pending和Judging的提交进行更新检查
      * @Since 2021/1/3
      */
-    HashMap<Long, Object> checkCommonJudgeResult(SubmitIdListDto submitIdListDto);
+    HashMap<Long, Object> checkCommonJudgeResult(SubmitIdListDTO submitIdListDTO);
 
     /**
      * @MethodName checkContestJudgeResult
      * @Description 需要检查是否为封榜，是否可以查询结果，避免有人恶意查询
      * @Since 2021/6/11
      */
-    HashMap<Long, Object> checkContestJudgeResult(SubmitIdListDto submitIdListDto);
+    HashMap<Long, Object> checkContestJudgeResult(SubmitIdListDTO submitIdListDTO);
 
     /**
      * @MethodName getJudgeCase

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.discussion.DiscussionEntityService;
 import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.mapper.DiscussionMapper;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVO;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.msg.MsgRemind;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class DiscussionEntityServiceImpl extends ServiceImpl<DiscussionMapper, D
     private final MsgRemindEntityService msgRemindEntityService;
 
     @Override
-    public DiscussionVo getDiscussion(Integer did, String uid) {
+    public DiscussionVO getDiscussion(Integer did, String uid) {
         return discussionMapper.getDiscussion(did, uid);
     }
 

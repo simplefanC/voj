@@ -6,9 +6,9 @@ import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.CompileConfig;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
-import com.simplefanc.voj.judger.common.exception.CompileError;
-import com.simplefanc.voj.judger.common.exception.SubmitError;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.CompileException;
+import com.simplefanc.voj.judger.common.exception.SubmitException;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 
 import java.io.File;
@@ -24,7 +24,7 @@ import java.util.List;
 public class Compiler {
 
     public static String compile(CompileConfig compileConfig, String code, String language,
-                                 HashMap<String, String> extraFiles) throws SystemError, CompileError, SubmitError {
+                                 HashMap<String, String> extraFiles) throws SystemException, CompileException, SubmitException {
 
         if (compileConfig == null) {
             throw new RuntimeException("Unsupported language " + language);
@@ -37,13 +37,13 @@ public class Compiler {
                 compileConfig.getEnvs(), code, extraFiles, true, false, null);
         JSONObject compileResult = (JSONObject) result.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
-            throw new CompileError("Compile Error.", ((JSONObject) compileResult.get("files")).getStr("stdout"),
+            throw new CompileException("Compile Error.", ((JSONObject) compileResult.get("files")).getStr("stdout"),
                     ((JSONObject) compileResult.get("files")).getStr("stderr"));
         }
 
         String fileId = ((JSONObject) compileResult.get("fileIds")).getStr(compileConfig.getExeName());
         if (StrUtil.isEmpty(fileId)) {
-            throw new SubmitError("Executable file not found.",
+            throw new SubmitException("Executable file not found.",
                     ((JSONObject) compileResult.get("files")).getStr("stdout"),
                     ((JSONObject) compileResult.get("files")).getStr("stderr"));
         }
@@ -51,7 +51,7 @@ public class Compiler {
     }
 
     public static Boolean compileSpj(String code, Long pid, String language, HashMap<String, String> extraFiles)
-            throws SystemError {
+            throws SystemException {
 
         CompileConfig spjCompiler = CompileConfig.getCompilerByLanguage("SPJ-" + language);
         if (spjCompiler == null) {
@@ -71,7 +71,7 @@ public class Compiler {
                 false, copyOutExe, JudgeDir.SPJ_WORKPLACE_DIR + File.separator + pid);
         JSONObject compileResult = (JSONObject) res.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
-            throw new SystemError("Special Judge Code Compile Error.",
+            throw new SystemException("Special Judge Code Compile Error.",
                     ((JSONObject) compileResult.get("files")).getStr("stdout"),
                     ((JSONObject) compileResult.get("files")).getStr("stderr"));
         }
@@ -79,7 +79,7 @@ public class Compiler {
     }
 
     public static Boolean compileInteractive(String code, Long pid, String language, HashMap<String, String> extraFiles)
-            throws SystemError {
+            throws SystemException {
 
         CompileConfig interactiveCompiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + language);
         if (interactiveCompiler == null) {
@@ -101,7 +101,7 @@ public class Compiler {
                 JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + pid);
         JSONObject compileResult = (JSONObject) res.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
-            throw new SystemError("Interactive Judge Code Compile Error.",
+            throw new SystemException("Interactive Judge Code Compile Error.",
                     ((JSONObject) compileResult.get("files")).getStr("stdout"),
                     ((JSONObject) compileResult.get("files")).getStr("stderr"));
         }

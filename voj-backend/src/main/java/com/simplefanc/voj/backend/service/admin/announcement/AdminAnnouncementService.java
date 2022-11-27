@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.admin.announcement;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 
 /**
@@ -11,7 +11,7 @@ import com.simplefanc.voj.common.pojo.entity.common.Announcement;
  */
 public interface AdminAnnouncementService {
 
-    IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage);
+    IPage<AnnouncementVO> getAnnouncementList(Integer limit, Integer currentPage);
 
     void deleteAnnouncement(long aid);
 

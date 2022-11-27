@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVO;
 import com.simplefanc.voj.backend.service.oj.DiscussionService;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
@@ -42,7 +42,7 @@ public class DiscussionController {
     }
 
     @GetMapping("/discussion")
-    public CommonResult<DiscussionVo> getDiscussion(@RequestParam(value = "did") Integer did) {
+    public CommonResult<DiscussionVO> getDiscussion(@RequestParam(value = "did") Integer did) {
         return CommonResult.successResponse(discussionService.getDiscussion(did));
     }
 

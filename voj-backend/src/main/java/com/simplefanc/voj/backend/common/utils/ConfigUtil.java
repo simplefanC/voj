@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.common.utils;
 
-import com.simplefanc.voj.backend.config.ConfigVo;
+import com.simplefanc.voj.backend.config.ConfigVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,67 +13,67 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ConfigUtil {
 
-    private final ConfigVo configVo;
+    private final ConfigVO configVO;
 
     public String getConfigContent() {
-        return buildYamlStr(configVo);
+        return buildYamlStr(configVO);
     }
 
-    public String buildYamlStr(ConfigVo configVo) {
+    public String buildYamlStr(ConfigVO configVO) {
         return "voj:\n" +
                 "  jwt:\n" +
                 "    # 加密秘钥\n" +
-                "    secret: " + configVo.getTokenSecret() + "\n" +
+                "    secret: " + configVO.getTokenSecret() + "\n" +
                 "    # token有效时长，1天，单位秒\n" +
-                "    expire: " + configVo.getTokenExpire() + "\n" +
-                "    checkRefreshExpire: " + configVo.getCheckRefreshExpire() + "\n" +
+                "    expire: " + configVO.getTokenExpire() + "\n" +
+                "    checkRefreshExpire: " + configVO.getCheckRefreshExpire() + "\n" +
                 "    header: token\n" +
                 "  judge:\n" +
                 "    # 调用判题服务器的token\n" +
-                "    token: " + configVo.getJudgeToken() + "\n" +
+                "    token: " + configVO.getJudgeToken() + "\n" +
                 "  db:\n" +
-                "    host: " + configVo.getMysqlHost() + "\n" +
-                "    public-host: " + configVo.getMysqlPublicHost() + "\n" +
-                "    port: " + configVo.getMysqlPort() + "\n" +
-                "    name: " + configVo.getMysqlDbName() + "\n" +
-                "    username: " + configVo.getMysqlUsername() + "\n" +
-                "    password: " + configVo.getMysqlPassword() + "\n" +
+                "    host: " + configVO.getMysqlHost() + "\n" +
+                "    public-host: " + configVO.getMysqlPublicHost() + "\n" +
+                "    port: " + configVO.getMysqlPort() + "\n" +
+                "    name: " + configVO.getMysqlDbName() + "\n" +
+                "    username: " + configVO.getMysqlUsername() + "\n" +
+                "    password: " + configVO.getMysqlPassword() + "\n" +
                 "  mail:\n" +
-                "    ssl: " + configVo.getEmailSsl() + "\n" +
-                "    username: " + configVo.getEmailUsername() + "\n" +
-                "    password: " + configVo.getEmailPassword() + "\n" +
-                "    host: " + configVo.getEmailHost() + "\n" +
-                "    port: " + configVo.getEmailPort() + "\n" +
+                "    ssl: " + configVO.getEmailSsl() + "\n" +
+                "    username: " + configVO.getEmailUsername() + "\n" +
+                "    password: " + configVO.getEmailPassword() + "\n" +
+                "    host: " + configVO.getEmailHost() + "\n" +
+                "    port: " + configVO.getEmailPort() + "\n" +
                 "  redis:\n" +
-                "    host: " + configVo.getRedisHost() + "\n" +
-                "    port: " + configVo.getRedisPort() + "\n" +
-                "    password: " + configVo.getRedisPassword() + "\n" +
+                "    host: " + configVO.getRedisHost() + "\n" +
+                "    port: " + configVO.getRedisPort() + "\n" +
+                "    password: " + configVO.getRedisPassword() + "\n" +
                 "  switch:\n" +
-                "    problem: " + configVo.getProblem() + "\n" +
-                "    training: " + configVo.getTraining() + "\n" +
-                "    contest: " + configVo.getContest() + "\n" +
-                "    status: " + configVo.getStatus() + "\n" +
-                "    rank: " + configVo.getRank() + "\n" +
-                "    discussion: " + configVo.getDiscussion() + "\n" +
-                "    introduction: " + configVo.getIntroduction() + "\n" +
-                "    register: " + configVo.getRegister() + "\n" +
+                "    problem: " + configVO.getProblem() + "\n" +
+                "    training: " + configVO.getTraining() + "\n" +
+                "    contest: " + configVO.getContest() + "\n" +
+                "    status: " + configVO.getStatus() + "\n" +
+                "    rank: " + configVO.getRank() + "\n" +
+                "    discussion: " + configVO.getDiscussion() + "\n" +
+                "    introduction: " + configVO.getIntroduction() + "\n" +
+                "    register: " + configVO.getRegister() + "\n" +
                 "    judge:\n" +
-                "      public: "  + configVo.getOpenPublicJudge() + "\n" +
-                "      contest: "  + configVo.getOpenContestJudge() + "\n" +
-                "      submit-interval: "  + configVo.getDefaultSubmitInterval() + "\n" +
-                "      code-visible-start-time: "  + configVo.getCodeVisibleStartTime() + "\n" +
+                "      public: "  + configVO.getOpenPublicJudge() + "\n" +
+                "      contest: "  + configVO.getOpenContestJudge() + "\n" +
+                "      submit-interval: "  + configVO.getDefaultSubmitInterval() + "\n" +
+                "      code-visible-start-time: "  + configVO.getCodeVisibleStartTime() + "\n" +
                 "  web-config:\n" +
-                "    base-url: \"" + configVo.getBaseUrl() + "\"\n" +
-                "    name: \"" + configVo.getName() + "\"\n" +
-                "    short-name: \"" + configVo.getShortName() + "\"\n" +
-                "    description: \"" + configVo.getDescription() + "\"\n" +
+                "    base-url: \"" + configVO.getBaseUrl() + "\"\n" +
+                "    name: \"" + configVO.getName() + "\"\n" +
+                "    short-name: \"" + configVO.getShortName() + "\"\n" +
+                "    description: \"" + configVO.getDescription() + "\"\n" +
                 "    footer:\n" +
                 "      record:\n" +
-                "        name: \"" + configVo.getRecordName() + "\"\n" +
-                "        url: \"" + configVo.getRecordUrl() + "\"\n" +
+                "        name: \"" + configVO.getRecordName() + "\"\n" +
+                "        url: \"" + configVO.getRecordUrl() + "\"\n" +
                 "      project:\n" +
-                "        name: \"" + configVo.getProjectName() + "\"\n" +
-                "        url: \"" + configVo.getProjectUrl() + "\"\n";
+                "        name: \"" + configVO.getProjectName() + "\"\n" +
+                "        url: \"" + configVO.getProjectUrl() + "\"\n";
     }
 
 }

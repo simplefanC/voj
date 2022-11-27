@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestMapper;
-import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVo;
-import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVO;
+import com.simplefanc.voj.backend.pojo.vo.ContestVO;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
@@ -36,65 +36,65 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
     private final ContestValidator contestValidator;
 
     @Override
-    public List<ContestVo> getWithinNext14DaysContests() {
+    public List<ContestVO> getWithinNext14DaysContests() {
         List<Contest> contestList = contestMapper.getWithinNext14DaysContests();
 
-        final List<ContestVo> contestVoList = contestList.stream()
+        final List<ContestVO> contestVOList = contestList.stream()
                 // 首页不显示仅比赛管理员可见的比赛
                 .filter(contest -> !contest.getContestAdminVisible())
-                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
+                .map(contest -> BeanUtil.copyProperties(contest, ContestVO.class))
                 .collect(Collectors.toList());
 
-        setRegisterCount(contestVoList);
+        setRegisterCount(contestVOList);
 
-        return contestVoList;
+        return contestVOList;
     }
 
     @Override
-    public IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer type, Integer status,
+    public IPage<ContestVO> getContestList(Integer limit, Integer currentPage, Integer type, Integer status,
                                            String keyword) {
         // 新建分页
-        IPage<ContestVo> page = new Page<>(currentPage, limit);
+        IPage<ContestVO> page = new Page<>(currentPage, limit);
 
         List<Contest> contestList = contestMapper.getContestList(page, type, status, keyword);
 
-        final List<ContestVo> contestVoList = contestList.stream().filter(contest ->
+        final List<ContestVO> contestVOList = contestList.stream().filter(contest ->
                 // 仅比赛管理员可见
                 !contest.getContestAdminVisible() || contestValidator.isContestAdmin(contest))
-                .map(contest -> BeanUtil.copyProperties(contest, ContestVo.class))
+                .map(contest -> BeanUtil.copyProperties(contest, ContestVO.class))
                 .collect(Collectors.toList());
 
-        setRegisterCount(contestVoList);
+        setRegisterCount(contestVOList);
 
-        return page.setRecords(contestVoList);
+        return page.setRecords(contestVOList);
     }
 
     @Override
-    public ContestVo getContestInfoById(long cid) {
+    public ContestVO getContestInfoById(long cid) {
         List<Long> cidList = Collections.singletonList(cid);
-        ContestVo contestVo = contestMapper.getContestInfoById(cid);
-        if (contestVo != null) {
-            List<ContestRegisterCountVo> contestRegisterCountVoList = contestMapper.getContestRegisterCount(cidList);
-            if (!CollectionUtils.isEmpty(contestRegisterCountVoList)) {
-                ContestRegisterCountVo contestRegisterCountVo = contestRegisterCountVoList.get(0);
-                contestVo.setCount(contestRegisterCountVo.getCount());
+        ContestVO contestVO = contestMapper.getContestInfoById(cid);
+        if (contestVO != null) {
+            List<ContestRegisterCountVO> contestRegisterCountVOList = contestMapper.getContestRegisterCount(cidList);
+            if (!CollectionUtils.isEmpty(contestRegisterCountVOList)) {
+                ContestRegisterCountVO contestRegisterCountVO = contestRegisterCountVOList.get(0);
+                contestVO.setCount(contestRegisterCountVO.getCount());
             }
         }
-        return contestVo;
+        return contestVO;
     }
 
     /**
      * 获取比赛注册人数
      * @param contestList
      */
-    private void setRegisterCount(List<ContestVo> contestList) {
-        List<Long> cidList = contestList.stream().map(ContestVo::getId).collect(Collectors.toList());
+    private void setRegisterCount(List<ContestVO> contestList) {
+        List<Long> cidList = contestList.stream().map(ContestVO::getId).collect(Collectors.toList());
         if (!CollectionUtils.isEmpty(cidList)) {
-            List<ContestRegisterCountVo> contestRegisterCountVoList = contestMapper.getContestRegisterCount(cidList);
-            for (ContestRegisterCountVo contestRegisterCountVo : contestRegisterCountVoList) {
-                for (ContestVo contestVo : contestList) {
-                    if (contestRegisterCountVo.getCid().equals(contestVo.getId())) {
-                        contestVo.setCount(contestRegisterCountVo.getCount());
+            List<ContestRegisterCountVO> contestRegisterCountVOList = contestMapper.getContestRegisterCount(cidList);
+            for (ContestRegisterCountVO contestRegisterCountVO : contestRegisterCountVOList) {
+                for (ContestVO contestVO : contestList) {
+                    if (contestRegisterCountVO.getCid().equals(contestVO.getId())) {
+                        contestVO.setCount(contestRegisterCountVO.getCount());
                         break;
                     }
                 }

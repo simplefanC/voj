@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.admin.contest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminContestVO;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 
 /**
@@ -14,13 +14,13 @@ public interface AdminContestService {
 
     IPage<Contest> getContestList(Integer limit, Integer currentPage, String keyword);
 
-    AdminContestVo getContest(Long cid);
+    AdminContestVO getContest(Long cid);
 
     void deleteContest(Long cid);
 
-    void addContest(AdminContestVo adminContestVo);
+    void addContest(AdminContestVO adminContestVO);
 
-    void updateContest(AdminContestVo adminContestVo);
+    void updateContest(AdminContestVO adminContestVO);
 
     void changeContestVisible(Long cid, String uid, Boolean visible);
 

@@ -13,10 +13,10 @@ import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.judge.Dispatcher;
-import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
+import com.simplefanc.voj.backend.judge.remote.crawler.AbstractProblemCrawler;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.problem.AdminProblemService;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -66,10 +66,12 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
     @Override
     public IPage<Problem> getProblemList(Integer limit, Integer currentPage, String keyword, Integer auth, String oj) {
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         IPage<Problem> iPage = new Page<>(currentPage, limit);
         IPage<Problem> problemList;
 
@@ -78,7 +80,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
         // 根据oj筛选过滤
         if (oj != null && !"All".equals(oj)) {
-            if (!RemoteOj.isRemoteOJ(oj)) {
+            if (!RemoteOj.isRemoteOj(oj)) {
                 queryWrapper.eq("is_remote", false);
             } else {
                 queryWrapper.eq("is_remote", true).likeRight("problem_id", oj);
@@ -105,12 +107,12 @@ public class AdminProblemServiceImpl implements AdminProblemService {
         // 查询成功
         if (problem != null) {
             // 获取当前登录的用户
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+            UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
             boolean isRoot = UserSessionUtil.isRoot();
             boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
             // 只有超级管理员和题目管理员、题目创建者才能操作
-            if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problem.getAuthor())) {
+            if (!isRoot && !isProblemAdmin && !userRolesVO.getUsername().equals(problem.getAuthor())) {
                 throw new StatusForbiddenException("对不起，你无权限查看题目！");
             }
 
@@ -133,15 +135,15 @@ public class AdminProblemServiceImpl implements AdminProblemService {
     }
 
     @Override
-    public void addProblem(ProblemDto problemDto) {
+    public void addProblem(ProblemDTO problemDTO) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        queryWrapper.eq("problem_id", problemDTO.getProblem().getProblemId().toUpperCase());
         Problem problem = problemEntityService.getOne(queryWrapper);
         if (problem != null) {
             throw new StatusFailException("该题目的Problem ID 已存在，请更换！");
         }
 
-        boolean isOk = problemEntityService.adminAddProblem(problemDto);
+        boolean isOk = problemEntityService.adminAddProblem(problemDTO);
         if (!isOk) {
             throw new StatusFailException("添加失败");
         }
@@ -149,37 +151,37 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateProblem(ProblemDto problemDto) {
+    public void updateProblem(ProblemDTO problemDTO) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         boolean isRoot = UserSessionUtil.isRoot();
         boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
         // 只有超级管理员和题目管理员、题目创建者才能操作
-        if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problemDto.getProblem().getAuthor())) {
+        if (!isRoot && !isProblemAdmin && !userRolesVO.getUsername().equals(problemDTO.getProblem().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限修改题目！");
         }
 
-        String problemId = problemDto.getProblem().getProblemId().toUpperCase();
+        String problemId = problemDTO.getProblem().getProblemId().toUpperCase();
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", problemId);
         Problem problem = problemEntityService.getOne(queryWrapper);
 
         // 如果problem_id不是原来的且已存在该problem_id，则修改失败！
-        if (problem != null && problem.getId().longValue() != problemDto.getProblem().getId()) {
+        if (problem != null && problem.getId().longValue() != problemDTO.getProblem().getId()) {
             throw new StatusFailException("当前的Problem ID 已被使用，请更换！");
         }
 
         // 记录修改题目的用户
-        problemDto.getProblem().setModifiedUser(userRolesVo.getUsername());
+        problemDTO.getProblem().setModifiedUser(userRolesVO.getUsername());
 
-        boolean result = problemEntityService.adminUpdateProblem(problemDto);
+        boolean result = problemEntityService.adminUpdateProblem(problemDTO);
         // 更新成功
         if (result) {
             // 说明改了problemId，同步一下judge表
             if (problem == null) {
                 UpdateWrapper<Judge> judgeUpdateWrapper = new UpdateWrapper<>();
-                judgeUpdateWrapper.eq("pid", problemDto.getProblem().getId()).set("display_pid", problemId);
+                judgeUpdateWrapper.eq("pid", problemDTO.getProblem().getId()).set("display_pid", problemId);
                 judgeEntityService.update(judgeUpdateWrapper);
             }
 
@@ -212,7 +214,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importRemoteOJProblem(String name, String problemId) {
+    public void importRemoteOjProblem(String name, String problemId) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
         Problem problem = problemEntityService.getOne(queryWrapper);
@@ -221,10 +223,10 @@ public class AdminProblemServiceImpl implements AdminProblemService {
         }
 
         try {
-            ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
+            AbstractProblemCrawler.RemoteProblemInfo otherOjProblemInfo = remoteProblemService
                     .getOtherOJProblemInfo(name.toUpperCase(), problemId);
-            if (otherOJProblemInfo != null) {
-                Problem importProblem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
+            if (otherOjProblemInfo != null) {
+                Problem importProblem = remoteProblemService.adminAddOtherOJProblem(otherOjProblemInfo, name);
                 if (importProblem == null) {
                     throw new StatusFailException("导入新题目失败！请重新尝试！");
                 }
@@ -248,11 +250,11 @@ public class AdminProblemServiceImpl implements AdminProblemService {
             throw new StatusForbiddenException("修改失败！你无权限公开题目！");
         }
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         UpdateWrapper<Problem> problemUpdateWrapper = new UpdateWrapper<>();
         problemUpdateWrapper.eq("id", problem.getId()).set("auth", problem.getAuth()).set("modified_user",
-                userRolesVo.getUsername());
+                userRolesVO.getUsername());
 
         boolean isOk = problemEntityService.update(problemUpdateWrapper);
         if (!isOk) {

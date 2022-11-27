@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
-import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVO;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
@@ -32,13 +32,15 @@ public class AdminNoticeServiceImpl implements AdminNoticeService {
     private final UserSysNoticeEntityService userSysNoticeEntityService;
 
     @Override
-    public IPage<AdminSysNoticeVo> getSysNotice(Integer limit, Integer currentPage, String type) {
+    public IPage<AdminSysNoticeVO> getSysNotice(Integer limit, Integer currentPage, String type) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
 
         return adminSysNoticeEntityService.getSysNotice(limit, currentPage, type);
     }

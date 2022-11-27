@@ -9,7 +9,7 @@ import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.*;
-import com.simplefanc.voj.backend.pojo.dto.PidListDto;
+import com.simplefanc.voj.backend.pojo.dto.PidListDTO;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.ProblemService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -61,19 +61,21 @@ public class ProblemServiceImpl implements ProblemService {
      * @Since 2021/10/27
      */
     @Override
-    public Page<ProblemVo> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagIds,
+    public Page<ProblemVO> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagIds,
                                           Integer difficulty, String oj, Boolean problemVisible) {
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
 
         // 关键词查询不为空
         if (!StrUtil.isEmpty(keyword)) {
             keyword = keyword.trim();
         }
-        if (oj != null && !RemoteOj.isRemoteOJ(oj)) {
+        if (oj != null && !RemoteOj.isRemoteOj(oj)) {
             oj = Constant.LOCAL;
         }
         boolean allProblemVisible = problemVisible && (UserSessionUtil.isRoot() || UserSessionUtil.isProblemAdmin());
@@ -86,7 +88,7 @@ public class ProblemServiceImpl implements ProblemService {
      * @Since 2021/10/27
      */
     @Override
-    public RandomProblemVo getRandomProblem() {
+    public RandomProblemVO getRandomProblem() {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         // 必须是公开题目
         queryWrapper.select("problem_id").eq("auth", 1);
@@ -96,9 +98,9 @@ public class ProblemServiceImpl implements ProblemService {
         }
         Random random = new Random();
         int index = random.nextInt(list.size());
-        RandomProblemVo randomProblemVo = new RandomProblemVo();
-        randomProblemVo.setProblemId(list.get(index).getProblemId());
-        return randomProblemVo;
+        RandomProblemVO randomProblemVO = new RandomProblemVO();
+        randomProblemVO.setProblemId(list.get(index).getProblemId());
+        return randomProblemVO;
     }
 
     /**
@@ -108,38 +110,38 @@ public class ProblemServiceImpl implements ProblemService {
      */
     // TODO 行数过多
     @Override
-    public HashMap<Long, Object> getUserProblemStatus(PidListDto pidListDto) {
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+    public HashMap<Long, Object> getUserProblemStatus(PidListDTO pidListDTO) {
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         HashMap<Long, Object> result = new HashMap<>();
         // 先查询判断该用户对于这些题是否已经通过，若已通过，则无论后续再提交结果如何，该题都标记为通过
         QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("distinct pid,status,submit_time,score").in("pid", pidListDto.getPidList())
-                .eq("uid", userRolesVo.getUid()).orderByDesc("submit_time");
+        queryWrapper.select("distinct pid,status,submit_time,score").in("pid", pidListDTO.getPidList())
+                .eq("uid", userRolesVO.getUid()).orderByDesc("submit_time");
 
-        if (pidListDto.getIsContestProblemList()) {
+        if (pidListDTO.getIsContestProblemList()) {
             // 如果是比赛的提交记录需要判断cid
-            queryWrapper.eq("cid", pidListDto.getCid());
+            queryWrapper.eq("cid", pidListDTO.getCid());
         } else {
             queryWrapper.eq("cid", 0);
         }
 
         List<Judge> judges = judgeEntityService.list(queryWrapper);
 
-        boolean isAcmContest = true;
+        boolean isACMContest = true;
         Contest contest = null;
-        if (pidListDto.getIsContestProblemList()) {
-            contest = contestEntityService.getById(pidListDto.getCid());
+        if (pidListDTO.getIsContestProblemList()) {
+            contest = contestEntityService.getById(pidListDTO.getCid());
             if (contest == null) {
                 throw new StatusNotFoundException("错误：该比赛不存在！");
             }
-            isAcmContest = contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode();
+            isACMContest = contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode();
         }
 
         for (Judge judge : judges) {
             // 如果是比赛的题目列表状态
             HashMap<String, Object> temp = new HashMap<>();
-            if (pidListDto.getIsContestProblemList()) {
-                processContestJudge(result, isAcmContest, contest, judge, temp);
+            if (pidListDTO.getIsContestProblemList()) {
+                processContestJudge(result, isACMContest, contest, judge, temp);
             } else { // 不是比赛题目
                 // 如果该题目已通过，则强制写为通过（0）
                 if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
@@ -154,9 +156,9 @@ public class ProblemServiceImpl implements ProblemService {
         }
 
         // 再次检查，应该可能从未提交过该题，则状态写为-10
-        for (Long pid : pidListDto.getPidList()) {
+        for (Long pid : pidListDTO.getPidList()) {
             // 如果是比赛的题目列表状态
-            if (pidListDto.getIsContestProblemList()) {
+            if (pidListDTO.getIsContestProblemList()) {
                 if (!result.containsKey(pid)) {
                     HashMap<String, Object> temp = new HashMap<>();
                     temp.put("score", null);
@@ -211,7 +213,7 @@ public class ProblemServiceImpl implements ProblemService {
      * @Since 2021/10/27
      */
     @Override
-    public ProblemInfoVo getProblemInfo(String problemId) {
+    public ProblemInfoVO getProblemInfo(String problemId) {
 
         QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>().eq("problem_id", problemId);
         // 查询题目详情，题目标签，题目语言，题目做题情况
@@ -249,7 +251,7 @@ public class ProblemServiceImpl implements ProblemService {
         });
 
         // 获取题目的提交记录
-        ProblemCountVo problemCount = judgeEntityService.getProblemCount(problem.getId());
+        ProblemCountVO problemCount = judgeEntityService.getProblemCount(problem.getId());
 
         // 获取题目的代码模板
         QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
@@ -264,8 +266,8 @@ public class ProblemServiceImpl implements ProblemService {
         // 屏蔽一些题目参数
         problem.setJudgeExtraFile(null).setSpjCode(null).setSpjLanguage(null);
 
-        // 将数据统一写入到一个Vo返回数据实体类中
-        return new ProblemInfoVo(problem, tags, languagesStr, problemCount, langNameAndCode);
+        // 将数据统一写入到一个VO返回数据实体类中
+        return new ProblemInfoVO(problem, tags, languagesStr, problemCount, langNameAndCode);
     }
 
 }

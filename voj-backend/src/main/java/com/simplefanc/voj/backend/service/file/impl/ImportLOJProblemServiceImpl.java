@@ -11,8 +11,8 @@ import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
-import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
+import com.simplefanc.voj.backend.judge.remote.crawler.AbstractProblemCrawler;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
 import com.simplefanc.voj.backend.service.file.ImportLOJProblemService;
 import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.constants.JudgeMode;
@@ -53,11 +53,11 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         if (problem != null) {
             throw new StatusFailException("该题目已添加，请勿重复添加！");
         }
-        return problemEntityService.adminAddProblem(getProblemDto(problemId));
+        return problemEntityService.adminAddProblem(getProblemDTO(problemId));
     }
 
-    private ProblemDto getProblemDto(Integer problemId) {
-        ProblemDto problemDto = new ProblemDto();
+    private ProblemDTO getProblemDTO(Integer problemId) {
+        ProblemDTO problemDTO = new ProblemDTO();
 
         Map<String, Object> map = MapUtil.builder(new HashMap<String, Object>())
                 .put("displayId", problemId)
@@ -82,9 +82,9 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
         // 设置 tag
         List<LOJTag> tags = lojProblem.getTagsOfLocale();
         List<Tag> tagList = tags.stream().map(lojTag -> new Tag().setName(lojTag.name)).collect(Collectors.toList());
-        problemDto.setTags(tagList);
+        problemDTO.setTags(tagList);
 
-        ProblemCrawler.RemoteProblemInfo problemInfo = new ProblemCrawler.RemoteProblemInfo();
+        AbstractProblemCrawler.RemoteProblemInfo problemInfo = new AbstractProblemCrawler.RemoteProblemInfo();
         problemInfo.setTagList(tagList);
         Problem problem = problemInfo.getProblem();
         String examples = samples.stream().map(sample -> "<input>" + sample.getInputData() + "</input>" +
@@ -106,19 +106,19 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
                 .setHint(contentSections.size() > 4 ? contentSections.get(4).text : null)
                 .setSource(String.format("<a style='color:#1A5CC8' href='https://loj.ac/p/%d'>%s</a>", problemId, JUDGE_NAME + "-" + problemId));
         // 设置 Problem
-        problemDto.setProblem(problem);
+        problemDTO.setProblem(problem);
 
         // 设置 测试用例
-        downloadProblemFiles(problemDto, problemId, judgeInfo);
+        downloadProblemFiles(problemDTO, problemId, judgeInfo);
 
         // 设置题目语言
         List<Language> languages = languageEntityService.lambdaQuery().eq(Language::getOj, Constant.LOCAL).list();
-        problemDto.setLanguages(languages).setJudgeMode(JudgeMode.DEFAULT.getMode());
+        problemDTO.setLanguages(languages).setJudgeMode(JudgeMode.DEFAULT.getMode());
 
-        return problemDto;
+        return problemDTO;
     }
 
-    private void downloadProblemFiles(ProblemDto problemDto, Integer problemId, JudgeInfo judgeInfo) {
+    private void downloadProblemFiles(ProblemDTO problemDTO, Integer problemId, JudgeInfo judgeInfo) {
         // 下载测试用例到本地
         // 多线程
         List<JudgeInfo.Task.Testcase> testcases = judgeInfo.subtasks.get(0).testcases;
@@ -180,7 +180,7 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
                 problemCaseList.get(i).setScore(averageScore);
             }
         }
-        problemDto.setUploadTestcaseDir(fileDir)
+        problemDTO.setUploadTestcaseDir(fileDir)
                 .setIsUploadTestCase(true)
                 .setSamples(problemCaseList);
 //        List<Long> res = new ArrayList<>();

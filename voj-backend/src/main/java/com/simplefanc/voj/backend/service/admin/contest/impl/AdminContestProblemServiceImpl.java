@@ -13,10 +13,10 @@ import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
-import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.judge.remote.crawler.AbstractProblemCrawler;
+import com.simplefanc.voj.backend.pojo.dto.ContestProblemDTO;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -87,7 +87,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         // 根据oj筛选过滤
         if (oj != null && !"All".equals(oj)) {
-            if (!RemoteOj.isRemoteOJ(oj)) {
+            if (!RemoteOj.isRemoteOj(oj)) {
                 problemQueryWrapper.eq("is_remote", false);
             } else {
                 problemQueryWrapper.eq("is_remote", true).likeRight("problem_id", oj);
@@ -106,10 +106,12 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             problemQueryWrapper.eq("id", null);
         }
 
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         if (pidList.size() > 0 && problemType == null) {
             limit = Integer.MAX_VALUE;
         }
@@ -137,12 +139,12 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         if (problem != null) {
             // 获取当前登录的用户
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+            UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
             boolean isRoot = UserSessionUtil.isRoot();
             boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
             // 只有超级管理员和题目管理员、题目创建者才能操作
-            if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problem.getAuthor())) {
+            if (!isRoot && !isProblemAdmin && !userRolesVO.getUsername().equals(problem.getAuthor())) {
                 throw new StatusForbiddenException("对不起，你无权限查看题目！");
             }
 
@@ -176,22 +178,22 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Map<Object, Object> addProblem(ProblemDto problemDto) {
+    public Map<Object, Object> addProblem(ProblemDTO problemDTO) {
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        queryWrapper.eq("problem_id", problemDTO.getProblem().getProblemId().toUpperCase());
         Problem problem = problemEntityService.getOne(queryWrapper);
         if (problem != null) {
             throw new StatusFailException("该题目的Problem ID已存在，请更换！");
         }
         // 设置为比赛题目
-        problemDto.getProblem().setAuth(ProblemEnum.AUTH_CONTEST.getCode());
-        boolean isOk = problemEntityService.adminAddProblem(problemDto);
+        problemDTO.getProblem().setAuth(ProblemEnum.AUTH_CONTEST.getCode());
+        boolean isOk = problemEntityService.adminAddProblem(problemDTO);
         // 添加成功
         if (isOk) {
             // 顺便返回新的题目id，好下一步添加外键操作
             // TODO put 键
-            return MapUtil.builder().put("pid", problemDto.getProblem().getId()).map();
+            return MapUtil.builder().put("pid", problemDTO.getProblem().getId()).map();
         } else {
             throw new StatusFailException("添加失败");
         }
@@ -199,30 +201,30 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateProblem(ProblemDto problemDto) {
+    public void updateProblem(ProblemDTO problemDTO) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         boolean isRoot = UserSessionUtil.isRoot();
         boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
         // 只有超级管理员和题目管理员、题目创建者才能操作
-        if (!isRoot && !isProblemAdmin && !userRolesVo.getUsername().equals(problemDto.getProblem().getAuthor())) {
+        if (!isRoot && !isProblemAdmin && !userRolesVO.getUsername().equals(problemDTO.getProblem().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限修改题目！");
         }
 
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("problem_id", problemDto.getProblem().getProblemId().toUpperCase());
+        queryWrapper.eq("problem_id", problemDTO.getProblem().getProblemId().toUpperCase());
         Problem problem = problemEntityService.getOne(queryWrapper);
 
         // 如果problem_id不是原来的且已存在该problem_id，则修改失败！
-        if (problem != null && problem.getId().longValue() != problemDto.getProblem().getId()) {
+        if (problem != null && problem.getId().longValue() != problemDTO.getProblem().getId()) {
             throw new StatusFailException("当前的Problem ID 已被使用，请重新更换新的！");
         }
 
         // 记录修改题目的用户
-        problemDto.getProblem().setModifiedUser(userRolesVo.getUsername());
+        problemDTO.getProblem().setModifiedUser(userRolesVO.getUsername());
 
-        boolean isOk = problemEntityService.adminUpdateProblem(problemDto);
+        boolean isOk = problemEntityService.adminUpdateProblem(problemDTO);
         if (!isOk) {
             throw new StatusFailException("修改失败");
         }
@@ -253,9 +255,9 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addProblemFromPublic(ContestProblemDto contestProblemDto) {
-        Long pid = contestProblemDto.getPid();
-        Long cid = contestProblemDto.getCid();
+    public void addProblemFromPublic(ContestProblemDTO contestProblemDTO) {
+        Long pid = contestProblemDTO.getPid();
+        Long cid = contestProblemDTO.getCid();
 
         List<ContestProblem> list = contestProblemEntityService.lambdaQuery().eq(ContestProblem::getCid, cid)
                 .orderByDesc(ContestProblem::getId).list();
@@ -283,7 +285,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importContestRemoteOJProblem(String name, String problemId, Long cid) {
+    public void importContestRemoteOjProblem(String name, String problemId, Long cid) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
         Problem problem = problemEntityService.getOne(queryWrapper, false);
@@ -291,10 +293,10 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         // 如果该题目不存在，需要先导入
         if (problem == null) {
             try {
-                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
+                AbstractProblemCrawler.RemoteProblemInfo otherOjProblemInfo = remoteProblemService
                         .getOtherOJProblemInfo(name.toUpperCase(), problemId);
-                if (otherOJProblemInfo != null) {
-                    problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
+                if (otherOjProblemInfo != null) {
+                    problem = remoteProblemService.adminAddOtherOJProblem(otherOjProblemInfo, name);
                     if (problem == null) {
                         throw new StatusFailException("导入新题目失败！请重新尝试！");
                     }
@@ -307,7 +309,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
             }
         }
 
-        addProblemFromPublic(new ContestProblemDto(problem.getId(), cid));
+        addProblemFromPublic(new ContestProblemDTO(problem.getId(), cid));
     }
 
 }

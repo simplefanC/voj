@@ -7,7 +7,7 @@ import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.judge.local.AbstractJudge;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
@@ -26,7 +26,7 @@ import java.io.File;
 public class InteractiveJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
 
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         RunConfig interactiveRunConfig = judgeGlobalDTO.getInteractiveRunConfig();
@@ -52,7 +52,7 @@ public class InteractiveJudge extends AbstractJudge {
 
     @Override
     public JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
-            throws SystemError {
+            throws SystemException {
         return null;
     }
 

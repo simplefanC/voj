@@ -16,12 +16,12 @@ import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
 import com.simplefanc.voj.backend.judge.local.JudgeTaskDispatcher;
 import com.simplefanc.voj.backend.judge.remote.RemoteJudgeTaskDispatcher;
-import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
-import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
-import com.simplefanc.voj.backend.config.ConfigVo;
-import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
-import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDTO;
+import com.simplefanc.voj.backend.pojo.dto.ToJudgeDTO;
+import com.simplefanc.voj.backend.config.ConfigVO;
+import com.simplefanc.voj.backend.pojo.vo.JudgeVO;
+import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.oj.BeforeDispatchInitService;
 import com.simplefanc.voj.backend.service.oj.JudgeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -82,7 +82,7 @@ public class JudgeServiceImpl implements JudgeService {
 
     private final BeforeDispatchInitService beforeDispatchInitService;
 
-    private final ConfigVo configVo;
+    private final ConfigVO configVO;
 
     /**
      * @MethodName submitProblemJudge
@@ -91,24 +91,24 @@ public class JudgeServiceImpl implements JudgeService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Judge submitProblemJudge(ToJudgeDto judgeDto) {
+    public Judge submitProblemJudge(ToJudgeDTO judgeDTO) {
 
-        judgeValidator.validateSubmissionInfo(judgeDto);
+        judgeValidator.validateSubmissionInfo(judgeDTO);
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        boolean isContestSubmission = judgeDto.getCid() != 0;
+        boolean isContestSubmission = judgeDTO.getCid() != 0;
 
-        boolean isTrainingSubmission = judgeDto.getTid() != null && judgeDto.getTid() != 0;
+        boolean isTrainingSubmission = judgeDTO.getTid() != null && judgeDTO.getTid() != 0;
 
         // 非比赛提交有限制
-        if (!isContestSubmission && configVo.getDefaultSubmitInterval() > 0) {
-            String lockKey = RedisConstant.SUBMIT_NON_CONTEST_LOCK + userRolesVo.getUid();
+        if (!isContestSubmission && configVO.getDefaultSubmitInterval() > 0) {
+            String lockKey = RedisConstant.SUBMIT_NON_CONTEST_LOCK + userRolesVO.getUid();
             long count = redisUtil.incr(lockKey, 1);
             if (count > 1) {
                 throw new StatusForbiddenException("对不起，您的提交频率过快，请稍后再尝试！");
             }
-            redisUtil.expire(lockKey, configVo.getDefaultSubmitInterval());
+            redisUtil.expire(lockKey, configVO.getDefaultSubmitInterval());
         }
 
         HttpServletRequest request = ((ServletRequestAttributes) (RequestContextHolder.currentRequestAttributes()))
@@ -116,24 +116,24 @@ public class JudgeServiceImpl implements JudgeService {
         // 将提交先写入数据库，准备调用判题服务器
         Judge judge = new Judge();
         // 默认设置代码为单独自己可见
-        judge.setShare(false).setCode(judgeDto.getCode()).setCid(judgeDto.getCid()).setLanguage(judgeDto.getLanguage())
-                .setLength(judgeDto.getCode().length()).setUid(userRolesVo.getUid())
-                .setUsername(userRolesVo.getUsername())
+        judge.setShare(false).setCode(judgeDTO.getCode()).setCid(judgeDTO.getCid()).setLanguage(judgeDTO.getLanguage())
+                .setLength(judgeDTO.getCode().length()).setUid(userRolesVO.getUid())
+                .setUsername(userRolesVO.getUsername())
                 // 开始进入判题队列
                 .setStatus(JudgeStatus.STATUS_PENDING.getStatus()).setSubmitTime(new Date()).setVersion(0)
                 .setIp(IpUtil.getUserIpAddr(request));
 
         // 如果比赛id不等于0，则说明为比赛提交
         if (isContestSubmission) {
-            beforeDispatchInitService.initContestSubmission(judgeDto.getCid(), judgeDto.getPid(), judge);
+            beforeDispatchInitService.initContestSubmission(judgeDTO.getCid(), judgeDTO.getPid(), judge);
         } else if (isTrainingSubmission) {
-            beforeDispatchInitService.initTrainingSubmission(judgeDto.getTid(), judgeDto.getPid(), judge);
+            beforeDispatchInitService.initTrainingSubmission(judgeDTO.getTid(), judgeDTO.getPid(), judge);
         } else { // 如果不是比赛提交和训练提交
-            beforeDispatchInitService.initCommonSubmission(judgeDto.getPid(), judge);
+            beforeDispatchInitService.initCommonSubmission(judgeDTO.getPid(), judge);
         }
 
         // 将提交加入任务队列
-        if (judgeDto.getIsRemote()) {
+        if (judgeDTO.getIsRemote()) {
             // 如果是远程oj判题
             final String remoteJudgeProblem = judge.getDisplayPid();
             remoteJudgeTaskDispatcher.sendTask(judge, remoteJudgeProblem, isContestSubmission);
@@ -202,15 +202,15 @@ public class JudgeServiceImpl implements JudgeService {
      * @Since 2021/1/2
      */
     @Override
-    public SubmissionInfoVo getSubmission(Long submitId) {
+    public SubmissionInfoVO getSubmission(Long submitId) {
 
         Judge judge = judgeEntityService.getById(submitId);
         if (judge == null) {
             throw new StatusNotFoundException("此提交数据不存在！");
         }
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        if (userRolesVo == null) {
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
+        if (userRolesVO == null) {
             throw new StatusAccessDeniedException("请先登录！");
         }
 
@@ -219,7 +219,7 @@ public class JudgeServiceImpl implements JudgeService {
         // 是否为题目管理员
         boolean problemAdmin = UserSessionUtil.isProblemAdmin();
         // 限制：后台配置的时间 之前的代码 都不能查看
-        if (!isRoot && !problemAdmin && judge.getSubmitTime().getTime() < configVo.getCodeVisibleStartTime()) {
+        if (!isRoot && !problemAdmin && judge.getSubmitTime().getTime() < configVO.getCodeVisibleStartTime()) {
             throw new StatusNotFoundException("此提交数据当前时间无法查看！");
         }
         // 清空vj信息
@@ -232,12 +232,12 @@ public class JudgeServiceImpl implements JudgeService {
         // 当此次提交代码不共享
         // 比赛提交只有比赛创建者和root账号可看代码
         if (judge.getCid() != 0) {
-            if (extracted(judge, userRolesVo)) {
-                return new SubmissionInfoVo().setSubmission(
+            if (extracted(judge, userRolesVO)) {
+                return new SubmissionInfoVO().setSubmission(
                         new Judge().setStatus(JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus()));
             }
         } else {
-            extracted(judge, userRolesVo, isRoot, problemAdmin);
+            extracted(judge, userRolesVO, isRoot, problemAdmin);
         }
 
         // 只允许用户查看ce错误,sf错误，se错误信息提示
@@ -248,12 +248,12 @@ public class JudgeServiceImpl implements JudgeService {
         }
 
         Problem problem = problemEntityService.getById(judge.getPid());
-        return new SubmissionInfoVo()
+        return new SubmissionInfoVO()
                 .setSubmission(judge)
                 .setCodeShare(problem.getCodeShare());
     }
 
-    private boolean extracted(Judge judge, UserRolesVo userRolesVo) {
+    private boolean extracted(Judge judge, UserRolesVO userRolesVO) {
         Contest contest = contestEntityService.getById(judge.getCid());
         if (!contestValidator.isContestAdmin(contest)) {
             // 如果是比赛,那么还需要判断是否为封榜,比赛管理员和超级管理员可以有权限查看(ACM题目除外)
@@ -262,7 +262,7 @@ public class JudgeServiceImpl implements JudgeService {
                 return true;
             }
             // 不是本人的话不能查看代码
-            if (!userRolesVo.getUid().equals(judge.getUid())) {
+            if (!userRolesVO.getUid().equals(judge.getUid())) {
                 judge.setCode(null);
                 // 如果还在比赛时间，不是本人不能查看时间，空间，长度，错误提示信息
                 if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()) {
@@ -277,10 +277,10 @@ public class JudgeServiceImpl implements JudgeService {
         return false;
     }
 
-    private void extracted(Judge judge, UserRolesVo userRolesVo, boolean isRoot, boolean problemAdmin) {
+    private void extracted(Judge judge, UserRolesVO userRolesVO, boolean isRoot, boolean problemAdmin) {
         if (!judge.getShare() && !isRoot && !problemAdmin) {
             // 需要判断是否为当前登陆用户自己的提交代码
-            if (!judge.getUid().equals(userRolesVo.getUid())) {
+            if (!judge.getUid().equals(userRolesVO.getUid())) {
                 judge.setCode(null);
             }
         }
@@ -295,10 +295,10 @@ public class JudgeServiceImpl implements JudgeService {
     public void updateSubmission(Judge judge) {
 
         // 需要获取一下该token对应用户的数据
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 判断该提交是否为当前用户的
-        if (!userRolesVo.getUid().equals(judge.getUid())) {
+        if (!userRolesVO.getUid().equals(judge.getUid())) {
             throw new StatusForbiddenException("对不起，您不能修改他人的代码分享权限！");
         }
         Judge judgeInfo = judgeEntityService.getById(judge.getSubmitId());
@@ -319,7 +319,7 @@ public class JudgeServiceImpl implements JudgeService {
      * @Since 2021/10/29
      */
     @Override
-    public IPage<JudgeVo> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
+    public IPage<JudgeVO> getJudgeList(Integer limit, Integer currentPage, Boolean onlyMine, String searchPid,
                                        Integer searchStatus, String searchUsername, Boolean completeProblemId) {
         // 页数，每页题数若为空，设置默认值
         if (currentPage == null || currentPage < 1) {
@@ -332,12 +332,12 @@ public class JudgeServiceImpl implements JudgeService {
         String uid = null;
         // 只查看当前用户的提交
         if (onlyMine) {
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+            UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-            if (userRolesVo == null) {
+            if (userRolesVO == null) {
                 throw new StatusAccessDeniedException("当前用户数据为空，请您重新登陆！");
             }
-            uid = userRolesVo.getUid();
+            uid = userRolesVO.getUid();
         }
         if (searchPid != null) {
             searchPid = searchPid.trim();
@@ -356,9 +356,9 @@ public class JudgeServiceImpl implements JudgeService {
      * @Since 2021/1/3
      */
     @Override
-    public HashMap<Long, Object> checkCommonJudgeResult(SubmitIdListDto submitIdListDto) {
+    public HashMap<Long, Object> checkCommonJudgeResult(SubmitIdListDTO submitIdListDTO) {
 
-        List<Long> submitIds = submitIdListDto.getSubmitIds();
+        List<Long> submitIds = submitIdListDTO.getSubmitIds();
 
         if (CollectionUtils.isEmpty(submitIds)) {
             return new HashMap<>();
@@ -386,26 +386,26 @@ public class JudgeServiceImpl implements JudgeService {
      * @Since 2021/6/11
      */
     @Override
-    public HashMap<Long, Object> checkContestJudgeResult(SubmitIdListDto submitIdListDto) {
+    public HashMap<Long, Object> checkContestJudgeResult(SubmitIdListDTO submitIdListDTO) {
 
-        if (submitIdListDto.getCid() == null) {
+        if (submitIdListDTO.getCid() == null) {
             throw new StatusNotFoundException("查询比赛id不能为空");
         }
 
-        if (CollectionUtils.isEmpty(submitIdListDto.getSubmitIds())) {
+        if (CollectionUtils.isEmpty(submitIdListDTO.getSubmitIds())) {
             return new HashMap<>();
         }
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        Contest contest = contestEntityService.getById(submitIdListDto.getCid());
+        Contest contest = contestEntityService.getById(submitIdListDTO.getCid());
 
         boolean isSealRank = contestValidator.isOpenSealRank(contest, true);
 
         QueryWrapper<Judge> queryWrapper = new QueryWrapper<>();
         // lambada表达式过滤掉code
         queryWrapper.select(Judge.class, info -> !"code".equals(info.getColumn()))
-                .in("submit_id", submitIdListDto.getSubmitIds()).eq("cid", submitIdListDto.getCid())
+                .in("submit_id", submitIdListDTO.getSubmitIds()).eq("cid", submitIdListDTO.getCid())
                 .between(isSealRank, "submit_time", contest.getStartTime(), contest.getSealRankTime());
         List<Judge> judgeList = judgeEntityService.list(queryWrapper);
         HashMap<Long, Object> result = new HashMap<>();
@@ -416,7 +416,7 @@ public class JudgeServiceImpl implements JudgeService {
             judge.setVjudgeUsername(null);
             judge.setVjudgeSubmitId(null);
             judge.setVjudgePassword(null);
-            if (!judge.getUid().equals(userRolesVo.getUid()) && !contestValidator.isContestAdmin(contest)) {
+            if (!judge.getUid().equals(userRolesVO.getUid()) && !contestValidator.isContestAdmin(contest)) {
                 judge.setTime(null);
                 judge.setMemory(null);
                 judge.setLength(null);

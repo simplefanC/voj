@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.contest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.AnnouncementDto;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.dto.AnnouncementDTO;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 
 /**
  * @Author: chenfan
@@ -12,12 +12,12 @@ import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
 
 public interface AdminContestAnnouncementService {
 
-    IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage, Long cid);
+    IPage<AnnouncementVO> getAnnouncementList(Integer limit, Integer currentPage, Long cid);
 
     void deleteAnnouncement(Long aid);
 
-    void addAnnouncement(AnnouncementDto announcementDto);
+    void addAnnouncement(AnnouncementDTO announcementDTO);
 
-    void updateAnnouncement(AnnouncementDto announcementDto);
+    void updateAnnouncement(AnnouncementDTO announcementDTO);
 
 }

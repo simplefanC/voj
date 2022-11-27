@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.simplefanc.voj.backend.common.utils.JwtUtil;
 import com.simplefanc.voj.backend.mapper.RoleAuthMapper;
 import com.simplefanc.voj.backend.mapper.UserRoleMapper;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.common.pojo.entity.user.Auth;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class AccountRealm extends AuthorizingRealm {
         // 获取该用户角色所有的权限
         List<Role> roles = userRoleMapper.getRolesByUid(user.getUid());
         // 角色变动，同时需要修改会话里面的数据
-        UserRolesVo userInfo = UserSessionUtil.getUserInfo();
+        UserRolesVO userInfo = UserSessionUtil.getUserInfo();
         userInfo.setRoles(roles);
         UserSessionUtil.setUserInfo(userInfo);
         for (Role role : roles) {
@@ -71,7 +71,7 @@ public class AccountRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) {
         JwtToken jwt = (JwtToken) token;
         String userId = jwtUtil.getClaimByToken((String) jwt.getPrincipal());
-        UserRolesVo userRoles = userRoleMapper.getUserRoles(userId, null);
+        UserRolesVO userRoles = userRoleMapper.getUserRoles(userId, null);
         if (userRoles == null) {
             throw new UnknownAccountException("账户不存在！");
         }

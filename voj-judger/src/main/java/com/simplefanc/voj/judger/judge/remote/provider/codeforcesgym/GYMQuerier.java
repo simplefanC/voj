@@ -12,7 +12,7 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFa
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
-import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.CFStyleQuerier;
+import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.AbstractCFStyleQuerier;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class GYMQuerier extends CFStyleQuerier {
+public class GYMQuerier extends AbstractCFStyleQuerier {
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
     private static final String SUBMISSION_BY_USERNAME = "/submissions/%s";
     private static final String JUDGE_PROTOCOL = "/data/judgeProtocol";
@@ -51,9 +51,9 @@ public class GYMQuerier extends CFStyleQuerier {
             if (status.statusType == JudgeStatus.STATUS_JUDGING) {
                 return status;
             }
-            String timeStr = matcher.group(2); // ms
+            String timeStr = matcher.group(2);
             status.executionTime = StrUtil.isEmpty(timeStr) ? 0 : Integer.parseInt(timeStr);
-            String memoryStr = matcher.group(3); // KB
+            String memoryStr = matcher.group(3);
             status.executionMemory = StrUtil.isEmpty(memoryStr) ? 0 : Integer.parseInt(memoryStr);
             if (status.statusType == JudgeStatus.STATUS_COMPILE_ERROR) {
                 HttpEntity entity = SimpleNameValueEntityFactory.create(

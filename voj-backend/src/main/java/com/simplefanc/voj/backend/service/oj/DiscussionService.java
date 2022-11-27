@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVO;
 import com.simplefanc.voj.common.pojo.entity.discussion.Discussion;
 import com.simplefanc.voj.common.pojo.entity.discussion.DiscussionReport;
 import com.simplefanc.voj.common.pojo.entity.problem.Category;
@@ -19,7 +19,7 @@ public interface DiscussionService {
     IPage<Discussion> getDiscussionList(Integer limit, Integer currentPage, Integer categoryId, String pid,
                                         Boolean onlyMine, String keyword, Boolean admin);
 
-    DiscussionVo getDiscussion(Integer did);
+    DiscussionVO getDiscussion(Integer did);
 
     void addDiscussion(Discussion discussion);
 

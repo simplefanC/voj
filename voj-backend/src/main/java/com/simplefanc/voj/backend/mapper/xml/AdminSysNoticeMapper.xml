@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.AdminSysNoticeMapper">
 
-    <resultMap id="map_AdminSysNoticeList" type="com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo">
+    <resultMap id="map_AdminSysNoticeList" type="com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVO">
         <id column="id" property="id"></id>
         <result column="title" property="title"></result>
         <result column="content" property="content"></result>

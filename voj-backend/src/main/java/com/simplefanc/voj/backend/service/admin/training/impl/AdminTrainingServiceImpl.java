@@ -12,8 +12,8 @@ import com.simplefanc.voj.backend.dao.training.MappingTrainingCategoryEntityServ
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingRegisterEntityService;
-import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.TrainingDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -50,14 +50,16 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     @Override
     public IPage<Training> getTrainingList(Integer limit, Integer currentPage, String keyword) {
 
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         IPage<Training> iPage = new Page<>(currentPage, limit);
         QueryWrapper<Training> queryWrapper = new QueryWrapper<>();
         // 过滤密码
-        queryWrapper.select(Training.class, info -> !info.getColumn().equals("private_pwd"));
+        queryWrapper.select(Training.class, info -> !"private_pwd".equals(info.getColumn()));
         if (!StrUtil.isEmpty(keyword)) {
             keyword = keyword.trim();
             queryWrapper.like("title", keyword).or().like("id", keyword).or().like("`rank`", keyword);
@@ -68,7 +70,7 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     }
 
     @Override
-    public TrainingDto getTraining(Long tid) {
+    public TrainingDTO getTraining(Long tid) {
         // 获取本场训练的信息
         Training training = trainingEntityService.getById(tid);
         // 查询不存在
@@ -77,16 +79,16 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         }
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
-        if (!isRoot && !userRolesVo.getUsername().equals(training.getAuthor())) {
+        if (!isRoot && !userRolesVO.getUsername().equals(training.getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
 
-        TrainingDto trainingDto = new TrainingDto();
-        trainingDto.setTraining(training);
+        TrainingDTO trainingDTO = new TrainingDTO();
+        trainingDTO.setTraining(training);
 
         QueryWrapper<MappingTrainingCategory> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tid", tid);
@@ -96,8 +98,8 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         if (mappingTrainingCategory != null) {
             trainingCategory = trainingCategoryEntityService.getById(mappingTrainingCategory.getCid());
         }
-        trainingDto.setTrainingCategory(trainingCategory);
-        return trainingDto;
+        trainingDTO.setTrainingCategory(trainingCategory);
+        return trainingDTO;
     }
 
     @Override
@@ -111,11 +113,11 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addTraining(TrainingDto trainingDto) {
+    public void addTraining(TrainingDTO trainingDTO) {
 
-        Training training = trainingDto.getTraining();
+        Training training = trainingDTO.getTraining();
         trainingEntityService.save(training);
-        TrainingCategory trainingCategory = trainingDto.getTrainingCategory();
+        TrainingCategory trainingCategory = trainingDTO.getTrainingCategory();
         if (trainingCategory.getId() == null) {
             try {
                 trainingCategoryEntityService.save(trainingCategory);
@@ -135,16 +137,16 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateTraining(TrainingDto trainingDto) {
+    public void updateTraining(TrainingDTO trainingDTO) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
-        if (!isRoot && !userRolesVo.getUsername().equals(trainingDto.getTraining().getAuthor())) {
+        if (!isRoot && !userRolesVO.getUsername().equals(trainingDTO.getTraining().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
-        Training training = trainingDto.getTraining();
+        Training training = trainingDTO.getTraining();
         Training oldTraining = trainingEntityService.getById(training.getId());
         trainingEntityService.updateById(training);
 
@@ -157,7 +159,7 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
             }
         }
 
-        TrainingCategory trainingCategory = trainingDto.getTrainingCategory();
+        TrainingCategory trainingCategory = trainingDTO.getTrainingCategory();
         if (trainingCategory.getId() == null) {
             try {
                 trainingCategoryEntityService.save(trainingCategory);
@@ -174,14 +176,14 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         if (mappingTrainingCategory == null) {
             mappingTrainingCategoryEntityService
                     .save(new MappingTrainingCategory().setTid(training.getId()).setCid(trainingCategory.getId()));
-            adminTrainingRecordService.checkSyncRecord(trainingDto.getTraining());
+            adminTrainingRecordService.checkSyncRecord(trainingDTO.getTraining());
         } else {
             if (!mappingTrainingCategory.getCid().equals(trainingCategory.getId())) {
                 UpdateWrapper<MappingTrainingCategory> updateWrapper = new UpdateWrapper<>();
                 updateWrapper.eq("tid", training.getId()).set("cid", trainingCategory.getId());
                 boolean isOk = mappingTrainingCategoryEntityService.update(null, updateWrapper);
                 if (isOk) {
-                    adminTrainingRecordService.checkSyncRecord(trainingDto.getTraining());
+                    adminTrainingRecordService.checkSyncRecord(trainingDTO.getTraining());
                 } else {
                     throw new StatusFailException("修改失败");
                 }
@@ -193,11 +195,11 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
     @Override
     public void changeTrainingStatus(Long tid, String author, Boolean status) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
         // 只有超级管理员和训练拥有者才能操作
-        if (!isRoot && !userRolesVo.getUsername().equals(author)) {
+        if (!isRoot && !userRolesVO.getUsername().equals(author)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
 

@@ -24,25 +24,25 @@ public interface ConfigService {
 
     List<JSONObject> getJudgeServiceInfo();
 
-    WebConfigDto getWebConfig();
+    WebConfigDTO getWebConfig();
 
-    void setWebConfig(WebConfigDto webConfigDto);
+    void setWebConfig(WebConfigDTO webConfigDTO);
 
     void deleteHomeCarousel(Long id);
 
-    EmailConfigDto getEmailConfig();
+    EmailConfigDTO getEmailConfig();
 
-    void setEmailConfig(EmailConfigDto config);
+    void setEmailConfig(EmailConfigDTO config);
 
-    void testEmail(TestEmailDto testEmailDto);
+    void testEmail(TestEmailDTO testEmailDTO);
 
-    DbAndRedisConfigDto getDbAndRedisConfig();
+    DbAndRedisConfigDTO getDbAndRedisConfig();
 
-    void setDbAndRedisConfig(DbAndRedisConfigDto config);
+    void setDbAndRedisConfig(DbAndRedisConfigDTO config);
 
     boolean sendNewConfigToNacos();
 
-    SwitchConfigDto getSwitchConfig();
+    SwitchConfigDTO getSwitchConfig();
 
-    void setSwitchConfig(SwitchConfigDto config);
+    void setSwitchConfig(SwitchConfigDTO config);
 }

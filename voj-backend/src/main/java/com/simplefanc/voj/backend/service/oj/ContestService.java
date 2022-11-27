@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ContestPrintDto;
-import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
-import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
-import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
+import com.simplefanc.voj.backend.pojo.dto.ContestPrintDTO;
+import com.simplefanc.voj.backend.pojo.dto.ContestRankDTO;
+import com.simplefanc.voj.backend.pojo.dto.RegisterContestDTO;
+import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDTO;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
@@ -19,31 +19,31 @@ import java.util.Set;
  */
 public interface ContestService {
 
-    IPage<ContestVo> getContestList(Integer limit, Integer currentPage, Integer status, Integer type, String keyword);
+    IPage<ContestVO> getContestList(Integer limit, Integer currentPage, Integer status, Integer type, String keyword);
 
-    ContestVo getContestInfo(Long cid);
+    ContestVO getContestInfo(Long cid);
 
-    void toRegisterContest(RegisterContestDto registerContestDto);
+    void toRegisterContest(RegisterContestDTO registerContestDTO);
 
-    AccessVo getContestAccess(Long cid);
+    AccessVO getContestAccess(Long cid);
 
-    List<ContestProblemVo> getContestProblem(Long cid);
+    List<ContestProblemVO> getContestProblem(Long cid);
 
-    ProblemInfoVo getContestProblemDetails(Long cid, String displayId);
+    ProblemInfoVO getContestProblemDetails(Long cid, String displayId);
 
     // TODO 参数过多
-    IPage<JudgeVo> getContestSubmissionList(Integer limit, Integer currentPage, Boolean onlyMine, String displayId,
+    IPage<JudgeVO> getContestSubmissionList(Integer limit, Integer currentPage, Boolean onlyMine, String displayId,
                                             Integer searchStatus, String searchUsername, Long searchCid, Boolean beforeContestSubmit,
                                             Boolean completeProblemId);
 
-    IPage getContestRank(ContestRankDto contestRankDto);
+    IPage getContestRank(ContestRankDTO contestRankDTO);
 
     Set<String> getContestAdminUidList(Contest contest);
 
-    IPage<AnnouncementVo> getContestAnnouncement(Long cid, Integer limit, Integer currentPage);
+    IPage<AnnouncementVO> getContestAnnouncement(Long cid, Integer limit, Integer currentPage);
 
-    List<Announcement> getContestUserNotReadAnnouncement(UserReadContestAnnouncementDto userReadContestAnnouncementDto);
+    List<Announcement> getContestUserNotReadAnnouncement(UserReadContestAnnouncementDTO userReadContestAnnouncementDTO);
 
-    void submitPrintText(ContestPrintDto contestPrintDto);
+    void submitPrintText(ContestPrintDTO contestPrintDTO);
 
 }

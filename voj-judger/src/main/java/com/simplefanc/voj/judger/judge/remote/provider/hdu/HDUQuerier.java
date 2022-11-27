@@ -30,7 +30,7 @@ public class HDUQuerier implements Querier {
 
     @Override
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) throws Exception {
-        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, null, getOjInfo().defaultChaset);
+        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, null, getOjInfo().defaultCharset);
 
         String html = client.get("/status.php?first=" + info.remoteRunId).getBody();
         Pattern pattern = Pattern.compile(">" + info.remoteRunId + "</td><td>[\\s\\S]*?</td><td>([\\s\\S]*?)</td><td>[\\s\\S]*?</td><td>(\\d*?)MS</td><td>(\\d*?)K</td>");

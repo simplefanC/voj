@@ -25,7 +25,7 @@
         ORDER BY c.checked ASC,c.submit_time ASC
     </select>
 
-    <select id="getOIContestRecordByRecentSubmission" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVo">
+    <select id="getOIContestRecordByRecentSubmission" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVO">
         SELECT cr.id,cr.cid,cr.uid,cr.pid,cr.cpid,cr.display_id,cr.submit_id,cr.username,cr.status,cr.submit_time,
         cr.time,cr.score,cr.use_time,cr.checked,cr.gmt_create,cr.gmt_modified
         FROM
@@ -46,7 +46,7 @@
         WHERE t.uid = cr.uid AND t.pid =cr.pid AND t.cpid = cr.cpid AND t.time = cr.time
     </select>
 
-    <select id="getOIContestRecordByHighestSubmission" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVo">
+    <select id="getOIContestRecordByHighestSubmission" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVO">
         SELECT cr.id,cr.cid,cr.uid,cr.pid,cr.cpid,cr.display_id,cr.submit_id,cr.username,cr.status,cr.submit_time,
         cr.time,cr.score,cr.use_time,cr.checked,cr.gmt_create,cr.gmt_modified
         FROM
@@ -68,7 +68,7 @@
     </select>
 
 
-    <select id="getACMContestRecord" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVo">
+    <select id="getACMContestRecord" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRecordVO">
         SELECT cr.id,
                cr.cid,
                cr.uid,

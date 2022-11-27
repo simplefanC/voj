@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
-import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.pojo.dto.WebConfigDTO;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
+import com.simplefanc.voj.backend.pojo.vo.ContestVO;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.backend.service.oj.HomeService;
 import com.simplefanc.voj.common.result.CommonResult;
@@ -39,7 +39,7 @@ public class HomeController {
      * @Since 2021/12/29
      */
     @GetMapping("/get-recent-contest")
-    public CommonResult<List<ContestVo>> getRecentContest() {
+    public CommonResult<List<ContestVO>> getRecentContest() {
         return CommonResult.successResponse(homeService.getRecentContest());
     }
 
@@ -63,7 +63,7 @@ public class HomeController {
      * @Since 2021/1/15
      */
     @GetMapping("/get-recent-seven-ac-rank")
-    public CommonResult<List<ACMRankVo>> getRecentSevenACRank() {
+    public CommonResult<List<ACMRankVO>> getRecentSevenACRank() {
         return CommonResult.successResponse(homeService.getRecentSevenACRank());
     }
 
@@ -87,7 +87,7 @@ public class HomeController {
      * @Since 2021/12/29
      */
     @GetMapping("/get-common-announcement")
-    public CommonResult<IPage<AnnouncementVo>> getCommonAnnouncement(
+    public CommonResult<IPage<AnnouncementVO>> getCommonAnnouncement(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(homeService.getCommonAnnouncement(limit, currentPage));
@@ -101,7 +101,7 @@ public class HomeController {
      * @Since 2021/12/29
      */
     @GetMapping("/get-website-config")
-    public CommonResult<WebConfigDto> getWebConfig() {
+    public CommonResult<WebConfigDTO> getWebConfig() {
         return CommonResult.successResponse(configService.getWebConfig());
     }
 

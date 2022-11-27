@@ -13,7 +13,7 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.ConfigUtil;
 import com.simplefanc.voj.backend.common.utils.RestTemplateUtil;
-import com.simplefanc.voj.backend.config.ConfigVo;
+import com.simplefanc.voj.backend.config.ConfigVO;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.pojo.dto.*;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
@@ -41,7 +41,7 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class ConfigServiceImpl implements ConfigService {
 
-    private final ConfigVo configVo;
+    private final ConfigVO configVO;
 
     private final EmailService emailService;
 
@@ -124,57 +124,57 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public WebConfigDto getWebConfig() {
-        return BeanUtil.copyProperties(configVo, WebConfigDto.class);
-//        return WebConfigDto.builder().baseUrl(UnicodeUtil.toString(configVo.getBaseUrl()))
-//                .name(UnicodeUtil.toString(configVo.getName()))
-//                .shortName(UnicodeUtil.toString(configVo.getShortName()))
-//                .description(UnicodeUtil.toString(configVo.getDescription()))
-//                .register(configVo.getRegister())
-//                .problem(configVo.getProblem())
-//                .training(configVo.getTraining())
-//                .contest(configVo.getContest())
-//                .status(configVo.getStatus())
-//                .rank(configVo.getRank())
-//                .discussion(configVo.getDiscussion())
-//                .introduction(configVo.getIntroduction())
-//                .recordName(UnicodeUtil.toString(configVo.getRecordName()))
-//                .recordUrl(UnicodeUtil.toString(configVo.getRecordUrl()))
-//                .projectName(UnicodeUtil.toString(configVo.getProjectName()))
-//                .projectUrl(UnicodeUtil.toString(configVo.getProjectUrl())).build();
+    public WebConfigDTO getWebConfig() {
+        return BeanUtil.copyProperties(configVO, WebConfigDTO.class);
+//        return WebConfigDTO.builder().baseUrl(UnicodeUtil.toString(configVO.getBaseUrl()))
+//                .name(UnicodeUtil.toString(configVO.getName()))
+//                .shortName(UnicodeUtil.toString(configVO.getShortName()))
+//                .description(UnicodeUtil.toString(configVO.getDescription()))
+//                .register(configVO.getRegister())
+//                .problem(configVO.getProblem())
+//                .training(configVO.getTraining())
+//                .contest(configVO.getContest())
+//                .status(configVO.getStatus())
+//                .rank(configVO.getRank())
+//                .discussion(configVO.getDiscussion())
+//                .introduction(configVO.getIntroduction())
+//                .recordName(UnicodeUtil.toString(configVO.getRecordName()))
+//                .recordUrl(UnicodeUtil.toString(configVO.getRecordUrl()))
+//                .projectName(UnicodeUtil.toString(configVO.getProjectName()))
+//                .projectUrl(UnicodeUtil.toString(configVO.getProjectUrl())).build();
     }
 
     @Override
-    public void setWebConfig(WebConfigDto webConfigDto) {
-        if (!StrUtil.isEmpty(webConfigDto.getBaseUrl())) {
-            configVo.setBaseUrl(webConfigDto.getBaseUrl());
+    public void setWebConfig(WebConfigDTO webConfigDTO) {
+        if (!StrUtil.isEmpty(webConfigDTO.getBaseUrl())) {
+            configVO.setBaseUrl(webConfigDTO.getBaseUrl());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getName())) {
-            configVo.setName(webConfigDto.getName());
+        if (!StrUtil.isEmpty(webConfigDTO.getName())) {
+            configVO.setName(webConfigDTO.getName());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getShortName())) {
-            configVo.setShortName(webConfigDto.getShortName());
+        if (!StrUtil.isEmpty(webConfigDTO.getShortName())) {
+            configVO.setShortName(webConfigDTO.getShortName());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getDescription())) {
-            configVo.setDescription(webConfigDto.getDescription());
+        if (!StrUtil.isEmpty(webConfigDTO.getDescription())) {
+            configVO.setDescription(webConfigDTO.getDescription());
         }
-//        if (webConfigDto.getRegister() != null) {
-//            configVo.setRegister(webConfigDto.getRegister());
+//        if (webConfigDTO.getRegister() != null) {
+//            configVO.setRegister(webConfigDTO.getRegister());
 //        }
-//        if (webConfigDto.getCodeVisibleStartTime() != null) {
-//            configVo.setCodeVisibleStartTime(webConfigDto.getCodeVisibleStartTime());
+//        if (webConfigDTO.getCodeVisibleStartTime() != null) {
+//            configVO.setCodeVisibleStartTime(webConfigDTO.getCodeVisibleStartTime());
 //        }
-        if (!StrUtil.isEmpty(webConfigDto.getRecordName())) {
-            configVo.setRecordName(webConfigDto.getRecordName());
+        if (!StrUtil.isEmpty(webConfigDTO.getRecordName())) {
+            configVO.setRecordName(webConfigDTO.getRecordName());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getRecordUrl())) {
-            configVo.setRecordUrl(webConfigDto.getRecordUrl());
+        if (!StrUtil.isEmpty(webConfigDTO.getRecordUrl())) {
+            configVO.setRecordUrl(webConfigDTO.getRecordUrl());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getProjectName())) {
-            configVo.setProjectName(webConfigDto.getProjectName());
+        if (!StrUtil.isEmpty(webConfigDTO.getProjectName())) {
+            configVO.setProjectName(webConfigDTO.getProjectName());
         }
-        if (!StrUtil.isEmpty(webConfigDto.getProjectUrl())) {
-            configVo.setProjectUrl(webConfigDto.getProjectUrl());
+        if (!StrUtil.isEmpty(webConfigDTO.getProjectUrl())) {
+            configVO.setProjectUrl(webConfigDTO.getProjectUrl());
         }
 
         boolean isOk = sendNewConfigToNacos();
@@ -198,32 +198,32 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public EmailConfigDto getEmailConfig() {
-        return BeanUtil.copyProperties(configVo, EmailConfigDto.class);
-//        return EmailConfigDto.builder().emailUsername(configVo.getEmailUsername())
-//                .emailPassword(configVo.getEmailPassword()).emailHost(configVo.getEmailHost())
-//                .emailPort(configVo.getEmailPort()).emailSsl(configVo.getEmailSsl()).build();
+    public EmailConfigDTO getEmailConfig() {
+        return BeanUtil.copyProperties(configVO, EmailConfigDTO.class);
+//        return EmailConfigDTO.builder().emailUsername(configVO.getEmailUsername())
+//                .emailPassword(configVO.getEmailPassword()).emailHost(configVO.getEmailHost())
+//                .emailPort(configVO.getEmailPort()).emailSsl(configVO.getEmailSsl()).build();
     }
 
     @Override
-    public void setEmailConfig(EmailConfigDto config) {
+    public void setEmailConfig(EmailConfigDTO config) {
         if (!StrUtil.isEmpty(config.getEmailHost())) {
-            configVo.setEmailHost(config.getEmailHost());
+            configVO.setEmailHost(config.getEmailHost());
         }
         if (!StrUtil.isEmpty(config.getEmailPassword())) {
-            configVo.setEmailPassword(config.getEmailPassword());
+            configVO.setEmailPassword(config.getEmailPassword());
         }
 
         if (config.getEmailPort() != null) {
-            configVo.setEmailPort(config.getEmailPort());
+            configVO.setEmailPort(config.getEmailPort());
         }
 
         if (!StrUtil.isEmpty(config.getEmailUsername())) {
-            configVo.setEmailUsername(config.getEmailUsername());
+            configVO.setEmailUsername(config.getEmailUsername());
         }
 
         if (config.getEmailSsl() != null) {
-            configVo.setEmailSsl(config.getEmailSsl());
+            configVO.setEmailSsl(config.getEmailSsl());
         }
 
         boolean isOk = sendNewConfigToNacos();
@@ -233,8 +233,8 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public void testEmail(TestEmailDto testEmailDto) {
-        String email = testEmailDto.getEmail();
+    public void testEmail(TestEmailDTO testEmailDTO) {
+        String email = testEmailDTO.getEmail();
         if (StrUtil.isEmpty(email)) {
             throw new StatusFailException("测试的邮箱不能为空！");
         }
@@ -247,42 +247,42 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public DbAndRedisConfigDto getDbAndRedisConfig() {
-        return BeanUtil.copyProperties(configVo, DbAndRedisConfigDto.class);
-//        return DbAndRedisConfigDto.builder().dbName(configVo.getMysqlDbName()).dbHost(configVo.getMysqlHost())
-//                .dbPort(configVo.getMysqlPort()).dbUsername(configVo.getMysqlUsername())
-//                .dbPassword(configVo.getMysqlPassword()).redisHost(configVo.getRedisHost())
-//                .redisPort(configVo.getRedisPort()).redisPassword(configVo.getRedisPassword()).build();
+    public DbAndRedisConfigDTO getDbAndRedisConfig() {
+        return BeanUtil.copyProperties(configVO, DbAndRedisConfigDTO.class);
+//        return DbAndRedisConfigDTO.builder().dbName(configVO.getMysqlDbName()).dbHost(configVO.getMysqlHost())
+//                .dbPort(configVO.getMysqlPort()).dbUsername(configVO.getMysqlUsername())
+//                .dbPassword(configVO.getMysqlPassword()).redisHost(configVO.getRedisHost())
+//                .redisPort(configVO.getRedisPort()).redisPassword(configVO.getRedisPassword()).build();
     }
 
     @Override
-    public void setDbAndRedisConfig(DbAndRedisConfigDto config) {
+    public void setDbAndRedisConfig(DbAndRedisConfigDTO config) {
         if (!StrUtil.isEmpty(config.getDbName())) {
-            configVo.setMysqlDbName(config.getDbName());
+            configVO.setMysqlDbName(config.getDbName());
         }
 
         if (!StrUtil.isEmpty(config.getDbHost())) {
-            configVo.setMysqlHost(config.getDbHost());
+            configVO.setMysqlHost(config.getDbHost());
         }
         if (config.getDbPort() != null) {
-            configVo.setMysqlPort(config.getDbPort());
+            configVO.setMysqlPort(config.getDbPort());
         }
         if (!StrUtil.isEmpty(config.getDbUsername())) {
-            configVo.setMysqlUsername(config.getDbUsername());
+            configVO.setMysqlUsername(config.getDbUsername());
         }
         if (!StrUtil.isEmpty(config.getDbPassword())) {
-            configVo.setMysqlPassword(config.getDbPassword());
+            configVO.setMysqlPassword(config.getDbPassword());
         }
 
         if (!StrUtil.isEmpty(config.getRedisHost())) {
-            configVo.setRedisHost(config.getRedisHost());
+            configVO.setRedisHost(config.getRedisHost());
         }
 
         if (config.getRedisPort() != null) {
-            configVo.setRedisPort(config.getRedisPort());
+            configVO.setRedisPort(config.getRedisPort());
         }
         if (!StrUtil.isEmpty(config.getRedisPassword())) {
-            configVo.setRedisPassword(config.getRedisPassword());
+            configVO.setRedisPassword(config.getRedisPassword());
         }
 
         boolean isOk = sendNewConfigToNacos();
@@ -314,66 +314,66 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public SwitchConfigDto getSwitchConfig() {
-        return BeanUtil.copyProperties(configVo, SwitchConfigDto.class);
-//        return SwitchConfigDto.builder()
-//                .openPublicDiscussion(configVo.getOpenPublicDiscussion())
-//                .openContestComment(configVo.getOpenContestComment())
-//                .openPublicJudge(configVo.getOpenPublicJudge())
-//                .openContestJudge(configVo.getOpenContestJudge())
-//                .defaultSubmitInterval(configVo.getDefaultSubmitInterval())
+    public SwitchConfigDTO getSwitchConfig() {
+        return BeanUtil.copyProperties(configVO, SwitchConfigDTO.class);
+//        return SwitchConfigDTO.builder()
+//                .openPublicDiscussion(configVO.getOpenPublicDiscussion())
+//                .openContestComment(configVO.getOpenContestComment())
+//                .openPublicJudge(configVO.getOpenPublicJudge())
+//                .openContestJudge(configVO.getOpenContestJudge())
+//                .defaultSubmitInterval(configVO.getDefaultSubmitInterval())
 //                .build();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void setSwitchConfig(SwitchConfigDto config) {
+    public void setSwitchConfig(SwitchConfigDTO config) {
 //        if (config.getOpenPublicDiscussion() != null) {
-//            configVo.setOpenPublicDiscussion(config.getOpenPublicDiscussion());
+//            configVO.setOpenPublicDiscussion(config.getOpenPublicDiscussion());
 //        }
 //        if (config.getOpenContestComment() != null) {
-//            configVo.setOpenContestComment(config.getOpenContestComment());
+//            configVO.setOpenContestComment(config.getOpenContestComment());
 //        }
         if (config.getOpenPublicJudge() != null) {
-            configVo.setOpenPublicJudge(config.getOpenPublicJudge());
+            configVO.setOpenPublicJudge(config.getOpenPublicJudge());
         }
         if (config.getOpenContestJudge() != null) {
-            configVo.setOpenContestJudge(config.getOpenContestJudge());
+            configVO.setOpenContestJudge(config.getOpenContestJudge());
         }
         if (config.getDefaultSubmitInterval() != null) {
             if (config.getDefaultSubmitInterval() >= 0) {
-                configVo.setDefaultSubmitInterval(config.getDefaultSubmitInterval());
+                configVO.setDefaultSubmitInterval(config.getDefaultSubmitInterval());
             } else {
-                configVo.setDefaultSubmitInterval(0);
+                configVO.setDefaultSubmitInterval(0);
             }
         }
         if (config.getCodeVisibleStartTime() != null) {
-            configVo.setCodeVisibleStartTime(config.getCodeVisibleStartTime());
+            configVO.setCodeVisibleStartTime(config.getCodeVisibleStartTime());
         }
 
         if (config.getRegister() != null) {
-            configVo.setRegister(config.getRegister());
+            configVO.setRegister(config.getRegister());
         }
         if (config.getProblem() != null) {
-            configVo.setProblem(config.getProblem());
+            configVO.setProblem(config.getProblem());
         }
         if (config.getTraining() != null) {
-            configVo.setTraining(config.getTraining());
+            configVO.setTraining(config.getTraining());
         }
         if (config.getContest() != null) {
-            configVo.setContest(config.getContest());
+            configVO.setContest(config.getContest());
         }
         if (config.getStatus() != null) {
-            configVo.setStatus(config.getStatus());
+            configVO.setStatus(config.getStatus());
         }
         if (config.getRank() != null) {
-            configVo.setRank(config.getRank());
+            configVO.setRank(config.getRank());
         }
         if (config.getDiscussion() != null) {
-            configVo.setDiscussion(config.getDiscussion());
+            configVO.setDiscussion(config.getDiscussion());
         }
         if (config.getIntroduction() != null) {
-            configVo.setIntroduction(config.getIntroduction());
+            configVO.setIntroduction(config.getIntroduction());
         }
         boolean isOk = sendNewConfigToNacos();
         if (!isOk) {

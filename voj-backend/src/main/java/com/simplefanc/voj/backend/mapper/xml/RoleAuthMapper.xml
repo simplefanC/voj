@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.RoleAuthMapper">
-    <resultMap id="map_RoleAuths" type="com.simplefanc.voj.backend.pojo.vo.RoleAuthsVo">
+    <resultMap id="map_RoleAuths" type="com.simplefanc.voj.backend.pojo.vo.RoleAuthsVO">
         <id column="id" property="id"></id>
         <result column="role" property="role"></result>
         <result column="description" property="description"></result>

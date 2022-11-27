@@ -6,14 +6,14 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
-import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import com.simplefanc.voj.judger.judge.remote.loginer.AbstractRetentiveLoginer;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class POJLoginer extends RetentiveLoginer {
+public class POJLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

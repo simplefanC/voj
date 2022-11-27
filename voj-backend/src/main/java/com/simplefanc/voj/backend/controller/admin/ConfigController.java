@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import cn.hutool.json.JSONObject;
-import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.EmailConfigDto;
-import com.simplefanc.voj.backend.pojo.dto.TestEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.WebConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.DbAndRedisConfigDTO;
+import com.simplefanc.voj.backend.pojo.dto.EmailConfigDTO;
+import com.simplefanc.voj.backend.pojo.dto.TestEmailDTO;
+import com.simplefanc.voj.backend.pojo.dto.WebConfigDTO;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class ConfigController {
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping("/get-web-config")
-    public CommonResult<WebConfigDto> getWebConfig() {
+    public CommonResult<WebConfigDTO> getWebConfig() {
         return CommonResult.successResponse(configService.getWebConfig());
     }
 
@@ -61,40 +61,40 @@ public class ConfigController {
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping(value = "/set-web-config", method = RequestMethod.PUT)
-    public CommonResult<Void> setWebConfig(@RequestBody WebConfigDto config) {
+    public CommonResult<Void> setWebConfig(@RequestBody WebConfigDTO config) {
         configService.setWebConfig(config);
         return CommonResult.successResponse();
     }
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping("/get-email-config")
-    public CommonResult<EmailConfigDto> getEmailConfig() {
+    public CommonResult<EmailConfigDTO> getEmailConfig() {
         return CommonResult.successResponse(configService.getEmailConfig());
     }
 
     @RequiresPermissions("system_info_admin")
     @PutMapping("/set-email-config")
-    public CommonResult<Void> setEmailConfig(@RequestBody EmailConfigDto config) {
+    public CommonResult<Void> setEmailConfig(@RequestBody EmailConfigDTO config) {
         configService.setEmailConfig(config);
         return CommonResult.successResponse();
     }
 
     @RequiresPermissions("system_info_admin")
     @PostMapping("/test-email")
-    public CommonResult<Void> testEmail(@RequestBody TestEmailDto testEmailDto) {
-        configService.testEmail(testEmailDto);
+    public CommonResult<Void> testEmail(@RequestBody TestEmailDTO testEmailDTO) {
+        configService.testEmail(testEmailDTO);
         return CommonResult.successResponse();
     }
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping("/get-db-and-redis-config")
-    public CommonResult<DbAndRedisConfigDto> getDbAndRedisConfig() {
+    public CommonResult<DbAndRedisConfigDTO> getDbAndRedisConfig() {
         return CommonResult.successResponse(configService.getDbAndRedisConfig());
     }
 
     @RequiresPermissions("system_info_admin")
     @PutMapping("/set-db-and-redis-config")
-    public CommonResult<Void> setDbAndRedisConfig(@RequestBody DbAndRedisConfigDto config) {
+    public CommonResult<Void> setDbAndRedisConfig(@RequestBody DbAndRedisConfigDTO config) {
         configService.setDbAndRedisConfig(config);
         return CommonResult.successResponse();
     }

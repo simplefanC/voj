@@ -2,6 +2,7 @@ package com.simplefanc.voj.backend.judge.remote.crawler;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
@@ -14,7 +15,6 @@ import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.utils.CodeForcesUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
-public class GYMProblemCrawler extends CFStyleProblemCrawler {
+public class GYMProblemCrawler extends AbstractCFStyleProblemCrawler {
     private final FilePathProperties filePathProperties;
     private final RemoteJudgeAccountEntityService remoteJudgeAccountEntityService;
 
@@ -52,7 +52,7 @@ public class GYMProblemCrawler extends CFStyleProblemCrawler {
     }
 
     @Override
-    public ProblemCrawler.RemoteProblemInfo getProblemInfo(String problemId) {
+    public AbstractProblemCrawler.RemoteProblemInfo getProblemInfo(String problemId) {
         if (cookies == null) {
             RemoteJudgeAccount account = remoteJudgeAccountEntityService.lambdaQuery()
                     .eq(RemoteJudgeAccount::getOj, RemoteOj.CF.getName())
@@ -136,8 +136,7 @@ public class GYMProblemCrawler extends CFStyleProblemCrawler {
 
     public void login(String username, String password) {
         HashMap<String, Object> keyMap = getCsrfToken(HOST + LOGIN_URL, false);
-
-        HttpRequest httpRequest = new HttpRequest(HOST + LOGIN_URL);
+        HttpRequest httpRequest = HttpRequest.of(HOST + LOGIN_URL);
         httpRequest.setConnectionTimeout(60000);
         httpRequest.setReadTimeout(60000);
         httpRequest.setMethod(Method.POST);
@@ -178,9 +177,9 @@ public class GYMProblemCrawler extends CFStyleProblemCrawler {
         res.put("ftaa", ftaa);
 
         String bfaa = ReUtil.get("_bfaa = \"(.{32})\"", body, 1);
-        if (StringUtils.isEmpty(bfaa)) {
+        if (StrUtil.isEmpty(bfaa)) {
             bfaa = response.getCookieValue("raa");
-            if (StringUtils.isEmpty(bfaa)) {
+            if (StrUtil.isEmpty(bfaa)) {
                 bfaa = response.getCookieValue("bfaa");
             }
         }
@@ -194,16 +193,21 @@ public class GYMProblemCrawler extends CFStyleProblemCrawler {
             int _tta = 0;
             for (int c = 0; c < _39ce7.length(); c++) {
                 _tta = (_tta + (c + 1) * (c + 2) * _39ce7.charAt(c)) % 1009;
-                if (c % 3 == 0)
+                if (c % 3 == 0) {
                     _tta++;
-                if (c % 2 == 0)
+                }
+                if (c % 2 == 0) {
                     _tta *= 2;
-                if (c > 0)
+                }
+                if (c > 0) {
                     _tta -= (_39ce7.charAt(c / 2) / 2) * (_tta % 5);
-                while (_tta < 0)
+                }
+                while (_tta < 0) {
                     _tta += 1009;
-                while (_tta >= 1009)
+                }
+                while (_tta >= 1009) {
                     _tta -= 1009;
+                }
             }
             res.put("_tta", _tta);
         }

@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.CheckAcDto;
+import com.simplefanc.voj.backend.pojo.dto.CheckAcDTO;
 import com.simplefanc.voj.backend.service.oj.ContestAdminService;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
@@ -46,8 +46,8 @@ public class ContestAdminController {
      */
     @PutMapping("/check-contest-ac-info")
     @RequiresAuthentication
-    public CommonResult<Void> checkContestACInfo(@RequestBody CheckAcDto checkACDto) {
-        contestAdminService.checkContestAcInfo(checkACDto);
+    public CommonResult<Void> checkContestACInfo(@RequestBody CheckAcDTO checkACDTO) {
+        contestAdminService.checkContestAcInfo(checkACDTO);
         return CommonResult.successResponse();
     }
 

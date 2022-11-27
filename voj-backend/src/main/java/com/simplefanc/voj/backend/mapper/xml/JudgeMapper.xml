@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.JudgeMapper">
-    <select id="getCommonJudgeList" resultType="com.simplefanc.voj.backend.pojo.vo.JudgeVo" useCache="false">
+    <select id="getCommonJudgeList" resultType="com.simplefanc.voj.backend.pojo.vo.JudgeVO" useCache="false">
         select j.uid,j.submit_id,j.submit_time,j.uid,j.username,j.uid,j.pid,j.status,j.share,
         j.time,j.memory,j.score,j.oi_rank_score,j.length,j.language,j.cid,j.cpid,j.judger,p.problem_id as
         display_pid,p.title
@@ -30,7 +30,7 @@
     </select>
 
 
-    <select id="getContestJudgeList" resultType="com.simplefanc.voj.backend.pojo.vo.JudgeVo" useCache="false">
+    <select id="getContestJudgeList" resultType="com.simplefanc.voj.backend.pojo.vo.JudgeVO" useCache="false">
         select j.uid,j.submit_id,j.submit_time,j.username,u.realname,j.uid,cp.display_id,cp.display_title as title,
         j.status,j.share,j.time,j.memory,j.score,j.length,j.language,j.cid,j.cpid,j.judger
         from judge j, contest_problem cp, user_info u
@@ -86,7 +86,7 @@
         WHERE DATE (gmt_create) = CURDATE();
     </select>
 
-    <select id="getContestProblemCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVo">
+    <select id="getContestProblemCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVO">
         SELECT COUNT(IF(status=-3,status,NULL)) AS pe,
         COUNT(IF(status=-2,status,NULL)) AS ce,
         COUNT(IF(status=-1,status,NULL)) AS wa,
@@ -116,7 +116,7 @@
         </where>
     </select>
 
-    <select id="getProblemCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVo">
+    <select id="getProblemCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVO">
         SELECT pid,
                COUNT(IF(status = -3, status, NULL)) AS pe,
                COUNT(IF(status = -2, status, NULL)) AS ce,
@@ -133,7 +133,7 @@
           AND cid = 0
     </select>
 
-    <select id="getProblemListCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVo">
+    <select id="getProblemListCount" resultType="com.simplefanc.voj.backend.pojo.vo.ProblemCountVO">
         SELECT pid,
         -- COUNT(IF(STATUS=-3,STATUS,NULL)) AS pe,
         -- COUNT(IF(STATUS=-2,STATUS,NULL)) AS ce,

@@ -216,7 +216,7 @@ public class ScheduleService {
     }
 
     @Scheduled(cron = "0 0/20 * * * ?")
-    public void check20MPendingSubmission() {
+    public void check20MinutesPendingSubmission() {
         DateTime dateTime = DateUtil.offsetMinute(new Date(), -15);
         String strTime = dateTime.toString(DatePattern.NORM_DATETIME_FORMAT);
 

@@ -18,8 +18,8 @@ import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemCaseEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.ImportProblemVO;
 import com.simplefanc.voj.backend.service.file.ProblemFileService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.Constant;
@@ -117,7 +117,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
         }
 
         // 读取json文件生成对象
-        HashMap<String, ImportProblemVo> problemVoMap = new HashMap<>();
+        HashMap<String, ImportProblemVO> problemVOMap = new HashMap<>();
         for (String key : problemInfo.keySet()) {
             // 若有名字不对应，直接返回失败
             if (testcaseInfo.getOrDefault(key, null) == null) {
@@ -126,8 +126,8 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             }
             try {
                 FileReader fileReader = new FileReader(problemInfo.get(key));
-                ImportProblemVo importProblemVo = JSONUtil.toBean(fileReader.readString(), ImportProblemVo.class);
-                problemVoMap.put(key, importProblemVo);
+                ImportProblemVO importProblemVO = JSONUtil.toBean(fileReader.readString(), ImportProblemVO.class);
+                problemVOMap.put(key, importProblemVO);
             } catch (Exception e) {
                 FileUtil.del(fileDir);
                 throw new StatusFailException("请检查编号为：" + key + "的题目json文件的格式：" + e.getLocalizedMessage());
@@ -142,12 +142,12 @@ public class ProblemFileServiceImpl implements ProblemFileService {
             languageMap.put(language.getName(), language.getId());
         }
 
-        List<ProblemDto> problemDtos = new LinkedList<>();
+        List<ProblemDTO> problemDTOs = new LinkedList<>();
         for (String key : problemInfo.keySet()) {
-            ImportProblemVo importProblemVo = problemVoMap.get(key);
+            ImportProblemVO importProblemVO = problemVOMap.get(key);
             // 1. 格式化题目语言
             List<Language> languages = new LinkedList<>();
-            for (String lang : importProblemVo.getLanguages()) {
+            for (String lang : importProblemVO.getLanguages()) {
                 Long lid = languageMap.getOrDefault(lang, null);
 
                 if (lid == null) {
@@ -158,7 +158,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
 
             // 2. 格式化题目代码模板
             List<CodeTemplate> codeTemplates = new LinkedList<>();
-            for (Map<String, String> tmp : importProblemVo.getCodeTemplates()) {
+            for (Map<String, String> tmp : importProblemVO.getCodeTemplates()) {
                 String language = tmp.getOrDefault("language", null);
                 String code = tmp.getOrDefault("code", null);
                 Long lid = languageMap.getOrDefault(language, null);
@@ -176,7 +176,7 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 tagMap.put(tag.getName().toUpperCase(), tag);
             }
             List<Tag> tags = new LinkedList<>();
-            for (String tagStr : importProblemVo.getTags()) {
+            for (String tagStr : importProblemVO.getTags()) {
                 Tag tag = tagMap.getOrDefault(tagStr.toUpperCase(), null);
                 if (tag == null) {
                     tags.add(new Tag().setName(tagStr).setOj(Constant.LOCAL));
@@ -187,35 +187,35 @@ public class ProblemFileServiceImpl implements ProblemFileService {
 
             // 4. 格式化测试样例
             List<ProblemCase> problemCaseList = new LinkedList<>();
-            for (Map<String, Object> tmp : importProblemVo.getSamples()) {
+            for (Map<String, Object> tmp : importProblemVO.getSamples()) {
                 problemCaseList.add(BeanUtil.toBeanIgnoreError(tmp, ProblemCase.class));
             }
 
-            Problem problem = BeanUtil.toBeanIgnoreError(importProblemVo.getProblem(), Problem.class);
+            Problem problem = BeanUtil.toBeanIgnoreError(importProblemVO.getProblem(), Problem.class);
             // 5. 获取当前登录的用户
             if (problem.getAuthor() == null) {
                 problem.setAuthor(UserSessionUtil.getUserInfo().getUsername());
             }
 
             // 6. 格式化用户额外文件和判题额外文件
-            if (importProblemVo.getUserExtraFile() != null) {
-                JSONObject userExtraFileJson = JSONUtil.parseObj(importProblemVo.getUserExtraFile());
+            if (importProblemVO.getUserExtraFile() != null) {
+                JSONObject userExtraFileJson = JSONUtil.parseObj(importProblemVO.getUserExtraFile());
                 problem.setUserExtraFile(userExtraFileJson.toString());
             }
-            if (importProblemVo.getJudgeExtraFile() != null) {
-                JSONObject judgeExtraFileJson = JSONUtil.parseObj(importProblemVo.getJudgeExtraFile());
+            if (importProblemVO.getJudgeExtraFile() != null) {
+                JSONObject judgeExtraFileJson = JSONUtil.parseObj(importProblemVO.getJudgeExtraFile());
                 problem.setJudgeExtraFile(judgeExtraFileJson.toString());
             }
 
-            ProblemDto problemDto = new ProblemDto();
-            problemDto.setJudgeMode(importProblemVo.getJudgeMode()).setProblem(problem).setCodeTemplates(codeTemplates)
+            ProblemDTO problemDTO = new ProblemDTO();
+            problemDTO.setJudgeMode(importProblemVO.getJudgeMode()).setProblem(problem).setCodeTemplates(codeTemplates)
                     .setTags(tags).setLanguages(languages).setUploadTestcaseDir(fileDir + File.separator + key)
                     .setIsUploadTestCase(true).setSamples(problemCaseList);
 
-            problemDtos.add(problemDto);
+            problemDTOs.add(problemDTO);
         }
-        for (ProblemDto problemDto : problemDtos) {
-            problemEntityService.adminAddProblem(problemDto);
+        for (ProblemDTO problemDTO : problemDTOs) {
+            problemEntityService.adminAddProblem(problemDTO);
         }
     }
 
@@ -356,9 +356,9 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 }
                 FileUtil.copy(testcaseWorkDir, workDir, true);
             }
-            ImportProblemVo importProblemVo = problemEntityService.buildExportProblem(pid, problemCases,
+            ImportProblemVO importProblemVO = problemEntityService.buildExportProblem(pid, problemCases,
                     languageMap, tagMap);
-            String content = JSONUtil.toJsonStr(importProblemVo);
+            String content = JSONUtil.toJsonStr(importProblemVO);
             FileWriter fileWriter = new FileWriter(workDir + File.separator + "problem_" + pid + ".json");
             fileWriter.write(content);
             return null;

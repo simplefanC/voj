@@ -383,7 +383,7 @@ contest表
 | uid                | String       | 外键 | 创建者id                                              |
 | author             | String       |      | 比赛创建者的用户名                                    |
 | title              | String       |      | 比赛标题                                              |
-| type               | int          |      | Acm赛制或者Rating                                     |
+| type               | int          |      | ACM赛制或者Rating                                     |
 | source             | int          |      | 比赛来源，原创为0，克隆赛为比赛id                     |
 | auth               | int          |      | 0为公开赛，1为私有赛（有密码），3为保护赛（有密码）。 |
 | pwd                | string       |      | 比赛密码                                              |

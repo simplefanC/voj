@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.pojo.dto.PidListDto;
-import com.simplefanc.voj.backend.pojo.vo.ProblemInfoVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
-import com.simplefanc.voj.backend.pojo.vo.RandomProblemVo;
+import com.simplefanc.voj.backend.pojo.dto.PidListDTO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemInfoVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
+import com.simplefanc.voj.backend.pojo.vo.RandomProblemVO;
 import com.simplefanc.voj.backend.service.oj.ProblemService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class ProblemController {
      * @Since 2021/10/27
      */
     @GetMapping(value = "/get-problem-list")
-    public CommonResult<Page<ProblemVo>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<Page<ProblemVO>> getProblemList(@RequestParam(value = "limit", required = false) Integer limit,
                                                         @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                         @RequestParam(value = "keyword", required = false) String keyword,
                                                         @RequestParam(value = "tagId", required = false) List<Long> tagId,
@@ -56,12 +56,12 @@ public class ProblemController {
      * @Since 2021/10/27
      */
     @GetMapping("/get-random-problem")
-    public CommonResult<RandomProblemVo> getRandomProblem() {
+    public CommonResult<RandomProblemVO> getRandomProblem() {
         return CommonResult.successResponse(problemService.getRandomProblem());
     }
 
     /**
-     * @param pidListDto
+     * @param pidListDTO
      * @MethodName getUserProblemStatus
      * @Description 获取用户对应该题目列表中各个题目的做题情况
      * @Return CommonResult
@@ -69,8 +69,8 @@ public class ProblemController {
      */
     @RequiresAuthentication
     @PostMapping("/get-user-problem-status")
-    public CommonResult<HashMap<Long, Object>> getUserProblemStatus(@Validated @RequestBody PidListDto pidListDto) {
-        return CommonResult.successResponse(problemService.getUserProblemStatus(pidListDto));
+    public CommonResult<HashMap<Long, Object>> getUserProblemStatus(@Validated @RequestBody PidListDTO pidListDTO) {
+        return CommonResult.successResponse(problemService.getUserProblemStatus(pidListDTO));
     }
 
     /**
@@ -81,7 +81,7 @@ public class ProblemController {
      * @Since 2021/10/27
      */
     @RequestMapping(value = "/get-problem", method = RequestMethod.GET)
-    public CommonResult<ProblemInfoVo> getProblemInfo(
+    public CommonResult<ProblemInfoVO> getProblemInfo(
             @RequestParam(value = "problemId") String problemId) {
         return CommonResult.successResponse(problemService.getProblemInfo(problemId));
     }

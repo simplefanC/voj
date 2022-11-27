@@ -2,11 +2,11 @@ package com.simplefanc.voj.judger.judge.remote.provider.codefores;
 
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
-import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.CFStyleSubmitter;
+import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.AbstractCFStyleSubmitter;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CFSubmitter extends CFStyleSubmitter {
+public class CFSubmitter extends AbstractCFStyleSubmitter {
 
     public static final String SUBMIT_URL = "/contest/%s/submit";
 

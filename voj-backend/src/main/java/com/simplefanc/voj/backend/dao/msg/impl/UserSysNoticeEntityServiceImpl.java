@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.UserSysNoticeMapper;
-import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
+import com.simplefanc.voj.backend.pojo.vo.SysMsgVO;
 import com.simplefanc.voj.common.pojo.entity.msg.UserSysNotice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,14 +23,14 @@ public class UserSysNoticeEntityServiceImpl extends ServiceImpl<UserSysNoticeMap
     private final UserSysNoticeMapper userSysNoticeMapper;
 
     @Override
-    public IPage<SysMsgVo> getSysNotice(int limit, int currentPage, String uid) {
-        Page<SysMsgVo> page = new Page<>(currentPage, limit);
+    public IPage<SysMsgVO> getSysNotice(int limit, int currentPage, String uid) {
+        Page<SysMsgVO> page = new Page<>(currentPage, limit);
         return userSysNoticeMapper.getSysOrMineNotice(page, uid, "Sys");
     }
 
     @Override
-    public IPage<SysMsgVo> getMineNotice(int limit, int currentPage, String uid) {
-        Page<SysMsgVo> page = new Page<>(currentPage, limit);
+    public IPage<SysMsgVO> getMineNotice(int limit, int currentPage, String uid) {
+        Page<SysMsgVO> page = new Page<>(currentPage, limit);
         return userSysNoticeMapper.getSysOrMineNotice(page, uid, "Mine");
     }
 

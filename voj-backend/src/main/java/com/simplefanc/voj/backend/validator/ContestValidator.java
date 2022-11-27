@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
@@ -33,11 +33,11 @@ public class ContestValidator {
     }
 
     public boolean isContestOwner(String uid) {
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        if(userRolesVo == null) {
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
+        if(userRolesVO == null) {
             return false;
         }
-        return uid.equals(userRolesVo.getUid());
+        return uid.equals(userRolesVO.getUid());
     }
 
     public boolean isOpenSealRank(Contest contest, Boolean forceRefresh) {

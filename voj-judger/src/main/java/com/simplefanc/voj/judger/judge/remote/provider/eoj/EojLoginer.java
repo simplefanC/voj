@@ -9,7 +9,7 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
-import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import com.simplefanc.voj.judger.judge.remote.loginer.AbstractRetentiveLoginer;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 @Component
 @RequiredArgsConstructor
-public class EojLoginer extends RetentiveLoginer {
+public class EojLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

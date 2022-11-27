@@ -4,7 +4,7 @@ import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.JudgeLanguage;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -61,12 +61,12 @@ public class JudgeContext {
     }
 
     public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)
-            throws SystemError {
+            throws SystemException {
         return Compiler.compileSpj(code, pid, spjLanguage, extraFiles);
     }
 
     public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
-                                      HashMap<String, String> extraFiles) throws SystemError {
+                                      HashMap<String, String> extraFiles) throws SystemException {
         return Compiler.compileInteractive(code, pid, interactiveLanguage, extraFiles);
     }
 

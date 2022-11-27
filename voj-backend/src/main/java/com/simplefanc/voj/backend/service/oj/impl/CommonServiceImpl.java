@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.dao.training.TrainingCategoryEntityService;
-import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemTagVo;
+import com.simplefanc.voj.backend.pojo.vo.CaptchaVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemTagVO;
 import com.simplefanc.voj.backend.service.oj.CommonService;
 import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
@@ -48,7 +48,7 @@ public class CommonServiceImpl implements CommonService {
     private final TrainingCategoryEntityService trainingCategoryEntityService;
 
     @Override
-    public CaptchaVo getCaptcha() {
+    public CaptchaVO getCaptcha() {
         SpecCaptcha specCaptcha = new SpecCaptcha(90, 30, 4);
         specCaptcha.setCharType(Captcha.TYPE_DEFAULT);
         String verCode = specCaptcha.text().toLowerCase();
@@ -56,10 +56,10 @@ public class CommonServiceImpl implements CommonService {
         // 存入redis并设置过期时间为30分钟
         redisUtil.set(key, verCode, 1800);
         // 将key和base64返回给前端
-        CaptchaVo captchaVo = new CaptchaVo();
-        captchaVo.setImg(specCaptcha.toBase64());
-        captchaVo.setCaptchaKey(key);
-        return captchaVo;
+        CaptchaVO captchaVO = new CaptchaVO();
+        captchaVO.setImg(specCaptcha.toBase64());
+        captchaVO.setCaptchaKey(key);
+        return captchaVO;
     }
 
     @Override
@@ -82,9 +82,9 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    public List<ProblemTagVo> getProblemTagsAndClassification(String oj) {
+    public List<ProblemTagVO> getProblemTagsAndClassification(String oj) {
         oj = oj.toUpperCase();
-        List<ProblemTagVo> problemTagVoList = new ArrayList<>();
+        List<ProblemTagVO> problemTagVOList = new ArrayList<>();
         List<TagClassification> classificationList = null;
         List<Tag> tagList = null;
         if ("ALL".equals(oj)) {
@@ -102,13 +102,13 @@ public class CommonServiceImpl implements CommonService {
             tagList = tagEntityService.list(tagQueryWrapper);
         }
         if (CollectionUtils.isEmpty(classificationList)) {
-            ProblemTagVo problemTagVo = new ProblemTagVo();
-            problemTagVo.setTagList(tagList);
-            problemTagVoList.add(problemTagVo);
+            ProblemTagVO problemTagVO = new ProblemTagVO();
+            problemTagVO.setTagList(tagList);
+            problemTagVOList.add(problemTagVO);
         } else {
             for (TagClassification classification : classificationList) {
-                ProblemTagVo problemTagVo = new ProblemTagVo();
-                problemTagVo.setClassification(classification);
+                ProblemTagVO problemTagVO = new ProblemTagVO();
+                problemTagVO.setClassification(classification);
                 List<Tag> tags = new ArrayList<>();
                 if (!CollectionUtils.isEmpty(tagList)) {
                     Iterator<Tag> it = tagList.iterator();
@@ -120,20 +120,20 @@ public class CommonServiceImpl implements CommonService {
                         }
                     }
                 }
-                problemTagVo.setTagList(tags);
-                problemTagVoList.add(problemTagVo);
+                problemTagVO.setTagList(tags);
+                problemTagVOList.add(problemTagVO);
             }
             if (tagList.size() > 0) {
-                ProblemTagVo problemTagVo = new ProblemTagVo();
-                problemTagVo.setTagList(tagList);
-                problemTagVoList.add(problemTagVo);
+                ProblemTagVO problemTagVO = new ProblemTagVO();
+                problemTagVO.setTagList(tagList);
+                problemTagVOList.add(problemTagVO);
             }
         }
 
         if ("ALL".equals(oj)) {
-            Collections.sort(problemTagVoList, problemTagVoComparator);
+            Collections.sort(problemTagVOList, problemTagVOComparator);
         }
-        return problemTagVoList;
+        return problemTagVOList;
     }
 
     @Override
@@ -178,7 +178,7 @@ public class CommonServiceImpl implements CommonService {
         return codeTemplateEntityService.list(queryWrapper);
     }
 
-    private Comparator<ProblemTagVo> problemTagVoComparator = (p1, p2) -> {
+    private Comparator<ProblemTagVO> problemTagVOComparator = (p1, p2) -> {
         if (p1 == null) {
             return 1;
         }

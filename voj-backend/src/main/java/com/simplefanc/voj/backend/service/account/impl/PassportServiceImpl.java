@@ -17,15 +17,15 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
-import com.simplefanc.voj.backend.config.property.EmailRuleBo;
-import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.LoginDto;
-import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
-import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
-import com.simplefanc.voj.backend.config.ConfigVo;
-import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
-import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.config.property.EmailRuleBO;
+import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.LoginDTO;
+import com.simplefanc.voj.backend.pojo.dto.RegisterDTO;
+import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDTO;
+import com.simplefanc.voj.backend.config.ConfigVO;
+import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVO;
+import com.simplefanc.voj.backend.pojo.vo.UserInfoVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.account.PassportService;
 import com.simplefanc.voj.backend.service.email.EmailService;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
@@ -53,9 +53,9 @@ public class PassportServiceImpl implements PassportService {
 
     private final JwtUtil jwtUtil;
 
-    private final ConfigVo configVo;
+    private final ConfigVO configVO;
 
-    private final EmailRuleBo emailRuleBo;
+    private final EmailRuleBO emailRuleBo;
 
     private final UserInfoEntityService userInfoEntityService;
 
@@ -68,26 +68,26 @@ public class PassportServiceImpl implements PassportService {
     private final NoticeService noticeService;
 
     @Override
-    public UserInfoVo login(LoginDto loginDto, HttpServletResponse response, HttpServletRequest request) {
+    public UserInfoVO login(LoginDTO loginDTO, HttpServletResponse response, HttpServletRequest request) {
         // 去掉账号密码首尾的空格
-        loginDto.setPassword(loginDto.getPassword().trim());
-        loginDto.setUsername(loginDto.getUsername().trim());
+        loginDTO.setPassword(loginDTO.getPassword().trim());
+        loginDTO.setUsername(loginDTO.getUsername().trim());
 
         String userIpAddr = IpUtil.getUserIpAddr(request);
-        String key = RedisConstant.TRY_LOGIN_NUM + loginDto.getUsername() + "_" + userIpAddr;
+        String key = RedisConstant.TRY_LOGIN_NUM + loginDTO.getUsername() + "_" + userIpAddr;
         Integer tryLoginCount = redisUtil.get(key, Integer.class);
 
         if (tryLoginCount != null && tryLoginCount >= 20) {
             throw new StatusFailException("对不起！登录失败次数过多！您的账号有风险，半个小时内暂时无法登录！");
         }
 
-        UserRolesVo userRolesVo = userRoleEntityService.getUserRoles(null, loginDto.getUsername());
+        UserRolesVO userRolesVO = userRoleEntityService.getUserRoles(null, loginDTO.getUsername());
 
-        if (userRolesVo == null) {
+        if (userRolesVO == null) {
             throw new StatusFailException("用户名或密码错误！请注意大小写！");
         }
 
-        if (!userRolesVo.getPassword().equals(SecureUtil.md5(loginDto.getPassword()))) {
+        if (!userRolesVO.getPassword().equals(SecureUtil.md5(loginDTO.getPassword()))) {
             if (tryLoginCount == null) {
                 // 三十分钟不尝试，该限制会自动清空消失
                 redisUtil.set(key, 1, 60 * 30);
@@ -97,17 +97,17 @@ public class PassportServiceImpl implements PassportService {
             throw new StatusFailException("用户名或密码错误！请注意大小写！");
         }
 
-        if (userRolesVo.getStatus() != 0) {
+        if (userRolesVO.getStatus() != 0) {
             throw new StatusFailException("该账户暂未开放，请联系管理员进行处理！");
         }
 
-        String jwt = jwtUtil.generateToken(userRolesVo.getUid());
+        String jwt = jwtUtil.generateToken(userRolesVO.getUid());
         // 放到信息头部
         response.setHeader("Authorization", jwt);
         response.setHeader("Access-Control-Expose-Headers", "Authorization");
 
         // 会话记录
-        sessionEntityService.save(new Session().setUid(userRolesVo.getUid()).setIp(IpUtil.getUserIpAddr(request))
+        sessionEntityService.save(new Session().setUid(userRolesVO.getUid()).setIp(IpUtil.getUserIpAddr(request))
                 .setUserAgent(request.getHeader("User-Agent")));
 
         // 登录成功，清除锁定限制
@@ -116,18 +116,18 @@ public class PassportServiceImpl implements PassportService {
         }
 
         // 异步检查是否异地登录
-//        sessionEntityService.checkRemoteLogin(userRolesVo.getUid());
+//        sessionEntityService.checkRemoteLogin(userRolesVO.getUid());
 
-        UserInfoVo userInfoVo = new UserInfoVo();
-        BeanUtil.copyProperties(userRolesVo, userInfoVo, "roles");
-        userInfoVo.setRoleList(userRolesVo.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
-        return userInfoVo;
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtil.copyProperties(userRolesVO, userInfoVO, "roles");
+        userInfoVO.setRoleList(userRolesVO.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+        return userInfoVO;
     }
 
     @Override
-    public RegisterCodeVo getRegisterCode(String email) {
+    public RegisterCodeVO getRegisterCode(String email) {
         // 需要判断一下网站是否开启注册
-        if (!configVo.getRegister()) {
+        if (!configVO.getRegister()) {
             throw new StatusAccessDeniedException("对不起！本站暂未开启注册功能！");
         }
         if (!emailService.isOk()) {
@@ -165,46 +165,46 @@ public class PassportServiceImpl implements PassportService {
         emailService.sendCode(email, numbers);
         redisUtil.set(lockKey, 0, 60);
 
-        RegisterCodeVo registerCodeVo = new RegisterCodeVo();
-        registerCodeVo.setEmail(email);
-        registerCodeVo.setExpire(5 * 60);
+        RegisterCodeVO registerCodeVO = new RegisterCodeVO();
+        registerCodeVO.setEmail(email);
+        registerCodeVO.setExpire(5 * 60);
 
-        return registerCodeVo;
+        return registerCodeVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void register(RegisterDto registerDto) {
+    public void register(RegisterDTO registerDTO) {
         // 需要判断一下网站是否开启注册
-        if (!configVo.getRegister()) {
+        if (!configVO.getRegister()) {
             throw new StatusAccessDeniedException("对不起！本站暂未开启注册功能！");
         }
 
-        String codeKey = EmailConstant.REGISTER_KEY_PREFIX + registerDto.getEmail();
+        String codeKey = EmailConstant.REGISTER_KEY_PREFIX + registerDTO.getEmail();
         if (!redisUtil.hasKey(codeKey)) {
             throw new StatusFailException("验证码不存在或已过期");
         }
         // 验证码判断
-        if (!redisUtil.get(codeKey).equals(registerDto.getCode())) {
+        if (!redisUtil.get(codeKey).equals(registerDTO.getCode())) {
             throw new StatusFailException("验证码不正确");
         }
 
         String uuid = IdUtil.simpleUUID();
         // 为新用户设置uuid
-        registerDto.setUuid(uuid);
+        registerDTO.setUuid(uuid);
         // 将密码MD5加密写入数据库
-        registerDto.setPassword(SecureUtil.md5(registerDto.getPassword().trim()));
-        registerDto.setUsername(registerDto.getUsername().trim());
-        registerDto.setEmail(registerDto.getEmail().trim());
+        registerDTO.setPassword(SecureUtil.md5(registerDTO.getPassword().trim()));
+        registerDTO.setUsername(registerDTO.getUsername().trim());
+        registerDTO.setEmail(registerDTO.getEmail().trim());
 
         // 往user_info表插入数据
-        boolean addUser = userInfoEntityService.addUser(registerDto);
+        boolean addUser = userInfoEntityService.addUser(registerDTO);
 
         // 往user_role表插入数据
         boolean addUserRole = userRoleEntityService.save(new UserRole().setRoleId(RoleEnum.DEFAULT_USER.getId()).setUid(uuid));
 
         if (addUser && addUserRole) {
-            redisUtil.del(registerDto.getEmail());
+            redisUtil.del(registerDTO.getEmail());
             noticeService.syncNoticeToNewRegisterUser(uuid);
         } else {
             throw new StatusFailException("注册失败，请稍后重新尝试！");
@@ -212,10 +212,10 @@ public class PassportServiceImpl implements PassportService {
     }
 
     @Override
-    public void applyResetPassword(ApplyResetPasswordDto applyResetPasswordDto) {
-        String captcha = applyResetPasswordDto.getCaptcha();
-        String captchaKey = applyResetPasswordDto.getCaptchaKey();
-        String email = applyResetPasswordDto.getEmail();
+    public void applyResetPassword(ApplyResetPasswordDTO applyResetPasswordDTO) {
+        String captcha = applyResetPasswordDTO.getCaptcha();
+        String captchaKey = applyResetPasswordDTO.getCaptchaKey();
+        String email = applyResetPasswordDTO.getEmail();
 
         if (!emailService.isOk()) {
             throw new StatusFailException("对不起！本站邮箱系统未配置，暂不支持重置密码！");
@@ -248,10 +248,10 @@ public class PassportServiceImpl implements PassportService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordDto resetPasswordDto) {
-        String username = resetPasswordDto.getUsername();
-        String password = resetPasswordDto.getPassword();
-        String code = resetPasswordDto.getCode();
+    public void resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        String username = resetPasswordDTO.getUsername();
+        String password = resetPasswordDTO.getPassword();
+        String code = resetPasswordDTO.getCode();
 
         String codeKey = EmailConstant.RESET_PASSWORD_KEY_PREFIX + username;
         if (!redisUtil.hasKey(codeKey)) {

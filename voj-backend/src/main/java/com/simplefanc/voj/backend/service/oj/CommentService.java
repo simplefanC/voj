@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.oj;
 
-import com.simplefanc.voj.backend.pojo.dto.ReplyDto;
-import com.simplefanc.voj.backend.pojo.vo.CommentListVo;
-import com.simplefanc.voj.backend.pojo.vo.CommentVo;
+import com.simplefanc.voj.backend.pojo.dto.ReplyDTO;
+import com.simplefanc.voj.backend.pojo.vo.CommentListVO;
+import com.simplefanc.voj.backend.pojo.vo.CommentVO;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 
@@ -16,9 +16,9 @@ import java.util.List;
 
 public interface CommentService {
 
-    CommentListVo getComments(Long cid, Integer did, Integer limit, Integer currentPage);
+    CommentListVO getComments(Long cid, Integer did, Integer limit, Integer currentPage);
 
-    CommentVo addComment(Comment comment);
+    CommentVO addComment(Comment comment);
 
     void deleteComment(Comment comment);
 
@@ -26,8 +26,8 @@ public interface CommentService {
 
     List<Reply> getAllReply(Integer commentId, Long cid);
 
-    void addReply(ReplyDto replyDto);
+    void addReply(ReplyDTO replyDTO);
 
-    void deleteReply(ReplyDto replyDto);
+    void deleteReply(ReplyDTO replyDTO);
 
 }

@@ -12,33 +12,19 @@ public class RemoteOjInfo {
 
     public RemoteOj remoteOj;
 
-    public String literal;
 
     public HttpHost mainHost;
 
-    public String defaultChaset = "UTF-8";
+    public String defaultCharset = "UTF-8";
 
     /**
      * In milliseconds
      */
     public long maxInactiveInterval = 300000L;
 
-    public String _64IntIoFormat;
-
-    public String urlForIndexDisplay;
-
-    //////////////////////////////////////////////////////////////////////////////
-
-    public RemoteOjInfo(RemoteOj remoteOj, String literal, HttpHost mainHost) {
+    public RemoteOjInfo(RemoteOj remoteOj, HttpHost mainHost) {
         this.remoteOj = remoteOj;
-        this.literal = literal;
         this.mainHost = mainHost;
-        this.urlForIndexDisplay = mainHost.toURI();
-    }
-
-    @Override
-    public String toString() {
-        return literal;
     }
 
 }

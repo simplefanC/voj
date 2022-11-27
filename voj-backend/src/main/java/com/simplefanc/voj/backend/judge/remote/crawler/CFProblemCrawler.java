@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @Description:
  */
 @Component
-public class CFProblemCrawler extends CFStyleProblemCrawler {
+public class CFProblemCrawler extends AbstractCFStyleProblemCrawler {
     private static final String PROBLEM_URL = "/problemset/problem/%s/%s";
 
     @Override

@@ -8,7 +8,7 @@ import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
-import com.simplefanc.voj.backend.pojo.dto.CheckAcDto;
+import com.simplefanc.voj.backend.pojo.dto.CheckAcDTO;
 import com.simplefanc.voj.backend.service.oj.ContestAdminService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -44,10 +44,12 @@ public class ContestAdminServiceImpl implements ContestAdminService {
             throw new StatusForbiddenException("对不起，你无权查看！");
         }
 
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 30;
+        }
 
         // 获取当前比赛的，状态为ac，未被校验的排在前面
         return contestRecordEntityService.getACInfo(currentPage, limit, ContestEnum.RECORD_AC.getCode(), cid,
@@ -56,17 +58,17 @@ public class ContestAdminServiceImpl implements ContestAdminService {
     }
 
     @Override
-    public void checkContestAcInfo(CheckAcDto checkAcDto) {
+    public void checkContestAcInfo(CheckAcDTO checkAcDTO) {
 
         // 获取本场比赛的状态
-        Contest contest = contestEntityService.getById(checkAcDto.getCid());
+        Contest contest = contestEntityService.getById(checkAcDTO.getCid());
 
         if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权操作！");
         }
 
         boolean isOk = contestRecordEntityService
-                .updateById(new ContestRecord().setChecked(checkAcDto.getChecked()).setId(checkAcDto.getId()));
+                .updateById(new ContestRecord().setChecked(checkAcDTO.getChecked()).setId(checkAcDTO.getId()));
 
         if (!isOk) {
             throw new StatusFailException("修改失败！");
@@ -83,10 +85,12 @@ public class ContestAdminServiceImpl implements ContestAdminService {
             throw new StatusForbiddenException("对不起，你无权查看！");
         }
 
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 30;
+        }
 
         // 获取当前比赛的，未被确定的排在签名
 

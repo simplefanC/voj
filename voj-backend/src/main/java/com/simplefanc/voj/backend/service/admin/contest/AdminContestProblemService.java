@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.admin.contest;
 
-import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
+import com.simplefanc.voj.backend.pojo.dto.ContestProblemDTO;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 
@@ -22,16 +22,16 @@ public interface AdminContestProblemService {
 
     void deleteProblem(Long pid, Long cid);
 
-    Map<Object, Object> addProblem(ProblemDto problemDto);
+    Map<Object, Object> addProblem(ProblemDTO problemDTO);
 
-    void updateProblem(ProblemDto problemDto);
+    void updateProblem(ProblemDTO problemDTO);
 
     ContestProblem getContestProblem(Long cid, Long pid);
 
     ContestProblem setContestProblem(ContestProblem contestProblem);
 
-    void addProblemFromPublic(ContestProblemDto contestProblemDto);
+    void addProblemFromPublic(ContestProblemDTO contestProblemDTO);
 
-    void importContestRemoteOJProblem(String name, String problemId, Long cid);
+    void importContestRemoteOjProblem(String name, String problemId, Long cid);
 
 }

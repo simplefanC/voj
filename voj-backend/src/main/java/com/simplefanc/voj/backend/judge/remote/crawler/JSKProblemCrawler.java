@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * @date 2022/1/17 20:15
  **/
 @Component
-public class JSKProblemCrawler extends ProblemCrawler {
+public class JSKProblemCrawler extends AbstractProblemCrawler {
 
     public static final String JUDGE_NAME = "JSK";
 

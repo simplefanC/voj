@@ -6,7 +6,7 @@ import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestProblemMapper;
-import com.simplefanc.voj.backend.pojo.vo.ContestProblemVo;
+import com.simplefanc.voj.backend.pojo.vo.ContestProblemVO;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class ContestProblemEntityServiceImpl extends ServiceImpl<ContestProblemM
     private final ContestRecordEntityService contestRecordEntityService;
 
     @Override
-    public List<ContestProblemVo> getContestProblemList(Long cid, Date startTime, Date endTime, Date sealTime,
+    public List<ContestProblemVO> getContestProblemList(Long cid, Date startTime, Date endTime, Date sealTime,
                                                         Boolean isAdmin, String contestAuthorUid) {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
         superAdminUidList.add(contestAuthorUid);

@@ -16,10 +16,10 @@ import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.problem.*;
 import com.simplefanc.voj.backend.mapper.ProblemMapper;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.ImportProblemVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemCountVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.ImportProblemVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemCountVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
 import com.simplefanc.voj.common.constants.Constant;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeMode;
@@ -69,32 +69,33 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     // 去除每行末尾的空白符
     public static String rtrim(String value) {
-        if (value == null)
+        if (value == null) {
             return null;
+        }
         return value.replaceAll("[^\\S\\r\\n]+(?=\\n|\\r)|\\s+(?=$)", "");
     }
 
     @Override
-    public Page<ProblemVo> getProblemList(int limit, int currentPage, String title, Integer difficulty,
+    public Page<ProblemVO> getProblemList(int limit, int currentPage, String title, Integer difficulty,
                                           List<Long> tagIds, String oj, boolean allProblemVisible) {
 
         // 新建分页
-        Page<ProblemVo> page = new Page<>(currentPage, limit);
+        Page<ProblemVO> page = new Page<>(currentPage, limit);
         Integer tagListSize = null;
         if (tagIds != null) {
             tagIds = tagIds.stream().distinct().collect(Collectors.toList());
             tagListSize = tagIds.size();
         }
 
-        List<ProblemVo> problemList = problemMapper.getProblemList(page, title, difficulty, tagIds, tagListSize, oj, allProblemVisible);
+        List<ProblemVO> problemList = problemMapper.getProblemList(page, title, difficulty, tagIds, tagListSize, oj, allProblemVisible);
 
         if (problemList.size() > 0) {
-            List<Long> pidList = problemList.stream().map(ProblemVo::getPid).collect(Collectors.toList());
-            List<ProblemCountVo> problemListCount = judgeEntityService.getProblemListCount(pidList);
-            for (ProblemVo problemVo : problemList) {
-                for (ProblemCountVo problemCountVo : problemListCount) {
-                    if (problemVo.getPid().equals(problemCountVo.getPid())) {
-                        problemVo.setProblemCountVo(problemCountVo);
+            List<Long> pidList = problemList.stream().map(ProblemVO::getPid).collect(Collectors.toList());
+            List<ProblemCountVO> problemListCount = judgeEntityService.getProblemListCount(pidList);
+            for (ProblemVO problemVO : problemList) {
+                for (ProblemCountVO problemCountVO : problemListCount) {
+                    if (problemVO.getPid().equals(problemCountVO.getPid())) {
+                        problemVO.setProblemCountVO(problemCountVO);
                         break;
                     }
                 }
@@ -107,7 +108,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     /**
      * 处理tag表与problem_tag表的删除与更新
      */
-    public boolean processTag(Long pid, ProblemDto problemDto, String ojName) {
+    public boolean processTag(Long pid, ProblemDTO problemDTO, String ojName) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
         // 与前端上传的数据进行对比，添加或删除！
@@ -120,7 +121,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         // 存储新的problem_tag表数据
         List<ProblemTag> problemTagList = new LinkedList<>();
-        for (Tag tag : problemDto.getTags()) {
+        for (Tag tag : problemDTO.getTags()) {
             // 没有主键表示为新添加的标签
             if (tag.getId() == null) {
                 tag.setOj(ojName);
@@ -165,7 +166,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     /**
      * 处理problem_language表的更新与删除
      */
-    public boolean processLanguage(Long pid, ProblemDto problemDto) {
+    public boolean processLanguage(Long pid, ProblemDTO problemDTO) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
         List<ProblemLanguage> oldProblemLanguages = (List<ProblemLanguage>) problemLanguageEntityService.listByMap(map);
@@ -178,7 +179,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         // 构建problem_language实体列表
         List<ProblemLanguage> problemLanguageList = new LinkedList<>();
         // 遍历插入
-        for (Language language : problemDto.getLanguages()) {
+        for (Language language : problemDTO.getLanguages()) {
             // 如果记录中有，则表式该language原来已有选中。
             if (mapOldPL.get(language.getId()) != null) {
                 // 记录一下，新数据也有该language
@@ -214,9 +215,9 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean adminUpdateProblem(ProblemDto problemDto) {
-        Problem problem = problemDto.getProblem();
-        if (JudgeMode.DEFAULT.getMode().equals(problemDto.getJudgeMode())) {
+    public boolean adminUpdateProblem(ProblemDTO problemDTO) {
+        Problem problem = problemDTO.getProblem();
+        if (JudgeMode.DEFAULT.getMode().equals(problemDTO.getJudgeMode())) {
             problem.setSpjLanguage(null).setSpjCode(null);
         }
 
@@ -226,14 +227,14 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             ojName = problemId.split("-")[0];
         }
 
-        long pid = checkUniquePid(problemDto, problem);
+        long pid = checkUniquePid(problemDTO, problem);
 
         if (problemMapper.updateById(problem) == 1 &&
-                processTag(pid, problemDto, ojName) &&
-                processCodeTemplate(pid, problemDto) &&
-                processLanguage(pid, problemDto) &&
+                processTag(pid, problemDTO, ojName) &&
+                processCodeTemplate(pid, problemDTO) &&
+                processLanguage(pid, problemDTO) &&
                 // 处理problem_case表的增加与删除
-                processProblemCase(pid, problemDto, problem)) {
+                processProblemCase(pid, problemDTO, problem)) {
             return true;
         }
         return false;
@@ -242,7 +243,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     /**
      * 处理problem_case表的增加与删除
      */
-    public boolean processProblemCase(long pid, ProblemDto problemDto, Problem problem) {
+    public boolean processProblemCase(long pid, ProblemDTO problemDTO, Problem problem) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
         List<ProblemCase> oldProblemCases = (List<ProblemCase>) problemCaseEntityService.listByMap(map);
@@ -255,14 +256,13 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         });
         boolean checkProblemCase = true;
         // 如果是自家的题目才有测试数据
-        if (!problem.getIsRemote() && problemDto.getSamples().size() > 0) {
-            int sumScore = 0;
+        if (!problem.getIsRemote() && problemDTO.getSamples().size() > 0) {
             // 新增加的case列表
             List<ProblemCase> newProblemCaseList = new LinkedList<>();
             // 需要修改的case列表
             List<ProblemCase> needUpdateProblemCaseList = new LinkedList<>();
             // 遍历上传的case列表，如果还存在，则从需要删除的测试样例列表移除该id
-            for (ProblemCase problemCase : problemDto.getSamples()) {
+            for (ProblemCase problemCase : problemDTO.getSamples()) {
                 // 已存在的case
                 if (problemCase.getId() != null) {
                     needDeleteProblemCases.remove(problemCase.getId());
@@ -280,14 +280,6 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
                 } else {
                     newProblemCaseList.add(problemCase.setPid(pid));
                 }
-
-                if (problemCase.getScore() != null) {
-                    sumScore += problemCase.getScore();
-                }
-            }
-            // 设置oi总分数，根据每个测试点的加和
-            if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setOiScore(sumScore);
             }
             // 执行批量删除操作
             boolean deleteCasesFromProblemResult = true;
@@ -309,29 +301,29 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
             // 只要有新添加，修改，删除都需要更新版本号 同时更新测试数据
             String caseVersion = String.valueOf(System.currentTimeMillis());
-            String testcaseDir = problemDto.getUploadTestcaseDir();
+            String testcaseDir = problemDTO.getUploadTestcaseDir();
             if (needDeleteProblemCases.size() > 0 || newProblemCaseList.size() > 0
                     || needUpdateProblemCaseList.size() > 0 || !StrUtil.isEmpty(testcaseDir)) {
                 problem.setCaseVersion(caseVersion);
                 // 如果是选择上传测试文件的，则需要遍历对应文件夹，读取数据，写入数据库,先前的题目数据一并清空。
-                if (problemDto.getIsUploadTestCase()) {
+                if (problemDTO.getIsUploadTestCase()) {
                     // 获取代理bean对象执行异步方法===》根据测试文件初始info
                     applicationContext.getBean(ProblemEntityServiceImpl.class).initUploadTestCase(
-                            problemDto.getJudgeMode(), caseVersion, pid, testcaseDir, problemDto.getSamples());
+                            problemDTO.getJudgeMode(), caseVersion, pid, testcaseDir, problemDTO.getSamples());
                 } else {
                     applicationContext.getBean(ProblemEntityServiceImpl.class).initHandTestCase(
-                            problemDto.getJudgeMode(), problem.getCaseVersion(), pid, problemDto.getSamples());
+                            problemDTO.getJudgeMode(), problem.getCaseVersion(), pid, problemDTO.getSamples());
                 }
-            } else if (problemDto.getChangeModeCode() != null && problemDto.getChangeModeCode()) {
+            } else if (problemDTO.getChangeModeCode() != null && problemDTO.getChangeModeCode()) {
                 // 变化成spj或interactive或者取消 同时更新测试数据
                 problem.setCaseVersion(caseVersion);
-                if (problemDto.getIsUploadTestCase()) {
+                if (problemDTO.getIsUploadTestCase()) {
                     // 获取代理bean对象执行异步方法===》根据测试文件初始info
                     applicationContext.getBean(ProblemEntityServiceImpl.class).initUploadTestCase(
-                            problemDto.getJudgeMode(), caseVersion, pid, null, problemDto.getSamples());
+                            problemDTO.getJudgeMode(), caseVersion, pid, null, problemDTO.getSamples());
                 } else {
                     applicationContext.getBean(ProblemEntityServiceImpl.class).initHandTestCase(
-                            problemDto.getJudgeMode(), problem.getCaseVersion(), pid, problemDto.getSamples());
+                            problemDTO.getJudgeMode(), problem.getCaseVersion(), pid, problemDTO.getSamples());
                 }
             }
         }
@@ -342,7 +334,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     /**
      * 处理code_template表
      */
-    public boolean processCodeTemplate(Long pid, ProblemDto problemDto) {
+    public boolean processCodeTemplate(Long pid, ProblemDTO problemDTO) {
         Map<String, Object> map = new HashMap<>();
         map.put("pid", pid);
         List<CodeTemplate> oldProblemTemplate = (List<CodeTemplate>) codeTemplateEntityService.listByMap(map);
@@ -353,7 +345,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         });
         boolean deleteTemplate = true;
         boolean saveOrUpdateCodeTemplate = true;
-        for (CodeTemplate codeTemplate : problemDto.getCodeTemplates()) {
+        for (CodeTemplate codeTemplate : problemDTO.getCodeTemplates()) {
             if (codeTemplate.getId() != null) {
                 mapOldPCT.put(codeTemplate.getId(), 1);
             }
@@ -368,8 +360,8 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         if (needDeleteCTs.size() > 0) {
             deleteTemplate = codeTemplateEntityService.removeByIds(needDeleteCTs);
         }
-        if (problemDto.getCodeTemplates().size() > 0) {
-            saveOrUpdateCodeTemplate = codeTemplateEntityService.saveOrUpdateBatch(problemDto.getCodeTemplates());
+        if (problemDTO.getCodeTemplates().size() > 0) {
+            saveOrUpdateCodeTemplate = codeTemplateEntityService.saveOrUpdateBatch(problemDTO.getCodeTemplates());
         }
         return deleteTemplate && saveOrUpdateCodeTemplate;
     }
@@ -377,7 +369,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     /**
      * problem_id唯一性检查
      */
-    public long checkUniquePid(ProblemDto problemDto, Problem problem) {
+    public long checkUniquePid(ProblemDTO problemDTO, Problem problem) {
         String problemId = problem.getProblemId().toUpperCase();
         QueryWrapper<Problem> problemQueryWrapper = new QueryWrapper<>();
         problemQueryWrapper.eq("problem_id", problemId);
@@ -385,7 +377,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         problem.setProblemId(problem.getProblemId().toUpperCase());
         // 后面许多表的更新或删除需要用到题目id
-        long pid = problemDto.getProblem().getId();
+        long pid = problemDTO.getProblem().getId();
 
         if (existedProblem != null && existedProblem.getId() != pid) {
             throw new RuntimeException("The problem_id [" + problemId + "] already exists. Do not reuse it!");
@@ -396,8 +388,8 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     // TODO 行数过多
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean adminAddProblem(ProblemDto problemDto) {
-        Problem problem = problemDto.getProblem();
+    public boolean adminAddProblem(ProblemDTO problemDTO) {
+        Problem problem = problemDTO.getProblem();
         
         // problem_id唯一性检查
         String problemId = problem.getProblemId().toUpperCase();
@@ -410,7 +402,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         problem.setProblemId(problemId);
         problem.setCaseVersion(String.valueOf(System.currentTimeMillis()));
-        if (JudgeMode.DEFAULT.getMode().equals(problemDto.getJudgeMode())) {
+        if (JudgeMode.DEFAULT.getMode().equals(problemDTO.getJudgeMode())) {
             problem.setSpjLanguage(null).setSpjCode(null);
         }
 
@@ -420,27 +412,27 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
 
         // 2. 为新的题目添加对应的language
         List<ProblemLanguage> problemLanguageList = new LinkedList<>();
-        for (Language language : problemDto.getLanguages()) {
+        for (Language language : problemDTO.getLanguages()) {
             problemLanguageList.add(new ProblemLanguage().setPid(pid).setLid(language.getId()));
         }
         boolean addLangToProblemResult = problemLanguageEntityService.saveOrUpdateBatch(problemLanguageList);
 
         // 3. 为新的题目添加对应的codeTemplate
         boolean addProblemCodeTemplate = true;
-        if (problemDto.getCodeTemplates() != null && problemDto.getCodeTemplates().size() > 0) {
-            for (CodeTemplate codeTemplate : problemDto.getCodeTemplates()) {
+        if (problemDTO.getCodeTemplates() != null && problemDTO.getCodeTemplates().size() > 0) {
+            for (CodeTemplate codeTemplate : problemDTO.getCodeTemplates()) {
                 codeTemplate.setPid(pid);
             }
-            addProblemCodeTemplate = codeTemplateEntityService.saveOrUpdateBatch(problemDto.getCodeTemplates());
+            addProblemCodeTemplate = codeTemplateEntityService.saveOrUpdateBatch(problemDTO.getCodeTemplates());
         }
 
         // 4. 为新的题目添加对应的case
-        boolean addCasesToProblemResult = addCasesToProblem(problemDto, problem, pid);
+        boolean addCasesToProblemResult = addCasesToProblem(problemDTO, problem, pid);
 
         // 5. 为新的题目添加对应的tag，可能tag是原表已有，也可能是新的，所以需要判断。
         List<ProblemTag> problemTagList = new LinkedList<>();
-        if (problemDto.getTags() != null) {
-            for (Tag tag : problemDto.getTags()) {
+        if (problemDTO.getTags() != null) {
+            for (Tag tag : problemDTO.getTags()) {
                 // id为空 表示为原tag表中不存在的 插入后可以获取到对应的tagId
                 if (tag.getId() == null) {
                     tag.setOj(Constant.LOCAL);
@@ -466,50 +458,41 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         return false;
     }
 
-    private boolean addCasesToProblem(ProblemDto problemDto, Problem problem, long pid) {
+    private boolean addCasesToProblem(ProblemDTO problemDTO, Problem problem, long pid) {
         boolean addCasesToProblemResult;
         // 为新的题目添加对应的case
         // 如果是选择上传测试文件的，则需要遍历对应文件夹，读取数据。
-        if (problemDto.getIsUploadTestCase()) {
-            int sumScore = 0;
-            String testcaseDir = problemDto.getUploadTestcaseDir();
+        if (problemDTO.getIsUploadTestCase()) {
+            String testcaseDir = problemDTO.getUploadTestcaseDir();
             // 如果是oi题目统计总分
-            List<ProblemCase> problemCases = problemDto.getSamples();
+            List<ProblemCase> problemCases = problemDTO.getSamples();
             if (problemCases.size() == 0) {
                 throw new RuntimeException("The test cases of problem must not be empty!");
             }
             for (ProblemCase problemCase : problemCases) {
-                if (problemCase.getScore() != null) {
-                    sumScore += problemCase.getScore();
-                }
                 if (StrUtil.isEmpty(problemCase.getOutput())) {
                     String filePreName = problemCase.getInput().split("\\.")[0];
                     problemCase.setOutput(filePreName + ".out");
                 }
                 problemCase.setPid(pid);
             }
-            // 设置oi总分数，根据每个测试点的加和
-            if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setOiScore(sumScore);
-            }
             addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemCases);
             // 获取代理bean对象 执行异步方法 ===》根据测试文件初始info
-            applicationContext.getBean(ProblemEntityServiceImpl.class).initUploadTestCase(problemDto.getJudgeMode(),
-                    problem.getCaseVersion(), pid, testcaseDir, problemDto.getSamples());
+            applicationContext.getBean(ProblemEntityServiceImpl.class).initUploadTestCase(problemDTO.getJudgeMode(),
+                    problem.getCaseVersion(), pid, testcaseDir, problemDTO.getSamples());
         } else {
             // oi题目需要求取平均值，给每个测试点初始oi的score值，默认总分100分
             if (problem.getType().intValue() == ContestEnum.TYPE_OI.getCode()) {
-                problem.setOiScore(100);
-                final int averScore = 100 / problemDto.getSamples().size();
+                final int averScore = 100 / problemDTO.getSamples().size();
                 // 设置好新题目的pid及分数
-                problemDto.getSamples().forEach(problemCase -> problemCase.setPid(pid).setScore(averScore));
-                addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemDto.getSamples());
+                problemDTO.getSamples().forEach(problemCase -> problemCase.setPid(pid).setScore(averScore));
+                addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemDTO.getSamples());
             } else {
                 // 设置好新题目的pid
-                problemDto.getSamples().forEach(problemCase -> problemCase.setPid(pid));
-                addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemDto.getSamples());
+                problemDTO.getSamples().forEach(problemCase -> problemCase.setPid(pid));
+                addCasesToProblemResult = problemCaseEntityService.saveOrUpdateBatch(problemDTO.getSamples());
             }
-            initHandTestCase(problemDto.getJudgeMode(), problem.getCaseVersion(), pid, problemDto.getSamples());
+            initHandTestCase(problemDTO.getJudgeMode(), problem.getCaseVersion(), pid, problemDTO.getSamples());
         }
         return addCasesToProblemResult;
     }
@@ -659,17 +642,17 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
     @Override
     // 如果是有提交记录的
     @SuppressWarnings("All")
-    public ImportProblemVo buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList,
+    public ImportProblemVO buildExportProblem(Long pid, List<HashMap<String, Object>> problemCaseList,
                                               HashMap<Long, String> languageMap, HashMap<Long, String> tagMap) {
         // TODO 参数
         // 导出相当于导入
-        ImportProblemVo importProblemVo = new ImportProblemVo();
+        ImportProblemVO importProblemVO = new ImportProblemVO();
         Problem problem = problemMapper.selectById(pid);
         problem.setCaseVersion(null).setGmtCreate(null).setId(null).setAuth(ProblemEnum.AUTH_PUBLIC.getCode()).setIsUploadCase(true).setAuthor(null)
                 .setGmtModified(null);
         HashMap<String, Object> problemMap = new HashMap<>();
         BeanUtil.beanToMap(problem, problemMap, false, true);
-        importProblemVo.setProblem(problemMap);
+        importProblemVO.setProblem(problemMap);
         QueryWrapper<CodeTemplate> codeTemplateQueryWrapper = new QueryWrapper<>();
         codeTemplateQueryWrapper.eq("pid", pid).eq("status", true);
         List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
@@ -680,35 +663,35 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             tmp.put("code", codeTemplate.getCode());
             codeTemplateList.add(tmp);
         }
-        importProblemVo.setCodeTemplates(codeTemplateList);
-        importProblemVo.setJudgeMode(problem.getJudgeMode());
-        importProblemVo.setSamples(problemCaseList);
+        importProblemVO.setCodeTemplates(codeTemplateList);
+        importProblemVO.setJudgeMode(problem.getJudgeMode());
+        importProblemVO.setSamples(problemCaseList);
 
         if (!StrUtil.isEmpty(problem.getUserExtraFile())) {
             HashMap<String, String> userExtraFileMap = (HashMap<String, String>) JSONUtil
                     .toBean(problem.getUserExtraFile(), Map.class);
-            importProblemVo.setUserExtraFile(userExtraFileMap);
+            importProblemVO.setUserExtraFile(userExtraFileMap);
         }
 
         if (!StrUtil.isEmpty(problem.getJudgeExtraFile())) {
             HashMap<String, String> judgeExtraFileMap = (HashMap<String, String>) JSONUtil
                     .toBean(problem.getJudgeExtraFile(), Map.class);
-            importProblemVo.setUserExtraFile(judgeExtraFileMap);
+            importProblemVO.setUserExtraFile(judgeExtraFileMap);
         }
 
         QueryWrapper<ProblemTag> problemTagQueryWrapper = new QueryWrapper<>();
         problemTagQueryWrapper.eq("pid", pid);
         List<ProblemTag> problemTags = problemTagEntityService.list(problemTagQueryWrapper);
-        importProblemVo.setTags(
+        importProblemVO.setTags(
                 problemTags.stream().map(problemTag -> tagMap.get(problemTag.getTid())).collect(Collectors.toList()));
 
         QueryWrapper<ProblemLanguage> problemLanguageQueryWrapper = new QueryWrapper<>();
         problemLanguageQueryWrapper.eq("pid", pid);
         List<ProblemLanguage> problemLanguages = problemLanguageEntityService.list(problemLanguageQueryWrapper);
-        importProblemVo.setLanguages(problemLanguages.stream()
+        importProblemVO.setLanguages(problemLanguages.stream()
                 .map(problemLanguage -> languageMap.get(problemLanguage.getLid())).collect(Collectors.toList()));
 
-        return importProblemVo;
+        return importProblemVO;
     }
 
 }

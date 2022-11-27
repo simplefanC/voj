@@ -5,7 +5,7 @@ import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.dao.ContestRecordEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
 import com.simplefanc.voj.judger.dao.ProblemEntityService;
@@ -14,8 +14,6 @@ import com.simplefanc.voj.judger.judge.local.JudgeContext;
 import com.simplefanc.voj.judger.judge.remote.RemoteJudgeContext;
 import com.simplefanc.voj.judger.service.JudgeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -73,13 +71,13 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Override
     public Boolean compileSpj(String code, Long pid, String spjLanguage, HashMap<String, String> extraFiles)
-            throws SystemError {
+            throws SystemException {
         return judgeContext.compileSpj(code, pid, spjLanguage, extraFiles);
     }
 
     @Override
     public Boolean compileInteractive(String code, Long pid, String interactiveLanguage,
-                                      HashMap<String, String> extraFiles) throws SystemError {
+                                      HashMap<String, String> extraFiles) throws SystemException {
         return judgeContext.compileInteractive(code, pid, interactiveLanguage, extraFiles);
     }
 

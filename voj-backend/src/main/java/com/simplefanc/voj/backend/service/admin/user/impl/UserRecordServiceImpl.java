@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.mapper.UserRecordMapper;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
-import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.OIRankVO;
+import com.simplefanc.voj.backend.pojo.vo.UserHomeVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,22 +27,22 @@ public class UserRecordServiceImpl implements UserRecordService {
     private final UserRecordMapper userRecordMapper;
 
     @Override
-    public List<ACMRankVo> getRecent7ACRank() {
+    public List<ACMRankVO> getRecent7ACRank() {
         return userRecordMapper.getRecent7ACRank();
     }
 
     @Override
-    public UserHomeVo getUserHomeInfo(String uid, String username) {
+    public UserHomeVO getUserHomeInfo(String uid, String username) {
         return userRecordMapper.getUserHomeInfo(uid, username);
     }
 
     @Override
-    public IPage<OIRankVo> getOIRankList(Page<OIRankVo> page, List<String> uidList) {
+    public IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, List<String> uidList) {
         return userRecordMapper.getOIRankList(page, uidList);
     }
 
     @Override
-    public IPage<ACMRankVo> getACMRankList(Page<ACMRankVo> page, List<String> uidList) {
+    public IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, List<String> uidList) {
         return userRecordMapper.getACMRankList(page, uidList);
     }
 

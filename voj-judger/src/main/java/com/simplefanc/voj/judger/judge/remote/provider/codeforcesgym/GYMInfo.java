@@ -6,7 +6,7 @@ import org.apache.http.HttpHost;
 
 public class GYMInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.GYM, "GYM",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.GYM,
             new HttpHost("codeforces.com", 443, "https"));
 
 }

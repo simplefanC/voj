@@ -7,13 +7,11 @@ import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusNotFoundException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
-import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
-import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
+import com.simplefanc.voj.backend.pojo.dto.ContestRankDTO;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
-import com.simplefanc.voj.backend.pojo.vo.ContestVo;
-import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
-import com.simplefanc.voj.backend.service.oj.ContestAcmRankService;
-import com.simplefanc.voj.backend.service.oj.ContestOiRankService;
+import com.simplefanc.voj.backend.pojo.vo.ContestVO;
+import com.simplefanc.voj.backend.service.oj.ContestACMRankService;
+import com.simplefanc.voj.backend.service.oj.ContestOIRankService;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -40,14 +38,14 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
 
     private final ContestValidator contestValidator;
 
-    private final ContestAcmRankService contestAcmRankService;
+    private final ContestACMRankService contestACMRankService;
 
-    private final ContestOiRankService contestOiRankService;
+    private final ContestOIRankService contestOIRankService;
 
     @Override
     public ContestOutsideInfo getContestOutsideInfo(Long cid) {
 
-        ContestVo contestInfo = contestEntityService.getContestInfoById(cid);
+        ContestVO contestInfo = contestEntityService.getContestInfoById(cid);
 
         if (contestInfo == null) {
             throw new StatusNotFoundException("访问错误：该比赛不存在！");
@@ -75,13 +73,13 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
     }
 
     @Override
-    public IPage getContestOutsideScoreboard(ContestRankDto contestRankDto) {
-        Long cid = contestRankDto.getCid();
-        List<String> concernedList = contestRankDto.getConcernedList();
-        Boolean removeStar = contestRankDto.getRemoveStar();
-        Boolean forceRefresh = contestRankDto.getForceRefresh();
-        Integer currentPage = contestRankDto.getCurrentPage();
-        Integer limit = contestRankDto.getLimit();
+    public IPage getContestOutsideScoreboard(ContestRankDTO contestRankDTO) {
+        Long cid = contestRankDTO.getCid();
+        List<String> concernedList = contestRankDTO.getConcernedList();
+        Boolean removeStar = contestRankDTO.getRemoveStar();
+        Boolean forceRefresh = contestRankDTO.getForceRefresh();
+        Integer currentPage = contestRankDTO.getCurrentPage();
+        Integer limit = contestRankDTO.getLimit();
 
         if (cid == null) {
             throw new StatusFailException("错误：比赛id不能为空");
@@ -93,10 +91,12 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
             forceRefresh = false;
         }
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 30;
+        }
 
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
@@ -122,14 +122,14 @@ public class ContestScoreboardServiceImpl implements ContestScoreboardService {
         boolean isOpenSealRank = contestValidator.isOpenSealRank(contest, forceRefresh);
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
             // 获取ACM比赛排行榜外榜
-            return contestAcmRankService.getContestAcmRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDto.getKeyword(),
+            return contestACMRankService.getContestACMRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDTO.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
                     15L, currentPage, limit);
 
         } else {
             // 获取OI比赛排行榜外榜
-            return contestOiRankService.getContestOiRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDto.getKeyword(),
+            return contestOIRankService.getContestOIRankPage(contest, isOpenSealRank, removeStar, concernedList, contestRankDTO.getKeyword(),
                     !forceRefresh,
                     // 默认15s缓存
                     15L, currentPage, limit);

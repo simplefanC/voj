@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.admin.problem;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
@@ -23,9 +23,9 @@ public interface AdminProblemService {
 
     void deleteProblem(Long pid);
 
-    void addProblem(ProblemDto problemDto);
+    void addProblem(ProblemDTO problemDTO);
 
-    void updateProblem(ProblemDto problemDto);
+    void updateProblem(ProblemDTO problemDTO);
 
     List<ProblemCase> getProblemCases(Long pid, Boolean isUpload);
 
@@ -33,7 +33,7 @@ public interface AdminProblemService {
 
     CommonResult compileInteractive(CompileDTO compileDTO);
 
-    void importRemoteOJProblem(String name, String problemId);
+    void importRemoteOjProblem(String name, String problemId);
 
     void changeProblemAuth(Problem problem);
 

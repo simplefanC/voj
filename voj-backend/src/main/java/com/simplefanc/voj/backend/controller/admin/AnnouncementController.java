@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 import com.simplefanc.voj.backend.service.admin.announcement.AdminAnnouncementService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import com.simplefanc.voj.common.result.CommonResult;
@@ -25,7 +25,7 @@ public class AnnouncementController {
 
     @GetMapping("/api/admin/announcement")
     @RequiresPermissions("announcement_admin")
-    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(
+    public CommonResult<IPage<AnnouncementVO>> getAnnouncementList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(adminAnnouncementService.getAnnouncementList(limit, currentPage));

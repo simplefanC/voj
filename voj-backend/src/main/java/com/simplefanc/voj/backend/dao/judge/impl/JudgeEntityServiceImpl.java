@@ -7,8 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.mapper.JudgeMapper;
-import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemCountVo;
+import com.simplefanc.voj.backend.pojo.vo.JudgeVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemCountVO;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
@@ -38,21 +38,21 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
     private final ContestRecordEntityService contestRecordEntityService;
 
     @Override
-    public IPage<JudgeVo> getCommonJudgeList(Integer limit, Integer currentPage, String searchPid, Integer status,
+    public IPage<JudgeVO> getCommonJudgeList(Integer limit, Integer currentPage, String searchPid, Integer status,
                                              String username, String uid, Boolean completeProblemId) {
         // 新建分页
-        Page<JudgeVo> page = new Page<>(currentPage, limit);
+        Page<JudgeVO> page = new Page<>(currentPage, limit);
 
         return judgeMapper.getCommonJudgeList(page, searchPid, status, username, uid, completeProblemId);
     }
 
     // TODO 参数过多
     @Override
-    public IPage<JudgeVo> getContestJudgeList(Integer limit, Integer currentPage, String displayId, Long cid,
+    public IPage<JudgeVO> getContestJudgeList(Integer limit, Integer currentPage, String displayId, Long cid,
                                               Integer status, String username, String uid, Boolean beforeContestSubmit, String rule, Date startTime,
                                               Date sealRankTime, String sealTimeUid, Boolean completeProblemId) {
         // 新建分页
-        Page<JudgeVo> page = new Page<>(currentPage, limit);
+        Page<JudgeVO> page = new Page<>(currentPage, limit);
 
         return judgeMapper.getContestJudgeList(page, displayId, cid, status, username, uid, beforeContestSubmit, rule,
                 startTime, sealRankTime, sealTimeUid, completeProblemId);
@@ -76,13 +76,13 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
     }
 
     @Override
-    public ProblemCountVo getContestProblemCount(Long pid, Long cpid, Long cid, Date startTime, Date sealRankTime,
+    public ProblemCountVO getContestProblemCount(Long pid, Long cpid, Long cid, Date startTime, Date sealRankTime,
                                                  List<String> adminList) {
         return judgeMapper.getContestProblemCount(pid, cpid, cid, startTime, sealRankTime, adminList);
     }
 
     @Override
-    public ProblemCountVo getProblemCount(Long pid) {
+    public ProblemCountVO getProblemCount(Long pid) {
         return judgeMapper.getProblemCount(pid);
     }
 
@@ -92,7 +92,7 @@ public class JudgeEntityServiceImpl extends ServiceImpl<JudgeMapper, Judge> impl
     }
 
     @Override
-    public List<ProblemCountVo> getProblemListCount(List<Long> pidList) {
+    public List<ProblemCountVO> getProblemListCount(List<Long> pidList) {
         return judgeMapper.getProblemListCount(pidList);
     }
 

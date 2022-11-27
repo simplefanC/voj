@@ -14,10 +14,10 @@ import java.util.List;
 @Data
 public class RemoteAccountProperties {
 
-    private List<RemoteOJ> ojs;
+    private List<RemoteOj> ojs;
 
     @Data
-    public static class RemoteOJ {
+    public static class RemoteOj {
 
         private String oj;
 

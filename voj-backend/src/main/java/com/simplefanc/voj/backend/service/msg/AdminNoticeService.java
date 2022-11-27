@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVO;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface AdminNoticeService {
 
-    IPage<AdminSysNoticeVo> getSysNotice(Integer limit, Integer currentPage, String type);
+    IPage<AdminSysNoticeVO> getSysNotice(Integer limit, Integer currentPage, String type);
 
     void addSysNotice(AdminSysNotice adminSysNotice);
 

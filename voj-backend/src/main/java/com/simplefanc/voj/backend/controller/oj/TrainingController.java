@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
-import com.simplefanc.voj.backend.pojo.vo.AccessVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
-import com.simplefanc.voj.backend.pojo.vo.TrainingRankVo;
-import com.simplefanc.voj.backend.pojo.vo.TrainingVo;
+import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDTO;
+import com.simplefanc.voj.backend.pojo.vo.AccessVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
+import com.simplefanc.voj.backend.pojo.vo.TrainingRankVO;
+import com.simplefanc.voj.backend.pojo.vo.TrainingVO;
 import com.simplefanc.voj.backend.service.oj.TrainingService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class TrainingController {
      * @Since 2021/11/20
      */
     @GetMapping("/get-training-list")
-    public CommonResult<IPage<TrainingVo>> getTrainingList(
+    public CommonResult<IPage<TrainingVO>> getTrainingList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "keyword", required = false) String keyword,
@@ -58,7 +58,7 @@ public class TrainingController {
      */
     @GetMapping("/get-training-detail")
     @RequiresAuthentication
-    public CommonResult<TrainingVo> getTraining(@RequestParam(value = "tid") Long tid) {
+    public CommonResult<TrainingVO> getTraining(@RequestParam(value = "tid") Long tid) {
         return CommonResult.successResponse(trainingService.getTraining(tid));
     }
 
@@ -71,12 +71,12 @@ public class TrainingController {
      */
     @GetMapping("/get-training-problem-list")
     @RequiresAuthentication
-    public CommonResult<List<ProblemVo>> getTrainingProblemList(@RequestParam(value = "tid") Long tid) {
+    public CommonResult<List<ProblemVO>> getTrainingProblemList(@RequestParam(value = "tid") Long tid) {
         return CommonResult.successResponse(trainingService.getTrainingProblemList(tid));
     }
 
     /**
-     * @param registerTrainingDto
+     * @param registerTrainingDTO
      * @MethodName toRegisterTraining
      * @Description 注册校验私有权限的训练
      * @Return
@@ -84,8 +84,8 @@ public class TrainingController {
      */
     @PostMapping("/register-training")
     @RequiresAuthentication
-    public CommonResult<Void> toRegisterTraining(@RequestBody RegisterTrainingDto registerTrainingDto) {
-        trainingService.toRegisterTraining(registerTrainingDto);
+    public CommonResult<Void> toRegisterTraining(@RequestBody RegisterTrainingDTO registerTrainingDTO) {
+        trainingService.toRegisterTraining(registerTrainingDTO);
         return CommonResult.successResponse();
     }
 
@@ -98,7 +98,7 @@ public class TrainingController {
      */
     @RequiresAuthentication
     @GetMapping("/get-training-access")
-    public CommonResult<AccessVo> getTrainingAccess(@RequestParam(value = "tid") Long tid) {
+    public CommonResult<AccessVO> getTrainingAccess(@RequestParam(value = "tid") Long tid) {
         return CommonResult.successResponse(trainingService.getTrainingAccess(tid));
     }
 
@@ -113,7 +113,7 @@ public class TrainingController {
      */
     @GetMapping("/get-training-rank")
     @RequiresAuthentication
-    public CommonResult<IPage<TrainingRankVo>> getTrainingRank(@RequestParam(value = "tid") Long tid,
+    public CommonResult<IPage<TrainingRankVO>> getTrainingRank(@RequestParam(value = "tid") Long tid,
                                                                @RequestParam(value = "limit", required = false) Integer limit,
                                                                @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(trainingService.getTrainingRank(tid, limit, currentPage));

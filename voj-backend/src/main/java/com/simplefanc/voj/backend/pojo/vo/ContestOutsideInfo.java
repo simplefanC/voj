@@ -17,7 +17,7 @@ import java.util.List;
 public class ContestOutsideInfo {
 
     @ApiModelProperty(value = "比赛信息")
-    private ContestVo contest;
+    private ContestVO contest;
 
     @ApiModelProperty(value = "比赛题目信息列表")
     private List<ContestProblem> problemList;

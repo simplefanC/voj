@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
  * @Description:
  */
 @Component
-public class HDUProblemCrawler extends ProblemCrawler {
+public class HDUProblemCrawler extends AbstractProblemCrawler {
 
     public static final String JUDGE_NAME = "HDU";
 

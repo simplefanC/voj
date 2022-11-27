@@ -10,9 +10,9 @@ import com.simplefanc.voj.backend.dao.discussion.DiscussionEntityService;
 import com.simplefanc.voj.backend.dao.discussion.ReplyEntityService;
 import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
-import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
-import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
+import com.simplefanc.voj.backend.pojo.vo.UserMsgVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
+import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVO;
 import com.simplefanc.voj.backend.service.msg.UserMessageService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
@@ -55,12 +55,12 @@ public class UserMessageServiceImpl implements UserMessageService {
     private final UserSysNoticeEntityService userSysNoticeEntityService;
 
     @Override
-    public UserUnreadMsgCountVo getUnreadMsgCount() {
+    public UserUnreadMsgCountVO getUnreadMsgCount() {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        UserUnreadMsgCountVo userUnreadMsgCount = msgRemindEntityService.getUserUnreadMsgCount(userRolesVo.getUid());
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
+        UserUnreadMsgCountVO userUnreadMsgCount = msgRemindEntityService.getUserUnreadMsgCount(userRolesVO.getUid());
         if (userUnreadMsgCount == null) {
-            userUnreadMsgCount = new UserUnreadMsgCountVo(0, 0, 0, 0, 0);
+            userUnreadMsgCount = new UserUnreadMsgCountVO(0, 0, 0, 0, 0);
         }
         return userUnreadMsgCount;
     }
@@ -68,54 +68,60 @@ public class UserMessageServiceImpl implements UserMessageService {
     @Override
     public void cleanMsg(String type, Long id) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-        boolean isOk = cleanMsgByType(type, id, userRolesVo.getUid());
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
+        boolean isOk = cleanMsgByType(type, id, userRolesVO.getUid());
         if (!isOk) {
             throw new StatusFailException("清空失败");
         }
     }
 
     @Override
-    public IPage<UserMsgVo> getCommentMsg(Integer limit, Integer currentPage) {
+    public IPage<UserMsgVO> getCommentMsg(Integer limit, Integer currentPage) {
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        return getUserMsgList(userRolesVo.getUid(), "Discuss", limit, currentPage);
+        return getUserMsgList(userRolesVO.getUid(), "Discuss", limit, currentPage);
     }
 
     @Override
-    public IPage<UserMsgVo> getReplyMsg(Integer limit, Integer currentPage) {
+    public IPage<UserMsgVO> getReplyMsg(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        return getUserMsgList(userRolesVo.getUid(), "Reply", limit, currentPage);
+        return getUserMsgList(userRolesVO.getUid(), "Reply", limit, currentPage);
     }
 
     @Override
-    public IPage<UserMsgVo> getLikeMsg(Integer limit, Integer currentPage) {
+    public IPage<UserMsgVO> getLikeMsg(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        return getUserMsgList(userRolesVo.getUid(), "Like", limit, currentPage);
+        return getUserMsgList(userRolesVO.getUid(), "Like", limit, currentPage);
     }
 
     private boolean cleanMsgByType(String type, Long id, String uid) {
@@ -136,9 +142,9 @@ public class UserMessageServiceImpl implements UserMessageService {
         return false;
     }
 
-    private IPage<UserMsgVo> getUserMsgList(String uid, String action, int limit, int currentPage) {
-        Page<UserMsgVo> page = new Page<>(currentPage, limit);
-        IPage<UserMsgVo> userMsgList = msgRemindEntityService.getUserMsg(page, uid, action);
+    private IPage<UserMsgVO> getUserMsgList(String uid, String action, int limit, int currentPage) {
+        Page<UserMsgVO> page = new Page<>(currentPage, limit);
+        IPage<UserMsgVO> userMsgList = msgRemindEntityService.getUserMsg(page, uid, action);
         if (userMsgList.getTotal() > 0) {
             switch (action) {
                 // 评论我的
@@ -157,15 +163,15 @@ public class UserMessageServiceImpl implements UserMessageService {
         }
     }
 
-    private IPage<UserMsgVo> getUserDiscussMsgList(IPage<UserMsgVo> userMsgList) {
+    private IPage<UserMsgVO> getUserDiscussMsgList(IPage<UserMsgVO> userMsgList) {
 
-        List<Integer> discussionIds = userMsgList.getRecords().stream().map(UserMsgVo::getSourceId)
+        List<Integer> discussionIds = userMsgList.getRecords().stream().map(UserMsgVO::getSourceId)
                 .collect(Collectors.toList());
         Collection<Discussion> discussions = discussionEntityService.listByIds(discussionIds);
         for (Discussion discussion : discussions) {
-            for (UserMsgVo userMsgVo : userMsgList.getRecords()) {
-                if (Objects.equals(discussion.getId(), userMsgVo.getSourceId())) {
-                    userMsgVo.setSourceTitle(discussion.getTitle());
+            for (UserMsgVO userMsgVO : userMsgList.getRecords()) {
+                if (Objects.equals(discussion.getId(), userMsgVO.getSourceId())) {
+                    userMsgVO.setSourceTitle(discussion.getTitle());
                     break;
                 }
             }
@@ -174,27 +180,27 @@ public class UserMessageServiceImpl implements UserMessageService {
         return userMsgList;
     }
 
-    private IPage<UserMsgVo> getUserReplyMsgList(IPage<UserMsgVo> userMsgList) {
+    private IPage<UserMsgVO> getUserReplyMsgList(IPage<UserMsgVO> userMsgList) {
 
-        for (UserMsgVo userMsgVo : userMsgList.getRecords()) {
-            if ("Discussion".equals(userMsgVo.getSourceType())) {
-                Discussion discussion = discussionEntityService.getById(userMsgVo.getSourceId());
+        for (UserMsgVO userMsgVO : userMsgList.getRecords()) {
+            if ("Discussion".equals(userMsgVO.getSourceType())) {
+                Discussion discussion = discussionEntityService.getById(userMsgVO.getSourceId());
                 if (discussion != null) {
-                    userMsgVo.setSourceTitle(discussion.getTitle());
+                    userMsgVO.setSourceTitle(discussion.getTitle());
                 } else {
-                    userMsgVo.setSourceTitle("原讨论帖已被删除!【The original discussion post has been deleted!】");
+                    userMsgVO.setSourceTitle("原讨论帖已被删除!【The original discussion post has been deleted!】");
                 }
-            } else if ("Contest".equals(userMsgVo.getSourceType())) {
-                Contest contest = contestEntityService.getById(userMsgVo.getSourceId());
+            } else if ("Contest".equals(userMsgVO.getSourceType())) {
+                Contest contest = contestEntityService.getById(userMsgVO.getSourceId());
                 if (contest != null) {
-                    userMsgVo.setSourceTitle(contest.getTitle());
+                    userMsgVO.setSourceTitle(contest.getTitle());
                 } else {
-                    userMsgVo.setSourceTitle("原比赛已被删除!【The original contest has been deleted!】");
+                    userMsgVO.setSourceTitle("原比赛已被删除!【The original contest has been deleted!】");
                 }
             }
 
-            if ("Comment".equals(userMsgVo.getQuoteType())) {
-                Comment comment = commentEntityService.getById(userMsgVo.getQuoteId());
+            if ("Comment".equals(userMsgVO.getQuoteType())) {
+                Comment comment = commentEntityService.getById(userMsgVO.getQuoteId());
                 if (comment != null) {
                     String content;
                     if (comment.getContent().length() < 100) {
@@ -203,13 +209,13 @@ public class UserMessageServiceImpl implements UserMessageService {
                     } else {
                         content = comment.getFromName() + " : " + comment.getContent().substring(0, 100) + "...";
                     }
-                    userMsgVo.setQuoteContent(content);
+                    userMsgVO.setQuoteContent(content);
                 } else {
-                    userMsgVo.setQuoteContent("您的原评论信息已被删除！【Your original comments have been deleted!】");
+                    userMsgVO.setQuoteContent("您的原评论信息已被删除！【Your original comments have been deleted!】");
                 }
 
-            } else if ("Reply".equals(userMsgVo.getQuoteType())) {
-                Reply reply = replyEntityService.getById(userMsgVo.getQuoteId());
+            } else if ("Reply".equals(userMsgVO.getQuoteType())) {
+                Reply reply = replyEntityService.getById(userMsgVO.getQuoteId());
                 if (reply != null) {
                     String content;
                     if (reply.getContent().length() < 100) {
@@ -219,9 +225,9 @@ public class UserMessageServiceImpl implements UserMessageService {
                         content = reply.getFromName() + " : @" + reply.getToName() + "："
                                 + reply.getContent().substring(0, 100) + "...";
                     }
-                    userMsgVo.setQuoteContent(content);
+                    userMsgVO.setQuoteContent(content);
                 } else {
-                    userMsgVo.setQuoteContent("您的原回复信息已被删除！【Your original reply has been deleted!】");
+                    userMsgVO.setQuoteContent("您的原回复信息已被删除！【Your original reply has been deleted!】");
                 }
             }
 
@@ -231,21 +237,21 @@ public class UserMessageServiceImpl implements UserMessageService {
         return userMsgList;
     }
 
-    private IPage<UserMsgVo> getUserLikeMsgList(IPage<UserMsgVo> userMsgList) {
-        for (UserMsgVo userMsgVo : userMsgList.getRecords()) {
-            if ("Discussion".equals(userMsgVo.getSourceType())) {
-                Discussion discussion = discussionEntityService.getById(userMsgVo.getSourceId());
+    private IPage<UserMsgVO> getUserLikeMsgList(IPage<UserMsgVO> userMsgList) {
+        for (UserMsgVO userMsgVO : userMsgList.getRecords()) {
+            if ("Discussion".equals(userMsgVO.getSourceType())) {
+                Discussion discussion = discussionEntityService.getById(userMsgVO.getSourceId());
                 if (discussion != null) {
-                    userMsgVo.setSourceTitle(discussion.getTitle());
+                    userMsgVO.setSourceTitle(discussion.getTitle());
                 } else {
-                    userMsgVo.setSourceTitle("原讨论帖已被删除!【The original discussion post has been deleted!】");
+                    userMsgVO.setSourceTitle("原讨论帖已被删除!【The original discussion post has been deleted!】");
                 }
-            } else if ("Contest".equals(userMsgVo.getSourceType())) {
-                Contest contest = contestEntityService.getById(userMsgVo.getSourceId());
+            } else if ("Contest".equals(userMsgVO.getSourceType())) {
+                Contest contest = contestEntityService.getById(userMsgVO.getSourceId());
                 if (contest != null) {
-                    userMsgVo.setSourceTitle(contest.getTitle());
+                    userMsgVO.setSourceTitle(contest.getTitle());
                 } else {
-                    userMsgVo.setSourceTitle("原比赛已被删除!【The original contest has been deleted!】");
+                    userMsgVO.setSourceTitle("原比赛已被删除!【The original contest has been deleted!】");
                 }
             }
         }
@@ -255,9 +261,9 @@ public class UserMessageServiceImpl implements UserMessageService {
 
     @Override
     @Async
-    public void updateUserMsgRead(IPage<UserMsgVo> userMsgList) {
-        List<Long> idList = userMsgList.getRecords().stream().filter(userMsgVo -> !userMsgVo.getState())
-                .map(UserMsgVo::getId).collect(Collectors.toList());
+    public void updateUserMsgRead(IPage<UserMsgVO> userMsgList) {
+        List<Long> idList = userMsgList.getRecords().stream().filter(userMsgVO -> !userMsgVO.getState())
+                .map(UserMsgVO::getId).collect(Collectors.toList());
         if (idList.size() == 0) {
             return;
         }

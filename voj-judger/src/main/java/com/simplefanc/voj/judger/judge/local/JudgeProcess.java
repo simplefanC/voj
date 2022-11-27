@@ -13,9 +13,9 @@ import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.CompileConfig;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
-import com.simplefanc.voj.judger.common.exception.CompileError;
-import com.simplefanc.voj.judger.common.exception.SubmitError;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.CompileException;
+import com.simplefanc.voj.judger.common.exception.SubmitException;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
@@ -86,14 +86,14 @@ public class JudgeProcess {
 
             // 对全部测试点结果进行评判，获取最终评判结果
             return getJudgeInfo(allCaseResultList, problem, judge);
-        } catch (SystemError systemError) {
+        } catch (SystemException systemException) {
             handleJudgeError(result, JudgeStatus.STATUS_SYSTEM_ERROR, "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
-            log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生SystemError异常------------------->", systemError);
-        } catch (SubmitError submitError) {
-            handleJudgeError(result, JudgeStatus.STATUS_SUBMITTED_FAILED, mergeNonEmptyStrings(submitError.getMessage(), submitError.getStdout(), submitError.getStderr()));
-            log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生SubmitError异常-------------------->", submitError);
-        } catch (CompileError compileError) {
-            handleJudgeError(result, JudgeStatus.STATUS_COMPILE_ERROR, mergeNonEmptyStrings(compileError.getStdout(), compileError.getStderr()));
+            log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生SystemError异常------------------->", systemException);
+        } catch (SubmitException submitException) {
+            handleJudgeError(result, JudgeStatus.STATUS_SUBMITTED_FAILED, mergeNonEmptyStrings(submitException.getMessage(), submitException.getStdout(), submitException.getStderr()));
+            log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生SubmitError异常-------------------->", submitException);
+        } catch (CompileException compileException) {
+            handleJudgeError(result, JudgeStatus.STATUS_COMPILE_ERROR, mergeNonEmptyStrings(compileException.getStdout(), compileException.getStderr()));
         } catch (Exception e) {
             handleJudgeError(result, JudgeStatus.STATUS_SYSTEM_ERROR, "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
             log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生Exception异常-------------------->", e);
@@ -107,7 +107,7 @@ public class JudgeProcess {
     }
 
 
-    private Boolean checkOrCompileExtraProgram(Problem problem) throws CompileError, SystemError {
+    private Boolean checkOrCompileExtraProgram(Problem problem) throws CompileException, SystemException {
         JudgeMode judgeMode = JudgeMode.getJudgeMode(problem.getJudgeMode());
         String currentVersion = problem.getCaseVersion();
         Boolean isOk;
@@ -116,11 +116,15 @@ public class JudgeProcess {
                 return true;
             case SPJ:
                 isOk = isCompileSpjOk(problem, currentVersion);
-                if (isOk != null) return isOk;
+                if (isOk != null) {
+                    return isOk;
+                }
                 break;
             case INTERACTIVE:
                 isOk = isCompileInteractive(problem, currentVersion);
-                if (isOk != null) return isOk;
+                if (isOk != null) {
+                    return isOk;
+                }
                 break;
             default:
                 throw new RuntimeException("The problem mode is error:" + judgeMode);
@@ -136,7 +140,7 @@ public class JudgeProcess {
         result.put("memory", 0);
     }
 
-    private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemError {
+    private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemException {
         CompileConfig compiler;
         String programFilePath;
         String programVersionPath;
@@ -172,7 +176,7 @@ public class JudgeProcess {
         return null;
     }
 
-    private Boolean isCompileSpjOk(Problem problem, String currentVersion) throws SystemError {
+    private Boolean isCompileSpjOk(Problem problem, String currentVersion) throws SystemException {
         CompileConfig compiler;
         String programFilePath;
         String programVersionPath;
@@ -224,9 +228,7 @@ public class JudgeProcess {
         List<JudgeCase> allCaseResList = new LinkedList<>();
 
         // 记录所有测试点的结果
-        testCaseResultList.forEach(jsonObject -> {
-            handleTestCase(problem, judge, isACM, errorTestCaseList, allCaseResList, jsonObject);
-        });
+        testCaseResultList.forEach(jsonObject -> handleTestCase(problem, judge, errorTestCaseList, allCaseResList, jsonObject));
 
         // 更新到数据库
         boolean addCaseRes = JudgeCaseEntityService.saveBatch(allCaseResList);
@@ -235,8 +237,7 @@ public class JudgeProcess {
         }
 
         // 获取判题的time，memory，OI score
-        HashMap<String, Object> result = computeResultInfo(allCaseResList, isACM, errorTestCaseList.size(),
-                problem.getOiScore(), problem.getDifficulty());
+        HashMap<String, Object> result = computeResultInfo(allCaseResList, errorTestCaseList.size(), problem.getDifficulty());
 
         // 如果该题为ACM类型的题目，多个测试点全部正确则AC，否则取第一个错误的测试点的状态
         // 如果该题为OI类型的题目，若多个测试点全部正确则AC，若全部错误则取第一个错误测试点状态，否则为部分正确
@@ -251,7 +252,7 @@ public class JudgeProcess {
         return result;
     }
 
-    private void handleTestCase(Problem problem, Judge judge, boolean isACM, List<JSONObject> errorTestCaseList, List<JudgeCase> allCaseResList, JSONObject jsonObject) {
+    private void handleTestCase(Problem problem, Judge judge, List<JSONObject> errorTestCaseList, List<JudgeCase> allCaseResList, JSONObject jsonObject) {
         Integer time = jsonObject.getLong("time").intValue();
         Integer memory = jsonObject.getLong("memory").intValue();
         Integer status = jsonObject.getInt("status");
@@ -289,8 +290,8 @@ public class JudgeProcess {
     }
 
     // 获取判题的运行时间，运行空间，OI得分
-    private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList, Boolean isACM,
-                                                      Integer errorCaseNum, Integer totalScore, Integer problemDifficulty) {
+    private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList,
+                                                      Integer errorCaseNum, Integer problemDifficulty) {
         HashMap<String, Object> result = new HashMap<>();
         // 用时和内存占用保存为多个测试点中最长的
         allTestCaseResultList.stream()
@@ -301,6 +302,9 @@ public class JudgeProcess {
                 .max(Comparator.comparing(JudgeCase::getMemory))
                 .ifPresent(t -> result.put("memory", t.getMemory()));
 
+        int totalScore = allTestCaseResultList.stream()
+                .mapToInt(JudgeCase::getScore)
+                .sum();
         // OI题目计算得分
 //        if (!isACM) {
         // 全对的直接用总分*0.1+2*题目难度
@@ -314,8 +318,7 @@ public class JudgeProcess {
                 sumScore += testcaseResult.getScore();
             }
             // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
-            int oiRankScore = (int) Math
-                    .round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
+            int oiRankScore = (int) Math.round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
             result.put("score", sumScore);
             result.put("oiRankScore", oiRankScore);
         }
@@ -330,8 +333,9 @@ public class JudgeProcess {
             case "JavaScript Node":
             case "JavaScript V8":
                 return "main.js";
+            default:
+                return "main";
         }
-        return "main";
     }
 
     private String mergeNonEmptyStrings(String... strings) {

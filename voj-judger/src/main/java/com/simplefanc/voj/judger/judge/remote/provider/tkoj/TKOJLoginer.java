@@ -4,7 +4,7 @@ import cn.hutool.crypto.SecureUtil;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.*;
-import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import com.simplefanc.voj.judger.judge.remote.loginer.AbstractRetentiveLoginer;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TKOJLoginer extends RetentiveLoginer {
+public class TKOJLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

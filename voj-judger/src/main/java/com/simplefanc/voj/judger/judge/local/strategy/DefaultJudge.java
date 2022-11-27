@@ -5,7 +5,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.judge.local.AbstractJudge;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
@@ -27,7 +27,7 @@ public class DefaultJudge extends AbstractJudge {
     private final static Pattern EOL_PATTERN = Pattern.compile("[^\\S\\n]+(?=\\n)");
 
     @Override
-    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
         final List<String> args = parseRunCommand(runConfig, null, null, null);
@@ -141,8 +141,9 @@ public class DefaultJudge extends AbstractJudge {
      * @return
      */
     private String rtrim(String value) {
-        if (value == null)
+        if (value == null) {
             return null;
+        }
         return EOL_PATTERN.matcher(StrUtil.trimEnd(value)).replaceAll("");
     }
 

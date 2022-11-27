@@ -11,18 +11,18 @@ import java.util.List;
 @Slf4j(topic = "voj")
 public class SubmittersHolder {
 
-    private static final HashMap<RemoteOj, Submitter> submitters = new HashMap<>();
+    private static final HashMap<RemoteOj, Submitter> SUBMITTERS = new HashMap<>();
 
     public static Submitter getSubmitter(RemoteOj remoteOj) {
-        if (!submitters.containsKey(remoteOj)) {
-            synchronized (submitters) {
-                if (!submitters.containsKey(remoteOj)) {
+        if (!SUBMITTERS.containsKey(remoteOj)) {
+            synchronized (SUBMITTERS) {
+                if (!SUBMITTERS.containsKey(remoteOj)) {
                     try {
                         List<Class<? extends Submitter>> submitterClasses = Tools
                                 .findSubClasses("com.simplefanc.voj.judger.judge.remote", Submitter.class);
                         for (Class<? extends Submitter> submitterClass : submitterClasses) {
                             Submitter submitter = SpringUtil.getBean(submitterClass);
-                            submitters.put(submitter.getOjInfo().remoteOj, submitter);
+                            SUBMITTERS.put(submitter.getOjInfo().remoteOj, submitter);
                         }
                     } catch (Throwable t) {
                         log.error("Get Submitter Failed", t);
@@ -30,7 +30,7 @@ public class SubmittersHolder {
                 }
             }
         }
-        return submitters.get(remoteOj);
+        return SUBMITTERS.get(remoteOj);
     }
 
 }

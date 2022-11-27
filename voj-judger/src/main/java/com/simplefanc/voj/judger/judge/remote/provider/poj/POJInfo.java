@@ -6,10 +6,6 @@ import org.apache.http.HttpHost;
 
 public class POJInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.POJ, "POJ", new HttpHost("poj.org"));
-
-    static {
-        INFO._64IntIoFormat = "%I64d & %I64u";
-    }
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.POJ, new HttpHost("poj.org"));
 
 }

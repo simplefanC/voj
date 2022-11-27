@@ -20,7 +20,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TKOJQuerier implements Querier {
 
-    private static final String[] statusArray = new String[]{"Pending", "Pending Rejudging", "Compiling",
+    private static final String[] STATUS_ARRAY = new String[]{"Pending", "Pending Rejudging", "Compiling",
             "Running Judging", "Accepted", "Presentation Error", "Wrong Answer", "Time Limit Exceed",
             "Memory Limit Exceed", "Output Limit Exceed", "Runtime Error", "Compile Error", "Compile OK",
             "Runtime Finish"};
@@ -58,7 +58,7 @@ public class TKOJQuerier implements Querier {
                 .getBody();
         String[] results = result.split(",");
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
-        status.rawStatus = statusArray[Integer.parseInt(results[0])];
+        status.rawStatus = STATUS_ARRAY[Integer.parseInt(results[0])];
         status.statusType = STATUS_MAP.getOrDefault(Integer.parseInt(results[0]), JudgeStatus.STATUS_JUDGING);
         status.executionMemory = Integer.parseInt(results[1]);
         status.executionTime = Integer.parseInt(results[2]);

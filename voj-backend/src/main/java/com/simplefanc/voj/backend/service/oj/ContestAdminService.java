@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.CheckAcDto;
+import com.simplefanc.voj.backend.pojo.dto.CheckAcDTO;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestPrint;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 
@@ -15,7 +15,7 @@ public interface ContestAdminService {
 
     IPage<ContestRecord> getContestACInfo(Long cid, Integer currentPage, Integer limit);
 
-    void checkContestAcInfo(CheckAcDto checkACDto);
+    void checkContestAcInfo(CheckAcDTO checkACDTO);
 
     IPage<ContestPrint> getContestPrint(Long cid, Integer currentPage, Integer limit);
 

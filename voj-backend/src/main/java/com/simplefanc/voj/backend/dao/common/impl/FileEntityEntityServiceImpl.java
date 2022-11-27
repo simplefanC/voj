@@ -3,16 +3,11 @@ package com.simplefanc.voj.backend.dao.common.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.mapper.FileMapper;
-import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
-import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
 import com.simplefanc.voj.common.pojo.entity.common.File;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: chenfan

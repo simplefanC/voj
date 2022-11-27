@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ContestPrintDto;
-import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
-import com.simplefanc.voj.backend.pojo.dto.RegisterContestDto;
-import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDto;
+import com.simplefanc.voj.backend.pojo.dto.ContestPrintDTO;
+import com.simplefanc.voj.backend.pojo.dto.ContestRankDTO;
+import com.simplefanc.voj.backend.pojo.dto.RegisterContestDTO;
+import com.simplefanc.voj.backend.pojo.dto.UserReadContestAnnouncementDTO;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
@@ -34,7 +34,7 @@ public class ContestController {
      * @Since 2021/10/27
      */
     @GetMapping("/get-contest-list")
-    public CommonResult<IPage<ContestVo>> getContestList(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<ContestVO>> getContestList(@RequestParam(value = "limit", required = false) Integer limit,
                                                          @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                          @RequestParam(value = "status", required = false) Integer status,
                                                          @RequestParam(value = "type", required = false) Integer type,
@@ -50,7 +50,7 @@ public class ContestController {
      */
     @GetMapping("/get-contest-info")
     @RequiresAuthentication
-    public CommonResult<ContestVo> getContestInfo(@RequestParam(value = "cid") Long cid) {
+    public CommonResult<ContestVO> getContestInfo(@RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestService.getContestInfo(cid));
     }
 
@@ -62,8 +62,8 @@ public class ContestController {
      */
     @PostMapping("/register-contest")
     @RequiresAuthentication
-    public CommonResult<Void> toRegisterContest(@RequestBody RegisterContestDto registerContestDto) {
-        contestService.toRegisterContest(registerContestDto);
+    public CommonResult<Void> toRegisterContest(@RequestBody RegisterContestDTO registerContestDTO) {
+        contestService.toRegisterContest(registerContestDTO);
         return CommonResult.successResponse();
     }
 
@@ -75,7 +75,7 @@ public class ContestController {
      */
     @RequiresAuthentication
     @GetMapping("/get-contest-access")
-    public CommonResult<AccessVo> getContestAccess(@RequestParam(value = "cid") Long cid) {
+    public CommonResult<AccessVO> getContestAccess(@RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestService.getContestAccess(cid));
     }
 
@@ -87,21 +87,21 @@ public class ContestController {
      */
     @GetMapping("/get-contest-problem")
     @RequiresAuthentication
-    public CommonResult<List<ContestProblemVo>> getContestProblem(
+    public CommonResult<List<ContestProblemVO>> getContestProblem(
             @RequestParam(value = "cid") Long cid) {
         return CommonResult.successResponse(contestService.getContestProblem(cid));
     }
 
     @GetMapping("/get-contest-problem-details")
     @RequiresAuthentication
-    public CommonResult<ProblemInfoVo> getContestProblemDetails(@RequestParam(value = "cid") Long cid,
+    public CommonResult<ProblemInfoVO> getContestProblemDetails(@RequestParam(value = "cid") Long cid,
                                                                 @RequestParam(value = "displayId") String displayId) {
         return CommonResult.successResponse(contestService.getContestProblemDetails(cid, displayId));
     }
 
     @GetMapping("/contest-submissions")
     @RequiresAuthentication
-    public CommonResult<IPage<JudgeVo>> getContestSubmissionList(
+    public CommonResult<IPage<JudgeVO>> getContestSubmissionList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "onlyMine", required = false) Boolean onlyMine,
@@ -124,8 +124,8 @@ public class ContestController {
      */
     @PostMapping("/get-contest-rank")
     @RequiresAuthentication
-    public CommonResult<IPage> getContestRank(@RequestBody ContestRankDto contestRankDto) {
-        return CommonResult.successResponse(contestService.getContestRank(contestRankDto));
+    public CommonResult<IPage> getContestRank(@RequestBody ContestRankDTO contestRankDTO) {
+        return CommonResult.successResponse(contestService.getContestRank(contestRankDTO));
     }
 
     /**
@@ -136,7 +136,7 @@ public class ContestController {
      */
     @GetMapping("/get-contest-announcement")
     @RequiresAuthentication
-    public CommonResult<IPage<AnnouncementVo>> getContestAnnouncement(
+    public CommonResult<IPage<AnnouncementVO>> getContestAnnouncement(
             @RequestParam(value = "cid") Long cid,
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage) {
@@ -144,7 +144,7 @@ public class ContestController {
     }
 
     /**
-     * @param userReadContestAnnouncementDto
+     * @param userReadContestAnnouncementDTO
      * @MethodName getContestUserNotReadAnnouncement
      * @Description 根据前端传过来的比赛id以及已阅读的公告提示id列表，排除后获取未阅读的公告
      * @Return
@@ -153,13 +153,13 @@ public class ContestController {
     @PostMapping("/get-contest-not-read-announcement")
     @RequiresAuthentication
     public CommonResult<List<Announcement>> getContestUserNotReadAnnouncement(
-            @RequestBody UserReadContestAnnouncementDto userReadContestAnnouncementDto) {
+            @RequestBody UserReadContestAnnouncementDTO userReadContestAnnouncementDTO) {
         return CommonResult
-                .successResponse(contestService.getContestUserNotReadAnnouncement(userReadContestAnnouncementDto));
+                .successResponse(contestService.getContestUserNotReadAnnouncement(userReadContestAnnouncementDTO));
     }
 
     /**
-     * @param contestPrintDto
+     * @param contestPrintDTO
      * @MethodName submitPrintText
      * @Description 提交比赛文本打印内容
      * @Return
@@ -167,8 +167,8 @@ public class ContestController {
      */
     @PostMapping("/submit-print-text")
     @RequiresAuthentication
-    public CommonResult<Void> submitPrintText(@RequestBody ContestPrintDto contestPrintDto) {
-        contestService.submitPrintText(contestPrintDto);
+    public CommonResult<Void> submitPrintText(@RequestBody ContestPrintDTO contestPrintDTO) {
+        contestService.submitPrintText(contestPrintDTO);
         return CommonResult.successResponse();
     }
 

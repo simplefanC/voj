@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.training.*;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
+import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDTO;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
 import com.simplefanc.voj.backend.service.oj.TrainingService;
@@ -60,14 +60,16 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public IPage<TrainingVo> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId,
+    public IPage<TrainingVO> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId,
                                              String auth) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 30;
+        }
         return trainingEntityService.getTrainingList(limit, currentPage, categoryId, auth, keyword);
     }
 
@@ -79,8 +81,8 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public TrainingVo getTraining(Long tid) {
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+    public TrainingVO getTraining(Long tid) {
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         boolean isRoot = UserSessionUtil.isRoot();
 
@@ -89,23 +91,23 @@ public class TrainingServiceImpl implements TrainingService {
             throw new StatusFailException("该训练不存在或不允许显示！");
         }
 
-        TrainingVo trainingVo = BeanUtil.copyProperties(training, TrainingVo.class);
+        TrainingVO trainingVO = BeanUtil.copyProperties(training, TrainingVO.class);
         TrainingCategory trainingCategory = trainingCategoryEntityService
                 .getTrainingCategoryByTrainingId(training.getId());
-        trainingVo.setCategoryName(trainingCategory.getName());
-        trainingVo.setCategoryColor(trainingCategory.getColor());
+        trainingVO.setCategoryName(trainingCategory.getName());
+        trainingVO.setCategoryColor(trainingCategory.getColor());
         List<Long> trainingProblemIdList = trainingProblemEntityService.getTrainingProblemIdList(training.getId());
-        trainingVo.setProblemCount(trainingProblemIdList.size());
+        trainingVO.setProblemCount(trainingProblemIdList.size());
 
-        if (userRolesVo != null && trainingValidator.isInTrainingOrAdmin(training, userRolesVo)) {
+        if (userRolesVO != null && trainingValidator.isInTrainingOrAdmin(training, userRolesVO)) {
             Integer userTrainingACProblemCount = trainingProblemEntityService
-                    .getUserTrainingACProblemCount(userRolesVo.getUid(), trainingProblemIdList);
-            trainingVo.setAcCount(userTrainingACProblemCount);
+                    .getUserTrainingACProblemCount(userRolesVO.getUid(), trainingProblemIdList);
+            trainingVO.setAcCount(userTrainingACProblemCount);
         } else {
-            trainingVo.setAcCount(0);
+            trainingVO.setAcCount(0);
         }
 
-        return trainingVo;
+        return trainingVO;
     }
 
     /**
@@ -116,7 +118,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public List<ProblemVo> getTrainingProblemList(Long tid) {
+    public List<ProblemVO> getTrainingProblemList(Long tid) {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -130,17 +132,17 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
     /**
-     * @param registerTrainingDto
+     * @param registerTrainingDTO
      * @MethodName toRegisterTraining
      * @Description 注册校验私有权限的训练
      * @Return
      * @Since 2021/11/20
      */
     @Override
-    public void toRegisterTraining(RegisterTrainingDto registerTrainingDto) {
+    public void toRegisterTraining(RegisterTrainingDTO registerTrainingDTO) {
 
-        Long tid = registerTrainingDto.getTid();
-        String password = registerTrainingDto.getPassword();
+        Long tid = registerTrainingDTO.getTid();
+        String password = registerTrainingDTO.getPassword();
 
         if (tid == null || StrUtil.isEmpty(password)) {
             throw new StatusFailException("请求参数不能为空！");
@@ -157,21 +159,21 @@ public class TrainingServiceImpl implements TrainingService {
         }
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         QueryWrapper<TrainingRegister> registerQueryWrapper = new QueryWrapper<>();
-        registerQueryWrapper.eq("tid", tid).eq("uid", userRolesVo.getUid());
+        registerQueryWrapper.eq("tid", tid).eq("uid", userRolesVO.getUid());
         if (trainingRegisterEntityService.count(registerQueryWrapper) > 0) {
             throw new StatusFailException("您已注册过该训练，请勿重复注册！");
         }
 
         boolean isOk = trainingRegisterEntityService
-                .save(new TrainingRegister().setTid(tid).setUid(userRolesVo.getUid()));
+                .save(new TrainingRegister().setTid(tid).setUid(userRolesVO.getUid()));
 
         if (!isOk) {
             throw new StatusFailException("校验训练密码失败，请稍后再试");
         } else {
-            adminTrainingRecordService.syncUserSubmissionToRecordByTid(tid, userRolesVo.getUid());
+            adminTrainingRecordService.syncUserSubmissionToRecordByTid(tid, userRolesVO.getUid());
         }
     }
 
@@ -183,13 +185,12 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/20
      */
     @Override
-    public AccessVo getTrainingAccess(Long tid) {
-
+    public AccessVO getTrainingAccess(Long tid) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         QueryWrapper<TrainingRegister> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("tid", tid).eq("uid", userRolesVo.getUid());
+        queryWrapper.eq("tid", tid).eq("uid", userRolesVO.getUid());
         TrainingRegister trainingRegister = trainingRegisterEntityService.getOne(queryWrapper, false);
         boolean access = false;
         if (trainingRegister != null) {
@@ -200,10 +201,10 @@ public class TrainingServiceImpl implements TrainingService {
             }
         }
 
-        AccessVo accessVo = new AccessVo();
-        accessVo.setAccess(access);
+        AccessVO accessVO = new AccessVO();
+        accessVO.setAccess(access);
 
-        return accessVo;
+        return accessVO;
     }
 
     /**
@@ -216,7 +217,7 @@ public class TrainingServiceImpl implements TrainingService {
      * @Since 2021/11/22
      */
     @Override
-    public IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage) {
+    public IPage<TrainingRankVO> getTrainingRank(Long tid, Integer limit, Integer currentPage) {
 
         Training training = trainingEntityService.getById(tid);
         if (training == null || !training.getStatus()) {
@@ -226,93 +227,95 @@ public class TrainingServiceImpl implements TrainingService {
         trainingValidator.validateTrainingAuth(training);
 
         // 页数，每页数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 30;
+        }
 
         return getTrainingRank(tid, training.getAuthor(), currentPage, limit);
     }
 
     // TODO 行数过多
-    private IPage<TrainingRankVo> getTrainingRank(Long tid, String username, int currentPage, int limit) {
+    private IPage<TrainingRankVO> getTrainingRank(Long tid, String username, int currentPage, int limit) {
 
         Map<Long, String> tpIdMapDisplayId = getTPIdMapDisplayId(tid);
-        List<TrainingRecordVo> trainingRecordVoList = trainingRecordEntityService.getTrainingRecord(tid);
+        List<TrainingRecordVO> trainingRecordVOList = trainingRecordEntityService.getTrainingRecord(tid);
 
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
 
-        List<TrainingRankVo> result = new ArrayList<>();
+        List<TrainingRankVO> result = new ArrayList<>();
 
         HashMap<String, Integer> uidMapIndex = new HashMap<>();
         int pos = 0;
-        for (TrainingRecordVo trainingRecordVo : trainingRecordVoList) {
+        for (TrainingRecordVO trainingRecordVO : trainingRecordVOList) {
             // 超级管理员和训练创建者的提交不入排行榜
-            if (username.equals(trainingRecordVo.getUsername())
-                    || superAdminUidList.contains(trainingRecordVo.getUid())) {
+            if (username.equals(trainingRecordVO.getUsername())
+                    || superAdminUidList.contains(trainingRecordVO.getUid())) {
                 continue;
             }
 
-            TrainingRankVo trainingRankVo;
-            Integer index = uidMapIndex.get(trainingRecordVo.getUid());
+            TrainingRankVO trainingRankVO;
+            Integer index = uidMapIndex.get(trainingRecordVO.getUid());
             if (index == null) {
-                trainingRankVo = new TrainingRankVo();
-                trainingRankVo.setRealname(trainingRecordVo.getRealname()).setAvatar(trainingRecordVo.getAvatar())
-                        .setSchool(trainingRecordVo.getSchool()).setGender(trainingRecordVo.getGender())
-                        .setUid(trainingRecordVo.getUid()).setUsername(trainingRecordVo.getUsername())
-                        .setNickname(trainingRecordVo.getNickname()).setAc(0).setTotalRunTime(0);
+                trainingRankVO = new TrainingRankVO();
+                trainingRankVO.setRealname(trainingRecordVO.getRealname()).setAvatar(trainingRecordVO.getAvatar())
+                        .setSchool(trainingRecordVO.getSchool()).setGender(trainingRecordVO.getGender())
+                        .setUid(trainingRecordVO.getUid()).setUsername(trainingRecordVO.getUsername())
+                        .setNickname(trainingRecordVO.getNickname()).setAc(0).setTotalRunTime(0);
                 HashMap<String, HashMap<String, Object>> submissionInfo = new HashMap<>();
-                trainingRankVo.setSubmissionInfo(submissionInfo);
+                trainingRankVO.setSubmissionInfo(submissionInfo);
 
-                result.add(trainingRankVo);
-                uidMapIndex.put(trainingRecordVo.getUid(), pos);
+                result.add(trainingRankVO);
+                uidMapIndex.put(trainingRecordVO.getUid(), pos);
                 pos++;
             } else {
-                trainingRankVo = result.get(index);
+                trainingRankVO = result.get(index);
             }
-            String displayId = tpIdMapDisplayId.get(trainingRecordVo.getTpid());
-            // TODO 键名
-            HashMap<String, Object> problemSubmissionInfo = trainingRankVo.getSubmissionInfo().getOrDefault(displayId,
+            String displayId = tpIdMapDisplayId.get(trainingRecordVO.getTpid());
+            // TODO
+            HashMap<String, Object> problemSubmissionInfo = trainingRankVO.getSubmissionInfo().getOrDefault(displayId,
                     new HashMap<>());
 
             // 如果该题目已经AC过了，只比较运行时间取最小
             if ((Boolean) problemSubmissionInfo.getOrDefault("isAC", false)) {
-                if (trainingRecordVo.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
+                if (trainingRecordVO.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
                     int runTime = (int) problemSubmissionInfo.getOrDefault("runTime", 0);
-                    if (runTime > trainingRecordVo.getUseTime()) {
-                        trainingRankVo.setTotalRunTime(
-                                trainingRankVo.getTotalRunTime() - runTime + trainingRecordVo.getUseTime());
-                        problemSubmissionInfo.put("runTime", trainingRecordVo.getUseTime());
+                    if (runTime > trainingRecordVO.getUseTime()) {
+                        trainingRankVO.setTotalRunTime(
+                                trainingRankVO.getTotalRunTime() - runTime + trainingRecordVO.getUseTime());
+                        problemSubmissionInfo.put("runTime", trainingRecordVO.getUseTime());
                     }
                 }
                 continue;
             }
 
-            problemSubmissionInfo.put("status", trainingRecordVo.getStatus());
-            problemSubmissionInfo.put("score", trainingRecordVo.getScore());
+            problemSubmissionInfo.put("status", trainingRecordVO.getStatus());
+            problemSubmissionInfo.put("score", trainingRecordVO.getScore());
 
             // 通过的话
-            if (trainingRecordVo.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
+            if (trainingRecordVO.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
                 // 总解决题目次数ac+1
-                trainingRankVo.setAc(trainingRankVo.getAc() + 1);
+                trainingRankVO.setAc(trainingRankVO.getAc() + 1);
                 problemSubmissionInfo.put("isAC", true);
-                problemSubmissionInfo.put("runTime", trainingRecordVo.getUseTime());
-                trainingRankVo.setTotalRunTime(trainingRankVo.getTotalRunTime() + trainingRecordVo.getUseTime());
+                problemSubmissionInfo.put("runTime", trainingRecordVO.getUseTime());
+                trainingRankVO.setTotalRunTime(trainingRankVO.getTotalRunTime() + trainingRecordVO.getUseTime());
             }
 
-            trainingRankVo.getSubmissionInfo().put(displayId, problemSubmissionInfo);
+            trainingRankVO.getSubmissionInfo().put(displayId, problemSubmissionInfo);
         }
 
-        List<TrainingRankVo> orderResultList = result.stream()
+        List<TrainingRankVO> orderResultList = result.stream()
                 // 先以总ac数降序
-                .sorted(Comparator.comparing(TrainingRankVo::getAc, Comparator.reverseOrder())
-                        .thenComparing(TrainingRankVo::getTotalRunTime))
+                .sorted(Comparator.comparing(TrainingRankVO::getAc, Comparator.reverseOrder())
+                        .thenComparing(TrainingRankVO::getTotalRunTime))
                 .collect(Collectors.toList());
 
         // 计算好排行榜，然后进行分页
-        Page<TrainingRankVo> page = new Page<>(currentPage, limit);
+        Page<TrainingRankVO> page = new Page<>(currentPage, limit);
         int count = orderResultList.size();
-        List<TrainingRankVo> pageList = new ArrayList<>();
+        List<TrainingRankVO> pageList = new ArrayList<>();
         // 计算当前页第一条数据的下标
         int currId = currentPage > 1 ? (currentPage - 1) * limit : 0;
         for (int i = 0; i < limit && i < count - currId; i++) {

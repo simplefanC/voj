@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.backend.pojo.dto.ReplyDto;
-import com.simplefanc.voj.backend.pojo.vo.CommentListVo;
-import com.simplefanc.voj.backend.pojo.vo.CommentVo;
+import com.simplefanc.voj.backend.pojo.dto.ReplyDTO;
+import com.simplefanc.voj.backend.pojo.vo.CommentListVO;
+import com.simplefanc.voj.backend.pojo.vo.CommentVO;
 import com.simplefanc.voj.backend.service.oj.CommentService;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
@@ -27,7 +27,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/comments")
-    public CommonResult<CommentListVo> getComments(@RequestParam(value = "cid", required = false) Long cid,
+    public CommonResult<CommentListVO> getComments(@RequestParam(value = "cid", required = false) Long cid,
                                                    @RequestParam(value = "did", required = false) Integer did,
                                                    @RequestParam(value = "limit", required = false, defaultValue = "20") Integer limit,
                                                    @RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer currentPage) {
@@ -37,7 +37,7 @@ public class CommentController {
     @PostMapping("/comment")
     @RequiresPermissions("comment_add")
     @RequiresAuthentication
-    public CommonResult<CommentVo> addComment(@RequestBody Comment comment) {
+    public CommonResult<CommentVO> addComment(@RequestBody Comment comment) {
         return CommonResult.successResponse(commentService.addComment(comment));
     }
 
@@ -66,15 +66,15 @@ public class CommentController {
     @PostMapping("/reply")
     @RequiresPermissions("reply_add")
     @RequiresAuthentication
-    public CommonResult<Reply> addReply(@RequestBody ReplyDto replyDto) {
-        commentService.addReply(replyDto);
+    public CommonResult<Reply> addReply(@RequestBody ReplyDTO replyDTO) {
+        commentService.addReply(replyDTO);
         return CommonResult.successResponse();
     }
 
     @DeleteMapping("/reply")
     @RequiresAuthentication
-    public CommonResult<Void> deleteReply(@RequestBody ReplyDto replyDto) {
-        commentService.deleteReply(replyDto);
+    public CommonResult<Void> deleteReply(@RequestBody ReplyDTO replyDTO) {
+        commentService.deleteReply(replyDTO);
         return CommonResult.successResponse();
     }
 

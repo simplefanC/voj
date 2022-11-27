@@ -13,7 +13,7 @@ import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFa
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
-import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.CFStyleQuerier;
+import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.AbstractCFStyleQuerier;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class CFQuerier extends CFStyleQuerier {
+public class CFQuerier extends AbstractCFStyleQuerier {
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
     private static final String CE_INFO_URL = "/data/submitSource";
 

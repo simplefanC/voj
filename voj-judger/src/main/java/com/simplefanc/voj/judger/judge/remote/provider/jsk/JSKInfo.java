@@ -6,7 +6,7 @@ import org.apache.http.HttpHost;
 
 public class JSKInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.JSK, "JSK",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.JSK,
             new HttpHost("www.jisuanke.com", 443, "https"));
 
 }

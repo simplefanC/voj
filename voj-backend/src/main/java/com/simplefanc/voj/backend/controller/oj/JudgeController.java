@@ -1,10 +1,10 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDto;
-import com.simplefanc.voj.backend.pojo.dto.ToJudgeDto;
-import com.simplefanc.voj.backend.pojo.vo.JudgeVo;
-import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.SubmitIdListDTO;
+import com.simplefanc.voj.backend.pojo.dto.ToJudgeDTO;
+import com.simplefanc.voj.backend.pojo.vo.JudgeVO;
+import com.simplefanc.voj.backend.pojo.vo.SubmissionInfoVO;
 import com.simplefanc.voj.backend.service.oj.JudgeService;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
@@ -38,8 +38,8 @@ public class JudgeController {
     @RequiresAuthentication
     @RequiresPermissions("submit")
     @RequestMapping(value = "/submit-problem-judge", method = RequestMethod.POST)
-    public CommonResult<Judge> submitProblemJudge(@RequestBody ToJudgeDto judgeDto) {
-        return CommonResult.successResponse(judgeService.submitProblemJudge(judgeDto));
+    public CommonResult<Judge> submitProblemJudge(@RequestBody ToJudgeDTO judgeDTO) {
+        return CommonResult.successResponse(judgeService.submitProblemJudge(judgeDTO));
     }
 
     /**
@@ -61,7 +61,7 @@ public class JudgeController {
      * @Since 2021/1/2
      */
     @GetMapping("/submission")
-    public CommonResult<SubmissionInfoVo> getSubmission(
+    public CommonResult<SubmissionInfoVO> getSubmission(
             @RequestParam(value = "submitId") Long submitId) {
         return CommonResult.successResponse(judgeService.getSubmission(submitId));
     }
@@ -93,7 +93,7 @@ public class JudgeController {
      * @Since 2021/10/29
      */
     @RequestMapping(value = "/submissions", method = RequestMethod.GET)
-    public CommonResult<IPage<JudgeVo>> getJudgeList(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<JudgeVO>> getJudgeList(@RequestParam(value = "limit", required = false) Integer limit,
                                                      @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                      @RequestParam(value = "onlyMine", required = false) Boolean onlyMine,
                                                      @RequestParam(value = "problemID", required = false) String searchPid,
@@ -111,12 +111,12 @@ public class JudgeController {
      * @Since 2021/1/3
      */
     @RequestMapping(value = "/check-submissions-status", method = RequestMethod.POST)
-    public CommonResult<HashMap<Long, Object>> checkCommonJudgeResult(@RequestBody SubmitIdListDto submitIdListDto) {
-        return CommonResult.successResponse(judgeService.checkCommonJudgeResult(submitIdListDto));
+    public CommonResult<HashMap<Long, Object>> checkCommonJudgeResult(@RequestBody SubmitIdListDTO submitIdListDTO) {
+        return CommonResult.successResponse(judgeService.checkCommonJudgeResult(submitIdListDTO));
     }
 
     /**
-     * @param submitIdListDto
+     * @param submitIdListDTO
      * @MethodName checkContestJudgeResult
      * @Description 需要检查是否为封榜，是否可以查询结果，避免有人恶意查询
      * @Return
@@ -124,8 +124,8 @@ public class JudgeController {
      */
     @RequestMapping(value = "/check-contest-submissions-status", method = RequestMethod.POST)
     @RequiresAuthentication
-    public CommonResult<HashMap<Long, Object>> checkContestJudgeResult(@RequestBody SubmitIdListDto submitIdListDto) {
-        return CommonResult.successResponse(judgeService.checkContestJudgeResult(submitIdListDto));
+    public CommonResult<HashMap<Long, Object>> checkContestJudgeResult(@RequestBody SubmitIdListDTO submitIdListDTO) {
+        return CommonResult.successResponse(judgeService.checkContestJudgeResult(submitIdListDTO));
     }
 
     /**

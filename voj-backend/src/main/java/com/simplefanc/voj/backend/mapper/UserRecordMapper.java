@@ -2,9 +2,9 @@ package com.simplefanc.voj.backend.mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
-import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.OIRankVO;
+import com.simplefanc.voj.backend.pojo.vo.UserHomeVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -21,12 +21,12 @@ import java.util.List;
 @Mapper
 public interface UserRecordMapper {
 
-    IPage<ACMRankVo> getACMRankList(Page<ACMRankVo> page, @Param("uidList") List<String> uidList);
+    IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, @Param("uidList") List<String> uidList);
 
-    List<ACMRankVo> getRecent7ACRank();
+    List<ACMRankVO> getRecent7ACRank();
 
-    IPage<OIRankVo> getOIRankList(Page<OIRankVo> page, @Param("uidList") List<String> uidList);
+    IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, @Param("uidList") List<String> uidList);
 
-    UserHomeVo getUserHomeInfo(@Param("uid") String uid, @Param("username") String username);
+    UserHomeVO getUserHomeInfo(@Param("uid") String uid, @Param("username") String username);
 
 }

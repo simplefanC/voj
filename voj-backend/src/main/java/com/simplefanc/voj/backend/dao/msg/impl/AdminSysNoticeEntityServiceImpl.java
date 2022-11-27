@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.mapper.AdminSysNoticeMapper;
-import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVO;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +23,8 @@ public class AdminSysNoticeEntityServiceImpl extends ServiceImpl<AdminSysNoticeM
     private final AdminSysNoticeMapper adminSysNoticeMapper;
 
     @Override
-    public IPage<AdminSysNoticeVo> getSysNotice(int limit, int currentPage, String type) {
-        Page<AdminSysNoticeVo> page = new Page<>(currentPage, limit);
+    public IPage<AdminSysNoticeVO> getSysNotice(int limit, int currentPage, String type) {
+        Page<AdminSysNoticeVO> page = new Page<>(currentPage, limit);
         return adminSysNoticeMapper.getAdminSysNotice(page, type);
     }
 

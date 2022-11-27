@@ -8,9 +8,9 @@ import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
-import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
+import com.simplefanc.voj.backend.pojo.vo.ContestVO;
 import com.simplefanc.voj.backend.service.oj.HomeService;
 import com.simplefanc.voj.common.pojo.entity.common.File;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class HomeServiceImpl implements HomeService {
      * @Since 2021/12/29
      */
     @Override
-    public List<ContestVo> getRecentContest() {
+    public List<ContestVO> getRecentContest() {
         return contestEntityService.getWithinNext14DaysContests();
     }
 
@@ -64,14 +64,13 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public List<HashMap<String, Object>> getHomeCarousel() {
         List<File> fileList = fileEntityService.queryCarouselFileList();
-        List<HashMap<String, Object>> apiList = fileList.stream().map(f -> {
-            // TODO put 键
+        return fileList.stream().map(f -> {
+            // TODO
             HashMap<String, Object> param = new HashMap<>(2);
             param.put("id", f.getId());
             param.put("url", filePathProps.getImgApi() + f.getName());
             return param;
         }).collect(Collectors.toList());
-        return apiList;
     }
 
     /**
@@ -82,7 +81,7 @@ public class HomeServiceImpl implements HomeService {
      * @Since 2021/1/15
      */
     @Override
-    public List<ACMRankVo> getRecentSevenACRank() {
+    public List<ACMRankVO> getRecentSevenACRank() {
         return userRecordService.getRecent7ACRank();
     }
 
@@ -108,11 +107,13 @@ public class HomeServiceImpl implements HomeService {
      * @Since 2021/12/29
      */
     @Override
-    public IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage) {
-        if (currentPage == null || currentPage < 1)
+    public IPage<AnnouncementVO> getCommonAnnouncement(Integer limit, Integer currentPage) {
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         return announcementEntityService.getAnnouncementList(limit, currentPage, true);
     }
 

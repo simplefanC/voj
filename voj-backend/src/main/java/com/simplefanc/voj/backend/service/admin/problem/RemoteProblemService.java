@@ -2,8 +2,8 @@ package com.simplefanc.voj.backend.service.admin.problem;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.dao.problem.*;
+import com.simplefanc.voj.backend.judge.remote.crawler.AbstractProblemCrawler;
 import com.simplefanc.voj.backend.judge.remote.crawler.CrawlersHolder;
-import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
 import com.simplefanc.voj.common.pojo.entity.problem.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,13 +32,13 @@ public class RemoteProblemService {
 
     private final ProblemLanguageEntityService problemLanguageEntityService;
 
-    public ProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId)
+    public AbstractProblemCrawler.RemoteProblemInfo getOtherOJProblemInfo(String ojName, String problemId)
             throws Exception {
         return CrawlersHolder.getCrawler(ojName).getProblemInfo(problemId);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Problem adminAddOtherOJProblem(ProblemCrawler.RemoteProblemInfo remoteProblemInfo, String OJName) {
+    public Problem adminAddOtherOJProblem(AbstractProblemCrawler.RemoteProblemInfo remoteProblemInfo, String OJName) {
         Problem problem = remoteProblemInfo.getProblem();
         // 1. 保存题目
         boolean addProblemResult = problemEntityService.save(problem);

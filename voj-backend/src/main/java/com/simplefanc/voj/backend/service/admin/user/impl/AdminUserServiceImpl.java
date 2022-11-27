@@ -15,9 +15,9 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
-import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
-import com.simplefanc.voj.backend.pojo.vo.ExcelUserVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDTO;
+import com.simplefanc.voj.backend.pojo.vo.ExcelUserVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
@@ -51,11 +51,13 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final RedisUtil redisUtil;
 
     @Override
-    public IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, String keyword, Long roleId, Integer status) {
-        if (currentPage == null || currentPage < 1)
+    public IPage<UserRolesVO> getUserList(Integer limit, Integer currentPage, String keyword, Long roleId, Integer status) {
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         if (keyword != null) {
             keyword = keyword.trim();
         }
@@ -63,26 +65,26 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     @Override
-    public void editUser(AdminEditUserDto adminEditUserDto) {
-        String uid = adminEditUserDto.getUid();
+    public void editUser(AdminEditUserDTO adminEditUserDTO) {
+        String uid = adminEditUserDTO.getUid();
 
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
 
         userInfoUpdateWrapper.eq("uuid", uid)
-                .set("username", adminEditUserDto.getUsername())
-                .set("realname", adminEditUserDto.getRealname())
-                .set("school", adminEditUserDto.getSchool())
-                .set("number", adminEditUserDto.getNumber())
-                .set("email", adminEditUserDto.getEmail())
-                .set(adminEditUserDto.getSetNewPwd(), "password", SecureUtil.md5(adminEditUserDto.getPassword()))
-                .set("status", adminEditUserDto.getStatus());
+                .set("username", adminEditUserDTO.getUsername())
+                .set("realname", adminEditUserDTO.getRealname())
+                .set("school", adminEditUserDTO.getSchool())
+                .set("number", adminEditUserDTO.getNumber())
+                .set("email", adminEditUserDTO.getEmail())
+                .set(adminEditUserDTO.getSetNewPwd(), "password", SecureUtil.md5(adminEditUserDTO.getPassword()))
+                .set("status", adminEditUserDTO.getStatus());
         boolean addUserInfo = userInfoEntityService.update(userInfoUpdateWrapper);
 
         QueryWrapper<UserRole> userRoleQueryWrapper = new QueryWrapper<>();
         userRoleQueryWrapper.eq("uid", uid);
         UserRole userRole = userRoleEntityService.getOne(userRoleQueryWrapper, false);
         boolean addUserRole = false;
-        int type = adminEditUserDto.getType();
+        int type = adminEditUserDTO.getType();
         int oldType = userRole.getRoleId().intValue();
         if (userRole.getRoleId().intValue() != type) {
             userRole.setRoleId((long) type);
@@ -103,10 +105,10 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         if (addUserRole) {
             // 获取当前登录的用户
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+            UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
             String title = "权限变更通知(Authority Change Notice)";
             String content = userRoleEntityService.getAuthChangeContent(oldType, type);
-            adminNoticeService.addSingleNoticeToUser(userRolesVo.getUid(), uid, title, content, "Sys");
+            adminNoticeService.addSingleNoticeToUser(userRolesVO.getUid(), uid, title, content, "Sys");
         }
 
     }
@@ -203,7 +205,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
         List<UserInfo> userInfoList = new LinkedList<>();
         List<UserRole> userRoleList = new LinkedList<>();
-        List<ExcelUserVo> userVoList = new LinkedList<>();
+        List<ExcelUserVO> userVOList = new LinkedList<>();
         // 存储账号密码放入redis中，等待导出excel
         final int numLen = String.valueOf(numberTo).length();
         for (int num = numberFrom; num <= numberTo; num++) {
@@ -211,7 +213,7 @@ public class AdminUserServiceImpl implements AdminUserService {
             String password = RandomUtil.randomString(passwordLength).toUpperCase();
             String username = prefix + String.format("%0" + numLen + "d", num) + suffix;
             userInfoList.add(new UserInfo().setUuid(uuid).setUsername(username).setPassword(SecureUtil.md5(password)));
-            userVoList.add(new ExcelUserVo().setUsername(username).setPassword(password));
+            userVOList.add(new ExcelUserVO().setUsername(username).setPassword(password));
             userRoleList.add(new UserRole()
                     .setRoleId(RoleEnum.DEFAULT_USER.getId())
                     .setUid(uuid));
@@ -221,7 +223,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (result1 && result2) {
             String key = IdUtil.simpleUUID();
             // 存储半小时
-            redisUtil.hset(Constant.GENERATE_USER_INFO_LIST, key, userVoList, 1800);
+            redisUtil.hset(Constant.GENERATE_USER_INFO_LIST, key, userVOList, 1800);
             // 异步同步系统通知
             List<String> uidList = userInfoList.stream().map(UserInfo::getUuid).collect(Collectors.toList());
             adminNoticeService.syncNoticeToNewRegisterBatchUser(uidList);

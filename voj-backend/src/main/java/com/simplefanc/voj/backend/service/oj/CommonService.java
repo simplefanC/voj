@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.oj;
 
-import com.simplefanc.voj.backend.pojo.vo.CaptchaVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemTagVo;
+import com.simplefanc.voj.backend.pojo.vo.CaptchaVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemTagVO;
 import com.simplefanc.voj.common.pojo.entity.problem.CodeTemplate;
 import com.simplefanc.voj.common.pojo.entity.problem.Language;
 import com.simplefanc.voj.common.pojo.entity.problem.Tag;
@@ -18,13 +18,13 @@ import java.util.List;
 
 public interface CommonService {
 
-    CaptchaVo getCaptcha();
+    CaptchaVO getCaptcha();
 
     List<TrainingCategory> getTrainingCategory();
 
     List<Tag> getAllProblemTagsList(String oj);
 
-    List<ProblemTagVo> getProblemTagsAndClassification(String oj);
+    List<ProblemTagVO> getProblemTagsAndClassification(String oj);
 
     Collection<Tag> getProblemTags(Long pid);
 

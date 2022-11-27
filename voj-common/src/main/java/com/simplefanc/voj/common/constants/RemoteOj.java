@@ -31,8 +31,9 @@ public enum RemoteOj {
     private final String name;
 
     public static RemoteOj getTypeByName(String judgeName) {
-        if (judgeName == null)
+        if (judgeName == null) {
             return null;
+        }
         for (RemoteOj remoteJudge : RemoteOj.values()) {
             if (remoteJudge.getName().equals(judgeName)) {
                 return remoteJudge;
@@ -41,13 +42,12 @@ public enum RemoteOj {
         return null;
     }
 
-    public static Boolean isRemoteOJ(String name) {
-        for (RemoteOj remoteOJ : RemoteOj.values()) {
-            if (remoteOJ.getName().equals(name)) {
+    public static Boolean isRemoteOj(String name) {
+        for (RemoteOj remoteOj : RemoteOj.values()) {
+            if (remoteOj.getName().equals(name)) {
                 return true;
             }
         }
         return false;
-
     }
 }

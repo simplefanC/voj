@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingProblemMapper;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +44,9 @@ public class TrainingProblemEntityServiceImpl extends ServiceImpl<TrainingProble
     }
 
     @Override
-    public List<ProblemVo> getTrainingProblemList(Long tid) {
-        List<ProblemVo> trainingProblemList = trainingProblemMapper.getTrainingProblemList(tid);
-        return trainingProblemList.stream().filter(distinctByKey(ProblemVo::getPid)).collect(Collectors.toList());
+    public List<ProblemVO> getTrainingProblemList(Long tid) {
+        List<ProblemVO> trainingProblemList = trainingProblemMapper.getTrainingProblemList(tid);
+        return trainingProblemList.stream().filter(distinctByKey(ProblemVO::getPid)).collect(Collectors.toList());
     }
 
     @Override

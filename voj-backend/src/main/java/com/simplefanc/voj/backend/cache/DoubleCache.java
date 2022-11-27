@@ -74,9 +74,8 @@ public class DoubleCache extends AbstractValueAdaptingCache {
     @Override
     public <T> T get(Object key, Callable<T> valueLoader) {
         ReentrantLock lock = new ReentrantLock();
+        lock.lock();
         try {
-            lock.lock();
-
             Object obj = lookup(key);
             if (Objects.nonNull(obj)) {
                 return (T) obj;

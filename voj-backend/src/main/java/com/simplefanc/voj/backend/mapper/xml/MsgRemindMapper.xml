@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.MsgRemindMapper">
 
-    <select id="getUserUnreadMsgCount" resultType="com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo"
+    <select id="getUserUnreadMsgCount" resultType="com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVO"
             useCache="true">
         SELECT (SELECT COUNT(1)
                 FROM msg_remind WHERE recipient_id = #{uid}
@@ -19,7 +19,7 @@
     </select>
 
 
-    <resultMap id="map_UserMsgList" type="com.simplefanc.voj.backend.pojo.vo.UserMsgVo">
+    <resultMap id="map_UserMsgList" type="com.simplefanc.voj.backend.pojo.vo.UserMsgVO">
         <id column="id" property="id"></id>
         <result column="sender_id" property="senderId"></result>
         <result column="action" property="action"></result>

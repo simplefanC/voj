@@ -6,7 +6,7 @@ import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.user.SessionEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.system.DashboardService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.Session;
@@ -35,9 +35,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public Session getRecentSession() {
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        QueryWrapper<Session> wrapper = new QueryWrapper<Session>().eq("uid", userRolesVo.getUid())
+        QueryWrapper<Session> wrapper = new QueryWrapper<Session>().eq("uid", userRolesVO.getUid())
                 .orderByDesc("gmt_create");
         List<Session> sessionList = sessionEntityService.list(wrapper);
         if (sessionList.size() > 1) {

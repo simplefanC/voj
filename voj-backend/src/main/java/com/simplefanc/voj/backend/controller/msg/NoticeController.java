@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
+import com.simplefanc.voj.backend.pojo.vo.SysMsgVO;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -25,14 +25,14 @@ public class NoticeController {
 
     @RequestMapping(value = "/sys", method = RequestMethod.GET)
     @RequiresAuthentication
-    public CommonResult<IPage<SysMsgVo>> getSysNotice(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<SysMsgVO>> getSysNotice(@RequestParam(value = "limit", required = false) Integer limit,
                                                       @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(noticeService.getSysNotice(limit, currentPage));
     }
 
     @RequestMapping(value = "/mine", method = RequestMethod.GET)
     @RequiresAuthentication
-    public CommonResult<IPage<SysMsgVo>> getMineNotice(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<SysMsgVO>> getMineNotice(@RequestParam(value = "limit", required = false) Integer limit,
                                                        @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return CommonResult.successResponse(noticeService.getMineNotice(limit, currentPage));
     }

@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.user;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 
 import java.util.List;
 import java.util.Map;
@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public interface AdminUserService {
 
-    IPage<UserRolesVo> getUserList(Integer limit, Integer currentPage, String keyword, Long role, Integer status);
+    IPage<UserRolesVO> getUserList(Integer limit, Integer currentPage, String keyword, Long role, Integer status);
 
-    void editUser(AdminEditUserDto adminEditUserDto);
+    void editUser(AdminEditUserDTO adminEditUserDTO);
 
     void deleteUser(List<String> deleteUserIdList);
 

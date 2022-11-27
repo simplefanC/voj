@@ -2,7 +2,7 @@ package com.simplefanc.voj.backend.controller.admin;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
 import com.simplefanc.voj.backend.service.admin.problem.AdminProblemService;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
@@ -57,16 +57,16 @@ public class AdminProblemController {
     @PostMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addProblem(@RequestBody ProblemDto problemDto) {
-        adminProblemService.addProblem(problemDto);
+    public CommonResult<Void> addProblem(@RequestBody ProblemDTO problemDTO) {
+        adminProblemService.addProblem(problemDTO);
         return CommonResult.successResponse();
     }
 
     @PutMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> updateProblem(@RequestBody ProblemDto problemDto) {
-        adminProblemService.updateProblem(problemDto);
+    public CommonResult<Void> updateProblem(@RequestBody ProblemDTO problemDTO) {
+        adminProblemService.updateProblem(problemDTO);
         return CommonResult.successResponse();
     }
 
@@ -102,9 +102,9 @@ public class AdminProblemController {
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> importRemoteOJProblem(@RequestParam("name") String name,
+    public CommonResult<Void> importRemoteOjProblem(@RequestParam("name") String name,
                                                     @RequestParam("problemId") String problemId) {
-        adminProblemService.importRemoteOJProblem(name, problemId);
+        adminProblemService.importRemoteOjProblem(name, problemId);
         return CommonResult.successResponse("导入新题目成功");
     }
 

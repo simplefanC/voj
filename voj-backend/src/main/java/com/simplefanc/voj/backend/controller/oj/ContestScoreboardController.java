@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
+import com.simplefanc.voj.backend.pojo.dto.ContestRankDTO;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 import com.simplefanc.voj.backend.service.oj.ContestScoreboardService;
 import com.simplefanc.voj.common.result.CommonResult;
@@ -43,8 +43,8 @@ public class ContestScoreboardController {
      * @Since 2021/12/07
      */
     @PostMapping("/get-contest-outside-scoreboard")
-    public CommonResult<IPage> getContestOutsideScoreboard(@RequestBody ContestRankDto contestRankDto) {
-        return CommonResult.successResponse(contestScoreboardService.getContestOutsideScoreboard(contestRankDto));
+    public CommonResult<IPage> getContestOutsideScoreboard(@RequestBody ContestRankDTO contestRankDTO) {
+        return CommonResult.successResponse(contestScoreboardService.getContestOutsideScoreboard(contestRankDTO));
     }
 
 }

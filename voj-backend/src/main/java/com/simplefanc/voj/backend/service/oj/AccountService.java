@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.service.oj;
 
-import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
-import com.simplefanc.voj.backend.pojo.vo.ChangeAccountVo;
-import com.simplefanc.voj.backend.pojo.vo.CheckUsernameOrEmailVo;
-import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
-import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDTO;
+import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDTO;
+import com.simplefanc.voj.backend.pojo.vo.ChangeAccountVO;
+import com.simplefanc.voj.backend.pojo.vo.CheckUsernameOrEmailVO;
+import com.simplefanc.voj.backend.pojo.vo.UserHomeVO;
+import com.simplefanc.voj.backend.pojo.vo.UserInfoVO;
 
 /**
  * @Author: chenfan
@@ -22,7 +22,7 @@ public interface AccountService {
      * @Return
      * @Since 2021/11/5
      */
-    CheckUsernameOrEmailVo checkUsernameOrEmail(CheckUsernameOrEmailDto checkUsernameOrEmailDto);
+    CheckUsernameOrEmailVO checkUsernameOrEmail(CheckUsernameOrEmailDTO checkUsernameOrEmailDTO);
 
     /**
      * @param uid
@@ -31,7 +31,7 @@ public interface AccountService {
      * @Return CommonResult
      * @Since 2021/01/07
      */
-    UserHomeVo getUserHomeInfo(String uid, String username);
+    UserHomeVO getUserHomeInfo(String uid, String username);
 
     /**
      * @MethodName changePassword
@@ -39,7 +39,7 @@ public interface AccountService {
      * @Return
      * @Since 2021/1/8
      */
-    ChangeAccountVo changePassword(ChangePasswordDto changePasswordDto);
+    ChangeAccountVO changePassword(ChangePasswordDTO changePasswordDTO);
 
     /**
      * @MethodName changeEmail
@@ -47,8 +47,8 @@ public interface AccountService {
      * @Return
      * @Since 2021/1/9
      */
-    ChangeAccountVo changeEmail(ChangeEmailDto changeEmailDto);
+    ChangeAccountVO changeEmail(ChangeEmailDTO changeEmailDTO);
 
-    UserInfoVo changeUserInfo(UserInfoVo userInfoVo);
+    UserInfoVO changeUserInfo(UserInfoVO userInfoVO);
 
 }

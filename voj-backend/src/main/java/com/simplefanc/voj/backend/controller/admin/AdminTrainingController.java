@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.TrainingDto;
-import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
+import com.simplefanc.voj.backend.pojo.dto.TrainingDTO;
+import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDTO;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingService;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
@@ -42,8 +42,8 @@ public class AdminTrainingController {
     @GetMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<TrainingDto> getTraining(@RequestParam("tid") Long tid) {
-        TrainingDto training = adminTrainingService.getTraining(tid);
+    public CommonResult<TrainingDTO> getTraining(@RequestParam("tid") Long tid) {
+        TrainingDTO training = adminTrainingService.getTraining(tid);
         return CommonResult.successResponse(training);
     }
 
@@ -58,16 +58,16 @@ public class AdminTrainingController {
     @PostMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addTraining(@RequestBody TrainingDto trainingDto) {
-        adminTrainingService.addTraining(trainingDto);
+    public CommonResult<Void> addTraining(@RequestBody TrainingDTO trainingDTO) {
+        adminTrainingService.addTraining(trainingDTO);
         return CommonResult.successResponse();
     }
 
     @PutMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> updateTraining(@RequestBody TrainingDto trainingDto) {
-        adminTrainingService.updateTraining(trainingDto);
+    public CommonResult<Void> updateTraining(@RequestBody TrainingDTO trainingDTO) {
+        adminTrainingService.updateTraining(trainingDTO);
         return CommonResult.successResponse();
     }
 
@@ -115,17 +115,17 @@ public class AdminTrainingController {
     @PostMapping("/add-problem-from-public")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addProblemFromPublic(@RequestBody TrainingProblemDto trainingProblemDto) {
-        adminTrainingProblemService.addProblemFromPublic(trainingProblemDto);
+    public CommonResult<Void> addProblemFromPublic(@RequestBody TrainingProblemDTO trainingProblemDTO) {
+        adminTrainingProblemService.addProblemFromPublic(trainingProblemDTO);
         return CommonResult.successResponse();
     }
 
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> importTrainingRemoteOJProblem(@RequestParam("name") String name,
+    public CommonResult<Void> importTrainingRemoteOjProblem(@RequestParam("name") String name,
                                                             @RequestParam("problemId") String problemId, @RequestParam("tid") Long tid) {
-        adminTrainingProblemService.importTrainingRemoteOJProblem(name, problemId, tid);
+        adminTrainingProblemService.importTrainingRemoteOjProblem(name, problemId, tid);
         return CommonResult.successResponse();
     }
 

@@ -7,7 +7,7 @@ import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.contest.ContestRecordEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestRecordMapper;
-import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
+import com.simplefanc.voj.backend.pojo.vo.ContestRecordVO;
 import com.simplefanc.voj.common.constants.ContestConstant;
 import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
@@ -97,7 +97,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
     @Override
     @Cacheable(value = RedisConstant.OI_CONTEST_RANK_CACHE, key = "#contest.oiRankScoreType+'-'+#contest.id", condition = "#isOpenSealRank")
-    public List<ContestRecordVo> getOIContestRecord(Contest contest, Boolean isOpenSealRank) {
+    public List<ContestRecordVO> getOIContestRecord(Contest contest, Boolean isOpenSealRank) {
         String oiRankScoreType = contest.getOiRankScoreType();
         Long cid = contest.getId();
         Date sealTime = contest.getSealRankTime();
@@ -124,7 +124,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 //            }
 //        } else {
 //            String key = ContestConstant.OI_CONTEST_RANK_CACHE + "_" + oiRankScoreType + "_" + cid;
-//            List<ContestRecordVo> oiContestRecordList = (List<ContestRecordVo>) redisUtil.get(key);
+//            List<ContestRecordVO> oiContestRecordList = (List<ContestRecordVO>) redisUtil.get(key);
 //            if (oiContestRecordList == null) {
 //                if (Objects.equals(ContestConstant.OI_RANK_RECENT_SCORE, oiRankScoreType)) {
 //                    return contestRecordMapper.getOIContestRecordByRecentSubmission(cid,
@@ -140,7 +140,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
 
 
     @Override
-    public List<ContestRecordVo> getACMContestRecord(Long cid, Date startTime) {
+    public List<ContestRecordVO> getACMContestRecord(Long cid, Date startTime) {
         return contestRecordMapper.getACMContestRecord(cid, startTime);
     }
 

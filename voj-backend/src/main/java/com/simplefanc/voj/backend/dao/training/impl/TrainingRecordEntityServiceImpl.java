@@ -3,7 +3,7 @@ package com.simplefanc.voj.backend.dao.training.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.training.TrainingRecordEntityService;
 import com.simplefanc.voj.backend.mapper.TrainingRecordMapper;
-import com.simplefanc.voj.backend.pojo.vo.TrainingRecordVo;
+import com.simplefanc.voj.backend.pojo.vo.TrainingRecordVO;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class TrainingRecordEntityServiceImpl extends ServiceImpl<TrainingRecordM
     private final TrainingRecordMapper trainingRecordMapper;
 
     @Override
-    public List<TrainingRecordVo> getTrainingRecord(Long tid) {
+    public List<TrainingRecordVO> getTrainingRecord(Long tid) {
         return trainingRecordMapper.getTrainingRecord(tid);
     }
 

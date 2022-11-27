@@ -1,14 +1,12 @@
 package com.simplefanc.voj.judger.judge.remote.provider.jsk;
 
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.*;
-import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import com.simplefanc.voj.judger.judge.remote.loginer.AbstractRetentiveLoginer;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.springframework.stereotype.Component;
@@ -17,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
-public class JSKLoginer extends RetentiveLoginer {
+public class JSKLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

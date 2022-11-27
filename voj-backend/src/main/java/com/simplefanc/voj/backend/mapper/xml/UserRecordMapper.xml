@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.UserRecordMapper">
-    <select id="getACMRankList" resultType="com.simplefanc.voj.backend.pojo.vo.ACMRankVo" useCache="true">
+    <select id="getACMRankList" resultType="com.simplefanc.voj.backend.pojo.vo.ACMRankVO" useCache="true">
         SELECT u.uuid as uid,u.nickname,u.username,left(u.signature,100) as signature,u.avatar,
         (SELECT COUNT(DISTINCT pid) FROM user_acproblem WHERE uid = u.uuid) AS ac,
         (SELECT COUNT(uid) FROM judge WHERE uid=u.uuid AND cid=0) AS total
@@ -18,7 +18,7 @@
         ORDER BY ac DESC,total ASC
     </select>
 
-    <select id="getRecent7ACRank" resultType="com.simplefanc.voj.backend.pojo.vo.ACMRankVo">
+    <select id="getRecent7ACRank" resultType="com.simplefanc.voj.backend.pojo.vo.ACMRankVO">
         SELECT u.uuid as uid,
                u.nickname,
                u.username,
@@ -39,7 +39,7 @@
     </select>
 
 
-    <select id="getOIRankList" resultType="com.simplefanc.voj.backend.pojo.vo.OIRankVo" useCache="true">
+    <select id="getOIRankList" resultType="com.simplefanc.voj.backend.pojo.vo.OIRankVO" useCache="true">
         SELECT ui.uuid AS uid, ui.nickname, ui.username, left(ui.signature,100) as signature, ui.avatar,
         (SELECT COUNT(DISTINCT pid) FROM user_acproblem WHERE uid = ui.uuid) AS ac,
         (SELECT COUNT(uid) FROM judge WHERE uid = ui.uuid) AS total,
@@ -65,7 +65,7 @@
         ORDER BY score DESC, ac DESC
     </select>
 
-    <resultMap id="map_UserHomeVo" type="com.simplefanc.voj.backend.pojo.vo.UserHomeVo">
+    <resultMap id="map_UserHomeVO" type="com.simplefanc.voj.backend.pojo.vo.UserHomeVO">
         <id column="uid" property="uid"></id>
         <result column="username" property="username"></result>
         <result column="school" property="school"></result>
@@ -80,7 +80,7 @@
         </collection>
     </resultMap>
 
-    <select id="getUserHomeInfo" resultMap="map_UserHomeVo">
+    <select id="getUserHomeInfo" resultMap="map_UserHomeVO">
         SELECT uuid as uid,username,nickname,gender,signature,school,github,blog,avatar,
         (SELECT COUNT(uid) FROM judge WHERE uid=uuid AND cid=0) AS total
         FROM user_info

@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.file.ImageService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.user.Role;
@@ -69,34 +69,34 @@ public class ImageServiceImpl implements ImageService {
         }
 
         // 获取当前登录用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 将当前用户所属的file表中avatar类型的实体的delete设置为1；
-        fileEntityService.updateFileToDeleteByUidAndType(userRolesVo.getUid(), "avatar");
+        fileEntityService.updateFileToDeleteByUidAndType(userRolesVO.getUid(), "avatar");
 
         // 更新user_info里面的avatar
         UpdateWrapper<UserInfo> userInfoUpdateWrapper = new UpdateWrapper<>();
-        userInfoUpdateWrapper.set("avatar", filePathProps.getImgApi() + filename).eq("uuid", userRolesVo.getUid());
+        userInfoUpdateWrapper.set("avatar", filePathProps.getImgApi() + filename).eq("uuid", userRolesVO.getUid());
         userInfoEntityService.update(userInfoUpdateWrapper);
 
         // 插入file表记录
         com.simplefanc.voj.common.pojo.entity.common.File imgFile = new com.simplefanc.voj.common.pojo.entity.common.File();
         imgFile.setName(filename).setFolderPath(filePathProps.getUserAvatarFolder())
                 .setFilePath(filePathProps.getUserAvatarFolder() + File.separator + filename).setSuffix(suffix)
-                .setType(FileTypeEnum.AVATAR.getType()).setUid(userRolesVo.getUid());
+                .setType(FileTypeEnum.AVATAR.getType()).setUid(userRolesVO.getUid());
         fileEntityService.saveOrUpdate(imgFile);
 
         // 更新session
-        userRolesVo.setAvatar(filePathProps.getImgApi() + filename);
-        UserSessionUtil.setUserInfo(userRolesVo);
-        return MapUtil.builder().put("uid", userRolesVo.getUid()).put("username", userRolesVo.getUsername())
-                .put("nickname", userRolesVo.getNickname()).put("avatar", filePathProps.getImgApi() + filename)
-                .put("email", userRolesVo.getEmail()).put("number", userRolesVo.getNumber())
-                .put("school", userRolesVo.getSchool()).put("course", userRolesVo.getCourse())
-                .put("signature", userRolesVo.getSignature()).put("realname", userRolesVo.getRealname())
-                .put("github", userRolesVo.getGithub()).put("blog", userRolesVo.getBlog())
-                .put("cfUsername", userRolesVo.getCfUsername())
-                .put("roleList", userRolesVo.getRoles().stream().map(Role::getRole)).map();
+        userRolesVO.setAvatar(filePathProps.getImgApi() + filename);
+        UserSessionUtil.setUserInfo(userRolesVO);
+        return MapUtil.builder().put("uid", userRolesVO.getUid()).put("username", userRolesVO.getUsername())
+                .put("nickname", userRolesVO.getNickname()).put("avatar", filePathProps.getImgApi() + filename)
+                .put("email", userRolesVO.getEmail()).put("number", userRolesVO.getNumber())
+                .put("school", userRolesVO.getSchool()).put("course", userRolesVO.getCourse())
+                .put("signature", userRolesVO.getSignature()).put("realname", userRolesVO.getRealname())
+                .put("github", userRolesVO.getGithub()).put("blog", userRolesVO.getBlog())
+                .put("cfUsername", userRolesVO.getCfUsername())
+                .put("roleList", userRolesVO.getRoles().stream().map(Role::getRole)).map();
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ImageServiceImpl implements ImageService {
         }
 
         // 获取当前登录用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 插入file表记录
         com.simplefanc.voj.common.pojo.entity.common.File imgFile = new com.simplefanc.voj.common.pojo.entity.common.File();
@@ -133,7 +133,7 @@ public class ImageServiceImpl implements ImageService {
                 .setFilePath(filePathProps.getHomeCarouselFolder() + File.separator + filename)
                 .setSuffix(suffix)
                 .setType(FileTypeEnum.CAROUSEL.getType())
-                .setUid(userRolesVo.getUid());
+                .setUid(userRolesVO.getUid());
         fileEntityService.saveOrUpdate(imgFile);
 
         return MapUtil.builder().put("id", imgFile.getId()).put("url", filePathProps.getImgApi() + filename).map();

@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.service.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.UserMsgVo;
-import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
+import com.simplefanc.voj.backend.pojo.vo.UserMsgVO;
+import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVO;
 
 /**
  * @Author: chenfan
@@ -12,16 +12,16 @@ import com.simplefanc.voj.backend.pojo.vo.UserUnreadMsgCountVo;
 
 public interface UserMessageService {
 
-    UserUnreadMsgCountVo getUnreadMsgCount();
+    UserUnreadMsgCountVO getUnreadMsgCount();
 
     void cleanMsg(String type, Long id);
 
-    IPage<UserMsgVo> getCommentMsg(Integer limit, Integer currentPage);
+    IPage<UserMsgVO> getCommentMsg(Integer limit, Integer currentPage);
 
-    IPage<UserMsgVo> getReplyMsg(Integer limit, Integer currentPage);
+    IPage<UserMsgVO> getReplyMsg(Integer limit, Integer currentPage);
 
-    IPage<UserMsgVo> getLikeMsg(Integer limit, Integer currentPage);
+    IPage<UserMsgVO> getLikeMsg(Integer limit, Integer currentPage);
 
-    void updateUserMsgRead(IPage<UserMsgVo> userMsgList);
+    void updateUserMsgRead(IPage<UserMsgVO> userMsgList);
 
 }

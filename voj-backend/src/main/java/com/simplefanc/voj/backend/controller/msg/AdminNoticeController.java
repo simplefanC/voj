@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.controller.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminSysNoticeVO;
 import com.simplefanc.voj.backend.service.msg.AdminNoticeService;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
 import com.simplefanc.voj.common.result.CommonResult;
@@ -25,7 +25,7 @@ public class AdminNoticeController {
     @GetMapping("/notice")
     @RequiresAuthentication
     @RequiresRoles("root")
-    public CommonResult<IPage<AdminSysNoticeVo>> getSysNotice(
+    public CommonResult<IPage<AdminSysNoticeVO>> getSysNotice(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "type", required = false) String type) {

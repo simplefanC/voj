@@ -11,7 +11,7 @@ import org.springframework.util.Assert;
  * @date 2022/1/17 23:07
  **/
 @Component
-public class TKOJProblemCrawler extends ProblemCrawler {
+public class TKOJProblemCrawler extends AbstractProblemCrawler {
 
     public static final String JUDGE_NAME = "TKOJ";
 

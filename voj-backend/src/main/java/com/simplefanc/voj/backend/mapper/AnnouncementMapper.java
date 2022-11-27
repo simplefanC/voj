@@ -3,7 +3,7 @@ package com.simplefanc.voj.backend.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,9 +19,9 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface AnnouncementMapper extends BaseMapper<Announcement> {
 
-    IPage<AnnouncementVo> getAnnouncementList(Page<AnnouncementVo> page, @Param("notAdmin") Boolean notAdmin);
+    IPage<AnnouncementVO> getAnnouncementList(Page<AnnouncementVO> page, @Param("notAdmin") Boolean notAdmin);
 
-    IPage<AnnouncementVo> getContestAnnouncement(Page<AnnouncementVo> page, @Param("cid") Long cid,
+    IPage<AnnouncementVO> getContestAnnouncement(Page<AnnouncementVO> page, @Param("cid") Long cid,
                                                  @Param("notAdmin") Boolean notAdmin);
 
 }

@@ -11,8 +11,8 @@ import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
-import com.simplefanc.voj.backend.judge.remote.crawler.ProblemCrawler;
-import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
+import com.simplefanc.voj.backend.judge.remote.crawler.AbstractProblemCrawler;
+import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDTO;
 import com.simplefanc.voj.backend.service.admin.problem.RemoteProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingProblemService;
 import com.simplefanc.voj.backend.service.admin.training.AdminTrainingRecordService;
@@ -53,10 +53,12 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     @Override
     public HashMap<String, Object> getProblemList(Integer limit, Integer currentPage, String keyword,
                                                   Boolean queryExisted, Long tid) {
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
 
         IPage<Problem> iPage = new Page<>(currentPage, limit);
         // 根据tid在TrainingProblem表中查询到对应pid集合
@@ -148,11 +150,11 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
     }
 
     @Override
-    public void addProblemFromPublic(TrainingProblemDto trainingProblemDto) {
+    public void addProblemFromPublic(TrainingProblemDTO trainingProblemDTO) {
 
-        Long pid = trainingProblemDto.getPid();
-        Long tid = trainingProblemDto.getTid();
-        String displayId = trainingProblemDto.getDisplayId();
+        Long pid = trainingProblemDTO.getPid();
+        Long tid = trainingProblemDTO.getTid();
+        String displayId = trainingProblemDTO.getDisplayId();
 
         QueryWrapper<TrainingProblem> trainingProblemQueryWrapper = new QueryWrapper<>();
         trainingProblemQueryWrapper.eq("tid", tid)
@@ -162,9 +164,9 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             throw new StatusFailException("添加失败，该题目已添加或者题目的训练展示ID已存在！");
         }
 
-        TrainingProblem newTProblem = new TrainingProblem();
+        TrainingProblem problem = new TrainingProblem();
         boolean isOk = trainingProblemEntityService
-                .saveOrUpdate(newTProblem.setTid(tid).setPid(pid).setDisplayId(displayId));
+                .saveOrUpdate(problem.setTid(tid).setPid(pid).setDisplayId(displayId));
         if (isOk) {
             // 更新训练最近更新时间
             UpdateWrapper<Training> trainingUpdateWrapper = new UpdateWrapper<>();
@@ -172,7 +174,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             trainingEntityService.update(trainingUpdateWrapper);
 
             // 异步地同步用户对该题目的提交数据
-            adminTrainingRecordService.syncAlreadyRegisterUserRecord(tid, pid, newTProblem.getId());
+            adminTrainingRecordService.syncAlreadyRegisterUserRecord(tid, pid, problem.getId());
         } else {
             throw new StatusFailException("添加失败！");
         }
@@ -180,7 +182,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importTrainingRemoteOJProblem(String name, String problemId, Long tid) {
+    public void importTrainingRemoteOjProblem(String name, String problemId, Long tid) {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("problem_id", name.toUpperCase() + "-" + problemId);
         Problem problem = problemEntityService.getOne(queryWrapper, false);
@@ -188,10 +190,10 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
         // 如果该题目不存在，需要先导入
         if (problem == null) {
             try {
-                ProblemCrawler.RemoteProblemInfo otherOJProblemInfo = remoteProblemService
+                AbstractProblemCrawler.RemoteProblemInfo otherOjProblemInfo = remoteProblemService
                         .getOtherOJProblemInfo(name.toUpperCase(), problemId);
-                if (otherOJProblemInfo != null) {
-                    problem = remoteProblemService.adminAddOtherOJProblem(otherOJProblemInfo, name);
+                if (otherOjProblemInfo != null) {
+                    problem = remoteProblemService.adminAddOtherOJProblem(otherOjProblemInfo, name);
                     if (problem == null) {
                         throw new StatusFailException("导入新题目失败！请重新尝试！");
                     }
@@ -213,9 +215,9 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             throw new StatusFailException("添加失败，该题目已添加或者题目的训练展示ID已存在！");
         }
 
-        TrainingProblem newTProblem = new TrainingProblem();
+        TrainingProblem newProblem = new TrainingProblem();
         boolean isOk = trainingProblemEntityService
-                .saveOrUpdate(newTProblem.setTid(tid).setPid(problem.getId()).setDisplayId(problem.getProblemId()));
+                .saveOrUpdate(newProblem.setTid(tid).setPid(problem.getId()).setDisplayId(problem.getProblemId()));
         // 添加成功
         if (isOk) {
             // 更新训练最近更新时间
@@ -224,7 +226,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             trainingEntityService.update(trainingUpdateWrapper);
 
             // 异步地同步用户对该题目的提交数据
-            adminTrainingRecordService.syncAlreadyRegisterUserRecord(tid, problem.getId(), newTProblem.getId());
+            adminTrainingRecordService.syncAlreadyRegisterUserRecord(tid, problem.getId(), newProblem.getId());
         } else {
             throw new StatusFailException("添加失败！");
         }

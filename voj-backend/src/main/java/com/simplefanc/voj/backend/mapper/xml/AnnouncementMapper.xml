@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.AnnouncementMapper">
 
-    <select id="getAnnouncementList" resultMap="map_AnnouncementVo" useCache="true">
+    <select id="getAnnouncementList" resultMap="map_AnnouncementVO" useCache="true">
         SELECT a.*,u.username FROM user_info u,announcement a where a.uid = u.uuid
         and (SELECT COUNT(*) FROM contest_announcement ca WHERE ca.aid=a.id) = 0
         <if test="notAdmin">
@@ -11,7 +11,7 @@
         order by a.gmt_create desc
     </select>
 
-    <select id="getContestAnnouncement" resultMap="map_AnnouncementVo">
+    <select id="getContestAnnouncement" resultMap="map_AnnouncementVO">
         SELECT a.*,u.username FROM user_info u,announcement a,contest_announcement ca
         where a.uid = u.uuid and ca.cid =#{cid} and ca.aid = a.id
         <if test="notAdmin">
@@ -20,7 +20,7 @@
         order by a.gmt_create desc
     </select>
 
-    <resultMap id="map_AnnouncementVo" type="com.simplefanc.voj.backend.pojo.vo.AnnouncementVo">
+    <resultMap id="map_AnnouncementVO" type="com.simplefanc.voj.backend.pojo.vo.AnnouncementVO">
         <id column="id" property="id"></id>
         <result column="title" property="title"></result>
         <result column="content" property="content"></result>

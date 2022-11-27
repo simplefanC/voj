@@ -5,7 +5,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -165,7 +165,7 @@ public class SandboxRun {
         }
     };
 
-    public JSONArray run(String uri, JSONObject param) throws SystemError {
+    public JSONArray run(String uri, JSONObject param) throws SystemException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(JSONUtil.toJsonStr(param), headers);
@@ -178,10 +178,10 @@ public class SandboxRun {
             return JSONUtil.parseArray(postForEntity.getBody());
         } catch (RestClientResponseException ex) {
             if (ex.getRawStatusCode() != 200) {
-                throw new SystemError("Cannot connect to sandbox service.", null, ex.getResponseBodyAsString());
+                throw new SystemException("Cannot connect to sandbox service.", null, ex.getResponseBodyAsString());
             }
         } catch (Exception e) {
-            throw new SystemError("Call SandBox Error.", null, e.getMessage());
+            throw new SystemException("Call SandBox Error.", null, e.getMessage());
         }
         return null;
     }
@@ -217,7 +217,7 @@ public class SandboxRun {
      */
     public static JSONArray compile(Long maxCpuTime, Long maxRealTime, Long maxMemory, Long maxStack, String srcName,
                                     String exeName, List<String> args, List<String> envs, String code, HashMap<String, String> extraFiles,
-                                    Boolean needCopyOutCached, Boolean needCopyOutExe, String copyOutDir) throws SystemError {
+                                    Boolean needCopyOutCached, Boolean needCopyOutExe, String copyOutDir) throws SystemException {
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
         cmd.set("env", envs);
@@ -283,7 +283,7 @@ public class SandboxRun {
      */
     public static JSONArray testCase(List<String> args, List<String> envs, String testCasePath, Long maxTime,
                                      Long maxMemory, Long maxOutputSize, Integer maxStack, String exeName, String fileId, String fileSrc)
-            throws SystemError {
+            throws SystemException {
 
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
@@ -356,7 +356,7 @@ public class SandboxRun {
     public static JSONArray spjCheckResult(List<String> args, List<String> envs, String userOutputFilePath,
                                            String userOutputFileName, String testCaseInputFilePath, String testCaseInputFileName,
                                            String testCaseOutputFilePath, String testCaseOutputFileName, String spjExeSrc, String spjExeName)
-            throws SystemError {
+            throws SystemException {
 
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
@@ -448,7 +448,7 @@ public class SandboxRun {
                                              String userFileId, String userFileSrc, Long userMaxTime, Long userMaxMemory, Integer userMaxStack,
                                              String testCaseInputPath, String testCaseInputFileName, String testCaseOutputFilePath,
                                              String testCaseOutputFileName, String userOutputFileName, List<String> interactArgs,
-                                             List<String> interactEnvs, String interactExeSrc, String interactExeName) throws SystemError {
+                                             List<String> interactEnvs, String interactExeSrc, String interactExeName) throws SystemException {
 
         /**
          * 注意：用户源代码需要先编译，若是通过编译需要先将文件存入内存，再利用管道判题，同时特殊判题程序必须已编译且存在（否则判题失败，系统错误）！

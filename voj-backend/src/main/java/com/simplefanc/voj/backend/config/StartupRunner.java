@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StartupRunner implements CommandLineRunner {
 
-    private final ConfigVo configVo;
+    private final ConfigVO configVO;
 
     private final ConfigService configService;
 
@@ -113,34 +113,34 @@ public class StartupRunner implements CommandLineRunner {
 
         // 动态修改nacos上的配置文件
         if ("default".equals(judgeToken)) {
-            configVo.setJudgeToken(IdUtil.fastSimpleUUID());
+            configVO.setJudgeToken(IdUtil.fastSimpleUUID());
         } else {
-            configVo.setJudgeToken(judgeToken);
+            configVO.setJudgeToken(judgeToken);
         }
 
         if ("default".equals(tokenSecret)) {
-            configVo.setTokenSecret(IdUtil.fastSimpleUUID());
+            configVO.setTokenSecret(IdUtil.fastSimpleUUID());
         } else {
-            configVo.setTokenSecret(tokenSecret);
+            configVO.setTokenSecret(tokenSecret);
         }
-        configVo.setTokenExpire(tokenExpire);
-        configVo.setCheckRefreshExpire(checkRefreshExpire);
+        configVO.setTokenExpire(tokenExpire);
+        configVO.setCheckRefreshExpire(checkRefreshExpire);
 
-        configVo.setMysqlUsername(mysqlUsername);
-        configVo.setMysqlPassword(mysqlPassword);
-        configVo.setMysqlHost(mysqlHost);
-        configVo.setMysqlPublicHost(mysqlPublicHost);
-        configVo.setMysqlPort(mysqlPort);
-        configVo.setMysqlDbName(mysqlDbName);
+        configVO.setMysqlUsername(mysqlUsername);
+        configVO.setMysqlPassword(mysqlPassword);
+        configVO.setMysqlHost(mysqlHost);
+        configVO.setMysqlPublicHost(mysqlPublicHost);
+        configVO.setMysqlPort(mysqlPort);
+        configVO.setMysqlDbName(mysqlDbName);
 
-        configVo.setRedisHost(redisHost);
-        configVo.setRedisPort(redisPort);
-        configVo.setRedisPassword(redisPassword);
+        configVO.setRedisHost(redisHost);
+        configVO.setRedisPort(redisPort);
+        configVO.setRedisPassword(redisPassword);
 
-        configVo.setEmailHost(emailHost);
-        configVo.setEmailPort(emailPort);
-        configVo.setEmailUsername(emailUsername);
-        configVo.setEmailPassword(emailPassword);
+        configVO.setEmailHost(emailHost);
+        configVO.setEmailPort(emailPort);
+        configVO.setEmailUsername(emailUsername);
+        configVO.setEmailPassword(emailPassword);
 
         configService.sendNewConfigToNacos();
 
@@ -153,7 +153,7 @@ public class StartupRunner implements CommandLineRunner {
         // 初始化清空表
         remoteJudgeAccountEntityService.remove(new QueryWrapper<>());
         List<RemoteJudgeAccount> accountList = new LinkedList<>();
-        for (RemoteAccountProperties.RemoteOJ remoteOj : remoteAccountProps.getOjs()) {
+        for (RemoteAccountProperties.RemoteOj remoteOj : remoteAccountProps.getOjs()) {
             for (RemoteAccountProperties.Account account : remoteOj.getAccounts()) {
                 accountList.add(new RemoteJudgeAccount().setUsername(account.getUsername())
                         .setPassword(account.getPassword()).setStatus(true).setVersion(0L).setOj(remoteOj.getOj()));

@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.service.admin.training;
 
-import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDto;
+import com.simplefanc.voj.backend.pojo.dto.TrainingProblemDTO;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 
 import java.util.HashMap;
@@ -20,8 +20,8 @@ public interface AdminTrainingProblemService {
 
     void deleteProblem(Long pid, Long tid);
 
-    void addProblemFromPublic(TrainingProblemDto trainingProblemDto);
+    void addProblemFromPublic(TrainingProblemDTO trainingProblemDTO);
 
-    void importTrainingRemoteOJProblem(String name, String problemId, Long tid);
+    void importTrainingRemoteOjProblem(String name, String problemId, Long tid);
 
 }

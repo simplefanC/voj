@@ -1,9 +1,9 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
-import com.simplefanc.voj.backend.pojo.vo.ContestVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
+import com.simplefanc.voj.backend.pojo.vo.ContestVO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ public interface HomeService {
      * @Return CommonResult
      * @Since 2021/12/29
      */
-    List<ContestVo> getRecentContest();
+    List<ContestVO> getRecentContest();
 
     /**
      * @MethodName getHomeCarousel
@@ -41,7 +41,7 @@ public interface HomeService {
      * @Return
      * @Since 2021/1/15
      */
-    List<ACMRankVo> getRecentSevenACRank();
+    List<ACMRankVO> getRecentSevenACRank();
 
     /**
      * @MethodName getRecentOtherContest
@@ -59,6 +59,6 @@ public interface HomeService {
      * @Return CommonResult
      * @Since 2021/12/29
      */
-    IPage<AnnouncementVo> getCommonAnnouncement(Integer limit, Integer currentPage);
+    IPage<AnnouncementVO> getCommonAnnouncement(Integer limit, Integer currentPage);
 
 }

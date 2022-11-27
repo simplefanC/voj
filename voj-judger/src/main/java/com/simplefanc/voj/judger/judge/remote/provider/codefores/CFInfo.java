@@ -6,7 +6,7 @@ import org.apache.http.HttpHost;
 
 public class CFInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.CF, "CF",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.CF,
             new HttpHost("codeforces.com", 443, "https"));
 
 }

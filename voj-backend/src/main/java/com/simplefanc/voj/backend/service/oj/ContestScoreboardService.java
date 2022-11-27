@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.ContestRankDto;
+import com.simplefanc.voj.backend.pojo.dto.ContestRankDTO;
 import com.simplefanc.voj.backend.pojo.vo.ContestOutsideInfo;
 
 import java.util.List;
@@ -16,6 +16,6 @@ public interface ContestScoreboardService {
 
     ContestOutsideInfo getContestOutsideInfo(Long cid);
 
-    IPage getContestOutsideScoreboard(ContestRankDto contestRankDto);
+    IPage getContestOutsideScoreboard(ContestRankDTO contestRankDTO);
 
 }

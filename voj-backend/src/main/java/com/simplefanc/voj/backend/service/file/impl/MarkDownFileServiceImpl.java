@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.common.FileEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.file.MarkDownFileService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import lombok.RequiredArgsConstructor;
@@ -63,11 +63,11 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         }
 
         // 获取当前登录用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         com.simplefanc.voj.common.pojo.entity.common.File file = new com.simplefanc.voj.common.pojo.entity.common.File();
         file.setFolderPath(filePathProps.getMarkdownFileFolder()).setName(filename)
                 .setFilePath(filePathProps.getMarkdownFileFolder() + File.separator + filename).setSuffix(suffix)
-                .setType(FileTypeEnum.MARKDOWN.getType()).setUid(userRolesVo.getUid());
+                .setType(FileTypeEnum.MARKDOWN.getType()).setUid(userRolesVO.getUid());
         fileEntityService.save(file);
 
         return MapUtil.builder().put("link", filePathProps.getImgApi() + filename).put("fileId", file.getId()).map();
@@ -78,7 +78,7 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
     public void deleteMDImg(Long fileId) {
 
         // 获取当前登录用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         com.simplefanc.voj.common.pojo.entity.common.File file = fileEntityService.getById(fileId);
 
@@ -94,7 +94,7 @@ public class MarkDownFileServiceImpl implements MarkDownFileService {
         boolean isProblemAdmin = UserSessionUtil.isProblemAdmin();
         boolean isAdmin = UserSessionUtil.isAdmin();
 
-        if (!file.getUid().equals(userRolesVo.getUid()) && !isRoot && !isAdmin && !isProblemAdmin) {
+        if (!file.getUid().equals(userRolesVO.getUid()) && !isRoot && !isAdmin && !isProblemAdmin) {
             throw new StatusForbiddenException("错误：无权删除他人文件！");
         }
 

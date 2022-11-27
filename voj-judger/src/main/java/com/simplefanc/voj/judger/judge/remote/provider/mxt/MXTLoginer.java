@@ -1,17 +1,12 @@
 package com.simplefanc.voj.judger.judge.remote.provider.mxt;
 
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
 import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
 import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
-import com.simplefanc.voj.judger.judge.remote.loginer.RetentiveLoginer;
+import com.simplefanc.voj.judger.judge.remote.loginer.AbstractRetentiveLoginer;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpEntity;
@@ -25,11 +20,10 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
-public class MXTLoginer extends RetentiveLoginer {
+public class MXTLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

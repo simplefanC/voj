@@ -1,12 +1,12 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
-import com.simplefanc.voj.backend.pojo.vo.ChangeAccountVo;
-import com.simplefanc.voj.backend.pojo.vo.CheckUsernameOrEmailVo;
-import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
-import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDTO;
+import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDTO;
+import com.simplefanc.voj.backend.pojo.vo.ChangeAccountVO;
+import com.simplefanc.voj.backend.pojo.vo.CheckUsernameOrEmailVO;
+import com.simplefanc.voj.backend.pojo.vo.UserHomeVO;
+import com.simplefanc.voj.backend.pojo.vo.UserInfoVO;
 import com.simplefanc.voj.backend.service.oj.AccountService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +32,9 @@ public class AccountController {
      * @Since 2021/11/5
      */
     @RequestMapping(value = "/check-username-or-email", method = RequestMethod.POST)
-    public CommonResult<CheckUsernameOrEmailVo> checkUsernameOrEmail(
-            @RequestBody CheckUsernameOrEmailDto checkUsernameOrEmailDto) {
-        return CommonResult.successResponse(accountService.checkUsernameOrEmail(checkUsernameOrEmailDto));
+    public CommonResult<CheckUsernameOrEmailVO> checkUsernameOrEmail(
+            @RequestBody CheckUsernameOrEmailDTO checkUsernameOrEmailDTO) {
+        return CommonResult.successResponse(accountService.checkUsernameOrEmail(checkUsernameOrEmailDTO));
     }
 
     /**
@@ -45,7 +45,7 @@ public class AccountController {
      * @Since 2021/01/07
      */
     @GetMapping("/get-user-home-info")
-    public CommonResult<UserHomeVo> getUserHomeInfo(@RequestParam(value = "uid", required = false) String uid,
+    public CommonResult<UserHomeVO> getUserHomeInfo(@RequestParam(value = "uid", required = false) String uid,
                                                     @RequestParam(value = "username", required = false) String username) {
         return CommonResult.successResponse(accountService.getUserHomeInfo(uid, username));
     }
@@ -60,8 +60,8 @@ public class AccountController {
 
     @PostMapping("/change-password")
     @RequiresAuthentication
-    public CommonResult<ChangeAccountVo> changePassword(@RequestBody ChangePasswordDto changePasswordDto) {
-        return CommonResult.successResponse(accountService.changePassword(changePasswordDto));
+    public CommonResult<ChangeAccountVO> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        return CommonResult.successResponse(accountService.changePassword(changePasswordDTO));
     }
 
     /**
@@ -73,14 +73,14 @@ public class AccountController {
      */
     @PostMapping("/change-email")
     @RequiresAuthentication
-    public CommonResult<ChangeAccountVo> changeEmail(@RequestBody ChangeEmailDto changeEmailDto) {
-        return CommonResult.successResponse(accountService.changeEmail(changeEmailDto));
+    public CommonResult<ChangeAccountVO> changeEmail(@RequestBody ChangeEmailDTO changeEmailDTO) {
+        return CommonResult.successResponse(accountService.changeEmail(changeEmailDTO));
     }
 
     @PostMapping("/change-userInfo")
     @RequiresAuthentication
-    public CommonResult<UserInfoVo> changeUserInfo(@RequestBody UserInfoVo userInfoVo) {
-        return CommonResult.successResponse(accountService.changeUserInfo(userInfoVo));
+    public CommonResult<UserInfoVO> changeUserInfo(@RequestBody UserInfoVO userInfoVO) {
+        return CommonResult.successResponse(accountService.changeUserInfo(userInfoVO));
     }
 
 }

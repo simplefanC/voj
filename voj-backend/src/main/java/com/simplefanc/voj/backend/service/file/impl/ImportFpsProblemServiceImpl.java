@@ -11,8 +11,8 @@ import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.file.ImportFpsProblemService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.*;
@@ -42,11 +42,11 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
 
-    private final static List<String> timeUnits = Arrays.asList("ms", "s");
+    private final static List<String> TIME_UNITS = Arrays.asList("ms", "s");
 
-    private final static List<String> memoryUnits = Arrays.asList("kb", "mb");
+    private final static List<String> MEMORY_UNITS = Arrays.asList("kb", "mb");
 
-    private static final Map<String, String> fpsMapVOJ = new HashMap<>() {
+    private static final Map<String, String> FPS_MAP_VOJ = new HashMap<>() {
         {
             put("Python", "Python3");
             put("Go", "Golang");
@@ -78,22 +78,22 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             throw new StatusFailException("请上传xml后缀格式的fps题目文件！");
         }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        List<ProblemDto> problemDtoList = parseFps(file.getInputStream(), userRolesVo.getUsername());
-        for (ProblemDto problemDto : problemDtoList) {
-            problemEntityService.adminAddProblem(problemDto);
+        List<ProblemDTO> problemDTOList = parseFps(file.getInputStream(), userRolesVO.getUsername());
+        for (ProblemDTO problemDTO : problemDTOList) {
+            problemEntityService.adminAddProblem(problemDTO);
         }
 
     }
 
     // TODO 行数过多
-    private List<ProblemDto> parseFps(InputStream inputStream, String username) {
+    private List<ProblemDTO> parseFps(InputStream inputStream, String username) {
         Document document = XmlUtil.readXML(inputStream);
         Element rootElement = XmlUtil.getRootElement(document);
         String version = rootElement.getAttribute("version");
 
-        List<ProblemDto> problemDtoList = new ArrayList<>();
+        List<ProblemDTO> problemDTOList = new ArrayList<>();
 
         String fileDirId = IdUtil.simpleUUID();
         String fileDir = filePathProps.getTestcaseTmpFolder() + File.separator + fileDirId;
@@ -208,7 +208,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
                 if (templateLanguage == null || templateCode == null) {
                     continue;
                 }
-                String lang = fpsMapVOJ.get(templateLanguage);
+                String lang = FPS_MAP_VOJ.get(templateLanguage);
                 if (lang != null) {
                     codeTemplates.add(new CodeTemplate().setCode(templateCode).setLid(languageMap.get(lang)));
                 }
@@ -243,22 +243,22 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             if (problem.getSpjLanguage() != null) {
                 mode = JudgeMode.SPJ.getMode();
             }
-            ProblemDto problemDto = new ProblemDto();
-            problemDto.setSamples(problemSamples).setIsUploadTestCase(true).setUploadTestcaseDir(problemTestCaseDir)
+            ProblemDTO problemDTO = new ProblemDTO();
+            problemDTO.setSamples(problemSamples).setIsUploadTestCase(true).setUploadTestcaseDir(problemTestCaseDir)
                     .setLanguages(languageList).setTags(null).setJudgeMode(mode).setProblem(problem)
                     .setCodeTemplates(codeTemplates);
 
-            problemDtoList.add(problemDto);
+            problemDTOList.add(problemDTO);
             index++;
         }
-        return problemDtoList;
+        return problemDTOList;
     }
 
     private Integer getTimeLimit(String version, Element item) {
         Element timeLimitNode = XmlUtil.getElement(item, "time_limit");
         String timeUnit = timeLimitNode.getAttribute("unit");
         String timeLimit = timeLimitNode.getTextContent();
-        int index = timeUnits.indexOf(timeUnit.toLowerCase());
+        int index = TIME_UNITS.indexOf(timeUnit.toLowerCase());
         if (index == -1) {
             throw new RuntimeException("Invalid time limit unit:" + timeUnit);
         }
@@ -274,7 +274,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
         Element memoryLimitNode = XmlUtil.getElement(item, "memory_limit");
         String memoryUnit = memoryLimitNode.getAttribute("unit");
         String memoryLimit = memoryLimitNode.getTextContent();
-        int index = memoryUnits.indexOf(memoryUnit.toLowerCase());
+        int index = MEMORY_UNITS.indexOf(memoryUnit.toLowerCase());
         if (index == -1) {
             throw new RuntimeException("Invalid memory limit unit:" + memoryUnit);
         }

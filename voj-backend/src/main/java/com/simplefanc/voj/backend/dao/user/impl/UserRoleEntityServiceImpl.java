@@ -3,10 +3,9 @@ package com.simplefanc.voj.backend.dao.user.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.dao.user.UserRoleEntityService;
 import com.simplefanc.voj.backend.mapper.UserRoleMapper;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.shiro.AccountProfile;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 import lombok.RequiredArgsConstructor;
@@ -50,14 +49,14 @@ public class UserRoleEntityServiceImpl extends ServiceImpl<UserRoleMapper, UserR
     private final RedisSessionDAO redisSessionDAO;
 
     @Override
-    public UserRolesVo getUserRoles(String uid, String username) {
+    public UserRolesVO getUserRoles(String uid, String username) {
         return userRoleMapper.getUserRoles(uid, username);
     }
 
     @Override
-    public IPage<UserRolesVo> getUserList(int limit, int currentPage, String keyword, Long roleId, Integer status) {
+    public IPage<UserRolesVO> getUserList(int limit, int currentPage, String keyword, Long roleId, Integer status) {
         // 新建分页
-        Page<UserRolesVo> page = new Page<>(currentPage, limit);
+        Page<UserRolesVO> page = new Page<>(currentPage, limit);
 //        if (onlyAdmin) {
 //            return userRoleMapper.getAdminUserList(page, limit, currentPage, keyword,
 //                    Arrays.asList(RoleEnum.ROOT.getId(), RoleEnum.PROBLEM_ADMIN.getId(), RoleEnum.ADMIN.getId()));

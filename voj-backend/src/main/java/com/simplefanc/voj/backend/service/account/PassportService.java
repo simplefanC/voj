@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.service.account;
 
-import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.LoginDto;
-import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
-import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
-import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.LoginDTO;
+import com.simplefanc.voj.backend.pojo.dto.RegisterDTO;
+import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDTO;
+import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVO;
+import com.simplefanc.voj.backend.pojo.vo.UserInfoVO;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,14 +18,14 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface PassportService {
 
-    UserInfoVo login(LoginDto loginDto, HttpServletResponse response, HttpServletRequest request);
+    UserInfoVO login(LoginDTO loginDTO, HttpServletResponse response, HttpServletRequest request);
 
-    RegisterCodeVo getRegisterCode(String email);
+    RegisterCodeVO getRegisterCode(String email);
 
-    void register(RegisterDto registerDto);
+    void register(RegisterDTO registerDTO);
 
-    void applyResetPassword(ApplyResetPasswordDto applyResetPasswordDto);
+    void applyResetPassword(ApplyResetPasswordDTO applyResetPasswordDTO);
 
-    void resetPassword(ResetPasswordDto resetPasswordDto);
+    void resetPassword(ResetPasswordDTO resetPasswordDTO);
 
 }

@@ -18,12 +18,12 @@ import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVo;
-import com.simplefanc.voj.backend.pojo.vo.ExcelIpVo;
-import com.simplefanc.voj.backend.pojo.vo.OIContestRankVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVO;
+import com.simplefanc.voj.backend.pojo.vo.ExcelIpVO;
+import com.simplefanc.voj.backend.pojo.vo.OIContestRankVO;
 import com.simplefanc.voj.backend.service.file.ContestFileService;
-import com.simplefanc.voj.backend.service.oj.ContestAcmRankService;
-import com.simplefanc.voj.backend.service.oj.ContestOiRankService;
+import com.simplefanc.voj.backend.service.oj.ContestACMRankService;
+import com.simplefanc.voj.backend.service.oj.ContestOIRankService;
 import com.simplefanc.voj.backend.service.oj.ContestService;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
@@ -56,12 +56,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContestFileServiceImpl implements ContestFileService {
 
-    private static final ThreadLocal<SimpleDateFormat> threadLocalTime = new ThreadLocal<SimpleDateFormat>() {
-        @Override
-        protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat("yyyyMMddHHmmss");
-        }
-    };
+    private static final ThreadLocal<SimpleDateFormat> THREAD_LOCAL_TIME = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMMddHHmmss"));
 
     private final ContestEntityService contestEntityService;
 
@@ -75,9 +70,9 @@ public class ContestFileServiceImpl implements ContestFileService {
 
     private final UserInfoEntityService userInfoEntityService;
 
-    private final ContestAcmRankService contestAcmRankService;
+    private final ContestACMRankService contestACMRankService;
 
-    private final ContestOiRankService contestOiRankService;
+    private final ContestOIRankService contestOIRankService;
 
     private final ContestValidator contestValidator;
 
@@ -169,29 +164,29 @@ public class ContestFileServiceImpl implements ContestFileService {
         List data;
         // ACM比赛
         if (contest.getType().intValue() == ContestEnum.TYPE_ACM.getCode()) {
-            List<ACMContestRankVo> acmContestRankVoList = contestAcmRankService.calculateAcmRank(isOpenSealRank, removeStar, contest,
+            List<ACMContestRankVO> acmContestRankVOList = contestACMRankService.calculateACMRank(isOpenSealRank, removeStar, contest,
                     null, null, false, null);
             head = getContestRankExcelHead(contestProblemDisplayIdList, true);
-            data = changeACMContestRankToExcelRowList(acmContestRankVoList,
+            data = changeACMContestRankToExcelRowList(acmContestRankVOList,
                             contestProblemDisplayIdList, contest.getRankShowName());
         } else {
-            List<OIContestRankVo> oiContestRankVoList = contestOiRankService.calculateOiRank(isOpenSealRank,
+            List<OIContestRankVO> oiContestRankVOList = contestOIRankService.calculateOIRank(isOpenSealRank,
                     removeStar, contest, null, null, false, null);
             head = getContestRankExcelHead(contestProblemDisplayIdList, false);
-            data = changeOIContestRankToExcelRowList(oiContestRankVoList, contestProblemDisplayIdList, contest.getRankShowName());
+            data = changeOIContestRankToExcelRowList(oiContestRankVOList, contestProblemDisplayIdList, contest.getRankShowName());
         }
 
         final String fileName = "contest_" + contest.getId() + "_rank";
         ExcelUtil.wrapExcelResponse(response, fileName);
         final ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream()).build();
         WriteSheet rankSheet = EasyExcel.writerSheet(0, "rank").head(head).build();
-        WriteSheet ipSheet = EasyExcel.writerSheet(1, "ip").head(ExcelIpVo.class).build();
+        WriteSheet ipSheet = EasyExcel.writerSheet(1, "ip").head(ExcelIpVO.class).build();
         excelWriter.write(data, rankSheet)
-                .write(getExcelIpVo(contest), ipSheet);
+                .write(getExcelIpVO(contest), ipSheet);
         excelWriter.finish();
     }
 
-    private List<ExcelIpVo> getExcelIpVo(Contest contest) {
+    private List<ExcelIpVO> getExcelIpVO(Contest contest) {
         final Set<String> contestAdminUidList = contestService.getContestAdminUidList(contest);
         final List<Judge> judgeList = judgeEntityService.list(new QueryWrapper<Judge>().select("DISTINCT username, ip")
                 .eq("cid", contest.getId())
@@ -203,8 +198,8 @@ public class ContestFileServiceImpl implements ContestFileService {
                         Collectors.mapping(Judge::getIp,
                                 Collectors.joining(" & "))));
         return userNameIpMap.entrySet().stream()
-                .map(entry -> new ExcelIpVo(entry.getKey(), entry.getValue()))
-                .sorted(Comparator.comparing(ExcelIpVo::getUsername))
+                .map(entry -> new ExcelIpVO(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(ExcelIpVO::getUsername))
                 .collect(Collectors.toList());
     }
 
@@ -284,14 +279,14 @@ public class ContestFileServiceImpl implements ContestFileService {
                     // OI模式只取最后一次提交
                     if (!recordMap.containsKey(key)) {
                         filePath += "_" + judge.getScore() + "_("
-                                + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                                + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
                         FileWriter fileWriter = new FileWriter(filePath);
                         fileWriter.write(judge.getCode());
                         recordMap.put(key, true);
                     }
                 } else {
-                    filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                    filePath += "_(" + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                             + languageToFileSuffix(judge.getLanguage().toLowerCase());
                     FileWriter fileWriter = new FileWriter(filePath);
                     fileWriter.write(judge.getCode());
@@ -336,7 +331,7 @@ public class ContestFileServiceImpl implements ContestFileService {
                     String key = judge.getUsername() + "_" + judge.getPid();
                     if (!recordMap.containsKey(key)) {
                         filePath += "_" + judge.getScore() + "_("
-                                + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                                + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
                         FileWriter fileWriter = new FileWriter(filePath);
                         fileWriter.write(judge.getCode());
@@ -344,7 +339,7 @@ public class ContestFileServiceImpl implements ContestFileService {
                     }
 
                 } else {
-                    filePath += "_(" + threadLocalTime.get().format(judge.getSubmitTime()) + ")."
+                    filePath += "_(" + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                             + languageToFileSuffix(judge.getLanguage().toLowerCase());
                     FileWriter fileWriter = new FileWriter(filePath);
                     fileWriter.write(judge.getCode());
@@ -415,29 +410,29 @@ public class ContestFileServiceImpl implements ContestFileService {
         return headList;
     }
 
-    public List<List<Object>> changeACMContestRankToExcelRowList(List<ACMContestRankVo> acmContestRankVoList,
+    public List<List<Object>> changeACMContestRankToExcelRowList(List<ACMContestRankVO> acmContestRankVOList,
                                                                  List<String> contestProblemDisplayIdList, String rankShowName) {
         List<List<Object>> allRowDataList = new LinkedList<>();
-        for (ACMContestRankVo acmContestRankVo : acmContestRankVoList) {
+        for (ACMContestRankVO acmContestRankVO : acmContestRankVOList) {
             List<Object> rowData = new LinkedList<>();
-            rowData.add(acmContestRankVo.getSeq());
-            rowData.add(acmContestRankVo.getRank() == -1 ? "*" : acmContestRankVo.getRank().toString());
-            rowData.add(acmContestRankVo.getUsername());
+            rowData.add(acmContestRankVO.getSeq());
+            rowData.add(acmContestRankVO.getRank() == -1 ? "*" : acmContestRankVO.getRank().toString());
+            rowData.add(acmContestRankVO.getUsername());
 //            if ("username".equals(rankShowName)) {
-//                rowData.add(acmContestRankVo.getUsername());
+//                rowData.add(acmContestRankVO.getUsername());
 //            } else if ("realname".equals(rankShowName)) {
-//                rowData.add(acmContestRankVo.getRealname());
+//                rowData.add(acmContestRankVO.getRealname());
 //            } else if ("nickname".equals(rankShowName)) {
-//                rowData.add(acmContestRankVo.getNickname());
+//                rowData.add(acmContestRankVO.getNickname());
 //            } else {
 //                rowData.add("");
 //            }
-            rowData.add(acmContestRankVo.getRealname());
-            rowData.add(acmContestRankVo.getSchool());
-            rowData.add(acmContestRankVo.getAc());
-            rowData.add(acmContestRankVo.getTotal());
-            rowData.add(acmContestRankVo.getTotalTime());
-            HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVo.getSubmissionInfo();
+            rowData.add(acmContestRankVO.getRealname());
+            rowData.add(acmContestRankVO.getSchool());
+            rowData.add(acmContestRankVO.getAc());
+            rowData.add(acmContestRankVO.getTotal());
+            rowData.add(acmContestRankVO.getTotalTime());
+            HashMap<String, HashMap<String, Object>> submissionInfo = acmContestRankVO.getSubmissionInfo();
             for (String displayId : contestProblemDisplayIdList) {
                 HashMap<String, Object> problemInfo = submissionInfo.getOrDefault(displayId, null);
                 // 如果是有提交记录的
@@ -471,27 +466,27 @@ public class ContestFileServiceImpl implements ContestFileService {
         return allRowDataList;
     }
 
-    public List<List<Object>> changeOIContestRankToExcelRowList(List<OIContestRankVo> oiContestRankVoList,
+    public List<List<Object>> changeOIContestRankToExcelRowList(List<OIContestRankVO> oiContestRankVOList,
                                                                 List<String> contestProblemDisplayIdList, String rankShowName) {
         List<List<Object>> allRowDataList = new LinkedList<>();
-        for (OIContestRankVo oiContestRankVo : oiContestRankVoList) {
+        for (OIContestRankVO oiContestRankVO : oiContestRankVOList) {
             List<Object> rowData = new LinkedList<>();
-            rowData.add(oiContestRankVo.getSeq());
-            rowData.add(oiContestRankVo.getRank() == -1 ? "*" : oiContestRankVo.getRank().toString());
-            rowData.add(oiContestRankVo.getUsername());
+            rowData.add(oiContestRankVO.getSeq());
+            rowData.add(oiContestRankVO.getRank() == -1 ? "*" : oiContestRankVO.getRank().toString());
+            rowData.add(oiContestRankVO.getUsername());
 //            if ("username".equals(rankShowName)) {
-//                rowData.add(oiContestRankVo.getUsername());
+//                rowData.add(oiContestRankVO.getUsername());
 //            } else if ("realname".equals(rankShowName)) {
-//                rowData.add(oiContestRankVo.getRealname());
+//                rowData.add(oiContestRankVO.getRealname());
 //            } else if ("nickname".equals(rankShowName)) {
-//                rowData.add(oiContestRankVo.getNickname());
+//                rowData.add(oiContestRankVO.getNickname());
 //            } else {
 //                rowData.add("");
 //            }
-            rowData.add(oiContestRankVo.getRealname());
-            rowData.add(oiContestRankVo.getSchool());
-            rowData.add(oiContestRankVo.getTotalScore());
-            Map<String, Integer> submissionInfo = oiContestRankVo.getSubmissionInfo();
+            rowData.add(oiContestRankVO.getRealname());
+            rowData.add(oiContestRankVO.getSchool());
+            rowData.add(oiContestRankVO.getTotalScore());
+            Map<String, Integer> submissionInfo = oiContestRankVO.getSubmissionInfo();
             for (String displayId : contestProblemDisplayIdList) {
                 Integer score = submissionInfo.getOrDefault(displayId, null);
                 // 如果是有提交记录的就写最后一次提交的分数，没有的就写空

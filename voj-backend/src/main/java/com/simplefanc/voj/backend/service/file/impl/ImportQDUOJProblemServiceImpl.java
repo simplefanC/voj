@@ -16,9 +16,9 @@ import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
 import com.simplefanc.voj.backend.config.property.FilePathProperties;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.dto.QDOJProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.dto.QDOJProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.file.ImportQDUOJProblemService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.*;
@@ -123,13 +123,13 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
 
         // 读取json文件生成对象
-        HashMap<String, QDOJProblemDto> problemVoMap = new HashMap<>();
+        HashMap<String, QDOJProblemDTO> problemVOMap = new HashMap<>();
         for (String key : problemInfo.keySet()) {
             try {
                 FileReader fileReader = new FileReader(problemInfo.get(key));
                 JSONObject problemJson = JSONUtil.parseObj(fileReader.readString());
-                QDOJProblemDto qdojProblemDto = QDOJProblemToProblemVo(problemJson);
-                problemVoMap.put(key, qdojProblemDto);
+                QDOJProblemDTO qdojProblemDTO = QDOJProblemToProblemVO(problemJson);
+                problemVOMap.put(key, qdojProblemDTO);
             } catch (Exception e) {
                 FileUtil.del(fileDir);
                 throw new StatusFailException("请检查编号为：" + key + "的题目json文件的格式：" + e.getLocalizedMessage());
@@ -146,7 +146,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         List<Tag> tagList = tagEntityService.list(new QueryWrapper<Tag>().eq("oj", Constant.LOCAL));
         HashMap<String, Tag> tagMap = new HashMap<>();
@@ -154,19 +154,19 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             tagMap.put(tag.getName().toUpperCase(), tag);
         }
 
-        List<ProblemDto> problemDtos = new LinkedList<>();
+        List<ProblemDTO> problemDTOs = new LinkedList<>();
         for (String key : problemInfo.keySet()) {
-            QDOJProblemDto qdojProblemDto = problemVoMap.get(key);
+            QDOJProblemDTO qdojProblemDTO = problemVOMap.get(key);
             // 格式化题目语言
             List<Language> languages = new LinkedList<>();
-            for (String lang : qdojProblemDto.getLanguages()) {
+            for (String lang : qdojProblemDTO.getLanguages()) {
                 Long lid = languageMap.getOrDefault(lang, null);
                 languages.add(new Language().setId(lid).setName(lang));
             }
 
             // 格式化标签
             List<Tag> tags = new LinkedList<>();
-            for (String tagStr : qdojProblemDto.getTags()) {
+            for (String tagStr : qdojProblemDTO.getTags()) {
                 Tag tag = tagMap.getOrDefault(tagStr.toUpperCase(), null);
                 if (tag == null) {
                     tags.add(new Tag().setName(tagStr).setOj(Constant.LOCAL));
@@ -175,37 +175,37 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
                 }
             }
 
-            Problem problem = qdojProblemDto.getProblem();
+            Problem problem = qdojProblemDTO.getProblem();
             if (problem.getAuthor() == null) {
-                problem.setAuthor(userRolesVo.getUsername());
+                problem.setAuthor(userRolesVO.getUsername());
             }
-            ProblemDto problemDto = new ProblemDto();
+            ProblemDTO problemDTO = new ProblemDTO();
 
             String mode = JudgeMode.DEFAULT.getMode();
-            if (qdojProblemDto.getIsSpj()) {
+            if (qdojProblemDTO.getIsSpj()) {
                 mode = JudgeMode.SPJ.getMode();
             }
 
-            problemDto.setJudgeMode(mode).setProblem(problem).setCodeTemplates(qdojProblemDto.getCodeTemplates())
+            problemDTO.setJudgeMode(mode).setProblem(problem).setCodeTemplates(qdojProblemDTO.getCodeTemplates())
                     .setTags(tags).setLanguages(languages)
                     .setUploadTestcaseDir(fileDir + File.separator + key + File.separator + "testcase")
-                    .setIsUploadTestCase(true).setSamples(qdojProblemDto.getSamples());
+                    .setIsUploadTestCase(true).setSamples(qdojProblemDTO.getSamples());
 
-            problemDtos.add(problemDto);
+            problemDTOs.add(problemDTO);
         }
-        for (ProblemDto problemDto : problemDtos) {
-            problemEntityService.adminAddProblem(problemDto);
+        for (ProblemDTO problemDTO : problemDTOs) {
+            problemEntityService.adminAddProblem(problemDTO);
         }
     }
 
-    private QDOJProblemDto QDOJProblemToProblemVo(JSONObject problemJson) {
-        QDOJProblemDto qdojProblemDto = new QDOJProblemDto();
+    private QDOJProblemDTO QDOJProblemToProblemVO(JSONObject problemJson) {
+        QDOJProblemDTO qdojProblemDTO = new QDOJProblemDTO();
         List<String> tags = (List<String>) problemJson.get("tags");
-        qdojProblemDto.setTags(tags.stream().map(UnicodeUtil::toString).collect(Collectors.toList()));
-        qdojProblemDto.setLanguages(LANGUAGES);
+        qdojProblemDTO.setTags(tags.stream().map(UnicodeUtil::toString).collect(Collectors.toList()));
+        qdojProblemDTO.setLanguages(LANGUAGES);
         Object spj = problemJson.getObj("spj");
         boolean isSpj = !JSONUtil.isNull(spj);
-        qdojProblemDto.setIsSpj(isSpj);
+        qdojProblemDTO.setIsSpj(isSpj);
 
         Problem problem = new Problem();
         if (isSpj) {
@@ -235,7 +235,6 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         }
         problem.setExamples(sb.toString());
 
-        int sumScore = 0;
         JSONArray testcaseList = problemJson.getJSONArray("test_case_score");
         List<ProblemCase> problemSamples = new LinkedList<>();
         for (int i = 0; i < testcaseList.size(); i++) {
@@ -244,16 +243,11 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             String output = testcase.getStr("output_name");
             Integer score = testcase.getInt("score", null);
             problemSamples.add(new ProblemCase().setInput(input).setOutput(output).setScore(score));
-            if (score != null) {
-                sumScore += score;
-            }
         }
         problem.setIsRemote(false);
-        problem.setOiScore(sumScore);
-        qdojProblemDto.setSamples(problemSamples);
-        qdojProblemDto.setProblem(problem);
-        return qdojProblemDto;
-
+        qdojProblemDTO.setSamples(problemSamples);
+        qdojProblemDTO.setProblem(problem);
+        return qdojProblemDTO;
     }
 
 }

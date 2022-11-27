@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.AnnouncementDto;
-import com.simplefanc.voj.backend.pojo.dto.ContestProblemDto;
-import com.simplefanc.voj.backend.pojo.dto.ProblemDto;
-import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.dto.AnnouncementDTO;
+import com.simplefanc.voj.backend.pojo.dto.ContestProblemDTO;
+import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
+import com.simplefanc.voj.backend.pojo.vo.AdminContestVO;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestAnnouncementService;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestProblemService;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestService;
@@ -51,9 +51,9 @@ public class AdminContestController {
     @GetMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<AdminContestVo> getContest(@RequestParam("cid") Long cid) {
-        AdminContestVo adminContestVo = adminContestService.getContest(cid);
-        return CommonResult.successResponse(adminContestVo);
+    public CommonResult<AdminContestVO> getContest(@RequestParam("cid") Long cid) {
+        AdminContestVO adminContestVO = adminContestService.getContest(cid);
+        return CommonResult.successResponse(adminContestVO);
     }
 
     @DeleteMapping("")
@@ -67,16 +67,16 @@ public class AdminContestController {
     @PostMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addContest(@RequestBody AdminContestVo adminContestVo) {
-        adminContestService.addContest(adminContestVo);
+    public CommonResult<Void> addContest(@RequestBody AdminContestVO adminContestVO) {
+        adminContestService.addContest(adminContestVO);
         return CommonResult.successResponse();
     }
 
     @PutMapping("")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> updateContest(@RequestBody AdminContestVo adminContestVo) {
-        adminContestService.updateContest(adminContestVo);
+    public CommonResult<Void> updateContest(@RequestBody AdminContestVO adminContestVO) {
+        adminContestService.updateContest(adminContestVO);
         return CommonResult.successResponse();
     }
 
@@ -144,16 +144,16 @@ public class AdminContestController {
     @PostMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Map<Object, Object>> addProblem(@RequestBody ProblemDto problemDto) {
-        Map<Object, Object> problemMap = adminContestProblemService.addProblem(problemDto);
+    public CommonResult<Map<Object, Object>> addProblem(@RequestBody ProblemDTO problemDTO) {
+        Map<Object, Object> problemMap = adminContestProblemService.addProblem(problemDTO);
         return CommonResult.successResponse(problemMap);
     }
 
     @PutMapping("/problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> updateProblem(@RequestBody ProblemDto problemDto) {
-        adminContestProblemService.updateProblem(problemDto);
+    public CommonResult<Void> updateProblem(@RequestBody ProblemDTO problemDTO) {
+        adminContestProblemService.updateProblem(problemDTO);
         return CommonResult.successResponse();
     }
 
@@ -176,17 +176,17 @@ public class AdminContestController {
     @PostMapping("/add-problem-from-public")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addProblemFromPublic(@RequestBody ContestProblemDto contestProblemDto) {
-        adminContestProblemService.addProblemFromPublic(contestProblemDto);
+    public CommonResult<Void> addProblemFromPublic(@RequestBody ContestProblemDTO contestProblemDTO) {
+        adminContestProblemService.addProblemFromPublic(contestProblemDTO);
         return CommonResult.successResponse();
     }
 
     @GetMapping("/import-remote-oj-problem")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> importContestRemoteOJProblem(@RequestParam("name") String name,
+    public CommonResult<Void> importContestRemoteOjProblem(@RequestParam("name") String name,
                                                            @RequestParam("problemId") String problemId, @RequestParam("cid") Long cid) {
-        adminContestProblemService.importContestRemoteOJProblem(name, problemId, cid);
+        adminContestProblemService.importContestRemoteOjProblem(name, problemId, cid);
         return CommonResult.successResponse();
     }
 
@@ -196,11 +196,11 @@ public class AdminContestController {
     @GetMapping("/announcement")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<IPage<AnnouncementVo>> getAnnouncementList(
+    public CommonResult<IPage<AnnouncementVO>> getAnnouncementList(
             @RequestParam(value = "limit", required = false) Integer limit,
             @RequestParam(value = "currentPage", required = false) Integer currentPage,
             @RequestParam(value = "cid") Long cid) {
-        IPage<AnnouncementVo> announcementList = adminContestAnnouncementService.getAnnouncementList(limit, currentPage,
+        IPage<AnnouncementVO> announcementList = adminContestAnnouncementService.getAnnouncementList(limit, currentPage,
                 cid);
         return CommonResult.successResponse(announcementList);
     }
@@ -216,16 +216,16 @@ public class AdminContestController {
     @PostMapping("/announcement")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> addAnnouncement(@RequestBody AnnouncementDto announcementDto) {
-        adminContestAnnouncementService.addAnnouncement(announcementDto);
+    public CommonResult<Void> addAnnouncement(@RequestBody AnnouncementDTO announcementDTO) {
+        adminContestAnnouncementService.addAnnouncement(announcementDTO);
         return CommonResult.successResponse();
     }
 
     @PutMapping("/announcement")
     @RequiresAuthentication
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
-    public CommonResult<Void> updateAnnouncement(@RequestBody AnnouncementDto announcementDto) {
-        adminContestAnnouncementService.updateAnnouncement(announcementDto);
+    public CommonResult<Void> updateAnnouncement(@RequestBody AnnouncementDTO announcementDTO) {
+        adminContestAnnouncementService.updateAnnouncement(announcementDTO);
         return CommonResult.successResponse();
     }
 

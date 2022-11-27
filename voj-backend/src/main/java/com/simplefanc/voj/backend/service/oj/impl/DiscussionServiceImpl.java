@@ -14,8 +14,8 @@ import com.simplefanc.voj.backend.dao.discussion.DiscussionLikeEntityService;
 import com.simplefanc.voj.backend.dao.discussion.DiscussionReportEntityService;
 import com.simplefanc.voj.backend.dao.problem.CategoryEntityService;
 import com.simplefanc.voj.backend.dao.user.UserAcproblemEntityService;
-import com.simplefanc.voj.backend.pojo.vo.DiscussionVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.DiscussionVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.oj.DiscussionService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.constants.RedisConstant;
@@ -81,26 +81,26 @@ public class DiscussionServiceImpl implements DiscussionService {
                 .orderByDesc("gmt_create").orderByDesc("like_num").orderByDesc("view_num");
 
         if (onlyMine) {
-            UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
-            discussionQueryWrapper.eq("uid", userRolesVo.getUid());
+            UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
+            discussionQueryWrapper.eq("uid", userRolesVO.getUid());
         }
 
         return discussionEntityService.page(iPage, discussionQueryWrapper);
     }
 
     @Override
-    public DiscussionVo getDiscussion(Integer did) {
+    public DiscussionVO getDiscussion(Integer did) {
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         String uid = null;
 
-        if (userRolesVo != null) {
-            uid = userRolesVo.getUid();
+        if (userRolesVO != null) {
+            uid = userRolesVO.getUid();
         }
 
-        DiscussionVo discussion = discussionEntityService.getDiscussion(did, uid);
+        DiscussionVO discussion = discussionEntityService.getDiscussion(did, uid);
 
         if (discussion == null) {
             throw new StatusNotFoundException("对不起，该讨论不存在！");
@@ -123,21 +123,21 @@ public class DiscussionServiceImpl implements DiscussionService {
     public void addDiscussion(Discussion discussion) {
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 除管理员外 其它用户需要AC20道题目以上才可发帖，同时限制一天只能发帖5次
         if (!UserSessionUtil.isRoot() && !UserSessionUtil.isAdmin()
                 && !UserSessionUtil.isProblemAdmin()) {
 
             QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
+            queryWrapper.eq("uid", userRolesVO.getUid()).select("distinct pid");
             int userAcProblemCount = userAcproblemEntityService.count(queryWrapper);
 
             if (userAcProblemCount < 20) {
                 throw new StatusForbiddenException("对不起，您暂时无权限发帖！请先去提交题目通过20道以上!");
             }
 
-            String lockKey = RedisConstant.DISCUSSION_ADD_NUM_LOCK + userRolesVo.getUid();
+            String lockKey = RedisConstant.DISCUSSION_ADD_NUM_LOCK + userRolesVO.getUid();
             Integer num = redisUtil.get(lockKey, Integer.class);
             if (num == null) {
                 redisUtil.set(lockKey, 1, 3600 * 24);
@@ -148,7 +148,7 @@ public class DiscussionServiceImpl implements DiscussionService {
             }
         }
 
-        discussion.setAuthor(userRolesVo.getUsername()).setAvatar(userRolesVo.getAvatar()).setUid(userRolesVo.getUid());
+        discussion.setAuthor(userRolesVO.getUsername()).setAvatar(userRolesVO.getAvatar()).setUid(userRolesVO.getUid());
 
         if (UserSessionUtil.isRoot()) {
             discussion.setRole("root");
@@ -176,13 +176,13 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Override
     public void removeDiscussion(Integer did) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         UpdateWrapper<Discussion> discussionUpdateWrapper = new UpdateWrapper<Discussion>().eq("id", did);
         // 如果不是是管理员,则需要附加当前用户的uid条件
         if (!UserSessionUtil.isRoot() && !UserSessionUtil.isAdmin()
                 && !UserSessionUtil.isProblemAdmin()) {
-            discussionUpdateWrapper.eq("uid", userRolesVo.getUid());
+            discussionUpdateWrapper.eq("uid", userRolesVO.getUid());
         }
         boolean isOk = discussionEntityService.remove(discussionUpdateWrapper);
         if (!isOk) {
@@ -195,10 +195,10 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Transactional(rollbackFor = Exception.class)
     public void addDiscussionLike(Integer did, Boolean toLike) {
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         QueryWrapper<DiscussionLike> discussionLikeQueryWrapper = new QueryWrapper<>();
-        discussionLikeQueryWrapper.eq("did", did).eq("uid", userRolesVo.getUid());
+        discussionLikeQueryWrapper.eq("did", did).eq("uid", userRolesVO.getUid());
 
         DiscussionLike discussionLike = discussionLikeEntityService.getOne(discussionLikeQueryWrapper, false);
 
@@ -207,7 +207,7 @@ public class DiscussionServiceImpl implements DiscussionService {
             // 如果不存在就添加
             if (discussionLike == null) {
                 boolean isSave = discussionLikeEntityService
-                        .saveOrUpdate(new DiscussionLike().setUid(userRolesVo.getUid()).setDid(did));
+                        .saveOrUpdate(new DiscussionLike().setUid(userRolesVO.getUid()).setDid(did));
                 if (!isSave) {
                     throw new StatusFailException("点赞失败，请重试尝试！");
                 }
@@ -218,7 +218,7 @@ public class DiscussionServiceImpl implements DiscussionService {
                 discussion.setLikeNum(discussion.getLikeNum() + 1);
                 discussionEntityService.updateById(discussion);
                 // 更新点赞消息
-                discussionEntityService.updatePostLikeMsg(discussion.getUid(), userRolesVo.getUid(), did);
+                discussionEntityService.updatePostLikeMsg(discussion.getUid(), userRolesVO.getUid(), did);
             }
         } else {
             // 取消点赞

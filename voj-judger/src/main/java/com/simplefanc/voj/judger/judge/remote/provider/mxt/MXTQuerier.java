@@ -42,7 +42,7 @@ public class MXTQuerier implements Querier {
         }
     };
 
-    private static final String[] statusArray = new String[]{
+    private static final String[] STATUS_ARRAY = new String[]{
             // 0
             "Pending",
             // 1
@@ -89,7 +89,7 @@ public class MXTQuerier implements Querier {
         final JSONObject jsonObject = JSONUtil.parseObj(body);
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         Integer result = jsonObject.getInt("result");
-        status.rawStatus = statusArray[result];
+        status.rawStatus = STATUS_ARRAY[result];
         // 3ms
         status.executionTime = jsonObject.getInt("time");
         // 1156B = 1.13KB

@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.dao.training;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.backend.pojo.vo.TrainingRecordVo;
+import com.simplefanc.voj.backend.pojo.vo.TrainingRecordVO;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRecord;
 
 import java.util.List;
@@ -13,6 +13,6 @@ import java.util.List;
  */
 public interface TrainingRecordEntityService extends IService<TrainingRecord> {
 
-    List<TrainingRecordVo> getTrainingRecord(Long tid);
+    List<TrainingRecordVO> getTrainingRecord(Long tid);
 
 }

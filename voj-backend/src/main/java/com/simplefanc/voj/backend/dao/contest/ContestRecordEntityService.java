@@ -2,7 +2,7 @@ package com.simplefanc.voj.backend.dao.contest;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.backend.pojo.vo.ContestRecordVo;
+import com.simplefanc.voj.backend.pojo.vo.ContestRecordVO;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRecord;
 
@@ -22,8 +22,8 @@ public interface ContestRecordEntityService extends IService<ContestRecord> {
     IPage<ContestRecord> getACInfo(Integer currentPage, Integer limit, Integer status, Long cid,
                                    String contestCreatorId);
 
-    List<ContestRecordVo> getOIContestRecord(Contest contest, Boolean isOpenSealRank);
+    List<ContestRecordVO> getOIContestRecord(Contest contest, Boolean isOpenSealRank);
 
-    List<ContestRecordVo> getACMContestRecord(Long cid, Date startTime);
+    List<ContestRecordVO> getACMContestRecord(Long cid, Date startTime);
 
 }

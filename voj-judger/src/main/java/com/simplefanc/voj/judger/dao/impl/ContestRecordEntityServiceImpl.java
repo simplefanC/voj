@@ -27,7 +27,7 @@ import java.util.List;
 public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMapper, ContestRecord>
         implements ContestRecordEntityService {
 
-    private static final List<Integer> penaltyStatus = Arrays.asList(JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus(),
+    private static final List<Integer> PENALTY_STATUS = Arrays.asList(JudgeStatus.STATUS_PRESENTATION_ERROR.getStatus(),
             JudgeStatus.STATUS_WRONG_ANSWER.getStatus(), JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus(),
             JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus(), JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
 
@@ -43,7 +43,7 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
         } else if (judge.getStatus().intValue() == JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus()) {
             updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_NOT_PENALTY.getCode());
             // 需要被罚时的状态
-        } else if (penaltyStatus.contains(judge.getStatus())) {
+        } else if (PENALTY_STATUS.contains(judge.getStatus())) {
             updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_PENALTY.getCode());
 
         } else {
@@ -65,7 +65,6 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
         }
     }
 
-    // TODO why
     public void tryAgainUpdate(UpdateWrapper<ContestRecord> updateWrapper) {
         boolean retryable;
         int attemptNumber = 0;

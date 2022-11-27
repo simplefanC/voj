@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.dao.training;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingProblem;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public interface TrainingProblemEntityService extends IService<TrainingProblem> 
 
     List<Long> getTrainingProblemIdList(Long tid);
 
-    List<ProblemVo> getTrainingProblemList(Long tid);
+    List<ProblemVO> getTrainingProblemList(Long tid);
 
     Integer getUserTrainingACProblemCount(String uid, List<Long> pidList);
 

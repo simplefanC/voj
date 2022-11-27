@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.UserRoleMapper">
-    <resultMap id="map_UserRoles" type="com.simplefanc.voj.backend.pojo.vo.UserRolesVo">
+    <resultMap id="map_UserRoles" type="com.simplefanc.voj.backend.pojo.vo.UserRolesVO">
         <id column="uuid" property="uid"></id>
         <result column="username" property="username"></result>
         <result column="password" property="password"></result>
@@ -56,7 +56,7 @@
     </select>
 
 
-    <resultMap id="map_UserRolesList" type="com.simplefanc.voj.backend.pojo.vo.UserRolesVo">
+    <resultMap id="map_UserRolesList" type="com.simplefanc.voj.backend.pojo.vo.UserRolesVO">
         <id column="uuid" property="uid"></id>
         <result column="username" property="username"></result>
         <result column="password" property="password"></result>

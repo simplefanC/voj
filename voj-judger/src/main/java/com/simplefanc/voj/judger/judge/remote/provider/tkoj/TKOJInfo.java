@@ -6,10 +6,5 @@ import org.apache.http.HttpHost;
 
 public class TKOJInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.TKOJ, "TKOJ", new HttpHost("tk.hustoj.com"));
-
-    static {
-        INFO._64IntIoFormat = "%I64d & %I64u";
-    }
-
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.TKOJ, new HttpHost("tk.hustoj.com"));
 }

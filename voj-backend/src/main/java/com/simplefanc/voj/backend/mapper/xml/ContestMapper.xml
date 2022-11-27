@@ -20,7 +20,7 @@
         order by c.status ASC, c.start_time DESC
     </select>
 
-    <select id="getContestRegisterCount" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVo">
+    <select id="getContestRegisterCount" resultType="com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVO">
         SELECT cr.cid as cid,COUNT(*) as count FROM contest_register cr,contest c
         <where>
             cr.cid = c.id
@@ -32,7 +32,7 @@
         GROUP BY cr.cid
     </select>
 
-    <select id="getContestInfoById" resultType="com.simplefanc.voj.backend.pojo.vo.ContestVo" useCache="true">
+    <select id="getContestInfoById" resultType="com.simplefanc.voj.backend.pojo.vo.ContestVO" useCache="true">
         select c.id,
                c.author,
                c.open_print,

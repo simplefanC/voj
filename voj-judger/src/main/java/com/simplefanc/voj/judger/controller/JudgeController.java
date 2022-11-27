@@ -5,7 +5,7 @@ import com.simplefanc.voj.common.pojo.dto.ToJudge;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.service.JudgeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,8 +61,8 @@ public class JudgeController {
             judgeService.compileSpj(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(),
                     compileDTO.getExtraFiles());
             return CommonResult.successResponse(null, "编译成功！");
-        } catch (SystemError systemError) {
-            return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
+        } catch (SystemException systemException) {
+            return CommonResult.errorResponse(systemException.getStderr(), ResultStatus.SYSTEM_ERROR);
         }
     }
 
@@ -77,8 +77,8 @@ public class JudgeController {
             judgeService.compileInteractive(compileDTO.getCode(), compileDTO.getPid(), compileDTO.getLanguage(),
                     compileDTO.getExtraFiles());
             return CommonResult.successResponse(null, "编译成功！");
-        } catch (SystemError systemError) {
-            return CommonResult.errorResponse(systemError.getStderr(), ResultStatus.SYSTEM_ERROR);
+        } catch (SystemException systemException) {
+            return CommonResult.errorResponse(systemException.getStderr(), ResultStatus.SYSTEM_ERROR);
         }
     }
 

@@ -5,7 +5,7 @@ import com.simplefanc.voj.backend.common.constants.TrainingEnum;
 import com.simplefanc.voj.backend.common.exception.StatusAccessDeniedException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.dao.training.TrainingRegisterEntityService;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.training.Training;
 import com.simplefanc.voj.common.pojo.entity.training.TrainingRegister;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * @Author: Himit_ZH
+ * @Author: chenfan
  * @Date: 2022/3/21 20:55
  * @Description:
  */
@@ -27,22 +27,22 @@ public class TrainingValidator {
 
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         if (TrainingEnum.AUTH_PRIVATE.getValue().equals(training.getAuth())) {
 
-            if (userRolesVo == null) {
+            if (userRolesVO == null) {
                 throw new StatusAccessDeniedException("该训练属于私有题单，请先登录以校验权限！");
             }
             // 是否为该私有训练的创建者
-            boolean isAuthor = training.getAuthor().equals(userRolesVo.getUsername());
+            boolean isAuthor = training.getAuthor().equals(userRolesVO.getUsername());
 
             if (isRoot || isAuthor) {
                 return;
             }
 
             // 如果三者都不是，需要做注册权限校验
-            checkTrainingRegister(training.getId(), userRolesVo.getUid());
+            checkTrainingRegister(training.getId(), userRolesVO.getUid());
         }
     }
 
@@ -61,15 +61,15 @@ public class TrainingValidator {
         }
     }
 
-    public boolean isInTrainingOrAdmin(Training training, UserRolesVo userRolesVo) {
+    public boolean isInTrainingOrAdmin(Training training, UserRolesVO userRolesVO) {
         if (TrainingEnum.AUTH_PRIVATE.getValue().equals(training.getAuth())) {
-            if (userRolesVo == null) {
+            if (userRolesVO == null) {
                 throw new StatusAccessDeniedException("该训练属于私有题单，请先登录以校验权限！");
             }
             // 是否为超级管理员
             boolean isRoot = UserSessionUtil.isRoot();
             // 是否为该私有训练的创建者
-            boolean isAuthor = training.getAuthor().equals(userRolesVo.getUsername());
+            boolean isAuthor = training.getAuthor().equals(userRolesVO.getUsername());
 
             if (isRoot || isAuthor) {
                 return true;
@@ -78,7 +78,7 @@ public class TrainingValidator {
             // 如果三者都不是，需要做注册权限校验
             QueryWrapper<TrainingRegister> trainingRegisterQueryWrapper = new QueryWrapper<>();
             trainingRegisterQueryWrapper.eq("tid", training.getId());
-            trainingRegisterQueryWrapper.eq("uid", userRolesVo.getUid());
+            trainingRegisterQueryWrapper.eq("uid", userRolesVO.getUid());
             TrainingRegister trainingRegister = trainingRegisterEntityService.getOne(trainingRegisterQueryWrapper,
                     false);
 

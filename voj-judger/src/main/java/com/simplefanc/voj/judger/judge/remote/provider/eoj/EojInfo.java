@@ -10,7 +10,7 @@ import org.apache.http.HttpHost;
  **/
 public class EojInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.EOJ, "EOJ",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.EOJ,
             new HttpHost("acm.ecnu.edu.cn", 443, "https"));
 
 }

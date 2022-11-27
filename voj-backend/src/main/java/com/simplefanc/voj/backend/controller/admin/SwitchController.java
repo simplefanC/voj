@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.controller.admin;
 
-import com.simplefanc.voj.backend.pojo.dto.SwitchConfigDto;
+import com.simplefanc.voj.backend.pojo.dto.SwitchConfigDTO;
 import com.simplefanc.voj.backend.service.admin.system.ConfigService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +24,13 @@ public class SwitchController {
 
     @RequiresPermissions("system_info_admin")
     @RequestMapping("/info")
-    public CommonResult<SwitchConfigDto> getSwitchConfig() {
+    public CommonResult<SwitchConfigDTO> getSwitchConfig() {
         return CommonResult.successResponse(configService.getSwitchConfig());
     }
 
     @RequiresPermissions("system_info_admin")
     @PutMapping("/update")
-    public CommonResult<Void> setSwitchConfig(@RequestBody SwitchConfigDto config) {
+    public CommonResult<Void> setSwitchConfig(@RequestBody SwitchConfigDTO config) {
         configService.setSwitchConfig(config);
         return CommonResult.successResponse();
     }

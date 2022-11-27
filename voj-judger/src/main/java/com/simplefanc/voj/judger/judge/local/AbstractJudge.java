@@ -6,12 +6,11 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.SandBoxRes;
-import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.text.MessageFormat;
@@ -34,7 +33,7 @@ public abstract class AbstractJudge {
 
     protected static final int SPJ_ERROR = 103;
 
-    public JSONObject judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONObject judge(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         // 判题
         JSONArray judgeResultList = judgeCase(judgeDTO, judgeGlobalDTO);
 
@@ -51,10 +50,10 @@ public abstract class AbstractJudge {
 
     }
 
-    public abstract JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError;
+    public abstract JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException;
 
     public abstract JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
-            throws SystemError;
+            throws SystemException;
 
     public abstract JSONObject processMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
                                                      JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO);
@@ -75,7 +74,7 @@ public abstract class AbstractJudge {
     }
 
     private JSONObject handle(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONArray judgeResultList)
-            throws SystemError {
+            throws SystemException {
         SandBoxRes sandBoxRes = wrapToSandBoxRes((JSONObject) judgeResultList.get(0));
         return processResult(sandBoxRes, judgeDTO, judgeGlobalDTO);
     }

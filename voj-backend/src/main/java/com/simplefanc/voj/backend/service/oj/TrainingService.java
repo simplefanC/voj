@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.service.oj;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDto;
-import com.simplefanc.voj.backend.pojo.vo.AccessVo;
-import com.simplefanc.voj.backend.pojo.vo.ProblemVo;
-import com.simplefanc.voj.backend.pojo.vo.TrainingRankVo;
-import com.simplefanc.voj.backend.pojo.vo.TrainingVo;
+import com.simplefanc.voj.backend.pojo.dto.RegisterTrainingDTO;
+import com.simplefanc.voj.backend.pojo.vo.AccessVO;
+import com.simplefanc.voj.backend.pojo.vo.ProblemVO;
+import com.simplefanc.voj.backend.pojo.vo.TrainingRankVO;
+import com.simplefanc.voj.backend.pojo.vo.TrainingVO;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public interface TrainingService {
      * @Return
      * @Since 2021/11/20
      */
-    IPage<TrainingVo> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId, String auth);
+    IPage<TrainingVO> getTrainingList(Integer limit, Integer currentPage, String keyword, Long categoryId, String auth);
 
     /**
      * @param tid
@@ -38,7 +38,7 @@ public interface TrainingService {
      * @Return
      * @Since 2021/11/20
      */
-    TrainingVo getTraining(@RequestParam(value = "tid") Long tid);
+    TrainingVO getTraining(@RequestParam(value = "tid") Long tid);
 
     /**
      * @param tid
@@ -47,16 +47,16 @@ public interface TrainingService {
      * @Return
      * @Since 2021/11/20
      */
-    List<ProblemVo> getTrainingProblemList(Long tid);
+    List<ProblemVO> getTrainingProblemList(Long tid);
 
     /**
-     * @param registerTrainingDto
+     * @param registerTrainingDTO
      * @MethodName toRegisterTraining
      * @Description 注册校验私有权限的训练
      * @Return
      * @Since 2021/11/20
      */
-    void toRegisterTraining(RegisterTrainingDto registerTrainingDto);
+    void toRegisterTraining(RegisterTrainingDTO registerTrainingDTO);
 
     /**
      * @param tid
@@ -65,7 +65,7 @@ public interface TrainingService {
      * @Return
      * @Since 2021/11/20
      */
-    AccessVo getTrainingAccess(Long tid);
+    AccessVO getTrainingAccess(Long tid);
 
     /**
      * @param tid
@@ -76,7 +76,7 @@ public interface TrainingService {
      * @Return
      * @Since 2021/11/22
      */
-    IPage<TrainingRankVo> getTrainingRank(Long tid, Integer limit, Integer currentPage);
+    IPage<TrainingRankVO> getTrainingRank(Long tid, Integer limit, Integer currentPage);
 
     /**
      * 未启用，该操作会导致公开训练也记录，但其实并不需求，会造成数据量无效增加

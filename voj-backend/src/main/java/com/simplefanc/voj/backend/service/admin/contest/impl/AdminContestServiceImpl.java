@@ -13,8 +13,8 @@ import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
-import com.simplefanc.voj.backend.pojo.vo.AdminContestVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.AdminContestVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.contest.AdminContestService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
@@ -47,10 +47,12 @@ public class AdminContestServiceImpl implements AdminContestService {
     @Override
     public IPage<Contest> getContestList(Integer limit, Integer currentPage, String keyword) {
 
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         IPage<Contest> iPage = new Page<>(currentPage, limit);
         QueryWrapper<Contest> queryWrapper = new QueryWrapper<>();
         // 过滤密码
@@ -64,7 +66,7 @@ public class AdminContestServiceImpl implements AdminContestService {
     }
 
     @Override
-    public AdminContestVo getContest(Long cid) {
+    public AdminContestVO getContest(Long cid) {
         // 获取本场比赛的状态
         Contest contest = contestEntityService.getById(cid);
         // 查询不存在
@@ -76,15 +78,15 @@ public class AdminContestServiceImpl implements AdminContestService {
         if (!contestValidator.isContestAdmin(contest)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
-        AdminContestVo adminContestVo = BeanUtil.copyProperties(contest, AdminContestVo.class, "starAccount");
+        AdminContestVO adminContestVO = BeanUtil.copyProperties(contest, AdminContestVO.class, "starAccount");
         if (StrUtil.isEmpty(contest.getStarAccount())) {
-            adminContestVo.setStarAccount(new ArrayList<>());
+            adminContestVO.setStarAccount(new ArrayList<>());
         } else {
             JSONObject jsonObject = JSONUtil.parseObj(contest.getStarAccount());
             List<String> starAccount = jsonObject.get("star_account", List.class);
-            adminContestVo.setStarAccount(starAccount);
+            adminContestVO.setStarAccount(starAccount);
         }
-        return adminContestVo;
+        return adminContestVO;
     }
 
     @Override
@@ -98,10 +100,10 @@ public class AdminContestServiceImpl implements AdminContestService {
     }
 
     @Override
-    public void addContest(AdminContestVo adminContestVo) {
-        Contest contest = BeanUtil.copyProperties(adminContestVo, Contest.class, "starAccount");
+    public void addContest(AdminContestVO adminContestVO) {
+        Contest contest = BeanUtil.copyProperties(adminContestVO, Contest.class, "starAccount");
         JSONObject accountJson = new JSONObject();
-        accountJson.set("star_account", adminContestVo.getStarAccount());
+        accountJson.set("star_account", adminContestVO.getStarAccount());
         contest.setStarAccount(accountJson.toString());
         boolean isOk = contestEntityService.save(contest);
         // 删除成功
@@ -112,15 +114,15 @@ public class AdminContestServiceImpl implements AdminContestService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateContest(AdminContestVo adminContestVo) {
+    public void updateContest(AdminContestVO adminContestVO) {
         // 是否为超级管理员
         boolean isRoot = UserSessionUtil.isRoot();
-        if (!isRoot && !contestValidator.isContestOwner(adminContestVo.getUid())) {
+        if (!isRoot && !contestValidator.isContestOwner(adminContestVO.getUid())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
-        Contest contest = BeanUtil.copyProperties(adminContestVo, Contest.class, "starAccount");
+        Contest contest = BeanUtil.copyProperties(adminContestVO, Contest.class, "starAccount");
         JSONObject accountJson = new JSONObject();
-        accountJson.set("star_account", adminContestVo.getStarAccount());
+        accountJson.set("star_account", adminContestVO.getStarAccount());
         contest.setStarAccount(accountJson.toString());
         Contest oldContest = contestEntityService.getById(contest.getId());
         boolean isOk = contestEntityService.saveOrUpdate(contest);
@@ -160,7 +162,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         if (contest == null) {
             throw new StatusSystemErrorException("该比赛不存在，无法克隆！");
         }
-        final UserRolesVo userInfo = UserSessionUtil.getUserInfo();
+        final UserRolesVO userInfo = UserSessionUtil.getUserInfo();
         contest.setUid(userInfo.getUid())
                 .setAuthor(userInfo.getUsername())
                 .setSource(cid.intValue())

@@ -1,6 +1,6 @@
 package com.simplefanc.voj.backend.shiro;
 
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
@@ -22,15 +22,15 @@ public class UserSessionUtil {
         return SecurityUtils.getSubject().hasRole("admin");
     }
 
-    public static UserRolesVo getUserInfo() {
-        return (UserRolesVo) getSessionAttribute("userInfo");
+    public static UserRolesVO getUserInfo() {
+        return (UserRolesVO) getSessionAttribute("userInfo");
     }
 
     public static void logout() {
         SecurityUtils.getSubject().logout();
     }
 
-    public static void setUserInfo(UserRolesVo userInfo) {
+    public static void setUserInfo(UserRolesVO userInfo) {
         setSessionAttribute("userInfo", userInfo);
     }
 

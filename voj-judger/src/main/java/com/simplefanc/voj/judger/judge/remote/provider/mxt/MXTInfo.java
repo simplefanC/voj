@@ -6,7 +6,7 @@ import org.apache.http.HttpHost;
 
 public class MXTInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.MXT, "MXT",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.MXT,
             new HttpHost("www.maxuetang.cn", 443, "https"));
 
 }

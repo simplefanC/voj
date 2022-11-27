@@ -1,11 +1,11 @@
 package com.simplefanc.voj.backend.controller.oj;
 
-import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.LoginDto;
-import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
-import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDto;
-import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVo;
-import com.simplefanc.voj.backend.pojo.vo.UserInfoVo;
+import com.simplefanc.voj.backend.pojo.dto.ApplyResetPasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.LoginDTO;
+import com.simplefanc.voj.backend.pojo.dto.RegisterDTO;
+import com.simplefanc.voj.backend.pojo.dto.ResetPasswordDTO;
+import com.simplefanc.voj.backend.pojo.vo.RegisterCodeVO;
+import com.simplefanc.voj.backend.pojo.vo.UserInfoVO;
 import com.simplefanc.voj.backend.service.account.PassportService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.result.CommonResult;
@@ -30,16 +30,16 @@ public class PassportController {
     private final PassportService passportService;
 
     /**
-     * @param loginDto
+     * @param loginDTO
      * @MethodName login
      * @Description 处理登录逻辑
      * @Return CommonResult
      * @Since 2021/10/24
      */
     @PostMapping("/login")
-    public CommonResult<UserInfoVo> login(@Validated @RequestBody LoginDto loginDto, HttpServletResponse response,
+    public CommonResult<UserInfoVO> login(@Validated @RequestBody LoginDTO loginDTO, HttpServletResponse response,
                                           HttpServletRequest request) {
-        return CommonResult.successResponse(passportService.login(loginDto, response, request));
+        return CommonResult.successResponse(passportService.login(loginDTO, response, request));
     }
 
     /**
@@ -49,46 +49,46 @@ public class PassportController {
      * @Since 2021/10/26
      */
     @RequestMapping(value = "/get-register-code", method = RequestMethod.GET)
-    public CommonResult<RegisterCodeVo> getRegisterCode(@RequestParam(value = "email") String email) {
+    public CommonResult<RegisterCodeVO> getRegisterCode(@RequestParam(value = "email") String email) {
         return CommonResult.successResponse(passportService.getRegisterCode(email));
     }
 
     /**
-     * @param registerDto
+     * @param registerDTO
      * @MethodName register
-     * @Description 注册逻辑，具体参数请看RegisterDto类
+     * @Description 注册逻辑，具体参数请看RegisterDTO类
      * @Return
      * @Since 2021/10/24
      */
     @PostMapping("/register")
-    public CommonResult<Void> register(@Validated @RequestBody RegisterDto registerDto) {
-        passportService.register(registerDto);
+    public CommonResult<Void> register(@Validated @RequestBody RegisterDTO registerDTO) {
+        passportService.register(registerDTO);
         return CommonResult.successResponse();
     }
 
     /**
-     * @param applyResetPasswordDto
+     * @param applyResetPasswordDTO
      * @MethodName applyResetPassword
      * @Description 发送重置密码的链接邮件
      * @Return
      * @Since 2021/11/6
      */
     @PostMapping("/apply-reset-password")
-    public CommonResult<Void> applyResetPassword(@RequestBody ApplyResetPasswordDto applyResetPasswordDto) {
-        passportService.applyResetPassword(applyResetPasswordDto);
+    public CommonResult<Void> applyResetPassword(@RequestBody ApplyResetPasswordDTO applyResetPasswordDTO) {
+        passportService.applyResetPassword(applyResetPasswordDTO);
         return CommonResult.successResponse();
     }
 
     /**
-     * @param resetPasswordDto
+     * @param resetPasswordDTO
      * @MethodName resetPassword
      * @Description 用户重置密码
      * @Return
      * @Since 2021/11/6
      */
     @PostMapping("/reset-password")
-    public CommonResult<Void> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
-        passportService.resetPassword(resetPasswordDto);
+    public CommonResult<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        passportService.resetPassword(resetPasswordDTO);
         return CommonResult.successResponse();
     }
 

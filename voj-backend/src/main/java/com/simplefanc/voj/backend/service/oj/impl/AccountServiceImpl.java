@@ -11,9 +11,9 @@ import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.user.*;
-import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDto;
-import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDto;
-import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDto;
+import com.simplefanc.voj.backend.pojo.dto.ChangeEmailDTO;
+import com.simplefanc.voj.backend.pojo.dto.ChangePasswordDTO;
+import com.simplefanc.voj.backend.pojo.dto.CheckUsernameOrEmailDTO;
 import com.simplefanc.voj.backend.pojo.vo.*;
 import com.simplefanc.voj.backend.service.admin.user.UserRecordService;
 import com.simplefanc.voj.backend.service.oj.AccountService;
@@ -64,11 +64,11 @@ public class AccountServiceImpl implements AccountService {
      * @Since 2021/11/5
      */
     @Override
-    public CheckUsernameOrEmailVo checkUsernameOrEmail(CheckUsernameOrEmailDto checkUsernameOrEmailDto) {
+    public CheckUsernameOrEmailVO checkUsernameOrEmail(CheckUsernameOrEmailDTO checkUsernameOrEmailDTO) {
 
-        String email = checkUsernameOrEmailDto.getEmail();
+        String email = checkUsernameOrEmailDTO.getEmail();
 
-        String username = checkUsernameOrEmailDto.getUsername();
+        String username = checkUsernameOrEmailDTO.getUsername();
 
         boolean rightEmail = false;
 
@@ -101,10 +101,10 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        CheckUsernameOrEmailVo checkUsernameOrEmailVo = new CheckUsernameOrEmailVo();
-        checkUsernameOrEmailVo.setEmail(rightEmail);
-        checkUsernameOrEmailVo.setUsername(rightUsername);
-        return checkUsernameOrEmailVo;
+        CheckUsernameOrEmailVO checkUsernameOrEmailVO = new CheckUsernameOrEmailVO();
+        checkUsernameOrEmailVO.setEmail(rightEmail);
+        checkUsernameOrEmailVO.setUsername(rightUsername);
+        return checkUsernameOrEmailVO;
     }
 
     /**
@@ -115,19 +115,19 @@ public class AccountServiceImpl implements AccountService {
      * @Since 2021/01/07
      */
     @Override
-    public UserHomeVo getUserHomeInfo(String uid, String username) {
+    public UserHomeVO getUserHomeInfo(String uid, String username) {
 
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         // 如果没有uid和username，默认查询当前登录用户的
         if (StrUtil.isEmpty(uid) && StrUtil.isEmpty(username)) {
-            if (userRolesVo != null) {
-                uid = userRolesVo.getUid();
+            if (userRolesVO != null) {
+                uid = userRolesVO.getUid();
             } else {
                 throw new StatusFailException("错误：uid和username不能都为空！");
             }
         }
 
-        UserHomeVo userHomeInfo = userRecordService.getUserHomeInfo(uid, username);
+        UserHomeVO userHomeInfo = userRecordService.getUserHomeInfo(uid, username);
         if (userHomeInfo == null) {
             throw new StatusFailException("用户不存在");
         }
@@ -168,9 +168,9 @@ public class AccountServiceImpl implements AccountService {
      * @Since 2021/1/8
      */
     @Override
-    public ChangeAccountVo changePassword(ChangePasswordDto changePasswordDto) {
-        String oldPassword = changePasswordDto.getOldPassword();
-        String newPassword = changePasswordDto.getNewPassword();
+    public ChangeAccountVO changePassword(ChangePasswordDTO changePasswordDTO) {
+        String oldPassword = changePasswordDTO.getOldPassword();
+        String newPassword = changePasswordDTO.getNewPassword();
 
         // 数据可用性判断
         if (StrUtil.isEmpty(oldPassword) || StrUtil.isEmpty(newPassword)) {
@@ -180,14 +180,14 @@ public class AccountServiceImpl implements AccountService {
             throw new StatusFailException("新密码长度应该为6~20位！");
         }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
-        String lockKey = RedisConstant.CODE_CHANGE_PASSWORD_LOCK + userRolesVo.getUid();
+        String lockKey = RedisConstant.CODE_CHANGE_PASSWORD_LOCK + userRolesVO.getUid();
         // 统计失败的key
-        String countKey = RedisConstant.CODE_CHANGE_PASSWORD_FAIL + userRolesVo.getUid();
+        String countKey = RedisConstant.CODE_CHANGE_PASSWORD_FAIL + userRolesVO.getUid();
 
-        ChangeAccountVo resp = new ChangeAccountVo();
+        ChangeAccountVO resp = new ChangeAccountVO();
         if (redisUtil.hasKey(lockKey)) {
             long expire = redisUtil.getExpire(lockKey);
             Date now = new Date();
@@ -203,10 +203,10 @@ public class AccountServiceImpl implements AccountService {
         }
         // 与当前登录用户的密码进行比较判断
         // 如果相同，则进行修改密码操作
-        if (userRolesVo.getPassword().equals(SecureUtil.md5(oldPassword))) {
+        if (userRolesVO.getPassword().equals(SecureUtil.md5(oldPassword))) {
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
             // 数据库用户密码全部用md5加密
-            updateWrapper.set("password", SecureUtil.md5(newPassword)).eq("uuid", userRolesVo.getUid());
+            updateWrapper.set("password", SecureUtil.md5(newPassword)).eq("uuid", userRolesVO.getUid());
             boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk) {
                 resp.setCode(200);
@@ -214,8 +214,8 @@ public class AccountServiceImpl implements AccountService {
                 // 清空记录
                 redisUtil.del(countKey);
                 // 更新session
-                userRolesVo.setPassword(SecureUtil.md5(newPassword));
-                UserSessionUtil.setUserInfo(userRolesVo);
+                userRolesVO.setPassword(SecureUtil.md5(newPassword));
+                UserSessionUtil.setUserInfo(userRolesVO);
                 return resp;
             } else {
                 throw new StatusSystemErrorException("系统错误：修改密码失败！");
@@ -250,10 +250,10 @@ public class AccountServiceImpl implements AccountService {
      * @Since 2021/1/9
      */
     @Override
-    public ChangeAccountVo changeEmail(ChangeEmailDto changeEmailDto) {
+    public ChangeAccountVO changeEmail(ChangeEmailDTO changeEmailDTO) {
 
-        String password = changeEmailDto.getPassword();
-        String newEmail = changeEmailDto.getNewEmail();
+        String password = changeEmailDTO.getPassword();
+        String newEmail = changeEmailDTO.getNewEmail();
         // 数据可用性判断
         if (StrUtil.isEmpty(password) || StrUtil.isEmpty(newEmail)) {
             throw new StatusFailException("错误：密码或新邮箱不能为空！");
@@ -262,14 +262,14 @@ public class AccountServiceImpl implements AccountService {
             throw new StatusFailException("邮箱格式错误！");
         }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
         // 如果已经被锁定半小时不能修改
-        String lockKey = RedisConstant.CODE_CHANGE_EMAIL_LOCK + userRolesVo.getUid();
+        String lockKey = RedisConstant.CODE_CHANGE_EMAIL_LOCK + userRolesVO.getUid();
         // 统计失败的key
-        String countKey = RedisConstant.CODE_CHANGE_EMAIL_FAIL + userRolesVo.getUid();
+        String countKey = RedisConstant.CODE_CHANGE_EMAIL_FAIL + userRolesVO.getUid();
 
-        ChangeAccountVo resp = new ChangeAccountVo();
+        ChangeAccountVO resp = new ChangeAccountVO();
         if (redisUtil.hasKey(lockKey)) {
             long expire = redisUtil.getExpire(lockKey);
             Date now = new Date();
@@ -285,24 +285,24 @@ public class AccountServiceImpl implements AccountService {
         }
         // 与当前登录用户的密码进行比较判断
         // 如果相同，则进行修改操作
-        if (userRolesVo.getPassword().equals(SecureUtil.md5(password))) {
+        if (userRolesVO.getPassword().equals(SecureUtil.md5(password))) {
             UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.set("email", newEmail).eq("uuid", userRolesVo.getUid());
+            updateWrapper.set("email", newEmail).eq("uuid", userRolesVO.getUid());
 
             boolean isOk = userInfoEntityService.update(updateWrapper);
             if (isOk) {
-                UserInfoVo userInfoVo = new UserInfoVo();
-                BeanUtil.copyProperties(userRolesVo, userInfoVo, "roles");
-                userInfoVo.setRoleList(userRolesVo.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+                UserInfoVO userInfoVO = new UserInfoVO();
+                BeanUtil.copyProperties(userRolesVO, userInfoVO, "roles");
+                userInfoVO.setRoleList(userRolesVO.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
 
                 resp.setCode(200);
                 resp.setMsg("修改邮箱成功！");
-                resp.setUserInfo(userInfoVo);
+                resp.setUserInfo(userInfoVO);
                 // 清空记录
                 redisUtil.del(countKey);
                 // 更新session
-                userRolesVo.setEmail(newEmail);
-                UserSessionUtil.setUserInfo(userRolesVo);
+                userRolesVO.setEmail(newEmail);
+                UserSessionUtil.setUserInfo(userRolesVO);
                 return resp;
             } else {
                 throw new StatusSystemErrorException("系统错误：修改邮箱失败！");
@@ -332,13 +332,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public UserInfoVo changeUserInfo(UserInfoVo userInfoVo) {
+    public UserInfoVO changeUserInfo(UserInfoVO userInfoVO) {
 
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        String realname = userInfoVo.getRealname();
-        String nickname = userInfoVo.getNickname();
+        String realname = userInfoVO.getRealname();
+        String nickname = userInfoVO.getNickname();
         if (!StrUtil.isEmpty(realname) && realname.length() > 50) {
             throw new StatusFailException("真实姓名的长度不能超过50位");
         }
@@ -346,21 +346,21 @@ public class AccountServiceImpl implements AccountService {
             throw new StatusFailException("昵称的长度不能超过20位");
         }
         UserInfo userInfo = new UserInfo();
-        userInfo.setUuid(userRolesVo.getUid()).setCfUsername(userInfoVo.getCfUsername()).setRealname(realname)
-                .setNickname(nickname).setSignature(userInfoVo.getSignature()).setBlog(userInfoVo.getBlog())
-                .setGender(userInfoVo.getGender()).setEmail(userRolesVo.getEmail()).setGithub(userInfoVo.getGithub())
-                .setSchool(userInfoVo.getSchool()).setNumber(userInfoVo.getNumber());
+        userInfo.setUuid(userRolesVO.getUid()).setCfUsername(userInfoVO.getCfUsername()).setRealname(realname)
+                .setNickname(nickname).setSignature(userInfoVO.getSignature()).setBlog(userInfoVO.getBlog())
+                .setGender(userInfoVO.getGender()).setEmail(userRolesVO.getEmail()).setGithub(userInfoVO.getGithub())
+                .setSchool(userInfoVO.getSchool()).setNumber(userInfoVO.getNumber());
 
         boolean isOk = userInfoEntityService.updateById(userInfo);
 
         if (isOk) {
             // 更新session
-            UserRolesVo userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
+            UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVO.getUid(), null);
             UserSessionUtil.setUserInfo(userRoles);
 
-            UserInfoVo userInfoRes = new UserInfoVo();
+            UserInfoVO userInfoRes = new UserInfoVO();
             BeanUtil.copyProperties(userRoles, userInfoRes, "roles");
-            userInfoVo.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+            userInfoVO.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
 
             return userInfoRes;
         } else {

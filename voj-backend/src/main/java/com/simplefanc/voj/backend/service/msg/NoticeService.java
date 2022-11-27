@@ -1,7 +1,7 @@
 package com.simplefanc.voj.backend.service.msg;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
+import com.simplefanc.voj.backend.pojo.vo.SysMsgVO;
 
 /**
  * @Author: chenfan
@@ -11,11 +11,11 @@ import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
 
 public interface NoticeService {
 
-    IPage<SysMsgVo> getSysNotice(Integer limit, Integer currentPage);
+    IPage<SysMsgVO> getSysNotice(Integer limit, Integer currentPage);
 
-    IPage<SysMsgVo> getMineNotice(Integer limit, Integer currentPage);
+    IPage<SysMsgVO> getMineNotice(Integer limit, Integer currentPage);
 
-    void updateSysOrMineMsgRead(IPage<SysMsgVo> userMsgList);
+    void updateSysOrMineMsgRead(IPage<SysMsgVO> userMsgList);
 
     void syncNoticeToNewRegisterUser(String uid);
 

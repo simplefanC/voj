@@ -2,9 +2,9 @@ package com.simplefanc.voj.backend.service.admin.user;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.simplefanc.voj.backend.pojo.vo.ACMRankVo;
-import com.simplefanc.voj.backend.pojo.vo.OIRankVo;
-import com.simplefanc.voj.backend.pojo.vo.UserHomeVo;
+import com.simplefanc.voj.backend.pojo.vo.ACMRankVO;
+import com.simplefanc.voj.backend.pojo.vo.OIRankVO;
+import com.simplefanc.voj.backend.pojo.vo.UserHomeVO;
 
 import java.util.List;
 
@@ -18,12 +18,12 @@ import java.util.List;
  */
 public interface UserRecordService {
 
-    List<ACMRankVo> getRecent7ACRank();
+    List<ACMRankVO> getRecent7ACRank();
 
-    UserHomeVo getUserHomeInfo(String uid, String username);
+    UserHomeVO getUserHomeInfo(String uid, String username);
 
-    IPage<OIRankVo> getOIRankList(Page<OIRankVo> page, List<String> uidList);
+    IPage<OIRankVO> getOIRankList(Page<OIRankVO> page, List<String> uidList);
 
-    IPage<ACMRankVo> getACMRankList(Page<ACMRankVo> page, List<String> uidList);
+    IPage<ACMRankVO> getACMRankList(Page<ACMRankVO> page, List<String> uidList);
 
 }

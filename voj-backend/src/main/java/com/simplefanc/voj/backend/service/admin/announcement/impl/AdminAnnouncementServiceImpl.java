@@ -3,7 +3,7 @@ package com.simplefanc.voj.backend.service.admin.announcement.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.dao.common.AnnouncementEntityService;
-import com.simplefanc.voj.backend.pojo.vo.AnnouncementVo;
+import com.simplefanc.voj.backend.pojo.vo.AnnouncementVO;
 import com.simplefanc.voj.backend.service.admin.announcement.AdminAnnouncementService;
 import com.simplefanc.voj.common.pojo.entity.common.Announcement;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,13 @@ public class AdminAnnouncementServiceImpl implements AdminAnnouncementService {
     private final AnnouncementEntityService announcementEntityService;
 
     @Override
-    public IPage<AnnouncementVo> getAnnouncementList(Integer limit, Integer currentPage) {
-        if (currentPage == null || currentPage < 1)
+    public IPage<AnnouncementVO> getAnnouncementList(Integer limit, Integer currentPage) {
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 10;
+        }
         return announcementEntityService.getAnnouncementList(limit, currentPage, false);
 
     }

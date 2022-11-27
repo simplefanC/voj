@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.simplefanc.voj.backend.mapper.CommentMapper">
 
-    <resultMap id="map_CommentList" type="com.simplefanc.voj.backend.pojo.vo.CommentVo">
+    <resultMap id="map_CommentList" type="com.simplefanc.voj.backend.pojo.vo.CommentVO">
         <id column="id" property="id"></id>
         <result column="content" property="content"></result>
         <result column="from_uid" property="fromUid"></result>

@@ -6,6 +6,6 @@ import org.apache.http.HttpHost;
 
 public class AtCoderInfo {
 
-    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.AtCoder, "AtCoder",
+    public static final RemoteOjInfo INFO = new RemoteOjInfo(RemoteOj.AtCoder,
             new HttpHost("atcoder.jp", 443, "https"));
 }

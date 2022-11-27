@@ -9,7 +9,7 @@ import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.judge.local.AbstractJudge;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
@@ -29,7 +29,7 @@ import java.io.File;
 public class SpecialJudge extends AbstractJudge {
 
     @Override
-    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemError {
+    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
         return SandboxRun.testCase(parseRunCommand(runConfig, null, null, null),
@@ -46,7 +46,7 @@ public class SpecialJudge extends AbstractJudge {
 
     @Override
     public JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO)
-            throws SystemError {
+            throws SystemException {
 
         JSONObject result = new JSONObject();
         StringBuilder errMsg = new StringBuilder();
@@ -85,7 +85,7 @@ public class SpecialJudge extends AbstractJudge {
         }
     }
 
-    private void success(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONObject result, StringBuilder errMsg) throws SystemError {
+    private void success(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONObject result, StringBuilder errMsg) throws SystemException {
         // 对结果的时间损耗和空间损耗与题目限制做比较，判断是否mle和tle
         if (sandBoxRes.getTime() > judgeGlobalDTO.getMaxTime()) {
             result.set("status", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
@@ -139,7 +139,7 @@ public class SpecialJudge extends AbstractJudge {
     // TODO 参数过多
     private JSONObject spjRunAndCheckResult(String userOutputFilePath, String userOutputFileName,
                                             String testCaseInputFilePath, String testCaseInputFileName, String testCaseOutputFilePath,
-                                            String testCaseOutputFileName, String spjExeSrc, RunConfig spjRunConfig) throws SystemError {
+                                            String testCaseOutputFileName, String spjExeSrc, RunConfig spjRunConfig) throws SystemException {
 
         // 调用安全沙箱运行spj程序
         JSONArray spjJudgeResultList = SandboxRun.spjCheckResult(

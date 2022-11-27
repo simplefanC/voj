@@ -15,7 +15,7 @@ import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingProblemEntityService;
 import com.simplefanc.voj.backend.dao.training.TrainingRecordEntityService;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.backend.validator.TrainingValidator;
@@ -91,7 +91,7 @@ public class BeforeDispatchInitService {
             throw new StatusForbiddenException("比赛已结束，不可再提交！");
         }
 
-        final UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        final UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         // 是否为比赛管理者
         if (!contestValidator.isContestAdmin(contest)) {
             if (contest.getStatus().intValue() == ContestEnum.STATUS_SCHEDULED.getCode()) {
@@ -102,7 +102,7 @@ public class BeforeDispatchInitService {
 
             // 需要校验当前比赛是否为保护比赛，同时是否开启账号规则限制，如果有，需要对当前用户的用户名进行验证
             if (contest.getAuth().equals(ContestEnum.AUTH_PROTECT.getCode()) && contest.getOpenAccountLimit()
-                    && !contestValidator.validateAccountRule(contest.getAccountLimitRule(), userRolesVo.getUsername())) {
+                    && !contestValidator.validateAccountRule(contest.getAccountLimitRule(), userRolesVO.getUsername())) {
                 throw new StatusForbiddenException("对不起！本次比赛只允许特定账号规则的用户参赛！");
             }
         }
@@ -125,8 +125,8 @@ public class BeforeDispatchInitService {
         // 同时初始化写入contest_record表
         ContestRecord contestRecord = new ContestRecord();
         contestRecord.setDisplayId(displayId).setCpid(contestProblem.getId()).setSubmitId(judge.getSubmitId())
-                .setPid(judge.getPid()).setUsername(userRolesVo.getUsername()).setRealname(userRolesVo.getRealname())
-                .setUid(userRolesVo.getUid()).setCid(judge.getCid()).setSubmitTime(judge.getSubmitTime());
+                .setPid(judge.getPid()).setUsername(userRolesVO.getUsername()).setRealname(userRolesVO.getRealname())
+                .setUid(userRolesVO.getUid()).setCid(judge.getCid()).setSubmitTime(judge.getSubmitTime());
 
         if (contest.getStatus().intValue() == ContestEnum.STATUS_SCHEDULED.getCode()) {
             contestRecord.setTime(0L);

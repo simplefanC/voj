@@ -2,7 +2,7 @@ package com.simplefanc.voj.backend.dao.user;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.common.pojo.entity.user.UserRole;
 
 /**
@@ -15,9 +15,9 @@ import com.simplefanc.voj.common.pojo.entity.user.UserRole;
  */
 public interface UserRoleEntityService extends IService<UserRole> {
 
-    UserRolesVo getUserRoles(String uid, String username);
+    UserRolesVO getUserRoles(String uid, String username);
 
-    IPage<UserRolesVo> getUserList(int limit, int currentPage, String keyword, Long role, Integer status);
+    IPage<UserRolesVO> getUserList(int limit, int currentPage, String keyword, Long role, Integer status);
 
     void deleteCache(String uid, boolean isRemoveSession);
 

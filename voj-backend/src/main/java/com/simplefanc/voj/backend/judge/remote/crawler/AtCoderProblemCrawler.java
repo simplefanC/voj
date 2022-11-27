@@ -19,10 +19,11 @@ import java.util.regex.Pattern;
  * @Description:
  */
 @Component
-public class AtCoderProblemCrawler extends ProblemCrawler {
+public class AtCoderProblemCrawler extends AbstractProblemCrawler {
 
     public static final String HOST = "https://atcoder.jp";
     public static final String PROBLEM_URL = "/contests/%s/tasks/%s";
+    private final Pattern pattern = Pattern.compile("Time Limit: (\\d+) sec / Memory Limit: (\\d+) MB");
 
     public String getProblemUrl(String problemId, String contestId) {
         return HOST + String.format(PROBLEM_URL, contestId, problemId);
@@ -43,7 +44,6 @@ public class AtCoderProblemCrawler extends ProblemCrawler {
         String contestId = problemId.split("_")[0];
 
         String body = HttpUtil.get(getProblemUrl(problemId, contestId));
-        Pattern pattern = Pattern.compile("Time Limit: (\\d+) sec / Memory Limit: (\\d+) MB");
         Matcher matcher = pattern.matcher(body);
         Assert.isTrue(matcher.find());
         String timeLimit = matcher.group(1).trim();

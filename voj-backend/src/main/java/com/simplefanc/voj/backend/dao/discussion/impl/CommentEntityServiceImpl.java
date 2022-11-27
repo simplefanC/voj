@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.dao.discussion.ReplyEntityService;
 import com.simplefanc.voj.backend.dao.msg.MsgRemindEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.CommentMapper;
-import com.simplefanc.voj.backend.pojo.vo.CommentVo;
+import com.simplefanc.voj.backend.pojo.vo.CommentVO;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
@@ -45,10 +45,10 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
     private final MsgRemindEntityService msgRemindEntityService;
 
     @Override
-    public IPage<CommentVo> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot,
+    public IPage<CommentVO> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot,
                                            String uid) {
         // 新建分页
-        Page<CommentVo> page = new Page<>(currentPage, limit);
+        Page<CommentVO> page = new Page<>(currentPage, limit);
 
         if (cid != null) {
             Contest contest = contestEntityService.getById(cid);
@@ -109,7 +109,7 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
 
         MsgRemind msgRemind = new MsgRemind();
         msgRemind.setAction("Like_Discuss").setRecipientId(recipientId).setSenderId(senderId).setSourceId(sourceId)
-                .setSourceType(sourceType).setUrl(sourceType.equals("Discussion") ? "/discussion-detail/" + sourceId
+                .setSourceType(sourceType).setUrl("Discussion".equals(sourceType) ? "/discussion-detail/" + sourceId
                 : "/contest/" + sourceId + "/comment");
         msgRemindEntityService.saveOrUpdate(msgRemind);
     }

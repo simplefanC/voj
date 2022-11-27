@@ -10,17 +10,17 @@ import java.util.List;
 @Slf4j
 public class CrawlersHolder {
 
-    private static HashMap<String, ProblemCrawler> crawlers = new HashMap<>();
+    private static HashMap<String, AbstractProblemCrawler> crawlers = new HashMap<>();
 
-    public static ProblemCrawler getCrawler(String remoteOj) {
+    public static AbstractProblemCrawler getCrawler(String remoteOj) {
         if (!crawlers.containsKey(remoteOj)) {
             synchronized (crawlers) {
                 if (!crawlers.containsKey(remoteOj)) {
                     try {
-                        List<Class<? extends ProblemCrawler>> crawlerClasses = Tools.findSubClasses(
-                                "com.simplefanc.voj.backend.judge.remote.crawler", ProblemCrawler.class);
-                        for (Class<? extends ProblemCrawler> crawlerClass : crawlerClasses) {
-                            ProblemCrawler crawler = SpringUtil.getBean(crawlerClass);
+                        List<Class<? extends AbstractProblemCrawler>> crawlerClasses = Tools.findSubClasses(
+                                "com.simplefanc.voj.backend.judge.remote.crawler", AbstractProblemCrawler.class);
+                        for (Class<? extends AbstractProblemCrawler> crawlerClass : crawlerClasses) {
+                            AbstractProblemCrawler crawler = SpringUtil.getBean(crawlerClass);
                             crawlers.put(crawler.getOjInfo(), crawler);
                         }
                     } catch (Throwable t) {

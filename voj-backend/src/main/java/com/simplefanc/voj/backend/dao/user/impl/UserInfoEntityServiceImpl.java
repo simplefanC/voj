@@ -5,7 +5,7 @@ import com.simplefanc.voj.backend.common.constants.RoleEnum;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.UserInfoMapper;
-import com.simplefanc.voj.backend.pojo.dto.RegisterDto;
+import com.simplefanc.voj.backend.pojo.dto.RegisterDTO;
 import com.simplefanc.voj.common.constants.RedisConstant;
 import com.simplefanc.voj.common.pojo.entity.user.UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +31,8 @@ public class UserInfoEntityServiceImpl extends ServiceImpl<UserInfoMapper, UserI
     private final RedisUtil redisUtil;
 
     @Override
-    public Boolean addUser(RegisterDto registerDto) {
-        return userInfoMapper.addUser(registerDto) == 1;
+    public Boolean addUser(RegisterDTO registerDTO) {
+        return userInfoMapper.addUser(registerDTO) == 1;
     }
 
     @Override

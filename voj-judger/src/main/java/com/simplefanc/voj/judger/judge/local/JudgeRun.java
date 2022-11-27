@@ -9,7 +9,7 @@ import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.common.utils.ThreadPoolUtil;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
@@ -45,7 +45,7 @@ public class JudgeRun {
     private final ProblemTestCaseUtils problemTestCaseUtils;
 
     public List<JSONObject> judgeAllCase(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput)
-            throws SystemError, ExecutionException, InterruptedException, UnsupportedEncodingException {
+            throws SystemException, ExecutionException, InterruptedException, UnsupportedEncodingException {
 
         JudgeGlobalDTO judgeGlobalDTO = getJudgeGlobalDTO(judge, problem, userFileId, userFileSrc, getUserOutput);
 
@@ -83,7 +83,7 @@ public class JudgeRun {
                 try {
                     // 普通方法
                     return judgeTask.call();
-                } catch (SystemError e) {
+                } catch (SystemException e) {
                     throw new RuntimeException(e);
                 }
             }, threadPool);
@@ -135,7 +135,7 @@ public class JudgeRun {
         return judgeTasks;
     }
 
-    private JudgeGlobalDTO getJudgeGlobalDTO(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput) throws SystemError, UnsupportedEncodingException {
+    private JudgeGlobalDTO getJudgeGlobalDTO(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput) throws SystemException, UnsupportedEncodingException {
         Long submitId = judge.getSubmitId();
         String judgeLanguage = judge.getLanguage();
 
@@ -151,7 +151,7 @@ public class JudgeRun {
         // 从文件中加载测试数据json
         JSONObject testCasesInfo = problemTestCaseUtils.loadTestCaseInfo(problem);
         if (testCasesInfo == null) {
-            throw new SystemError("The evaluation data of the problem does not exist", null, null);
+            throw new SystemException("The evaluation data of the problem does not exist", null, null);
         }
 
         // 测试数据文件所在文件夹
@@ -194,7 +194,7 @@ public class JudgeRun {
         }
 
         @Override
-        public JSONObject call() throws SystemError {
+        public JSONObject call() throws SystemException {
             final AbstractJudge abstractJudge = getAbstractJudge(judgeGlobalDTO.getJudgeMode());
 
             JSONObject result = abstractJudge.judge(judgeDTO, judgeGlobalDTO);

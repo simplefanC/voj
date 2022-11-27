@@ -2,7 +2,7 @@ package com.simplefanc.voj.backend.dao.discussion;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.simplefanc.voj.backend.pojo.vo.CommentVo;
+import com.simplefanc.voj.backend.pojo.vo.CommentVO;
 import com.simplefanc.voj.common.pojo.entity.discussion.Comment;
 import com.simplefanc.voj.common.pojo.entity.discussion.Reply;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface CommentEntityService extends IService<Comment> {
 
-    IPage<CommentVo> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot, String uid);
+    IPage<CommentVO> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot, String uid);
 
     List<Reply> getAllReplyByCommentId(Long cid, String uid, Boolean isRoot, Integer commentId);
 

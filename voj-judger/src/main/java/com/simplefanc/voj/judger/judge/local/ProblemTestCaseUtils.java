@@ -13,7 +13,7 @@ import com.simplefanc.voj.common.constants.JudgeMode;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.problem.ProblemCase;
 import com.simplefanc.voj.judger.common.constants.JudgeDir;
-import com.simplefanc.voj.judger.common.exception.SystemError;
+import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.dao.ProblemCaseEntityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class ProblemTestCaseUtils {
 
     private final ProblemCaseEntityService problemCaseEntityService;
 
-    public JSONObject loadTestCaseInfo(Problem problem) throws SystemError {
+    public JSONObject loadTestCaseInfo(Problem problem) throws SystemException {
         Long problemId = problem.getId();
         String testCasesDir = JudgeDir.TEST_CASE_DIR + File.separator + "problem_" + problem.getId();
         String version = problem.getCaseVersion();
@@ -64,17 +64,17 @@ public class ProblemTestCaseUtils {
      * @param version
      * @param mode
      * @return
-     * @throws SystemError
+     * @throws SystemException
      */
     private JSONObject tryInitTestCaseInfo(String testCasesDir, Long problemId, String version, String mode)
-            throws SystemError {
+            throws SystemException {
 
         QueryWrapper<ProblemCase> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("pid", problemId);
         List<ProblemCase> problemCases = problemCaseEntityService.list(queryWrapper);
         // 数据库也为空的话
         if (problemCases.size() == 0) {
-            throw new SystemError("problemID:[" + problemId + "] test case has not found.", null, null);
+            throw new SystemException("problemID:[" + problemId + "] test case has not found.", null, null);
         }
 
         // 文件上传
@@ -82,7 +82,7 @@ public class ProblemTestCaseUtils {
                 || (problemCases.get(0).getOutput().endsWith(".out") || problemCases.get(0).getOutput().endsWith(".ans"))) {
             // 如果本地对应文件夹也为空，说明文件丢失了
             if (FileUtil.isEmpty(new File(testCasesDir))) {
-                throw new SystemError("problemID:[" + problemId + "] test case has not found.", null, null);
+                throw new SystemException("problemID:[" + problemId + "] test case has not found.", null, null);
             } else {
                 return initLocalTestCase(mode, version, testCasesDir, problemCases);
             }
@@ -151,13 +151,13 @@ public class ProblemTestCaseUtils {
      * @param version
      * @param mode
      * @return
-     * @throws SystemError
+     * @throws SystemException
      */
     private JSONObject initTestCase(List<HashMap<String, Object>> testCases, Long problemId, String version, String mode)
-            throws SystemError {
+            throws SystemException {
         // TODO 参数
         if (testCases == null || testCases.size() == 0) {
-            throw new SystemError("题号为：" + problemId + "的评测数据为空！", null, "The test cases does not exist.");
+            throw new SystemException("题号为：" + problemId + "的评测数据为空！", null, "The test cases does not exist.");
         }
 
         JSONObject result = new JSONObject();
@@ -224,8 +224,9 @@ public class ProblemTestCaseUtils {
      * @return
      */
     private static String rtrim(String value) {
-        if (value == null)
+        if (value == null) {
             return null;
+        }
         return value.replaceAll("[^\\S\\r\\n]+(?=\\n|\\r)|\\s+(?=$)", "");
     }
 }

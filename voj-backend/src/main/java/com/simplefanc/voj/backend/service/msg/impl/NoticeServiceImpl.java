@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.dao.msg.AdminSysNoticeEntityService;
 import com.simplefanc.voj.backend.dao.msg.UserSysNoticeEntityService;
-import com.simplefanc.voj.backend.pojo.vo.SysMsgVo;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.vo.SysMsgVO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.msg.NoticeService;
 import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.common.pojo.entity.msg.AdminSysNotice;
@@ -37,42 +37,46 @@ public class NoticeServiceImpl implements NoticeService {
     private final ApplicationContext applicationContext;
 
     @Override
-    public IPage<SysMsgVo> getSysNotice(Integer limit, Integer currentPage) {
+    public IPage<SysMsgVO> getSysNotice(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        IPage<SysMsgVo> sysNotice = userSysNoticeEntityService.getSysNotice(limit, currentPage, userRolesVo.getUid());
+        IPage<SysMsgVO> sysNotice = userSysNoticeEntityService.getSysNotice(limit, currentPage, userRolesVO.getUid());
         applicationContext.getBean(NoticeService.class).updateSysOrMineMsgRead(sysNotice);
         return sysNotice;
     }
 
     @Override
-    public IPage<SysMsgVo> getMineNotice(Integer limit, Integer currentPage) {
+    public IPage<SysMsgVO> getMineNotice(Integer limit, Integer currentPage) {
 
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1)
+        if (currentPage == null || currentPage < 1) {
             currentPage = 1;
-        if (limit == null || limit < 1)
+        }
+        if (limit == null || limit < 1) {
             limit = 5;
+        }
         // 获取当前登录的用户
-        UserRolesVo userRolesVo = UserSessionUtil.getUserInfo();
+        UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
-        IPage<SysMsgVo> mineNotice = userSysNoticeEntityService.getMineNotice(limit, currentPage, userRolesVo.getUid());
+        IPage<SysMsgVO> mineNotice = userSysNoticeEntityService.getMineNotice(limit, currentPage, userRolesVO.getUid());
         applicationContext.getBean(NoticeService.class).updateSysOrMineMsgRead(mineNotice);
         return mineNotice;
     }
 
     @Override
     @Async
-    public void updateSysOrMineMsgRead(IPage<SysMsgVo> userMsgList) {
-        List<Long> idList = userMsgList.getRecords().stream().filter(userMsgVo -> !userMsgVo.getState())
-                .map(SysMsgVo::getId).collect(Collectors.toList());
+    public void updateSysOrMineMsgRead(IPage<SysMsgVO> userMsgList) {
+        List<Long> idList = userMsgList.getRecords().stream().filter(userMsgVO -> !userMsgVO.getState())
+                .map(SysMsgVO::getId).collect(Collectors.toList());
         if (idList.size() == 0) {
             return;
         }

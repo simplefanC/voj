@@ -1,8 +1,8 @@
 package com.simplefanc.voj.backend.controller.admin;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDto;
-import com.simplefanc.voj.backend.pojo.vo.UserRolesVo;
+import com.simplefanc.voj.backend.pojo.dto.AdminEditUserDTO;
+import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
 import com.simplefanc.voj.backend.service.admin.user.AdminUserService;
 import com.simplefanc.voj.common.result.CommonResult;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class AdminUserController {
     @GetMapping("/get-user-list")
     @RequiresAuthentication
     @RequiresPermissions("user_admin")
-    public CommonResult<IPage<UserRolesVo>> getUserList(@RequestParam(value = "limit", required = false) Integer limit,
+    public CommonResult<IPage<UserRolesVO>> getUserList(@RequestParam(value = "limit", required = false) Integer limit,
                                                         @RequestParam(value = "currentPage", required = false) Integer currentPage,
                                                         @RequestParam(value = "roleId", required = false) Long roleId,
                                                         @RequestParam(value = "status", required = false) Integer status,
@@ -39,8 +39,8 @@ public class AdminUserController {
     @PutMapping("/edit-user")
     @RequiresPermissions("user_admin")
     @RequiresAuthentication
-    public CommonResult<Void> editUser(@RequestBody AdminEditUserDto adminEditUserDto) {
-        adminUserService.editUser(adminEditUserDto);
+    public CommonResult<Void> editUser(@RequestBody AdminEditUserDTO adminEditUserDTO) {
+        adminUserService.editUser(adminEditUserDTO);
         return CommonResult.successResponse();
     }
 
