@@ -259,7 +259,8 @@ public class ProblemFileServiceImpl implements ProblemFileService {
                 // 结束线程时间单位
                 TimeUnit.SECONDS,
                 // 阻塞队列，限制等候线程数
-                new LinkedBlockingDeque<>(200), Executors.defaultThreadFactory(),
+                new LinkedBlockingDeque<>(200),
+                Executors.defaultThreadFactory(),
                 // 队列满了，尝试去和最早的竞争，也不会抛出异常！
                 new ThreadPoolExecutor.DiscardOldestPolicy());
 

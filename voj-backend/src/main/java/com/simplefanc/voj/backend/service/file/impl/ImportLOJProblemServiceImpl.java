@@ -172,9 +172,9 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
                 .map(testcase -> new ProblemCase().setInput(testcase.inputFile).setOutput(testcase.outputFile))
                 .collect(Collectors.toList());
         int averageScore = 100 / problemCaseList.size();
-        int add_1_num = 100 - averageScore * problemCaseList.size();
+        int add1Num = 100 - averageScore * problemCaseList.size();
         for (int i = 0; i < problemCaseList.size(); i++) {
-            if (i >= problemCaseList.size() - add_1_num) {
+            if (i >= problemCaseList.size() - add1Num) {
                 problemCaseList.get(i).setScore(averageScore + 1);
             } else {
                 problemCaseList.get(i).setScore(averageScore);
@@ -188,70 +188,69 @@ public class ImportLOJProblemServiceImpl implements ImportLOJProblemService {
 //            res.add((Long) futures[i].get());
 //        }
     }
-}
-
-
-@Data
-class LOJProblem {
-    Contents localizedContentsOfLocale;
-
-    JudgeInfo judgeInfo;
-
-    List<Sample> samples;
-
-    List<LOJTag> tagsOfLocale;
-}
-
-@Data
-class Contents {
-    String title;
-    List<Section> contentSections;
 
     @Data
-    class Section {
-        String sectionTitle;
-        String type;
-        String text;
+    class LOJProblem {
+        Contents localizedContentsOfLocale;
+
+        JudgeInfo judgeInfo;
+
+        List<Sample> samples;
+
+        List<LOJTag> tagsOfLocale;
     }
-}
-
-@Data
-class JudgeInfo {
-    Integer timeLimit;
-    Integer memoryLimit;
-    List<Task> subtasks;
 
     @Data
-    class Task {
-        List<Testcase> testcases;
+    class Contents {
+        String title;
+        List<Section> contentSections;
 
         @Data
-        class Testcase {
-            String inputFile;
-            String outputFile;
+        class Section {
+            String sectionTitle;
+            String type;
+            String text;
         }
     }
-}
-
-@Data
-class Sample {
-    String inputData;
-    String outputData;
-}
-
-@Data
-class LOJTag {
-    String name;
-}
-
-///////////////////////////////////
-@Data
-class DownloadInfo {
-    List<Info> downloadInfo;
 
     @Data
-    class Info {
-        String filename;
-        String downloadUrl;
+    class JudgeInfo {
+        Integer timeLimit;
+        Integer memoryLimit;
+        List<Task> subtasks;
+
+        @Data
+        class Task {
+            List<Testcase> testcases;
+
+            @Data
+            class Testcase {
+                String inputFile;
+                String outputFile;
+            }
+        }
+    }
+
+    @Data
+    class Sample {
+        String inputData;
+        String outputData;
+    }
+
+    @Data
+    class LOJTag {
+        String name;
+    }
+
+    ///////////////////////////////////
+    @Data
+    class DownloadInfo {
+        List<Info> downloadInfo;
+
+        @Data
+        class Info {
+            String filename;
+            String downloadUrl;
+        }
     }
 }

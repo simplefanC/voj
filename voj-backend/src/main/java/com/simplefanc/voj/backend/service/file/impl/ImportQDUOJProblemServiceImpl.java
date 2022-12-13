@@ -12,10 +12,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.common.utils.MyFileUtil;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.problem.LanguageEntityService;
 import com.simplefanc.voj.backend.dao.problem.ProblemEntityService;
 import com.simplefanc.voj.backend.dao.problem.TagEntityService;
-import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.dto.ProblemDTO;
 import com.simplefanc.voj.backend.pojo.dto.QDOJProblemDTO;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
@@ -34,7 +34,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,7 +49,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService {
 
-    public static final List<String> LANGUAGES = Arrays.asList("C", "C With O2", "C++", "C++ With O2", "Java", "Python3", "Python2", "Golang", "C#");
     private final LanguageEntityService languageEntityService;
 
     private final ProblemEntityService problemEntityService;
@@ -136,15 +134,6 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
             }
         }
 
-        QueryWrapper<Language> languageQueryWrapper = new QueryWrapper<>();
-        languageQueryWrapper.eq("oj", Constant.LOCAL);
-        List<Language> languageList = languageEntityService.list(languageQueryWrapper);
-
-        HashMap<String, Long> languageMap = new HashMap<>();
-        for (Language language : languageList) {
-            languageMap.put(language.getName(), language.getId());
-        }
-
         // 获取当前登录的用户
         UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
@@ -158,11 +147,7 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         for (String key : problemInfo.keySet()) {
             QDOJProblemDTO qdojProblemDTO = problemVOMap.get(key);
             // 格式化题目语言
-            List<Language> languages = new LinkedList<>();
-            for (String lang : qdojProblemDTO.getLanguages()) {
-                Long lid = languageMap.getOrDefault(lang, null);
-                languages.add(new Language().setId(lid).setName(lang));
-            }
+            List<Language> languages = languageEntityService.lambdaQuery().eq(Language::getOj, Constant.LOCAL).list();
 
             // 格式化标签
             List<Tag> tags = new LinkedList<>();
@@ -202,7 +187,6 @@ public class ImportQDUOJProblemServiceImpl implements ImportQDUOJProblemService 
         QDOJProblemDTO qdojProblemDTO = new QDOJProblemDTO();
         List<String> tags = (List<String>) problemJson.get("tags");
         qdojProblemDTO.setTags(tags.stream().map(UnicodeUtil::toString).collect(Collectors.toList()));
-        qdojProblemDTO.setLanguages(LANGUAGES);
         Object spj = problemJson.getObj("spj");
         boolean isSpj = !JSONUtil.isNull(spj);
         qdojProblemDTO.setIsSpj(isSpj);

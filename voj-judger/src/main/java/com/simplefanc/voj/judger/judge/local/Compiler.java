@@ -86,11 +86,8 @@ public class Compiler {
             throw new RuntimeException("Unsupported interactive language:" + language);
         }
 
-        boolean copyOutExe = true;
         // 题目id为空，则不进行本地存储，可能为新建题目时测试特判程序是否正常的判断而已
-        if (pid == null) {
-            copyOutExe = false;
-        }
+        boolean copyOutExe = pid != null;
 
         // 调用安全沙箱对特别判题程序进行编译
         JSONArray res = SandboxRun.compile(interactiveCompiler.getMaxCpuTime(), interactiveCompiler.getMaxRealTime(),

@@ -52,7 +52,7 @@ spring:
   datasource:
     username: ${voj.db.username}
     password: ${voj.db.password}
-    url: jdbc:mysql://${voj.db.host}:${voj.db.port}/${voj.db.name}?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true
+    url: jdbc:mysql://${voj.db.host}:${voj.db.port}/${voj.db.name}?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&allowMultiQueries=true&rewriteBatchedStatements=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initial-size: 10 # 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时

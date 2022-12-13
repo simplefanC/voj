@@ -29,11 +29,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends AuthenticatingFilter {
 
-    private final static String TOKEN_KEY = "token-key:";
-
     private final static String TOKEN_LOCK = "token-lock:";
-
-    private final static String TOKEN_REFRESH = "token-refresh:";
 
     private final JwtUtil jwtUtil;
 
@@ -76,7 +72,7 @@ public class JwtFilter extends AuthenticatingFilter {
             return true;
         }
         String userId = jwtUtil.getClaimByToken(token);
-        if (!redisUtil.hasKey(TOKEN_REFRESH + userId) && redisUtil.hasKey(TOKEN_KEY + userId)) {
+        if (!redisUtil.hasKey(JwtUtil.TOKEN_REFRESH + userId) && redisUtil.hasKey(JwtUtil.TOKEN_KEY + userId)) {
             // 过了需更新token时间，但是还未过期，则进行token刷新
             HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
             HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;

@@ -11,18 +11,18 @@ import java.util.List;
 @Slf4j(topic = "voj")
 public class QueriersHolder {
 
-    private static HashMap<RemoteOj, Querier> queriers = new HashMap<>();
+    private static final HashMap<RemoteOj, Querier> QUERIERS = new HashMap<>();
 
     public static Querier getQuerier(RemoteOj remoteOj) {
-        if (!queriers.containsKey(remoteOj)) {
-            synchronized (queriers) {
-                if (!queriers.containsKey(remoteOj)) {
+        if (!QUERIERS.containsKey(remoteOj)) {
+            synchronized (QUERIERS) {
+                if (!QUERIERS.containsKey(remoteOj)) {
                     try {
                         List<Class<? extends Querier>> querierClasses = Tools
                                 .findSubClasses("com.simplefanc.voj.judger.judge.remote", Querier.class);
                         for (Class<? extends Querier> querierClass : querierClasses) {
                             Querier querier = SpringUtil.getBean(querierClass);
-                            queriers.put(querier.getOjInfo().remoteOj, querier);
+                            QUERIERS.put(querier.getOjInfo().remoteOj, querier);
                         }
                     } catch (Throwable t) {
                         log.error("Get Querier Failed", t);
@@ -30,7 +30,7 @@ public class QueriersHolder {
                 }
             }
         }
-        return queriers.get(remoteOj);
+        return QUERIERS.get(remoteOj);
     }
 
 }

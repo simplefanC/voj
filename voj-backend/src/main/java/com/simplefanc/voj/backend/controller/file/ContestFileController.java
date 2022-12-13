@@ -38,9 +38,10 @@ public class ContestFileController {
     @RequiresRoles(value = {"root", "admin", "problem_admin"}, logical = Logical.OR)
     public void downloadContestAcSubmission(@RequestParam("cid") Long cid,
                                             @RequestParam(value = "excludeAdmin", defaultValue = "false") Boolean excludeAdmin,
-                                            @RequestParam(value = "splitType", defaultValue = "user") String splitType, HttpServletResponse response) {
-
-        contestFileService.downloadContestAcSubmission(cid, excludeAdmin, splitType, response);
+                                            @RequestParam(value = "allStatus", defaultValue = "false") Boolean allStatus,
+                                            @RequestParam(value = "splitType", defaultValue = "user") String splitType,
+                                            HttpServletResponse response) {
+        contestFileService.downloadContestAcSubmission(cid, excludeAdmin, allStatus, splitType, response);
     }
 
     @GetMapping("/download-contest-print-text")

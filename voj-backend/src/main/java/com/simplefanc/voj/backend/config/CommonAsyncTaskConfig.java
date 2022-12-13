@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @Slf4j(topic = "voj")
-public class AsyncTaskConfig implements AsyncConfigurer {
+public class CommonAsyncTaskConfig implements AsyncConfigurer {
 
     @Override
     public Executor getAsyncExecutor() {
@@ -39,7 +39,7 @@ public class AsyncTaskConfig implements AsyncConfigurer {
         // 如果执行程序尚未关闭，则位于工作队列头部的任务将被删除，然后重试执行程序（如果再次失败，则重复此过程）
         taskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         // 线程名前缀,方便排查问题
-        taskExecutor.setThreadNamePrefix("CommonThread-");
+        taskExecutor.setThreadNamePrefix("CommonExecutor-");
         // 注意一定要初始化
         taskExecutor.initialize();
 

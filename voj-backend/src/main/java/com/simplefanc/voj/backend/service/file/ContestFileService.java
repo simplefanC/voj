@@ -13,7 +13,7 @@ public interface ContestFileService {
     void downloadContestRank(Long cid, Boolean forceRefresh, Boolean removeStar, HttpServletResponse response)
             throws IOException;
 
-    void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, String splitType, HttpServletResponse response);
+    void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, Boolean allStatus, String splitType, HttpServletResponse response);
 
     void downloadContestPrintText(Long id, HttpServletResponse response);
 

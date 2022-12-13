@@ -10,14 +10,14 @@ import com.alibaba.excel.write.metadata.WriteSheet;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
-import com.simplefanc.voj.backend.common.utils.MyFileUtil;
 import com.simplefanc.voj.backend.common.utils.ExcelUtil;
+import com.simplefanc.voj.backend.common.utils.MyFileUtil;
+import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestPrintEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.judge.JudgeEntityService;
 import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
-import com.simplefanc.voj.backend.config.property.FilePathProperties;
 import com.simplefanc.voj.backend.pojo.vo.ACMContestRankVO;
 import com.simplefanc.voj.backend.pojo.vo.ExcelIpVO;
 import com.simplefanc.voj.backend.pojo.vo.OIContestRankVO;
@@ -204,11 +204,9 @@ public class ContestFileServiceImpl implements ContestFileService {
     }
 
     @Override
-    public void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, String splitType,
+    public void downloadContestAcSubmission(Long cid, Boolean excludeAdmin, Boolean allStatus, String splitType,
                                             HttpServletResponse response) {
-
         Contest contest = contestEntityService.getById(cid);
-
         if (contest == null) {
             throw new StatusFailException("错误：该比赛不存在！");
         }
@@ -224,11 +222,12 @@ public class ContestFileServiceImpl implements ContestFileService {
         List<ContestProblem> contestProblemList = contestProblemEntityService.list(contestProblemQueryWrapper);
 
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
-
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
-        judgeQueryWrapper.eq("cid", cid).eq(isACM, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
+        judgeQueryWrapper.eq("cid", cid)
+                .eq(!allStatus && isACM, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
                 // OI模式取得分不为null的
-                .isNotNull(!isACM, "score").between("submit_time", contest.getStartTime(), contest.getEndTime())
+                .isNotNull(!allStatus && !isACM, "score")
+                .between("submit_time", contest.getStartTime(), contest.getEndTime())
                 // 排除比赛创建者和root
                 .ne(excludeAdmin, "uid", contest.getUid())
                 .notIn(excludeAdmin && superAdminUidList.size() > 0, "uid", superAdminUidList)
@@ -253,7 +252,6 @@ public class ContestFileServiceImpl implements ContestFileService {
         MyFileUtil.download(response, zipPath, zipFileName, "下载比赛AC代码失败，请重新尝试！");
         FileUtil.del(tmpFilesDir);
         FileUtil.del(zipPath);
-
     }
 
     /**

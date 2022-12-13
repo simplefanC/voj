@@ -16,17 +16,15 @@ import java.util.Date;
 @ConfigurationProperties(prefix = "voj.jwt")
 public class JwtUtil {
 
-    private final static String TOKEN_KEY = "token-key:";
+    public final static String TOKEN_KEY = "token-key:";
 
-    private final static String TOKEN_REFRESH = "token-refresh:";
-
-    private String secret;
+    public final static String TOKEN_REFRESH = "token-refresh:";
 
     private long expire;
 
-    private String header;
-
     private long checkRefreshExpire;
+
+    private String secret;
 
     private final RedisUtil redisUtil;
 
