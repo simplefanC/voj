@@ -36,16 +36,15 @@ public class ContestRecordEntityServiceImpl extends ServiceImpl<ContestRecordMap
     @Override
     public void updateContestRecord(Judge judge) {
         UpdateWrapper<ContestRecord> updateWrapper = new UpdateWrapper<>();
-        // 如果是AC
         if (judge.getStatus().intValue() == JudgeStatus.STATUS_ACCEPTED.getStatus()) {
+            // 如果是AC
             updateWrapper.set("status", ContestEnum.RECORD_AC.getCode());
-            // 部分通过
         } else if (judge.getStatus().intValue() == JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus()) {
-            updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_NOT_PENALTY.getCode());
-            // 需要被罚时的状态
-        } else if (PENALTY_STATUS.contains(judge.getStatus())) {
+            // 部分通过
             updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_PENALTY.getCode());
-
+        } else if (PENALTY_STATUS.contains(judge.getStatus())) {
+            // 需要被罚时的状态
+            updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_PENALTY.getCode());
         } else {
             updateWrapper.set("status", ContestEnum.RECORD_NOT_AC_NOT_PENALTY.getCode());
         }
