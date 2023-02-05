@@ -5,7 +5,6 @@ import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
-import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.constants.JudgeMode;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -221,15 +220,10 @@ public class JudgeProcess {
      * @return
      */
     private HashMap<String, Object> getJudgeInfo(List<JSONObject> testCaseResultList, Problem problem, Judge judge) {
-        boolean isACM = problem.getType().equals(ContestEnum.TYPE_ACM.getCode());
-
         List<JSONObject> errorTestCaseList = new LinkedList<>();
-
         List<JudgeCase> allCaseResList = new LinkedList<>();
-
         // 记录所有测试点的结果
-        testCaseResultList.forEach(jsonObject -> handleTestCase(problem, judge, errorTestCaseList, allCaseResList, jsonObject));
-
+        testCaseResultList.forEach(jsonObject -> handleTestCase(jsonObject, problem, judge, allCaseResList, errorTestCaseList));
         // 更新到数据库
         boolean addCaseRes = JudgeCaseEntityService.saveBatch(allCaseResList);
         if (!addCaseRes) {
@@ -237,22 +231,19 @@ public class JudgeProcess {
         }
 
         // 获取判题的time，memory，OI score
-        HashMap<String, Object> result = computeResultInfo(allCaseResList, errorTestCaseList.size(), problem.getDifficulty());
+        boolean accepted = errorTestCaseList.size() == 0;
+        HashMap<String, Object> result = computeResultInfo(allCaseResList, accepted, problem.getDifficulty());
 
-        // 如果该题为ACM类型的题目，多个测试点全部正确则AC，否则取第一个错误的测试点的状态
-        // 如果该题为OI类型的题目，若多个测试点全部正确则AC，若全部错误则取第一个错误测试点状态，否则为部分正确
-        // 全部测试点正确，则为AC
-        if (errorTestCaseList.size() == 0) {
+        // 如果多个测试点全部正确则AC，否则取第一个错误的测试点的状态
+        if (accepted) {
             result.put("code", JudgeStatus.STATUS_ACCEPTED.getStatus());
-        } else if (isACM || errorTestCaseList.size() == testCaseResultList.size()) {
-            result.put("code", errorTestCaseList.get(0).getInt("status"));
         } else {
-            result.put("code", JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus());
+            result.put("code", errorTestCaseList.get(0).getInt("status"));
         }
         return result;
     }
 
-    private void handleTestCase(Problem problem, Judge judge, List<JSONObject> errorTestCaseList, List<JudgeCase> allCaseResList, JSONObject jsonObject) {
+    private void handleTestCase(JSONObject jsonObject, Problem problem, Judge judge, List<JudgeCase> allCaseResList, List<JSONObject> errorTestCaseList) {
         Integer time = jsonObject.getLong("time").intValue();
         Integer memory = jsonObject.getLong("memory").intValue();
         Integer status = jsonObject.getInt("status");
@@ -289,9 +280,15 @@ public class JudgeProcess {
         allCaseResList.add(judgeCase);
     }
 
-    // 获取判题的运行时间，运行空间，OI得分
+    /**
+     * 获取判题的运行时间，运行空间，得分
+     * @param allTestCaseResultList
+     * @param accepted
+     * @param problemDifficulty
+     * @return
+     */
     private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList,
-                                                      Integer errorCaseNum, Integer problemDifficulty) {
+                                                      boolean accepted, Integer problemDifficulty) {
         HashMap<String, Object> result = new HashMap<>();
         // 用时和内存占用保存为多个测试点中最长的
         allTestCaseResultList.stream()
@@ -305,10 +302,9 @@ public class JudgeProcess {
         int totalScore = allTestCaseResultList.stream()
                 .mapToInt(JudgeCase::getScore)
                 .sum();
-        // OI题目计算得分
-//        if (!isACM) {
+        // 计算得分
         // 全对的直接用总分*0.1+2*题目难度
-        if (errorCaseNum == 0) {
+        if (accepted) {
             int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
             result.put("score", totalScore);
             result.put("oiRankScore", oiRankScore);
@@ -322,7 +318,6 @@ public class JudgeProcess {
             result.put("score", sumScore);
             result.put("oiRankScore", oiRankScore);
         }
-//        }
         return result;
     }
 
