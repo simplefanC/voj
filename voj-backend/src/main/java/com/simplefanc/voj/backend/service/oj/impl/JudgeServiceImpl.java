@@ -203,7 +203,6 @@ public class JudgeServiceImpl implements JudgeService {
      */
     @Override
     public SubmissionInfoVO getSubmission(Long submitId) {
-
         Judge judge = judgeEntityService.getById(submitId);
         if (judge == null) {
             throw new StatusNotFoundException("此提交数据不存在！");
@@ -232,15 +231,30 @@ public class JudgeServiceImpl implements JudgeService {
         // 当此次提交代码不共享
         // 比赛提交只有比赛创建者和root账号可看代码
         if (judge.getCid() != 0) {
-            if (extracted(judge, userRolesVO)) {
-                return new SubmissionInfoVO().setSubmission(
-                        new Judge().setStatus(JudgeStatus.STATUS_SUBMITTED_UNKNOWN_RESULT.getStatus()));
+            Contest contest = contestEntityService.getById(judge.getCid());
+            if (!contestValidator.isContestAdmin(contest)) {
+                // 不是本人的话不能查看代码
+                if (!userRolesVO.getUid().equals(judge.getUid())) {
+                    judge.setCode(null);
+                    // 如果还在比赛时间，不是本人不能查看时间，空间，长度，错误提示信息
+                    if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()) {
+                        judge.setTime(null);
+                        judge.setMemory(null);
+                        judge.setLength(null);
+                        judge.setErrorMessage("The contest is in progress. You are not allowed to view other people's error information.");
+                    }
+                }
             }
         } else {
-            extracted(judge, userRolesVO, isRoot, problemAdmin);
+            if (!judge.getShare() && !isRoot && !problemAdmin) {
+                // 需要判断是否为当前登陆用户自己的提交代码
+                if (!judge.getUid().equals(userRolesVO.getUid())) {
+                    judge.setCode(null);
+                }
+            }
         }
 
-        // 只允许用户查看ce错误,sf错误，se错误信息提示
+        // 只允许用户查看ce错误，sf错误，se错误信息提示
         if (judge.getStatus().intValue() != JudgeStatus.STATUS_COMPILE_ERROR.getStatus()
                 && judge.getStatus().intValue() != JudgeStatus.STATUS_SYSTEM_ERROR.getStatus()
                 && judge.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
@@ -253,39 +267,6 @@ public class JudgeServiceImpl implements JudgeService {
                 .setCodeShare(problem.getCodeShare());
     }
 
-    private boolean extracted(Judge judge, UserRolesVO userRolesVO) {
-        Contest contest = contestEntityService.getById(judge.getCid());
-        if (!contestValidator.isContestAdmin(contest)) {
-            // 如果是比赛,那么还需要判断是否为封榜,比赛管理员和超级管理员可以有权限查看(ACM题目除外)
-            if (contest.getType().intValue() == ContestEnum.TYPE_OI.getCode()
-                    && contestValidator.isOpenSealRank(contest, true)) {
-                return true;
-            }
-            // 不是本人的话不能查看代码
-            if (!userRolesVO.getUid().equals(judge.getUid())) {
-                judge.setCode(null);
-                // 如果还在比赛时间，不是本人不能查看时间，空间，长度，错误提示信息
-                if (contest.getStatus().intValue() == ContestEnum.STATUS_RUNNING.getCode()) {
-                    judge.setTime(null);
-                    judge.setMemory(null);
-                    judge.setLength(null);
-                    judge.setErrorMessage(
-                            "The contest is in progress. You are not allowed to view other people's error information.");
-                }
-            }
-        }
-        return false;
-    }
-
-    private void extracted(Judge judge, UserRolesVO userRolesVO, boolean isRoot, boolean problemAdmin) {
-        if (!judge.getShare() && !isRoot && !problemAdmin) {
-            // 需要判断是否为当前登陆用户自己的提交代码
-            if (!judge.getUid().equals(userRolesVO.getUid())) {
-                judge.setCode(null);
-            }
-        }
-    }
-
     /**
      * @MethodName updateSubmission
      * @Description 修改单个提交详情的分享权限
@@ -293,7 +274,6 @@ public class JudgeServiceImpl implements JudgeService {
      */
     @Override
     public void updateSubmission(Judge judge) {
-
         // 需要获取一下该token对应用户的数据
         UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
 
