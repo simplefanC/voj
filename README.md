@@ -35,7 +35,7 @@ VOJ 是基于微服务、前后端分离的高性能在线评测系统。采用�
 
 ## 项目文档
 
-项目文档地址：[https://docs.voj.mobi](https://docs.voj.mobi)
+项目文档地址：[https://github.com/simplefanC/voj/wiki](https://github.com/simplefanC/voj/wiki)
 
 ## 项目结构
 
@@ -69,6 +69,6 @@ voj
 
 ## 部署
 
-快速部署：[基于 Docker Compose 部署](https://docs.voj.mobi/deploy/docker.html)
+快速部署：[基于 Docker Compose 部署](https://github.com/simplefanC/voj/wiki/deploy)
 
 部署仓库：[https://github.com/simplefanC/voj-deploy](https://github.com/simplefanC/voj-deploy)
