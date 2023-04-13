@@ -15,7 +15,7 @@ public interface ContestAdminService {
 
     IPage<ContestRecord> getContestACInfo(Long cid, Integer currentPage, Integer limit);
 
-    void checkContestAcInfo(CheckAcDTO checkACDTO);
+    void checkContestAcInfo(CheckAcDTO checkAcDTO);
 
     IPage<ContestPrint> getContestPrint(Long cid, Integer currentPage, Integer limit);
 

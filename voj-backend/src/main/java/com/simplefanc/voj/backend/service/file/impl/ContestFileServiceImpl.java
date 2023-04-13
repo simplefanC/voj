@@ -224,9 +224,9 @@ public class ContestFileServiceImpl implements ContestFileService {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper.eq("cid", cid)
-                .eq(!allStatus && isACM, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
+                .eq(isACM && !allStatus, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
                 // OI模式取得分不为null的
-                .isNotNull(!allStatus && !isACM, "score")
+                .isNotNull(!isACM, "score")
                 .between("submit_time", contest.getStartTime(), contest.getEndTime())
                 // 排除比赛创建者和root
                 .ne(excludeAdmin, "uid", contest.getUid())
@@ -239,11 +239,10 @@ public class ContestFileServiceImpl implements ContestFileService {
         String tmpFilesDir = filePathProps.getContestAcSubmissionTmpFolder() + File.separator + IdUtil.fastSimpleUUID();
         FileUtil.mkdir(tmpFilesDir);
 
-        HashMap<String, Boolean> recordMap = new HashMap<>();
         if ("user".equals(splitType)) {
-            splitCodeByUser(isACM, contestProblemList, judgeList, tmpFilesDir, recordMap);
+            splitCodeByUser(isACM, contestProblemList, judgeList, tmpFilesDir);
         } else if ("problem".equals(splitType)) {
-            splitByProblem(isACM, contestProblemList, judgeList, tmpFilesDir, recordMap);
+            splitByProblem(isACM, contestProblemList, judgeList, tmpFilesDir);
         }
 
         String zipFileName = "contest_" + contest.getId() + "_" + System.currentTimeMillis() + ".zip";
@@ -257,7 +256,7 @@ public class ContestFileServiceImpl implements ContestFileService {
     /**
      * 以比赛题目编号来分割提交的代码
      */
-    private void splitByProblem(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir, HashMap<String, Boolean> recordMap) {
+    private void splitByProblem(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir) {
         for (ContestProblem contestProblem : contestProblemList) {
             // 对于每题目生成对应的文件夹
             String problemDir = tmpFilesDir + File.separator + contestProblem.getDisplayId();
@@ -275,14 +274,14 @@ public class ContestFileServiceImpl implements ContestFileService {
                 if (!isACM) {
                     String key = judge.getUsername() + "_" + contestProblem.getDisplayId();
                     // OI模式只取最后一次提交
-                    if (!recordMap.containsKey(key)) {
+//                    if (!recordMap.containsKey(key)) {
                         filePath += "_" + judge.getScore() + "_("
                                 + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
                         FileWriter fileWriter = new FileWriter(filePath);
                         fileWriter.write(judge.getCode());
-                        recordMap.put(key, true);
-                    }
+//                        recordMap.put(key, true);
+//                    }
                 } else {
                     filePath += "_(" + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                             + languageToFileSuffix(judge.getLanguage().toLowerCase());
@@ -296,7 +295,7 @@ public class ContestFileServiceImpl implements ContestFileService {
     /**
      * 以用户来分割提交的代码
      */
-    private void splitCodeByUser(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir, HashMap<String, Boolean> recordMap) {
+    private void splitCodeByUser(boolean isACM, List<ContestProblem> contestProblemList, List<Judge> judgeList, String tmpFilesDir) {
         List<String> usernameList = judgeList.stream()
                 // 根据用户名过滤唯一
                 .filter(distinctByKey(Judge::getUsername))
@@ -323,26 +322,23 @@ public class ContestFileServiceImpl implements ContestFileService {
 
             for (Judge judge : userSubmissionList) {
                 String filePath = userDir + File.separator + cpIdMap.getOrDefault(judge.getCpid(), "null");
-
                 // OI模式只取最后一次提交
                 if (!isACM) {
                     String key = judge.getUsername() + "_" + judge.getPid();
-                    if (!recordMap.containsKey(key)) {
+//                    if (!recordMap.containsKey(key)) {
                         filePath += "_" + judge.getScore() + "_("
                                 + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                                 + languageToFileSuffix(judge.getLanguage().toLowerCase());
                         FileWriter fileWriter = new FileWriter(filePath);
                         fileWriter.write(judge.getCode());
-                        recordMap.put(key, true);
-                    }
-
+//                        recordMap.put(key, true);
+//                    }
                 } else {
                     filePath += "_(" + THREAD_LOCAL_TIME.get().format(judge.getSubmitTime()) + ")."
                             + languageToFileSuffix(judge.getLanguage().toLowerCase());
                     FileWriter fileWriter = new FileWriter(filePath);
                     fileWriter.write(judge.getCode());
                 }
-
             }
         }
     }
