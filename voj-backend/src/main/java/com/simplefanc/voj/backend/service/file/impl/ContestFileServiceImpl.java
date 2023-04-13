@@ -224,7 +224,7 @@ public class ContestFileServiceImpl implements ContestFileService {
         List<String> superAdminUidList = userInfoEntityService.getSuperAdminUidList();
         QueryWrapper<Judge> judgeQueryWrapper = new QueryWrapper<>();
         judgeQueryWrapper.eq("cid", cid)
-                .eq(isACM && !allStatus, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
+                .eq(!allStatus, "status", JudgeStatus.STATUS_ACCEPTED.getStatus())
                 // OI模式取得分不为null的
                 .isNotNull(!isACM, "score")
                 .between("submit_time", contest.getStartTime(), contest.getEndTime())
