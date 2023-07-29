@@ -244,7 +244,7 @@ public class ContestACMRankService {
 
     private void computeACMRankNo(boolean removeStar, Contest contest, List<String> concernedList, List<ACMContestRankVO> orderResultList, List<ACMContestRankVO> topACMRankVOList) {
         // 需要打星的用户名列表
-        HashMap<String, Boolean> starAccountMap = starAccountToMap(contest.getStarAccount());
+        Map<String, Boolean> starAccountMap = starAccountToMap(contest.getStarAccount());
 
         // 如果选择了移除打星队伍，同时该用户属于打星队伍，则将其移除
         if (removeStar) {
@@ -358,19 +358,17 @@ public class ContestACMRankService {
         return DateUtil.isIn(submissionDate, contest.getSealRankTime(), contest.getEndTime());
     }
 
-    private HashMap<String, Boolean> starAccountToMap(String starAccountStr) {
+    private Map<String, Boolean> starAccountToMap(String starAccountStr) {
         if (StrUtil.isEmpty(starAccountStr)) {
             return new HashMap<>();
         }
         JSONObject jsonObject = JSONUtil.parseObj(starAccountStr);
-        List<String> list = jsonObject.get("star_account", List.class);
-        HashMap<String, Boolean> res = new HashMap<>();
-        for (String str : list) {
-            if (!StrUtil.isEmpty(str)) {
-                res.put(str, true);
-            }
-        }
-        return res;
+        List<String> accountList = jsonObject.get("star_account", List.class);
+        return Optional.ofNullable(accountList)
+                .orElse(Collections.emptyList())
+                .stream()
+                .filter(StrUtil::isNotEmpty)
+                .collect(Collectors.toMap(str -> str, str -> true));
     }
 
 }

@@ -106,7 +106,6 @@ public class AdminContestServiceImpl implements AdminContestService {
         accountJson.set("star_account", adminContestVO.getStarAccount());
         contest.setStarAccount(accountJson.toString());
         boolean isOk = contestEntityService.save(contest);
-        // 删除成功
         if (!isOk) {
             throw new StatusFailException("添加失败");
         }
