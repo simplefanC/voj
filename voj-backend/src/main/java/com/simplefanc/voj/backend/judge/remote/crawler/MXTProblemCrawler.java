@@ -15,7 +15,7 @@ public class MXTProblemCrawler extends AbstractProblemCrawler {
 
     public static final String JUDGE_NAME = "MXT";
 
-    public static final String HOST = "https://www.maxuetang.cn";
+    public static final String HOST = "https://mxt.cn";
 
     public static final String PROBLEM_URL = "/course/%s.html";
 
@@ -53,7 +53,7 @@ public class MXTProblemCrawler extends AbstractProblemCrawler {
         final String hint = ReUtil.getGroup1("<div class=\"panel-heading\">\n" + "\t\t\t<b>提示</b>\n" + "\t\t</div>\n"
                 + "\t\t<div class=\"panel-body jdc-latex-show\">([\\s\\S]*?)</div>", html);
         info.setHint(hint != null ? hint.trim() : hint);
-        info.setSource(String.format("<a style='color:#1A5CC8' href='https://www.maxuetang.cn/course/%s.html'>%s</a>",
+        info.setSource(String.format("<a style='color:#1A5CC8' href='https://mxt.cn/course/%s.html'>%s</a>",
                 problemId, JUDGE_NAME + "-" + problemId));
         return problemInfo;
     }
