@@ -20,9 +20,9 @@ public class JSKProblemCrawler extends AbstractProblemCrawler {
 
     public static final String JUDGE_NAME = "JSK";
 
-    public static final String HOST = "https://nanti.jisuanke.com";
+    public static final String HOST = "https://www.jisuanke.com";
 
-    public static final String PROBLEM_URL = "/t/%s";
+    public static final String PROBLEM_URL = "/problem/%s";
 
     private Pattern compile1 = Pattern.compile("([\\s\\S]*?)<h4>输入格式</h4><p>([\\s\\S]*?)</p><h4>输出格式</h4><p>([\\s\\S]*?)</p>");
     private Pattern compile2 = Pattern.compile("([\\s\\S]*?)输入格式([\\s\\S]*?)输出格式([\\s\\S]*)");
@@ -80,7 +80,7 @@ public class JSKProblemCrawler extends AbstractProblemCrawler {
         info.setExamples(sb);
 
         info.setHint(jsonObject.getStr("hint"));
-        info.setSource(String.format("<a style='color:#1A5CC8' href='https://nanti.jisuanke.com/t/%s'>%s</a>",
+        info.setSource(String.format("<a style='color:#1A5CC8' href='https://www.jisuanke.com/problem/%s'>%s</a>",
                 problemId, JUDGE_NAME + "-" + problemId));
         return problemInfo;
     }

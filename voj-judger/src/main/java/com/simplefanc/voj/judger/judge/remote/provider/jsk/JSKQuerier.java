@@ -37,7 +37,9 @@ public class JSKQuerier implements Querier {
             put("OL", JudgeStatus.STATUS_OUTPUT_LIMIT_EXCEEDED);
             put("RE", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("RE_SEGV", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("RE_ABRT", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("RE_FPE", JudgeStatus.STATUS_RUNTIME_ERROR);
+            put("RE_SYS", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("SF", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("AE", JudgeStatus.STATUS_RUNTIME_ERROR);
             put("CE", JudgeStatus.STATUS_COMPILE_ERROR);
