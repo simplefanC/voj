@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeMode;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
@@ -18,6 +17,8 @@ import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.dao.JudgeCaseEntityService;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
+import com.simplefanc.voj.judger.judge.local.pojo.CaseResult;
+import com.simplefanc.voj.judger.judge.local.pojo.JudgeResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,15 +39,15 @@ public class JudgeProcess {
 
     private final JudgeEntityService judgeEntityService;
 
-    private final JudgeCaseEntityService JudgeCaseEntityService;
+    private final JudgeCaseEntityService judgeCaseEntityService;
 
     private final JudgeRun judgeRun;
 
     @Value("${voj-judge-server.name}")
     private String judgeServerName;
 
-    public HashMap<String, Object> execute(Problem problem, Judge judge) {
-        HashMap<String, Object> result = new HashMap<>();
+    public JudgeResult execute(Problem problem, Judge judge) {
+        JudgeResult result = new JudgeResult();
         // 编译好的临时代码文件id
         String userFileId = null;
         String userFileSrc = null;
@@ -81,10 +82,10 @@ public class JudgeProcess {
             judge.setStatus(JudgeStatus.STATUS_JUDGING.getStatus());
             judgeEntityService.updateById(judge);
             // 开始测试每个测试点
-            List<JSONObject> allCaseResultList = judgeRun.judgeAllCase(judge, problem, userFileId, userFileSrc, false);
+            List<CaseResult> allCaseResultList = judgeRun.judgeAllCase(judge, problem, userFileId, userFileSrc, false);
 
             // 对全部测试点结果进行评判，获取最终评判结果
-            return getJudgeInfo(allCaseResultList, problem, judge);
+            return getJudgeResult(allCaseResultList, problem, judge);
         } catch (SystemException systemException) {
             handleJudgeError(result, JudgeStatus.STATUS_SYSTEM_ERROR, "Oops, something has gone wrong with the judgeServer. Please report this to administrator.");
             log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生SystemError异常------------------->", systemException);
@@ -98,7 +99,7 @@ public class JudgeProcess {
             log.error("题号为：" + problem.getId() + "的题目，提交id为" + judge.getSubmitId() + "在评测过程中发生Exception异常-------------------->", e);
         } finally {
             // 删除tmpfs内存中的用户代码可执行文件
-            if (!StrUtil.isEmpty(userFileId)) {
+            if (StrUtil.isNotEmpty(userFileId)) {
                 SandboxRun.delFile(userFileId);
             }
         }
@@ -132,11 +133,11 @@ public class JudgeProcess {
         return true;
     }
 
-    private void handleJudgeError(HashMap<String, Object> result, JudgeStatus status, String errMsg) {
-        result.put("code", status.getStatus());
-        result.put("errMsg", errMsg);
-        result.put("time", 0);
-        result.put("memory", 0);
+    private void handleJudgeError(JudgeResult result, JudgeStatus status, String errMsg) {
+        result.setStatus(status.getStatus());
+        result.setErrMsg(errMsg);
+        result.setTime(0);
+        result.setMemory(0);
     }
 
     private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemException {
@@ -144,11 +145,9 @@ public class JudgeProcess {
         String programFilePath;
         String programVersionPath;
         compiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
-        programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                + compiler.getExeName();
+        programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + compiler.getExeName();
 
-        programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
-                + "version";
+        programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + "version";
 
         // 如果不存在该已经编译好的程序，则需要再次进行编译 版本变动也需要重新编译
         if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
@@ -219,61 +218,51 @@ public class JudgeProcess {
      * @param judge
      * @return
      */
-    private HashMap<String, Object> getJudgeInfo(List<JSONObject> testCaseResultList, Problem problem, Judge judge) {
-        List<JSONObject> errorTestCaseList = new LinkedList<>();
-        List<JudgeCase> allCaseResList = new LinkedList<>();
+    private JudgeResult getJudgeResult(List<CaseResult> testCaseResultList, Problem problem, Judge judge) {
+        List<JudgeCase> allCaseResList = new ArrayList<>();
+        List<CaseResult> errorTestCaseList = new ArrayList<>();
         // 记录所有测试点的结果
-        testCaseResultList.forEach(jsonObject -> handleTestCase(jsonObject, problem, judge, allCaseResList, errorTestCaseList));
+        testCaseResultList.forEach(testCaseResult -> handleTestCaseResult(testCaseResult, problem, judge, allCaseResList, errorTestCaseList));
         // 更新到数据库
-        boolean addCaseRes = JudgeCaseEntityService.saveBatch(allCaseResList);
+        boolean addCaseRes = judgeCaseEntityService.saveBatch(allCaseResList);
         if (!addCaseRes) {
             log.error("题号为：" + problem.getId() + "，提交id为：" + judge.getSubmitId() + "的各个测试数据点的结果更新到数据库操作失败");
         }
 
         // 获取判题的time，memory，OI score
-        boolean accepted = errorTestCaseList.size() == 0;
-        HashMap<String, Object> result = computeResultInfo(allCaseResList, accepted, problem.getDifficulty());
-
-        // 如果多个测试点全部正确则AC，否则取第一个错误的测试点的状态
-        if (accepted) {
-            result.put("code", JudgeStatus.STATUS_ACCEPTED.getStatus());
-        } else {
-            result.put("code", errorTestCaseList.get(0).getInt("status"));
-        }
-        return result;
+        return computeJudgeResultInfo(allCaseResList, errorTestCaseList, problem.getDifficulty());
     }
 
-    private void handleTestCase(JSONObject jsonObject, Problem problem, Judge judge, List<JudgeCase> allCaseResList, List<JSONObject> errorTestCaseList) {
-        Integer time = jsonObject.getLong("time").intValue();
-        Integer memory = jsonObject.getLong("memory").intValue();
-        Integer status = jsonObject.getInt("status");
-        Long caseId = jsonObject.getLong("caseId", null);
-        String inputFileName = jsonObject.getStr("inputFileName");
-        String outputFileName = jsonObject.getStr("outputFileName");
-        String msg = jsonObject.getStr("errMsg");
-        int oiScore = jsonObject.getInt("score");
+    private void handleTestCaseResult(CaseResult result, Problem problem, Judge judge, List<JudgeCase> allCaseResList, List<CaseResult> errorTestCaseList) {
+        Integer time = result.getTime().intValue();
+        Integer memory = result.getMemory().intValue();
+        Integer status = result.getStatus();
+        Long caseId = result.getCaseId();
+        String inputFileName = result.getInputFileName();
+        String outputFileName = result.getOutputFileName();
+        String msg = result.getErrMsg();
+        int oiScore = result.getScore();
 
         JudgeCase judgeCase = new JudgeCase();
         judgeCase.setTime(time).setMemory(memory).setStatus(status).setInputData(inputFileName)
                 .setOutputData(outputFileName).setPid(problem.getId()).setUid(judge.getUid()).setCaseId(caseId)
                 .setSubmitId(judge.getSubmitId());
-
-        if (!StrUtil.isEmpty(msg) && !status.equals(JudgeStatus.STATUS_COMPILE_ERROR.getStatus())) {
+        if (StrUtil.isNotEmpty(msg) && !status.equals(JudgeStatus.STATUS_COMPILE_ERROR.getStatus())) {
             judgeCase.setUserOutput(msg);
         }
 
         int score = 0;
-        if (!status.equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
-            errorTestCaseList.add(jsonObject);
+        if (status.equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
+            score = oiScore;
+        } else {
+            errorTestCaseList.add(result);
             if (status.equals(JudgeStatus.STATUS_PARTIAL_ACCEPTED.getStatus())) {
                 // SPJ_PC
-                Double percentage = jsonObject.getDouble("percentage");
+                Double percentage = result.getPercentage();
                 if (percentage != null) {
                     score = (int) Math.floor(percentage * oiScore);
                 }
             }
-        } else {
-            score = oiScore;
         }
         judgeCase.setScore(score);
 
@@ -282,41 +271,42 @@ public class JudgeProcess {
 
     /**
      * 获取判题的运行时间，运行空间，得分
-     * @param allTestCaseResultList
-     * @param accepted
-     * @param problemDifficulty
-     * @return
      */
-    private HashMap<String, Object> computeResultInfo(List<JudgeCase> allTestCaseResultList,
-                                                      boolean accepted, Integer problemDifficulty) {
-        HashMap<String, Object> result = new HashMap<>();
+    private JudgeResult computeJudgeResultInfo(List<JudgeCase> allTestCaseResultList, List<CaseResult> errorTestCaseList, Integer problemDifficulty) {
+        JudgeResult result = new JudgeResult();
         // 用时和内存占用保存为多个测试点中最长的
         allTestCaseResultList.stream()
                 .max(Comparator.comparing(JudgeCase::getTime))
-                .ifPresent(t -> result.put("time", t.getTime()));
+                .ifPresent(t -> result.setTime(t.getTime()));
 
         allTestCaseResultList.stream()
                 .max(Comparator.comparing(JudgeCase::getMemory))
-                .ifPresent(t -> result.put("memory", t.getMemory()));
+                .ifPresent(t -> result.setMemory(t.getMemory()));
 
         int totalScore = allTestCaseResultList.stream()
                 .mapToInt(JudgeCase::getScore)
                 .sum();
+
+        boolean accepted = errorTestCaseList.isEmpty();
         // 计算得分
         // 全对的直接用总分*0.1+2*题目难度
         if (accepted) {
+            result.setStatus(JudgeStatus.STATUS_ACCEPTED.getStatus());
             int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
-            result.put("score", totalScore);
-            result.put("oiRankScore", oiRankScore);
+            result.setScore(totalScore);
+            result.setOiRankScore(oiRankScore);
         } else {
+            CaseResult caseResult = errorTestCaseList.get(0);
+            result.setStatus(caseResult.getStatus());
+            result.setErrMsg(caseResult.getErrMsg());
             int sumScore = 0;
             for (JudgeCase testcaseResult : allTestCaseResultList) {
                 sumScore += testcaseResult.getScore();
             }
             // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
             int oiRankScore = (int) Math.round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
-            result.put("score", sumScore);
-            result.put("oiRankScore", oiRankScore);
+            result.setScore(sumScore);
+            result.setOiRankScore(oiRankScore);
         }
         return result;
     }
@@ -336,7 +326,7 @@ public class JudgeProcess {
     private String mergeNonEmptyStrings(String... strings) {
         StringBuilder sb = new StringBuilder();
         for (String str : strings) {
-            if (!StrUtil.isEmpty(str)) {
+            if (StrUtil.isNotEmpty(str)) {
                 sb.append(str, 0, Math.min(1024 * 1024, str.length())).append("\n");
             }
         }

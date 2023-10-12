@@ -111,7 +111,7 @@ public class ContestACMRankService {
         List<ACMContestRankVO> topACMRankVOList = new ArrayList<>();
         computeACMRankNo(removeStar, contest, concernedList, orderResultList, topACMRankVOList);
         topACMRankVOList.addAll(orderResultList);
-        if(!StrUtil.isEmpty(keyword)) {
+        if(StrUtil.isNotEmpty(keyword)) {
             return topACMRankVOList.stream()
                     .filter(rankVO -> filterKeyword(rankVO, keyword))
                     .collect(Collectors.toList());
@@ -121,19 +121,19 @@ public class ContestACMRankService {
 
     boolean filterKeyword(ACMContestRankVO rankVO, String keyword){
         final String realname = rankVO.getRealname();
-        if(!StrUtil.isEmpty(realname)){
+        if(StrUtil.isNotEmpty(realname)){
             if(realname.contains(keyword)) {
                 return true;
             }
         }
         final String username = rankVO.getUsername();
-        if(!StrUtil.isEmpty(username)){
+        if(StrUtil.isNotEmpty(username)){
             if(username.contains(keyword)) {
                 return true;
             }
         }
         final String school = rankVO.getSchool();
-        if(!StrUtil.isEmpty(school)){
+        if(StrUtil.isNotEmpty(school)){
             if(school.contains(keyword)) {
                 return true;
             }
@@ -287,7 +287,7 @@ public class ContestACMRankService {
                 rankNum++;
             }
 
-            if (!StrUtil.isEmpty(currentUserId) && currentUserId.equals(currentACMRankVO.getUid())) {
+            if (StrUtil.isNotEmpty(currentUserId) && currentUserId.equals(currentACMRankVO.getUid())) {
                 topACMRankVOList.add(currentACMRankVO);
             }
 

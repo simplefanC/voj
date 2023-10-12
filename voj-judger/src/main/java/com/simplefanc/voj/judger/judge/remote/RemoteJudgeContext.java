@@ -2,7 +2,7 @@ package com.simplefanc.voj.judger.judge.remote;
 
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.constants.RemoteOj;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.judger.dao.JudgeEntityService;
@@ -15,7 +15,6 @@ import com.simplefanc.voj.judger.judge.remote.submitter.RemoteJudgeSubmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -42,7 +41,7 @@ public class RemoteJudgeContext {
     private String judgeServerName;
 
 //    @Async // 去掉 异步注解 否则直接返回主服务器 无法实现对判题机的负载均衡
-    public void judge(ToJudge toJudge) {
+    public void judge(JudgeDTO toJudge) {
         String[] source = toJudge.getRemoteJudgeProblem().split("-");
         // String remoteOj = source[0];
         RemoteOj remoteOj = RemoteOj.getTypeByName(source[0]);

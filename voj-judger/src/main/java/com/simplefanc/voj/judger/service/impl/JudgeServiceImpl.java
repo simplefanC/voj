@@ -1,7 +1,7 @@
 package com.simplefanc.voj.judger.service.impl;
 
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.problem.Problem;
 import com.simplefanc.voj.common.pojo.entity.user.UserAcproblem;
@@ -40,15 +40,15 @@ public class JudgeServiceImpl implements JudgeService {
     private final RemoteJudgeContext remoteJudgeContext;
 
     @Override
-    public void judge(Judge judge) {
+    public void localJudge(Judge judge) {
         Problem problem = problemEntityService.getById(judge.getPid());
         // 【进行判题操作】！！！
-        Judge finalJudgeResult = judgeContext.judge(problem, judge);
+        judgeContext.judge(judge, problem);
 
         // 更新该次提交
-        judgeEntityService.updateById(finalJudgeResult);
+        judgeEntityService.updateById(judge);
 
-        if (finalJudgeResult.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
+        if (judge.getStatus().intValue() != JudgeStatus.STATUS_SUBMITTED_FAILED.getStatus()) {
             // 更新其它表
             // 非比赛提交
             if (judge.getCid() == 0) {
@@ -65,7 +65,7 @@ public class JudgeServiceImpl implements JudgeService {
     }
 
     @Override
-    public void remoteJudge(ToJudge toJudge) {
+    public void remoteJudge(JudgeDTO toJudge) {
         remoteJudgeContext.judge(toJudge);
     }
 

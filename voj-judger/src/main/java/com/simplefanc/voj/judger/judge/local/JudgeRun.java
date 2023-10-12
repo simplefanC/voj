@@ -12,8 +12,10 @@ import com.simplefanc.voj.judger.common.constants.RunConfig;
 import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.common.utils.JudgeUtil;
 import com.simplefanc.voj.judger.common.utils.ThreadPoolUtil;
-import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.JudgeCaseDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.CaseResult;
+import com.simplefanc.voj.judger.judge.local.strategy.AbstractJudge;
 import com.simplefanc.voj.judger.judge.local.strategy.DefaultJudge;
 import com.simplefanc.voj.judger.judge.local.strategy.InteractiveJudge;
 import com.simplefanc.voj.judger.judge.local.strategy.SpecialJudge;
@@ -44,7 +46,7 @@ public class JudgeRun {
 
     private final ProblemTestCaseUtils problemTestCaseUtils;
 
-    public List<JSONObject> judgeAllCase(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput)
+    public List<CaseResult> judgeAllCase(Judge judge, Problem problem, String userFileId, String userFileSrc, Boolean getUserOutput)
             throws SystemException, ExecutionException, InterruptedException, UnsupportedEncodingException {
 
         JudgeGlobalDTO judgeGlobalDTO = getJudgeGlobalDTO(judge, problem, userFileId, userFileSrc, getUserOutput);
@@ -58,15 +60,15 @@ public class JudgeRun {
         }
     }
 
-    private List<JSONObject> iterateJudgeAllCase(List<JudgeTask> judgeTasks) throws ExecutionException, InterruptedException {
-        List<JSONObject> result = new LinkedList<>();
+    private List<CaseResult> iterateJudgeAllCase(List<JudgeTask> judgeTasks) throws ExecutionException, InterruptedException {
+        List<CaseResult> result = new LinkedList<>();
         for (JudgeTask judgeTask : judgeTasks) {
             // 提交到线程池进行执行
-            FutureTask<JSONObject> futureTask = new FutureTask<>(judgeTask);
+            FutureTask<CaseResult> futureTask = new FutureTask<>(judgeTask);
             ThreadPoolUtil.getInstance().getThreadPool().submit(futureTask);
-            final JSONObject judgeRes = futureTask.get();
+            final CaseResult judgeRes = futureTask.get();
             result.add(judgeRes);
-            Integer status = judgeRes.getInt("status");
+            Integer status = judgeRes.getStatus();
             if (!JudgeStatus.STATUS_ACCEPTED.getStatus().equals(status)) {
                 break;
             }
@@ -74,7 +76,7 @@ public class JudgeRun {
         return result;
     }
 
-    private List<JSONObject> defaultJudgeAllCase(List<JudgeTask> judgeTasks) throws InterruptedException, ExecutionException {
+    private List<CaseResult> defaultJudgeAllCase(List<JudgeTask> judgeTasks) throws InterruptedException, ExecutionException {
         ExecutorService threadPool = ThreadPoolUtil.getInstance().getThreadPool();
         CompletableFuture[] futures = new CompletableFuture[judgeTasks.size()];
         for (int i = 0; i < judgeTasks.size(); i++) {
@@ -92,9 +94,9 @@ public class JudgeRun {
         CompletableFuture<Void> headerFuture = CompletableFuture.allOf(futures);
         // 都运行完了之后再继续执行
         headerFuture.join();
-        List<JSONObject> res = new ArrayList<>();
+        List<CaseResult> res = new ArrayList<>();
         for (int i = 0; i < judgeTasks.size(); i++) {
-            res.add((JSONObject) futures[i].get());
+            res.add((CaseResult) futures[i].get());
         }
         return res;
     }
@@ -120,7 +122,7 @@ public class JudgeRun {
 
             final Long maxOutputSize = Math.max(testcase.getLong("outputSize", 0L) * 2, 16 * 1024 * 1024L);
 
-            JudgeDTO judgeDTO = JudgeDTO.builder()
+            JudgeCaseDTO judgeDTO = JudgeCaseDTO.builder()
                     .testCaseNum(testCaseNum)
                     .testCaseInputFileName(inputFileName)
                     .testCaseInputPath(testCaseInputPath)
@@ -184,24 +186,24 @@ public class JudgeRun {
                 .removeEOLBlank(problem.getIsRemoveEndBlank()).build();
     }
 
-    class JudgeTask implements Callable<JSONObject> {
-        JudgeDTO judgeDTO;
+    class JudgeTask implements Callable<CaseResult> {
+        JudgeCaseDTO judgeDTO;
         JudgeGlobalDTO judgeGlobalDTO;
 
-        public JudgeTask(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
+        public JudgeTask(JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
             this.judgeDTO = judgeDTO;
             this.judgeGlobalDTO = judgeGlobalDTO;
         }
 
         @Override
-        public JSONObject call() throws SystemException {
+        public CaseResult call() throws SystemException {
             final AbstractJudge abstractJudge = getAbstractJudge(judgeGlobalDTO.getJudgeMode());
 
-            JSONObject result = abstractJudge.judge(judgeDTO, judgeGlobalDTO);
-            result.set("caseId", judgeDTO.getProblemCaseId());
-            result.set("score", judgeDTO.getScore());
-            result.set("inputFileName", judgeDTO.getTestCaseInputFileName());
-            result.set("outputFileName", judgeDTO.getTestCaseOutputFileName());
+            CaseResult result = abstractJudge.judge(judgeDTO, judgeGlobalDTO);
+            result.setCaseId(judgeDTO.getProblemCaseId());
+            result.setScore(judgeDTO.getScore());
+            result.setInputFileName(judgeDTO.getTestCaseInputFileName());
+            result.setOutputFileName(judgeDTO.getTestCaseOutputFileName());
             return result;
         }
 

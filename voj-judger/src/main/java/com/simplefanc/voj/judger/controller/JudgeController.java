@@ -1,7 +1,7 @@
 package com.simplefanc.voj.judger.controller;
 
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.result.CommonResult;
 import com.simplefanc.voj.common.result.ResultStatus;
@@ -33,8 +33,7 @@ public class JudgeController {
     private Boolean openRemoteJudge;
 
     @PostMapping(value = "/judge")
-    public CommonResult submitProblemJudge(@RequestBody ToJudge toJudge) {
-
+    public CommonResult submitProblemJudge(@RequestBody JudgeDTO toJudge) {
         if (!toJudge.getToken().equals(judgeToken)) {
             return CommonResult.errorResponse("对不起！您使用的判题服务调用凭证不正确！访问受限！", ResultStatus.ACCESS_DENIED);
         }
@@ -45,14 +44,13 @@ public class JudgeController {
             return CommonResult.errorResponse("调用参数错误！请检查您的调用参数！");
         }
 
-        judgeService.judge(judge);
+        judgeService.localJudge(judge);
 
         return CommonResult.successResponse("判题机评测完成！");
     }
 
     @PostMapping(value = "/compile-spj")
     public CommonResult compileSpj(@RequestBody CompileDTO compileDTO) {
-
         if (!compileDTO.getToken().equals(judgeToken)) {
             return CommonResult.errorResponse("对不起！您使用的判题服务调用凭证不正确！访问受限！", ResultStatus.ACCESS_DENIED);
         }
@@ -68,7 +66,6 @@ public class JudgeController {
 
     @PostMapping(value = "/compile-interactive")
     public CommonResult compileInteractive(@RequestBody CompileDTO compileDTO) {
-
         if (!compileDTO.getToken().equals(judgeToken)) {
             return CommonResult.errorResponse("对不起！您使用的判题服务调用凭证不正确！访问受限！", ResultStatus.ACCESS_DENIED);
         }
@@ -83,8 +80,7 @@ public class JudgeController {
     }
 
     @PostMapping(value = "/remote-judge")
-    public CommonResult remoteJudge(@RequestBody ToJudge toJudge) {
-
+    public CommonResult remoteJudge(@RequestBody JudgeDTO toJudge) {
         if (!openRemoteJudge) {
             return CommonResult.errorResponse("对不起！该判题服务器未开启远程虚拟判题功能！", ResultStatus.ACCESS_DENIED);
         }

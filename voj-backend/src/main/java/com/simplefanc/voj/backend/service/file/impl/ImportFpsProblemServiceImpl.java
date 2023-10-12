@@ -220,7 +220,7 @@ public class ImportFpsProblemServiceImpl implements ImportFpsProblemService {
             if (spjNode != null) {
                 String spjLanguage = spjNode.getAttribute("language");
                 String spjCode = spjNode.getTextContent();
-                if (("C".equals(spjLanguage) || "C++".equals(spjLanguage)) && !StrUtil.isEmpty(spjCode)) {
+                if (("C".equals(spjLanguage) || "C++".equals(spjLanguage)) && StrUtil.isNotEmpty(spjCode)) {
                     problem.setSpjLanguage(spjLanguage).setSpjCode(spjCode);
                 }
             }

@@ -113,7 +113,7 @@ public class ContestOIRankService {
         // 设置 rank 和 添加置顶
         computeOIRankNo(contest, concernedList, removeStar, orderResultList, topOIRankVOList);
         topOIRankVOList.addAll(orderResultList);
-        if(!StrUtil.isEmpty(keyword)) {
+        if(StrUtil.isNotEmpty(keyword)) {
             return topOIRankVOList.stream()
                     .filter(rankVO -> filterKeyword(rankVO, keyword))
                     .collect(Collectors.toList());
@@ -123,19 +123,19 @@ public class ContestOIRankService {
 
     boolean filterKeyword(OIContestRankVO rankVO, String keyword){
         final String realname = rankVO.getRealname();
-        if(!StrUtil.isEmpty(realname)){
+        if(StrUtil.isNotEmpty(realname)){
             if(realname.contains(keyword)) {
                 return true;
             }
         }
         final String username = rankVO.getUsername();
-        if(!StrUtil.isEmpty(username)){
+        if(StrUtil.isNotEmpty(username)){
             if(username.contains(keyword)) {
                 return true;
             }
         }
         final String school = rankVO.getSchool();
-        if(!StrUtil.isEmpty(school)){
+        if(StrUtil.isNotEmpty(school)){
             if(school.contains(keyword)) {
                 return true;
             }

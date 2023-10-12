@@ -6,10 +6,10 @@ import cn.hutool.json.JSONObject;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
 import com.simplefanc.voj.judger.common.exception.SystemException;
-import com.simplefanc.voj.judger.judge.local.AbstractJudge;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
-import com.simplefanc.voj.judger.judge.local.pojo.JudgeDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.JudgeCaseDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
+import com.simplefanc.voj.judger.judge.local.pojo.CaseResult;
 import com.simplefanc.voj.judger.judge.local.pojo.SandBoxRes;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
@@ -27,7 +27,7 @@ public class DefaultJudge extends AbstractJudge {
     private final static Pattern EOL_PATTERN = Pattern.compile("[^\\S\\n]+(?=\\n)");
 
     @Override
-    public JSONArray judgeCase(JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
+    public JSONArray judgeCase(JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
         final List<String> args = parseRunCommand(runConfig, null, null, null);
@@ -37,70 +37,58 @@ public class DefaultJudge extends AbstractJudge {
     }
 
     @Override
-    public JSONObject processResult(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
-        JSONObject result = new JSONObject();
-
-        StringBuilder errMsg = new StringBuilder();
+    public CaseResult processResult(SandBoxRes sandBoxRes, JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
+        CaseResult result = new CaseResult();
         // 如果测试跑题无异常
         if (sandBoxRes.getStatus().equals(JudgeStatus.STATUS_ACCEPTED.getStatus())) {
             // 比对题目限制、测试数据
-            success(sandBoxRes, judgeDTO, judgeGlobalDTO, result);
+            success(result, sandBoxRes, judgeDTO, judgeGlobalDTO);
         } else if (sandBoxRes.getStatus().equals(JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus())) {
-            result.set("status", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
+            result.setStatus(JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
         } else if (sandBoxRes.getExitCode() != 0) {
             // STATUS_RUNTIME_ERROR 记录errMsg
-            abort(sandBoxRes, result, errMsg);
+            abort(result, sandBoxRes);
         } else {
-            result.set("status", sandBoxRes.getStatus());
+            result.setStatus(sandBoxRes.getStatus());
         }
 
-        result.set("memory", sandBoxRes.getMemory());
-        result.set("time", sandBoxRes.getTime());
-
-        // 记录该测试点的错误信息
-        if (!StrUtil.isEmpty(errMsg.toString())) {
-            String str = errMsg.toString();
-            result.set("errMsg", str.substring(0, Math.min(1024 * 1024, str.length())));
-        }
+        result.setMemory(sandBoxRes.getMemory());
+        result.setTime(sandBoxRes.getTime());
 
         // 如果需要获取用户对于该题目的输出
         if (judgeGlobalDTO.getNeedUserOutputFile()) {
-            result.set("output", sandBoxRes.getStdout());
+            result.setOutput(sandBoxRes.getStdout());
         }
-
         return result;
     }
 
-    private void abort(SandBoxRes sandBoxRes, JSONObject result, StringBuilder errMsg) {
-        result.set("status", JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+    private void abort(CaseResult result, SandBoxRes sandBoxRes) {
+        StringBuilder errMsg = new StringBuilder();
+        result.setStatus(JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
         if (sandBoxRes.getExitCode() < 32) {
             errMsg.append(String.format("The program return exit status code: %s (%s)\n", sandBoxRes.getExitCode(),
                     SandboxRun.SIGNALS.get(sandBoxRes.getExitCode())));
         } else {
             errMsg.append(String.format("The program return exit status code: %s\n", sandBoxRes.getExitCode()));
         }
+        // 记录该测试点的错误信息
+        String str = errMsg.toString();
+        result.setErrMsg(str.substring(0, Math.min(1024 * 1024, str.length())));
     }
 
 
-    private void success(SandBoxRes sandBoxRes, JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO, JSONObject result) {
+    private void success(CaseResult result, SandBoxRes sandBoxRes, JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
         // 对结果的时间损耗和空间损耗与题目限制做比较，判断是否mle和tle
         if (sandBoxRes.getTime() > judgeGlobalDTO.getMaxTime()) {
-            result.set("status", JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
+            result.setStatus(JudgeStatus.STATUS_TIME_LIMIT_EXCEEDED.getStatus());
         } else if (sandBoxRes.getMemory() > judgeGlobalDTO.getMaxMemory() * 1024) {
-            result.set("status", JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
+            result.setStatus(JudgeStatus.STATUS_MEMORY_LIMIT_EXCEEDED.getStatus());
         } else {
             // 与原测试数据输出的md5进行对比 AC或者是WA
             JSONObject testcaseInfo = (JSONObject) ((JSONArray) judgeGlobalDTO.getTestCaseInfo().get("testCases"))
                     .get(judgeDTO.getTestCaseNum() - 1);
-            result.set("status",
-                    compareOutput(sandBoxRes.getStdout(), judgeGlobalDTO.getRemoveEOLBlank(), testcaseInfo));
+            result.setStatus(compareOutput(sandBoxRes.getStdout(), judgeGlobalDTO.getRemoveEOLBlank(), testcaseInfo));
         }
-    }
-
-    @Override
-    public JSONObject processMultipleResult(SandBoxRes userSandBoxRes, SandBoxRes interactiveSandBoxRes,
-                                            JudgeDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) {
-        return null;
     }
 
     /**

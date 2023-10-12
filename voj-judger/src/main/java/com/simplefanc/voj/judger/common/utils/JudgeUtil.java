@@ -16,11 +16,11 @@ public class JudgeUtil {
     @SuppressWarnings("All")
     public static HashMap<String, String> getProblemExtraFileMap(Problem problem, String type) {
         if ("user".equals(type)) {
-            if (!StrUtil.isEmpty(problem.getUserExtraFile())) {
+            if (StrUtil.isNotEmpty(problem.getUserExtraFile())) {
                 return (HashMap<String, String>) JSONUtil.toBean(problem.getUserExtraFile(), Map.class);
             }
         } else if ("judge".equals(type)) {
-            if (!StrUtil.isEmpty(problem.getJudgeExtraFile())) {
+            if (StrUtil.isNotEmpty(problem.getJudgeExtraFile())) {
                 return (HashMap<String, String>) JSONUtil.toBean(problem.getJudgeExtraFile(), Map.class);
             }
         }

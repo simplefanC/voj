@@ -101,7 +101,7 @@ public abstract class AbstractCFStyleProblemCrawler extends AbstractProblemCrawl
                     html, 1);
         }
 
-        if (!StrUtil.isEmpty(tmpDesc)) {
+        if (StrUtil.isNotEmpty(tmpDesc)) {
             tmpDesc = tmpDesc.replaceAll("\\$\\$\\$", "\\$")
                     .replaceAll("src=\"../../", "src=\"" + HOST + "/")
                     .trim();
@@ -115,13 +115,13 @@ public abstract class AbstractCFStyleProblemCrawler extends AbstractProblemCrawl
         if (StrUtil.isEmpty(inputDesc)) {
             inputDesc = ReUtil.get("<div class=\"input-specification\">\\s*<div class=\"section-title\">\\s*Input\\s*</div>([\\s\\S]*?)</div>", html, 1);
         }
-        if (!StrUtil.isEmpty(inputDesc)) {
+        if (StrUtil.isNotEmpty(inputDesc)) {
             inputDesc = inputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
         info.setInput(inputDesc);
 
         String outputDesc = ReUtil.get("<div class=\"section-title\">\\s*Output\\s*</div>([\\s\\S]*?)</div>\\s*<div class=\"sample-tests\">", html, 1);
-        if (!StrUtil.isEmpty(outputDesc)) {
+        if (StrUtil.isNotEmpty(outputDesc)) {
             outputDesc = outputDesc.replaceAll("\\$\\$\\$", "\\$").trim();
         }
         info.setOutput(outputDesc);

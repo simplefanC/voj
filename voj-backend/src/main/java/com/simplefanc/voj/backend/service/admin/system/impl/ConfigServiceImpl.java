@@ -146,16 +146,16 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public void setWebConfig(WebConfigDTO webConfigDTO) {
-        if (!StrUtil.isEmpty(webConfigDTO.getBaseUrl())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getBaseUrl())) {
             configVO.setBaseUrl(webConfigDTO.getBaseUrl());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getName())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getName())) {
             configVO.setName(webConfigDTO.getName());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getShortName())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getShortName())) {
             configVO.setShortName(webConfigDTO.getShortName());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getDescription())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getDescription())) {
             configVO.setDescription(webConfigDTO.getDescription());
         }
 //        if (webConfigDTO.getRegister() != null) {
@@ -164,16 +164,16 @@ public class ConfigServiceImpl implements ConfigService {
 //        if (webConfigDTO.getCodeVisibleStartTime() != null) {
 //            configVO.setCodeVisibleStartTime(webConfigDTO.getCodeVisibleStartTime());
 //        }
-        if (!StrUtil.isEmpty(webConfigDTO.getRecordName())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getRecordName())) {
             configVO.setRecordName(webConfigDTO.getRecordName());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getRecordUrl())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getRecordUrl())) {
             configVO.setRecordUrl(webConfigDTO.getRecordUrl());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getProjectName())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getProjectName())) {
             configVO.setProjectName(webConfigDTO.getProjectName());
         }
-        if (!StrUtil.isEmpty(webConfigDTO.getProjectUrl())) {
+        if (StrUtil.isNotEmpty(webConfigDTO.getProjectUrl())) {
             configVO.setProjectUrl(webConfigDTO.getProjectUrl());
         }
 
@@ -207,10 +207,10 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public void setEmailConfig(EmailConfigDTO config) {
-        if (!StrUtil.isEmpty(config.getEmailHost())) {
+        if (StrUtil.isNotEmpty(config.getEmailHost())) {
             configVO.setEmailHost(config.getEmailHost());
         }
-        if (!StrUtil.isEmpty(config.getEmailPassword())) {
+        if (StrUtil.isNotEmpty(config.getEmailPassword())) {
             configVO.setEmailPassword(config.getEmailPassword());
         }
 
@@ -218,7 +218,7 @@ public class ConfigServiceImpl implements ConfigService {
             configVO.setEmailPort(config.getEmailPort());
         }
 
-        if (!StrUtil.isEmpty(config.getEmailUsername())) {
+        if (StrUtil.isNotEmpty(config.getEmailUsername())) {
             configVO.setEmailUsername(config.getEmailUsername());
         }
 
@@ -257,31 +257,31 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public void setDbAndRedisConfig(DbAndRedisConfigDTO config) {
-        if (!StrUtil.isEmpty(config.getDbName())) {
+        if (StrUtil.isNotEmpty(config.getDbName())) {
             configVO.setMysqlDbName(config.getDbName());
         }
 
-        if (!StrUtil.isEmpty(config.getDbHost())) {
+        if (StrUtil.isNotEmpty(config.getDbHost())) {
             configVO.setMysqlHost(config.getDbHost());
         }
         if (config.getDbPort() != null) {
             configVO.setMysqlPort(config.getDbPort());
         }
-        if (!StrUtil.isEmpty(config.getDbUsername())) {
+        if (StrUtil.isNotEmpty(config.getDbUsername())) {
             configVO.setMysqlUsername(config.getDbUsername());
         }
-        if (!StrUtil.isEmpty(config.getDbPassword())) {
+        if (StrUtil.isNotEmpty(config.getDbPassword())) {
             configVO.setMysqlPassword(config.getDbPassword());
         }
 
-        if (!StrUtil.isEmpty(config.getRedisHost())) {
+        if (StrUtil.isNotEmpty(config.getRedisHost())) {
             configVO.setRedisHost(config.getRedisHost());
         }
 
         if (config.getRedisPort() != null) {
             configVO.setRedisPort(config.getRedisPort());
         }
-        if (!StrUtil.isEmpty(config.getRedisPassword())) {
+        if (StrUtil.isNotEmpty(config.getRedisPassword())) {
             configVO.setRedisPassword(config.getRedisPassword());
         }
 

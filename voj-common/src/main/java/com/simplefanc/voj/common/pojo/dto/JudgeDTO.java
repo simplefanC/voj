@@ -17,9 +17,8 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@ApiModel(value = "com.simplefanc.voj.common.pojo.dto.ToJudge", description = "后台服务与判题服务之间的数据交互格式")
-// TODO 命名问题
-public class ToJudge implements Serializable {
+@ApiModel(value = "com.simplefanc.voj.common.pojo.dto.JudgeDTO", description = "后台服务与判题服务之间的数据交互格式")
+public class JudgeDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,12 +42,4 @@ public class ToJudge implements Serializable {
 
     @ApiModelProperty("调用判题机的port")
     private Integer judgeServerPort;
-
-    /**
-     * VJ判題辅助选择判题机序号使用
-     */
-    private Integer index;
-
-    private Integer size;
-
 }

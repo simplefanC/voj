@@ -146,7 +146,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
                 if (user.size() >= 4) {
                     String realname = user.get(3);
-                    if (!StrUtil.isEmpty(realname)) {
+                    if (StrUtil.isNotEmpty(realname)) {
                         userInfo.setRealname(user.get(3));
                     }
                 }
@@ -162,14 +162,14 @@ public class AdminUserServiceImpl implements AdminUserService {
 
                 if (user.size() >= 6) {
                     String nickname = user.get(5);
-                    if (!StrUtil.isEmpty(nickname)) {
+                    if (StrUtil.isNotEmpty(nickname)) {
                         userInfo.setNickname(nickname);
                     }
                 }
 
                 if (user.size() >= 7) {
                     String school = user.get(6);
-                    if (!StrUtil.isEmpty(school)) {
+                    if (StrUtil.isNotEmpty(school)) {
                         userInfo.setSchool(school);
                     }
                 }

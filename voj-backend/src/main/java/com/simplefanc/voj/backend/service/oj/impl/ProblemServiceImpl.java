@@ -72,7 +72,7 @@ public class ProblemServiceImpl implements ProblemService {
         }
 
         // 关键词查询不为空
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             keyword = keyword.trim();
         }
         if (oj != null && !RemoteOj.isRemoteOj(oj)) {

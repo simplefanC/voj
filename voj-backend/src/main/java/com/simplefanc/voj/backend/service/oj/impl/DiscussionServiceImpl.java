@@ -63,7 +63,7 @@ public class DiscussionServiceImpl implements DiscussionService {
             discussionQueryWrapper.eq("category_id", categoryId);
         }
 
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
 
             final String key = keyword.trim();
 
@@ -71,7 +71,7 @@ public class DiscussionServiceImpl implements DiscussionService {
                     .like("id", key).or().like("description", key));
         }
 
-        if (!StrUtil.isEmpty(pid)) {
+        if (StrUtil.isNotEmpty(pid)) {
             discussionQueryWrapper.eq("pid", pid);
         }
 

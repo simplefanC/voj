@@ -74,7 +74,7 @@ public class AccountServiceImpl implements AccountService {
 
         boolean rightUsername = false;
 
-        if (!StrUtil.isEmpty(email)) {
+        if (StrUtil.isNotEmpty(email)) {
             email = email.trim();
             boolean isEmail = Validator.isEmail(email);
             if (!isEmail) {
@@ -90,7 +90,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        if (!StrUtil.isEmpty(username)) {
+        if (StrUtil.isNotEmpty(username)) {
             username = username.trim();
             QueryWrapper<UserInfo> wrapper = new QueryWrapper<UserInfo>().eq("username", username);
             UserInfo user = userInfoEntityService.getOne(wrapper, false);
@@ -339,10 +339,10 @@ public class AccountServiceImpl implements AccountService {
 
         String realname = userInfoVO.getRealname();
         String nickname = userInfoVO.getNickname();
-        if (!StrUtil.isEmpty(realname) && realname.length() > 50) {
+        if (StrUtil.isNotEmpty(realname) && realname.length() > 50) {
             throw new StatusFailException("真实姓名的长度不能超过50位");
         }
-        if (!StrUtil.isEmpty(nickname) && nickname.length() > 20) {
+        if (StrUtil.isNotEmpty(nickname) && nickname.length() > 20) {
             throw new StatusFailException("昵称的长度不能超过20位");
         }
         UserInfo userInfo = new UserInfo();

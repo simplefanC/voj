@@ -60,7 +60,7 @@ public class AdminTrainingServiceImpl implements AdminTrainingService {
         QueryWrapper<Training> queryWrapper = new QueryWrapper<>();
         // 过滤密码
         queryWrapper.select(Training.class, info -> !"private_pwd".equals(info.getColumn()));
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             keyword = keyword.trim();
             queryWrapper.like("title", keyword).or().like("id", keyword).or().like("`rank`", keyword);
         }

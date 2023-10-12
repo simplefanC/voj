@@ -57,7 +57,7 @@ public class RankServiceImpl implements RankService {
         }
 
         List<String> uidList = null;
-        if (!StrUtil.isEmpty(searchUser)) {
+        if (StrUtil.isNotEmpty(searchUser)) {
             QueryWrapper<UserInfo> userInfoQueryWrapper = new QueryWrapper<>();
             userInfoQueryWrapper.and(wrapper -> wrapper.like("username", searchUser)
                     .or().like("nickname", searchUser)

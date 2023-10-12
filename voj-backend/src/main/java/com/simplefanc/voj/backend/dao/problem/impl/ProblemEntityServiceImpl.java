@@ -303,7 +303,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
             String caseVersion = String.valueOf(System.currentTimeMillis());
             String testcaseDir = problemDTO.getUploadTestcaseDir();
             if (needDeleteProblemCases.size() > 0 || newProblemCaseList.size() > 0
-                    || needUpdateProblemCaseList.size() > 0 || !StrUtil.isEmpty(testcaseDir)) {
+                    || needUpdateProblemCaseList.size() > 0 || StrUtil.isNotEmpty(testcaseDir)) {
                 problem.setCaseVersion(caseVersion);
                 // 如果是选择上传测试文件的，则需要遍历对应文件夹，读取数据，写入数据库,先前的题目数据一并清空。
                 if (problemDTO.getIsUploadTestCase()) {
@@ -512,7 +512,7 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         String testCasesDir = filePathProps.getTestcaseBaseFolder() + File.separator + "problem_" + problemId;
 
         // 将之前的临时文件夹里面的评测文件全部复制到指定文件夹(覆盖)
-        if (!StrUtil.isEmpty(tmpTestcaseDir)) {
+        if (StrUtil.isNotEmpty(tmpTestcaseDir)) {
             FileUtil.clean(testCasesDir);
             FileUtil.copyFilesFromDir(new File(tmpTestcaseDir), new File(testCasesDir), true);
         }
@@ -667,13 +667,13 @@ public class ProblemEntityServiceImpl extends ServiceImpl<ProblemMapper, Problem
         importProblemVO.setJudgeMode(problem.getJudgeMode());
         importProblemVO.setSamples(problemCaseList);
 
-        if (!StrUtil.isEmpty(problem.getUserExtraFile())) {
+        if (StrUtil.isNotEmpty(problem.getUserExtraFile())) {
             HashMap<String, String> userExtraFileMap = (HashMap<String, String>) JSONUtil
                     .toBean(problem.getUserExtraFile(), Map.class);
             importProblemVO.setUserExtraFile(userExtraFileMap);
         }
 
-        if (!StrUtil.isEmpty(problem.getJudgeExtraFile())) {
+        if (StrUtil.isNotEmpty(problem.getJudgeExtraFile())) {
             HashMap<String, String> judgeExtraFileMap = (HashMap<String, String>) JSONUtil
                     .toBean(problem.getJudgeExtraFile(), Map.class);
             importProblemVO.setUserExtraFile(judgeExtraFileMap);

@@ -57,7 +57,7 @@ public class AdminContestServiceImpl implements AdminContestService {
         QueryWrapper<Contest> queryWrapper = new QueryWrapper<>();
         // 过滤密码
         queryWrapper.select(Contest.class, info -> !"pwd".equals(info.getColumn()));
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             keyword = keyword.trim();
             queryWrapper.like("title", keyword).or().like("id", keyword);
         }

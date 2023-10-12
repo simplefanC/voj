@@ -95,13 +95,13 @@ public class SessionEntityServiceImpl extends ServiceImpl<SessionMapper, Session
         } catch (Exception ignored) {
             return null;
         }
-        if (!StrUtil.isEmpty(addr)) {
+        if (StrUtil.isNotEmpty(addr)) {
             sb.append("在【").append(addr).append("】");
         }
         sb.append("登录，登录IP为：【").append(newIp).append("】，若非本人操作，请立即修改密码。").append("\n\n")
                 .append("Hello! Dear user, Your account was logged in in");
 
-        if (!StrUtil.isEmpty(addr)) {
+        if (StrUtil.isNotEmpty(addr)) {
             sb.append(" 【").append(addr).append("】 on ").append(dateStr)
                     .append(". If you do not operate by yourself, please change your password immediately.");
         }

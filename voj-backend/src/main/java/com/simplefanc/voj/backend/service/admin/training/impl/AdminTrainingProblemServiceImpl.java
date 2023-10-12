@@ -93,7 +93,7 @@ public class AdminTrainingProblemServiceImpl implements AdminTrainingProblemServ
             problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
         }
 
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or().like("problem_id", keyword).or()
                     .like("author", keyword));
         }

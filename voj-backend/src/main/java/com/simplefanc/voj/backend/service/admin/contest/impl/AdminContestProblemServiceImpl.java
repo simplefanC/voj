@@ -95,7 +95,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         }
 
         // 根据keyword筛选过滤
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             problemQueryWrapper.and(wrapper -> wrapper.like("title", keyword).or().like("problem_id", keyword).or()
                     .like("author", keyword));
         }

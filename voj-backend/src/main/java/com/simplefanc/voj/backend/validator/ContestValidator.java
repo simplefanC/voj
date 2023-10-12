@@ -125,7 +125,7 @@ public class ContestValidator {
             }
         }
         // 额外账号列表
-        if (!StrUtil.isEmpty(extra)) {
+        if (StrUtil.isNotEmpty(extra)) {
             String[] accountList = extra.trim().split("\n");
             for (String account : accountList) {
                 if (username.equals(account)) {

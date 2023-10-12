@@ -91,7 +91,7 @@ public class AdminProblemServiceImpl implements AdminProblemService {
             queryWrapper.eq("auth", auth);
         }
 
-        if (!StrUtil.isEmpty(keyword)) {
+        if (StrUtil.isNotEmpty(keyword)) {
             final String key = keyword.trim();
             queryWrapper
                     .and(wrapper -> wrapper.like("title", key).or().like("author", key).or().like("problem_id", key));

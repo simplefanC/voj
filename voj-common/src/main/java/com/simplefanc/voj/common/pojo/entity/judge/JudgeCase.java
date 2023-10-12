@@ -50,7 +50,7 @@ public class JudgeCase implements Serializable {
     @ApiModelProperty(value = "测试该样例所用空间KB")
     private Integer memory;
 
-    @ApiModelProperty(value = "IO得分")
+    @ApiModelProperty(value = "OI得分")
     private Integer score;
 
     @ApiModelProperty(value = "测试该样例结果状态码")

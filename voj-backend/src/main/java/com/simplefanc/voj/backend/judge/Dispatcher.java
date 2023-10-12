@@ -10,7 +10,7 @@ import com.simplefanc.voj.backend.dao.judge.RemoteJudgeAccountEntityService;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.constants.RemoteOj;
 import com.simplefanc.voj.common.pojo.dto.CompileDTO;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeServer;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
@@ -51,7 +51,7 @@ public class Dispatcher {
     public CommonResult dispatcher(CallJudgerType type, String path, Object data) {
         switch (type) {
             case JUDGE:
-                ToJudge judgeData = (ToJudge) data;
+                JudgeDTO judgeData = (JudgeDTO) data;
                 toJudge(path, judgeData, judgeData.getJudge().getSubmitId(), judgeData.getRemoteJudgeProblem() != null);
                 break;
             case COMPILE:
@@ -84,7 +84,7 @@ public class Dispatcher {
         return result;
     }
 
-    public void toJudge(String path, ToJudge data, Long submitId, Boolean isRemote) {
+    public void toJudge(String path, JudgeDTO data, Long submitId, Boolean isRemote) {
         String oj = null;
         if (isRemote) {
             oj = data.getRemoteJudgeProblem().split("-")[0];
@@ -101,7 +101,7 @@ public class Dispatcher {
          */
         String path;
 
-        ToJudge data;
+        JudgeDTO data;
 
         Long submitId;
 
@@ -114,7 +114,7 @@ public class Dispatcher {
         // 尝试600s
         AtomicInteger count = new AtomicInteger(0);
 
-        public SubmitTask(String path, ToJudge data, Long submitId, Boolean isRemote, String oj, String key) {
+        public SubmitTask(String path, JudgeDTO data, Long submitId, Boolean isRemote, String oj, String key) {
             this.path = path;
             this.data = data;
             this.submitId = submitId;

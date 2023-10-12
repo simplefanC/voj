@@ -11,7 +11,7 @@ import com.simplefanc.voj.backend.judge.AbstractTaskReceiver;
 import com.simplefanc.voj.backend.judge.ChooseUtils;
 import com.simplefanc.voj.backend.judge.Dispatcher;
 import com.simplefanc.voj.common.constants.JudgeStatus;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import com.simplefanc.voj.common.pojo.entity.judge.RemoteJudgeAccount;
 import lombok.RequiredArgsConstructor;
@@ -68,7 +68,7 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
     }
 
     private void dispatchRemoteJudge(Judge judge, String token, String remoteJudgeProblem, String remoteOjName) {
-        ToJudge toJudge = new ToJudge();
+        JudgeDTO toJudge = new JudgeDTO();
         toJudge.setJudge(judge).setToken(token).setRemoteJudgeProblem(remoteJudgeProblem);
 
         commonJudge(remoteOjName, toJudge, judge);
@@ -76,7 +76,7 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
         processWaitingTask();
     }
 
-    private void commonJudge(String ojName, ToJudge toJudge, Judge judge) {
+    private void commonJudge(String ojName, JudgeDTO toJudge, Judge judge) {
         String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
         ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(
                 new RemoteJudgeAccountTask(ojName, toJudge, judge, key), 0, 3, TimeUnit.SECONDS);
@@ -87,7 +87,7 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
 
         String ojName;
 
-        ToJudge toJudge;
+        JudgeDTO toJudge;
 
         Judge judge;
 
@@ -96,7 +96,7 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
         // 尝试600s
         AtomicInteger tryNum = new AtomicInteger(0);
 
-        public RemoteJudgeAccountTask(String ojName, ToJudge toJudge, Judge judge, String key) {
+        public RemoteJudgeAccountTask(String ojName, JudgeDTO toJudge, Judge judge, String key) {
             this.ojName = ojName;
             this.toJudge = toJudge;
             this.judge = judge;

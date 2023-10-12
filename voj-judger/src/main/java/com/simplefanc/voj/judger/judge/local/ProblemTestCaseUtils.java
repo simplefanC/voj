@@ -73,7 +73,7 @@ public class ProblemTestCaseUtils {
         queryWrapper.eq("pid", problemId);
         List<ProblemCase> problemCases = problemCaseEntityService.list(queryWrapper);
         // 数据库也为空的话
-        if (problemCases.size() == 0) {
+        if (problemCases.isEmpty()) {
             throw new SystemException("problemID:[" + problemId + "] test case has not found.", null, null);
         }
 
@@ -156,7 +156,7 @@ public class ProblemTestCaseUtils {
     private JSONObject initTestCase(List<HashMap<String, Object>> testCases, Long problemId, String version, String mode)
             throws SystemException {
         // TODO 参数
-        if (testCases == null || testCases.size() == 0) {
+        if (testCases == null || testCases.isEmpty()) {
             throw new SystemException("题号为：" + problemId + "的评测数据为空！", null, "The test cases does not exist.");
         }
 

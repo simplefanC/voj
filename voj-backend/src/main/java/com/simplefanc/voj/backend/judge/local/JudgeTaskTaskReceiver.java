@@ -7,7 +7,7 @@ import com.simplefanc.voj.backend.common.constants.QueueConstant;
 import com.simplefanc.voj.backend.common.utils.RedisUtil;
 import com.simplefanc.voj.backend.judge.AbstractTaskReceiver;
 import com.simplefanc.voj.backend.judge.Dispatcher;
-import com.simplefanc.voj.common.pojo.dto.ToJudge;
+import com.simplefanc.voj.common.pojo.dto.JudgeDTO;
 import com.simplefanc.voj.common.pojo.entity.judge.Judge;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class JudgeTaskTaskReceiver extends AbstractTaskReceiver {
         String token = task.getStr("token");
         // 调用判题服务
         dispatcher.dispatcher(CallJudgerType.JUDGE, "/judge",
-                new ToJudge().setJudge(judge).setToken(token).setRemoteJudgeProblem(null));
+                new JudgeDTO().setJudge(judge).setToken(token).setRemoteJudgeProblem(null));
         // 接着处理任务
         processWaitingTask();
     }

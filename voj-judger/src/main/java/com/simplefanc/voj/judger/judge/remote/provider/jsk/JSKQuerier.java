@@ -64,7 +64,13 @@ public class JSKQuerier implements Querier {
         JSONObject data = JSONUtil.parseObj(result);
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
         status.rawStatus = data.getStr("status");
-        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
+        status.statusType = STATUS_MAP.computeIfAbsent(status.rawStatus, k -> {
+            if (k.startsWith("RE")) {
+                return JudgeStatus.STATUS_RUNTIME_ERROR;
+            }
+            return JudgeStatus.STATUS_JUDGING;
+        });
+//        status.statusType = STATUS_MAP.getOrDefault(status.rawStatus, JudgeStatus.STATUS_JUDGING);
         if (status.statusType != JudgeStatus.STATUS_JUDGING) {
             status.executionMemory = data.getInt("usedMemory");
             status.executionTime = data.getInt("usedTime");

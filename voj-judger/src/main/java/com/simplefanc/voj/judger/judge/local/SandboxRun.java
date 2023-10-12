@@ -238,7 +238,7 @@ public class SandboxRun {
 
         if (extraFiles != null) {
             for (Map.Entry<String, String> entry : extraFiles.entrySet()) {
-                if (!StrUtil.isEmpty(entry.getKey()) && !StrUtil.isEmpty(entry.getValue())) {
+                if (StrUtil.isNotEmpty(entry.getKey()) && StrUtil.isNotEmpty(entry.getValue())) {
                     JSONObject content = new JSONObject();
                     content.set("content", entry.getValue());
                     copyIn.set(entry.getKey(), content);
@@ -315,7 +315,7 @@ public class SandboxRun {
         cmd.set("stackLimit", maxStack * 1024 * 1024L);
 
         JSONObject exeFile = new JSONObject();
-        if (!StrUtil.isEmpty(fileId)) {
+        if (StrUtil.isNotEmpty(fileId)) {
             exeFile.set("fileId", fileId);
         } else {
             exeFile.set("src", fileSrc);
@@ -482,7 +482,7 @@ public class SandboxRun {
         pipeInputCmd.set("stackLimit", userMaxStack * 1024 * 1024L);
 
         JSONObject exeFile = new JSONObject();
-        if (!StrUtil.isEmpty(userFileId)) {
+        if (StrUtil.isNotEmpty(userFileId)) {
             exeFile.set("fileId", userFileId);
         } else {
             exeFile.set("src", userFileSrc);
