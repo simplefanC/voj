@@ -249,7 +249,7 @@ public class ContestServiceImpl implements ContestService {
             problemTagEntityService.list(problemTagQueryWrapper).forEach(problemTag -> {
                 tidList.add(problemTag.getTid());
             });
-            if (tidList.size() != 0) {
+            if (!tidList.isEmpty()) {
                 tags = (List<Tag>) tagEntityService.listByIds(tidList);
             }
         }
@@ -287,7 +287,7 @@ public class ContestServiceImpl implements ContestService {
         codeTemplateQueryWrapper.eq("pid", problem.getId()).eq("status", true);
         List<CodeTemplate> codeTemplates = codeTemplateEntityService.list(codeTemplateQueryWrapper);
         HashMap<String, String> langNameAndCode = new HashMap<>();
-        if (codeTemplates.size() > 0) {
+        if (!codeTemplates.isEmpty()) {
             for (CodeTemplate codeTemplate : codeTemplates) {
                 langNameAndCode.put(tmpMap.get(codeTemplate.getLid()), codeTemplate.getCode());
             }

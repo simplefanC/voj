@@ -12,6 +12,7 @@ import com.simplefanc.voj.backend.common.exception.StatusFailException;
 import com.simplefanc.voj.backend.common.exception.StatusForbiddenException;
 import com.simplefanc.voj.backend.common.exception.StatusSystemErrorException;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
+import com.simplefanc.voj.backend.dao.contest.ContestProblemEntityService;
 import com.simplefanc.voj.backend.dao.contest.ContestRegisterEntityService;
 import com.simplefanc.voj.backend.pojo.vo.AdminContestVO;
 import com.simplefanc.voj.backend.pojo.vo.UserRolesVO;
@@ -20,6 +21,7 @@ import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.constants.ContestEnum;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
+import com.simplefanc.voj.common.pojo.entity.contest.ContestProblem;
 import com.simplefanc.voj.common.pojo.entity.contest.ContestRegister;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Author: chenfan
@@ -39,6 +42,8 @@ import java.util.Objects;
 public class AdminContestServiceImpl implements AdminContestService {
 
     private final ContestEntityService contestEntityService;
+
+    private final ContestProblemEntityService contestProblemEntityService;
 
     private final ContestRegisterEntityService contestRegisterEntityService;
 
@@ -156,17 +161,29 @@ public class AdminContestServiceImpl implements AdminContestService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void cloneContest(Long cid) {
         Contest contest = contestEntityService.getById(cid);
         if (contest == null) {
             throw new StatusSystemErrorException("该比赛不存在，无法克隆！");
         }
         final UserRolesVO userInfo = UserSessionUtil.getUserInfo();
-        contest.setUid(userInfo.getUid())
+        Contest copyContest = BeanUtil.copyProperties(contest, Contest.class, "id", "gmtCreate", "gmtModified");
+        copyContest.setUid(userInfo.getUid())
                 .setAuthor(userInfo.getUsername())
                 .setSource(cid.intValue())
                 .setTitle(contest.getTitle() + " [Clone]");
-        boolean isOk = contestEntityService.save(contest);
+        contestEntityService.save(copyContest);
+        Long copyCid = copyContest.getId();
+
+        List<ContestProblem> problems = contestProblemEntityService.lambdaQuery()
+                .eq(ContestProblem::getCid, cid)
+                .list();
+        List<ContestProblem> copyContestProblems = problems.stream()
+                .map(problem -> BeanUtil.copyProperties(problem, ContestProblem.class, "id", "gmtCreate", "gmtModified"))
+                .map(problem -> problem.setCid(copyCid))
+                .collect(Collectors.toList());
+        contestProblemEntityService.saveBatch(copyContestProblems);
     }
 
 }

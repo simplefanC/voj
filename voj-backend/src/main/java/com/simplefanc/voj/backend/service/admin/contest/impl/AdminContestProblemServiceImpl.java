@@ -73,7 +73,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
 
         if (problemType != null) {
             // 从公共题库添加题目
-            problemQueryWrapper.notIn(pidList.size() > 0, "id", pidList);
+            problemQueryWrapper.notIn(!pidList.isEmpty(), "id", pidList);
 
             problemQueryWrapper
                     // 同时需要与比赛相同类型的题目或vj题目（20221123移除限制）
@@ -82,7 +82,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
                     .ne("auth", ProblemEnum.AUTH_PRIVATE.getCode());
         } else {
             // 比赛题目列表
-            problemQueryWrapper.in(pidList.size() > 0, "id", pidList);
+            problemQueryWrapper.in(!pidList.isEmpty(), "id", pidList);
         }
 
         // 根据oj筛选过滤
@@ -101,7 +101,7 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         }
 
         // 比赛题目列表为空
-        if (pidList.size() == 0 && problemType == null) {
+        if (pidList.isEmpty() && problemType == null) {
             problemQueryWrapper = new QueryWrapper<>();
             problemQueryWrapper.eq("id", null);
         }
@@ -112,13 +112,13 @@ public class AdminContestProblemServiceImpl implements AdminContestProblemServic
         if (limit == null || limit < 1) {
             limit = 10;
         }
-        if (pidList.size() > 0 && problemType == null) {
+        if (!pidList.isEmpty() && problemType == null) {
             limit = Integer.MAX_VALUE;
         }
 
         IPage<Problem> problemListPage = problemEntityService.page(new Page<>(currentPage, limit), problemQueryWrapper);
 
-        if (pidList.size() > 0 && problemType == null) {
+        if (!pidList.isEmpty() && problemType == null) {
             List<Problem> sortedProblemList = problemListPage.getRecords().stream()
                     .sorted(Comparator.comparing(Problem::getId, (a, b) -> {
                         ContestProblem x = contestProblemMap.get(a);
