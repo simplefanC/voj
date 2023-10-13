@@ -3,7 +3,6 @@ package com.simplefanc.voj.backend.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVO;
-import com.simplefanc.voj.backend.pojo.vo.ContestVO;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -25,8 +24,6 @@ public interface ContestMapper extends BaseMapper<Contest> {
                                    @Param("keyword") String keyword);
 
     List<ContestRegisterCountVO> getContestRegisterCount(@Param("cidList") List<Long> cidList);
-
-    ContestVO getContestInfoById(@Param("cid") long cid);
 
     List<Contest> getWithinNext14DaysContests();
 

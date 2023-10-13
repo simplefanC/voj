@@ -57,6 +57,16 @@ public class ContestValidator {
         return false;
     }
 
+    public boolean checkVisible(Contest contest) {
+        if (contest == null) {
+            return false;
+        }
+        if (contest.getContestAdminVisible() && isContestAdmin(contest)) {
+            return true;
+        }
+        return contest.getVisible();
+    }
+
     /**
      * @param contest
      * @MethodName validateContestAuth
@@ -64,7 +74,7 @@ public class ContestValidator {
      * @Since 2021/1/17
      */
     public void validateContestAuth(Contest contest) {
-        if (contest == null || !contest.getVisible()) {
+        if (!checkVisible(contest)) {
             throw new StatusFailException("对不起，该比赛不存在！");
         }
         if (isContestAdmin(contest)) {

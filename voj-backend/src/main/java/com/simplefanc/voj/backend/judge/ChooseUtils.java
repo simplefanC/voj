@@ -53,7 +53,7 @@ public class ChooseUtils {
     public JudgeServer chooseJudgeServer(Boolean isRemote) {
         // 获取该微服务的所有健康实例
         List<Instance> instances = getInstances(judgeServiceName);
-        if (instances.size() <= 0) {
+        if (instances.isEmpty()) {
             return null;
         }
         List<String> keyList = new ArrayList<>();

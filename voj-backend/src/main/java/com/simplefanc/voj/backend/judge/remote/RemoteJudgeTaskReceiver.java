@@ -62,24 +62,21 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
         Judge judge = task.get("judge", Judge.class);
         String token = task.getStr("token");
         String remoteJudgeProblem = task.getStr("remoteJudgeProblem");
-        String remoteOjName = remoteJudgeProblem.split("-")[0].toUpperCase();
-
-        dispatchRemoteJudge(judge, token, remoteJudgeProblem, remoteOjName);
-    }
-
-    private void dispatchRemoteJudge(Judge judge, String token, String remoteJudgeProblem, String remoteOjName) {
         JudgeDTO toJudge = new JudgeDTO();
         toJudge.setJudge(judge).setToken(token).setRemoteJudgeProblem(remoteJudgeProblem);
+        dispatchRemoteJudge(toJudge);
+    }
 
-        commonJudge(remoteOjName, toJudge, judge);
+    private void dispatchRemoteJudge(JudgeDTO toJudge) {
+        commonJudge(toJudge);
         // 如果队列中还有任务，则继续处理
         processWaitingTask();
     }
 
-    private void commonJudge(String ojName, JudgeDTO toJudge, Judge judge) {
+    private void commonJudge(JudgeDTO toJudge) {
         String key = UUID.randomUUID().toString() + toJudge.getJudge().getSubmitId();
         ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(
-                new RemoteJudgeAccountTask(ojName, toJudge, judge, key), 0, 3, TimeUnit.SECONDS);
+                new RemoteJudgeAccountTask(toJudge, key), 0, 3, TimeUnit.SECONDS);
         FUTURE_TASK_MAP.put(key, scheduledFuture);
     }
 
@@ -96,10 +93,10 @@ public class RemoteJudgeTaskReceiver extends AbstractTaskReceiver {
         // 尝试600s
         AtomicInteger tryNum = new AtomicInteger(0);
 
-        public RemoteJudgeAccountTask(String ojName, JudgeDTO toJudge, Judge judge, String key) {
-            this.ojName = ojName;
+        public RemoteJudgeAccountTask(JudgeDTO toJudge, String key) {
+            this.ojName = toJudge.getRemoteJudgeProblem().split("-")[0].toUpperCase();
             this.toJudge = toJudge;
-            this.judge = judge;
+            this.judge = toJudge.getJudge();
             this.key = key;
         }
 

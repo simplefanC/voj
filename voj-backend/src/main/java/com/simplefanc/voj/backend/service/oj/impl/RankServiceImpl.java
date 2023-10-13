@@ -86,7 +86,7 @@ public class RankServiceImpl implements RankService {
         IPage<ACMRankVO> data = null;
         if (uidList != null) {
             Page<ACMRankVO> page = new Page<>(currentPage, limit);
-            if (uidList.size() > 0) {
+            if (!uidList.isEmpty()) {
                 data = userRecordService.getACMRankList(page, uidList);
             } else {
                 data = page;
@@ -109,7 +109,7 @@ public class RankServiceImpl implements RankService {
         IPage<OIRankVO> data = null;
         if (uidList != null) {
             Page<OIRankVO> page = new Page<>(currentPage, limit);
-            if (uidList.size() > 0) {
+            if (!uidList.isEmpty()) {
                 data = userRecordService.getOIRankList(page, uidList);
             } else {
                 data = page;

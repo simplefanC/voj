@@ -141,13 +141,9 @@ public class JudgeProcess {
     }
 
     private Boolean isCompileInteractive(Problem problem, String currentVersion) throws SystemException {
-        CompileConfig compiler;
-        String programFilePath;
-        String programVersionPath;
-        compiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
-        programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + compiler.getExeName();
-
-        programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + "version";
+        CompileConfig compiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + problem.getSpjLanguage());
+        String programFilePath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + compiler.getExeName();
+        String programVersionPath = JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + problem.getId() + File.separator + "version";
 
         // 如果不存在该已经编译好的程序，则需要再次进行编译 版本变动也需要重新编译
         if (!FileUtil.exist(programFilePath) || !FileUtil.exist(programVersionPath)) {
@@ -175,15 +171,10 @@ public class JudgeProcess {
     }
 
     private Boolean isCompileSpjOk(Problem problem, String currentVersion) throws SystemException {
-        CompileConfig compiler;
-        String programFilePath;
-        String programVersionPath;
-        compiler = CompileConfig.getCompilerByLanguage("SPJ-" + problem.getSpjLanguage());
-
-        programFilePath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+        CompileConfig compiler = CompileConfig.getCompilerByLanguage("SPJ-" + problem.getSpjLanguage());
+        String programFilePath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
                 + compiler.getExeName();
-
-        programVersionPath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
+        String programVersionPath = JudgeDir.SPJ_WORKPLACE_DIR + File.separator + problem.getId() + File.separator
                 + "version";
 
         // 如果不存在该已经编译好的程序，则需要再次进行编译
@@ -224,13 +215,9 @@ public class JudgeProcess {
         // 记录所有测试点的结果
         testCaseResultList.forEach(testCaseResult -> handleTestCaseResult(testCaseResult, problem, judge, allCaseResList, errorTestCaseList));
         // 更新到数据库
-        boolean addCaseRes = judgeCaseEntityService.saveBatch(allCaseResList);
-        if (!addCaseRes) {
-            log.error("题号为：" + problem.getId() + "，提交id为：" + judge.getSubmitId() + "的各个测试数据点的结果更新到数据库操作失败");
-        }
-
+        judgeCaseEntityService.saveBatch(allCaseResList);
         // 获取判题的time，memory，OI score
-        return computeJudgeResultInfo(allCaseResList, errorTestCaseList, problem.getDifficulty());
+        return computeJudgeResultInfo(allCaseResList, testCaseResultList, errorTestCaseList, problem.getDifficulty());
     }
 
     private void handleTestCaseResult(CaseResult result, Problem problem, Judge judge, List<JudgeCase> allCaseResList, List<CaseResult> errorTestCaseList) {
@@ -272,7 +259,7 @@ public class JudgeProcess {
     /**
      * 获取判题的运行时间，运行空间，得分
      */
-    private JudgeResult computeJudgeResultInfo(List<JudgeCase> allTestCaseResultList, List<CaseResult> errorTestCaseList, Integer problemDifficulty) {
+    private JudgeResult computeJudgeResultInfo(List<JudgeCase> allTestCaseResultList, List<CaseResult> testCaseResultList, List<CaseResult> errorTestCaseList, Integer problemDifficulty) {
         JudgeResult result = new JudgeResult();
         // 用时和内存占用保存为多个测试点中最长的
         allTestCaseResultList.stream()
@@ -286,26 +273,23 @@ public class JudgeProcess {
         int totalScore = allTestCaseResultList.stream()
                 .mapToInt(JudgeCase::getScore)
                 .sum();
+        result.setScore(totalScore);
 
         boolean accepted = errorTestCaseList.isEmpty();
-        // 计算得分
-        // 全对的直接用总分*0.1+2*题目难度
         if (accepted) {
             result.setStatus(JudgeStatus.STATUS_ACCEPTED.getStatus());
+            // 全对的直接用总分*0.1+2*题目难度
             int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty);
-            result.setScore(totalScore);
             result.setOiRankScore(oiRankScore);
         } else {
             CaseResult caseResult = errorTestCaseList.get(0);
             result.setStatus(caseResult.getStatus());
             result.setErrMsg(caseResult.getErrMsg());
-            int sumScore = 0;
-            for (JudgeCase testcaseResult : allTestCaseResultList) {
-                sumScore += testcaseResult.getScore();
-            }
             // 测试点总得分*0.1+2*题目难度*（测试点总得分/题目总分）
-            int oiRankScore = (int) Math.round(sumScore * 0.1 + 2 * problemDifficulty * (sumScore * 1.0 / totalScore));
-            result.setScore(sumScore);
+            int fullScore = testCaseResultList.stream()
+                    .mapToInt(CaseResult::getScore)
+                    .sum();
+            int oiRankScore = (int) Math.round(totalScore * 0.1 + 2 * problemDifficulty * (totalScore * 1.0 / fullScore));
             result.setOiRankScore(oiRankScore);
         }
         return result;

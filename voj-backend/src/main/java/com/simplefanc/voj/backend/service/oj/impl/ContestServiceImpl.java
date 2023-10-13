@@ -117,7 +117,7 @@ public class ContestServiceImpl implements ContestService {
         UserRolesVO userRolesVO = UserSessionUtil.getUserInfo();
         Contest contest = contestEntityService.getById(cid);
 
-        if (contest == null || !contest.getVisible()) {
+        if (!contestValidator.checkVisible(contest)) {
             throw new StatusFailException("对不起，该比赛不存在!");
         }
 
@@ -157,7 +157,7 @@ public class ContestServiceImpl implements ContestService {
                         .eq("uid", userRolesVO.getUid()), false);
 
         Contest contest = contestEntityService.getById(cid);
-        if (contest == null || !contest.getVisible()) {
+        if (!contestValidator.checkVisible(contest)) {
             throw new StatusFailException("对不起，该比赛不存在!");
         }
 

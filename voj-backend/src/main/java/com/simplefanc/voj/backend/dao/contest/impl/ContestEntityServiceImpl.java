@@ -5,11 +5,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.simplefanc.voj.backend.dao.contest.ContestEntityService;
-import com.simplefanc.voj.backend.dao.user.UserInfoEntityService;
 import com.simplefanc.voj.backend.mapper.ContestMapper;
 import com.simplefanc.voj.backend.pojo.vo.ContestRegisterCountVO;
 import com.simplefanc.voj.backend.pojo.vo.ContestVO;
-import com.simplefanc.voj.backend.shiro.UserSessionUtil;
 import com.simplefanc.voj.backend.validator.ContestValidator;
 import com.simplefanc.voj.common.pojo.entity.contest.Contest;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +38,7 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
         List<Contest> contestList = contestMapper.getWithinNext14DaysContests();
 
         final List<ContestVO> contestVOList = contestList.stream()
-                // 首页不显示仅比赛管理员可见的比赛
-                .filter(contest -> !contest.getContestAdminVisible())
+                .filter(contestValidator::checkVisible)
                 .map(contest -> BeanUtil.copyProperties(contest, ContestVO.class))
                 .collect(Collectors.toList());
 
@@ -58,9 +55,8 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
 
         List<Contest> contestList = contestMapper.getContestList(page, type, status, keyword);
 
-        final List<ContestVO> contestVOList = contestList.stream().filter(contest ->
-                // 仅比赛管理员可见
-                !contest.getContestAdminVisible() || contestValidator.isContestAdmin(contest))
+        final List<ContestVO> contestVOList = contestList.stream()
+                .filter(contestValidator::checkVisible)
                 .map(contest -> BeanUtil.copyProperties(contest, ContestVO.class))
                 .collect(Collectors.toList());
 
@@ -72,15 +68,17 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
     @Override
     public ContestVO getContestInfoById(long cid) {
         List<Long> cidList = Collections.singletonList(cid);
-        ContestVO contestVO = contestMapper.getContestInfoById(cid);
-        if (contestVO != null) {
+        Contest contest = contestMapper.selectById(cid);
+        if (contestValidator.checkVisible(contest)) {
+            ContestVO contestVO = BeanUtil.copyProperties(contest, ContestVO.class);
             List<ContestRegisterCountVO> contestRegisterCountVOList = contestMapper.getContestRegisterCount(cidList);
             if (!CollectionUtils.isEmpty(contestRegisterCountVOList)) {
                 ContestRegisterCountVO contestRegisterCountVO = contestRegisterCountVOList.get(0);
                 contestVO.setCount(contestRegisterCountVO.getCount());
             }
+            return contestVO;
         }
-        return contestVO;
+        return null;
     }
 
     /**
@@ -101,5 +99,4 @@ public class ContestEntityServiceImpl extends ServiceImpl<ContestMapper, Contest
             }
         }
     }
-
 }

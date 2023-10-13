@@ -51,12 +51,10 @@ public class Dispatcher {
     public CommonResult dispatcher(CallJudgerType type, String path, Object data) {
         switch (type) {
             case JUDGE:
-                JudgeDTO judgeData = (JudgeDTO) data;
-                toJudge(path, judgeData, judgeData.getJudge().getSubmitId(), judgeData.getRemoteJudgeProblem() != null);
+                toJudge(path, (JudgeDTO) data);
                 break;
             case COMPILE:
-                CompileDTO compileDTO = (CompileDTO) data;
-                return toCompile(path, compileDTO);
+                return toCompile(path, (CompileDTO) data);
             default:
                 throw new IllegalArgumentException("判题机不支持此调用类型");
         }
@@ -84,14 +82,10 @@ public class Dispatcher {
         return result;
     }
 
-    public void toJudge(String path, JudgeDTO data, Long submitId, Boolean isRemote) {
-        String oj = null;
-        if (isRemote) {
-            oj = data.getRemoteJudgeProblem().split("-")[0];
-        }
-        String key = UUID.randomUUID().toString() + submitId;
+    public void toJudge(String path, JudgeDTO data) {
+        String key = UUID.randomUUID().toString() + data.getJudge().getSubmitId();
         ScheduledFuture<?> scheduledFuture = SCHEDULER.scheduleWithFixedDelay(
-                new SubmitTask(path, data, submitId, isRemote, oj, key), 0, 2, TimeUnit.SECONDS);
+                new SubmitTask(path, data, key), 0, 2, TimeUnit.SECONDS);
         FUTURE_TASK_MAP.put(key, scheduledFuture);
     }
 
@@ -114,11 +108,15 @@ public class Dispatcher {
         // 尝试600s
         AtomicInteger count = new AtomicInteger(0);
 
-        public SubmitTask(String path, JudgeDTO data, Long submitId, Boolean isRemote, String oj, String key) {
+        public SubmitTask(String path, JudgeDTO data, String key) {
             this.path = path;
             this.data = data;
-            this.submitId = submitId;
-            this.isRemote = isRemote;
+            this.submitId = data.getJudge().getSubmitId();
+            this.isRemote = data.getRemoteJudgeProblem() != null;
+            String oj = null;
+            if (isRemote) {
+                oj = data.getRemoteJudgeProblem().split("-")[0];
+            }
             this.oj = oj;
             this.key = key;
         }
