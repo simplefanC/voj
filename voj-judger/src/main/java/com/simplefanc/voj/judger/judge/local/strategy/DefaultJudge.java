@@ -7,14 +7,13 @@ import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.judger.common.constants.RunConfig;
 import com.simplefanc.voj.judger.common.exception.SystemException;
 import com.simplefanc.voj.judger.judge.local.SandboxRun;
+import com.simplefanc.voj.judger.judge.local.pojo.CaseResult;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeCaseDTO;
 import com.simplefanc.voj.judger.judge.local.pojo.JudgeGlobalDTO;
-import com.simplefanc.voj.judger.judge.local.pojo.CaseResult;
 import com.simplefanc.voj.judger.judge.local.pojo.SandBoxRes;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -30,10 +29,17 @@ public class DefaultJudge extends AbstractJudge {
     public JSONArray judgeCase(JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
-        final List<String> args = parseRunCommand(runConfig, null, null, null);
-        return SandboxRun.testCase(args, runConfig.getEnvs(), judgeDTO.getTestCaseInputPath(), judgeGlobalDTO.getTestTime(),
-                judgeGlobalDTO.getMaxMemory(), judgeDTO.getMaxOutputSize(), judgeGlobalDTO.getMaxStack(),
-                runConfig.getExeName(), judgeGlobalDTO.getUserFileId(), judgeGlobalDTO.getUserFileSrc());
+        return SandboxRun.testCase(
+                parseRunCommand(runConfig, null, null, null),
+                runConfig.getEnvs(),
+                judgeDTO.getTestCaseInputPath(),
+                judgeGlobalDTO.getTestTime(),
+                judgeGlobalDTO.getMaxMemory(),
+                judgeDTO.getMaxOutputSize(),
+                judgeGlobalDTO.getMaxStack(),
+                runConfig.getExeName(),
+                judgeGlobalDTO.getUserFileId(),
+                judgeGlobalDTO.getUserFileSrc());
     }
 
     @Override

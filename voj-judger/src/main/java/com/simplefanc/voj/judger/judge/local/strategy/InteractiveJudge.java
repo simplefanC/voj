@@ -39,13 +39,23 @@ public class InteractiveJudge extends AbstractJudge {
 
         String userOutputFileName = judgeGlobalDTO.getProblemId() + "_user_output";
 
-        return SandboxRun.interactTestCase(parseRunCommand(runConfig, null, null, null),
-                runConfig.getEnvs(), runConfig.getExeName(), judgeGlobalDTO.getUserFileId(),
-                judgeGlobalDTO.getUserFileSrc(), judgeGlobalDTO.getTestTime(), judgeGlobalDTO.getMaxMemory(),
-                judgeGlobalDTO.getMaxStack(), judgeDTO.getTestCaseInputPath(), testCaseInputFileName,
-                judgeDTO.getTestCaseOutputPath(), testCaseOutputFileName, userOutputFileName,
+        return SandboxRun.interactTestCase(
+                parseRunCommand(runConfig, null, null, null),
+                runConfig.getEnvs(),
+                runConfig.getExeName(),
+                judgeGlobalDTO.getUserFileId(),
+                judgeGlobalDTO.getUserFileSrc(),
+                judgeGlobalDTO.getTestTime(),
+                judgeGlobalDTO.getMaxMemory(),
+                judgeGlobalDTO.getMaxStack(),
+                judgeDTO.getTestCaseInputPath(),
+                testCaseInputFileName,
+                judgeDTO.getTestCaseOutputPath(),
+                testCaseOutputFileName, userOutputFileName,
                 parseRunCommand(interactiveRunConfig, testCaseInputFileName, userOutputFileName, testCaseOutputFileName),
-                interactiveRunConfig.getEnvs(), interactiveExeSrc, interactiveRunConfig.getExeName());
+                interactiveRunConfig.getEnvs(),
+                interactiveExeSrc,
+                interactiveRunConfig.getExeName());
     }
 
     @Override

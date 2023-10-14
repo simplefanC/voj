@@ -66,7 +66,8 @@ public abstract class AbstractJudge {
     protected List<String> parseRunCommand(RunConfig runConfig, String testCaseInputName,
                                            String userOutputName, String testCaseOutputName) {
         String command = runConfig.getCommand();
-        command = MessageFormat.format(command, JudgeDir.TMPFS_DIR, runConfig.getExeName(),
+        command = MessageFormat.format(command,
+                JudgeDir.TMPFS_DIR, runConfig.getExeName(),
                 JudgeDir.TMPFS_DIR + File.separator + testCaseInputName,
                 JudgeDir.TMPFS_DIR + File.separator + userOutputName,
                 JudgeDir.TMPFS_DIR + File.separator + testCaseOutputName);

@@ -6,9 +6,11 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * {0} --> tmpfs_dir {1} --> exeName (user or spj) {2} --> The test case standard input
- * file name of question {3} --> The user's program output file name of question {4} -->
- * The test case standard output file name of question
+ * {0} --> tmpfs_dir
+ * {1} --> exeName (user or spj)
+ * {2} --> The test case standard input file name of question
+ * {3} --> The user's program output file name of question
+ * {4} --> The test case standard output file name of question
  */
 @Getter
 @AllArgsConstructor

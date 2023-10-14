@@ -23,18 +23,29 @@ import java.util.List;
  */
 public class Compiler {
 
-    public static String compile(CompileConfig compileConfig, String code, String language,
+    public static String compile(CompileConfig compileConfig,
+                                 String code,
+                                 String language,
                                  HashMap<String, String> extraFiles) throws SystemException, CompileException, SubmitException {
-
         if (compileConfig == null) {
             throw new RuntimeException("Unsupported language " + language);
         }
 
         // 调用安全沙箱进行编译
-        JSONArray result = SandboxRun.compile(compileConfig.getMaxCpuTime(), compileConfig.getMaxRealTime(),
-                compileConfig.getMaxMemory(), 256 * 1024 * 1024L, compileConfig.getSrcName(),
-                compileConfig.getExeName(), parseCompileCommand(compileConfig.getCommand(), compileConfig),
-                compileConfig.getEnvs(), code, extraFiles, true, false, null);
+        JSONArray result = SandboxRun.compile(
+                compileConfig.getMaxCpuTime(),
+                compileConfig.getMaxRealTime(),
+                compileConfig.getMaxMemory(),
+                256 * 1024 * 1024L,
+                compileConfig.getSrcName(),
+                compileConfig.getExeName(),
+                parseCompileCommand(compileConfig),
+                compileConfig.getEnvs(),
+                code,
+                extraFiles,
+                true,
+                false,
+                null);
         JSONObject compileResult = (JSONObject) result.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
             throw new CompileException("Compile Error.", ((JSONObject) compileResult.get("files")).getStr("stdout"),
@@ -52,7 +63,6 @@ public class Compiler {
 
     public static Boolean compileSpj(String code, Long pid, String language, HashMap<String, String> extraFiles)
             throws SystemException {
-
         CompileConfig spjCompiler = CompileConfig.getCompilerByLanguage("SPJ-" + language);
         if (spjCompiler == null) {
             throw new RuntimeException("Unsupported SPJ language:" + language);
@@ -65,10 +75,20 @@ public class Compiler {
         }
 
         // 调用安全沙箱对特别判题程序进行编译
-        JSONArray res = SandboxRun.compile(spjCompiler.getMaxCpuTime(), spjCompiler.getMaxRealTime(),
-                spjCompiler.getMaxMemory(), 256 * 1024 * 1024L, spjCompiler.getSrcName(), spjCompiler.getExeName(),
-                parseCompileCommand(spjCompiler.getCommand(), spjCompiler), spjCompiler.getEnvs(), code, extraFiles,
-                false, copyOutExe, JudgeDir.SPJ_WORKPLACE_DIR + File.separator + pid);
+        JSONArray res = SandboxRun.compile(
+                spjCompiler.getMaxCpuTime(),
+                spjCompiler.getMaxRealTime(),
+                spjCompiler.getMaxMemory(),
+                256 * 1024 * 1024L,
+                spjCompiler.getSrcName(),
+                spjCompiler.getExeName(),
+                parseCompileCommand(spjCompiler),
+                spjCompiler.getEnvs(),
+                code,
+                extraFiles,
+                false,
+                copyOutExe,
+                JudgeDir.SPJ_WORKPLACE_DIR + File.separator + pid);
         JSONObject compileResult = (JSONObject) res.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
             throw new SystemException("Special Judge Code Compile Error.",
@@ -80,7 +100,6 @@ public class Compiler {
 
     public static Boolean compileInteractive(String code, Long pid, String language, HashMap<String, String> extraFiles)
             throws SystemException {
-
         CompileConfig interactiveCompiler = CompileConfig.getCompilerByLanguage("INTERACTIVE-" + language);
         if (interactiveCompiler == null) {
             throw new RuntimeException("Unsupported interactive language:" + language);
@@ -90,11 +109,19 @@ public class Compiler {
         boolean copyOutExe = pid != null;
 
         // 调用安全沙箱对特别判题程序进行编译
-        JSONArray res = SandboxRun.compile(interactiveCompiler.getMaxCpuTime(), interactiveCompiler.getMaxRealTime(),
-                interactiveCompiler.getMaxMemory(), 256 * 1024 * 1024L, interactiveCompiler.getSrcName(),
+        JSONArray res = SandboxRun.compile(
+                interactiveCompiler.getMaxCpuTime(),
+                interactiveCompiler.getMaxRealTime(),
+                interactiveCompiler.getMaxMemory(),
+                256 * 1024 * 1024L,
+                interactiveCompiler.getSrcName(),
                 interactiveCompiler.getExeName(),
-                parseCompileCommand(interactiveCompiler.getCommand(), interactiveCompiler),
-                interactiveCompiler.getEnvs(), code, extraFiles, false, copyOutExe,
+                parseCompileCommand(interactiveCompiler),
+                interactiveCompiler.getEnvs(),
+                code,
+                extraFiles,
+                false,
+                copyOutExe,
                 JudgeDir.INTERACTIVE_WORKPLACE_DIR + File.separator + pid);
         JSONObject compileResult = (JSONObject) res.get(0);
         if (compileResult.getInt("status").intValue() != JudgeStatus.STATUS_ACCEPTED.getStatus()) {
@@ -105,10 +132,9 @@ public class Compiler {
         return true;
     }
 
-    private static List<String> parseCompileCommand(String command, CompileConfig compileConfig) {
-
-        command = MessageFormat.format(command, JudgeDir.TMPFS_DIR, compileConfig.getSrcName(),
-                compileConfig.getExeName());
+    private static List<String> parseCompileCommand(CompileConfig compileConfig) {
+        String command = MessageFormat.format(compileConfig.getCommand(),
+                JudgeDir.TMPFS_DIR, compileConfig.getSrcName(), compileConfig.getExeName());
         return JudgeUtil.translateCommandline(command);
     }
 

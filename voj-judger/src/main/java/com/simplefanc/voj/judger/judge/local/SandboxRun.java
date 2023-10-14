@@ -215,9 +215,19 @@ public class SandboxRun {
      * @Return
      * @Since 2022/1/3
      */
-    public static JSONArray compile(Long maxCpuTime, Long maxRealTime, Long maxMemory, Long maxStack, String srcName,
-                                    String exeName, List<String> args, List<String> envs, String code, HashMap<String, String> extraFiles,
-                                    Boolean needCopyOutCached, Boolean needCopyOutExe, String copyOutDir) throws SystemException {
+    public static JSONArray compile(Long maxCpuTime,
+                                    Long maxRealTime,
+                                    Long maxMemory,
+                                    Long maxStack,
+                                    String srcName,
+                                    String exeName,
+                                    List<String> args,
+                                    List<String> envs,
+                                    String code,
+                                    HashMap<String, String> extraFiles,
+                                    Boolean needCopyOutCached,
+                                    Boolean needCopyOutExe,
+                                    String copyOutDir) throws SystemException {
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
         cmd.set("env", envs);
@@ -281,9 +291,16 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    public static JSONArray testCase(List<String> args, List<String> envs, String testCasePath, Long maxTime,
-                                     Long maxMemory, Long maxOutputSize, Integer maxStack, String exeName, String fileId, String fileSrc)
-            throws SystemException {
+    public static JSONArray testCase(List<String> args,
+                                     List<String> envs,
+                                     String testCasePath,
+                                     Long maxTime,
+                                     Long maxMemory,
+                                     Long maxOutputSize,
+                                     Integer maxStack,
+                                     String exeName,
+                                     String fileId,
+                                     String fileSrc) throws SystemException {
 
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
@@ -353,10 +370,16 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    public static JSONArray spjCheckResult(List<String> args, List<String> envs, String userOutputFilePath,
-                                           String userOutputFileName, String testCaseInputFilePath, String testCaseInputFileName,
-                                           String testCaseOutputFilePath, String testCaseOutputFileName, String spjExeSrc, String spjExeName)
-            throws SystemException {
+    public static JSONArray spjCheckResult(List<String> args,
+                                           List<String> envs,
+                                           String userOutputFilePath,
+                                           String userOutputFileName,
+                                           String testCaseInputFilePath,
+                                           String testCaseInputFileName,
+                                           String testCaseOutputFilePath,
+                                           String testCaseOutputFileName,
+                                           String spjExeSrc,
+                                           String spjExeName) throws SystemException {
 
         JSONObject cmd = new JSONObject();
         cmd.set("args", args);
@@ -444,11 +467,23 @@ public class SandboxRun {
      * @Return JSONArray
      * @Since 2022/1/3
      */
-    public static JSONArray interactTestCase(List<String> args, List<String> envs, String userExeName,
-                                             String userFileId, String userFileSrc, Long userMaxTime, Long userMaxMemory, Integer userMaxStack,
-                                             String testCaseInputPath, String testCaseInputFileName, String testCaseOutputFilePath,
-                                             String testCaseOutputFileName, String userOutputFileName, List<String> interactArgs,
-                                             List<String> interactEnvs, String interactExeSrc, String interactExeName) throws SystemException {
+    public static JSONArray interactTestCase(List<String> args,
+                                             List<String> envs,
+                                             String userExeName,
+                                             String userFileId,
+                                             String userFileSrc,
+                                             Long userMaxTime,
+                                             Long userMaxMemory,
+                                             Integer userMaxStack,
+                                             String testCaseInputPath,
+                                             String testCaseInputFileName,
+                                             String testCaseOutputFilePath,
+                                             String testCaseOutputFileName,
+                                             String userOutputFileName,
+                                             List<String> interactArgs,
+                                             List<String> interactEnvs,
+                                             String interactExeSrc,
+                                             String interactExeName) throws SystemException {
 
         /**
          * 注意：用户源代码需要先编译，若是通过编译需要先将文件存入内存，再利用管道判题，同时特殊判题程序必须已编译且存在（否则判题失败，系统错误）！

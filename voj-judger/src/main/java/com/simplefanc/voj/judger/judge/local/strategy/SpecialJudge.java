@@ -32,10 +32,17 @@ public class SpecialJudge extends AbstractJudge {
     public JSONArray judgeCase(JudgeCaseDTO judgeDTO, JudgeGlobalDTO judgeGlobalDTO) throws SystemException {
         RunConfig runConfig = judgeGlobalDTO.getRunConfig();
         // 调用安全沙箱使用测试点对程序进行测试
-        return SandboxRun.testCase(parseRunCommand(runConfig, null, null, null),
-                runConfig.getEnvs(), judgeDTO.getTestCaseInputPath(), judgeGlobalDTO.getTestTime(),
-                judgeGlobalDTO.getMaxMemory(), judgeDTO.getMaxOutputSize(), judgeGlobalDTO.getMaxStack(),
-                runConfig.getExeName(), judgeGlobalDTO.getUserFileId(), judgeGlobalDTO.getUserFileSrc());
+        return SandboxRun.testCase(
+                parseRunCommand(runConfig, null, null, null),
+                runConfig.getEnvs(),
+                judgeDTO.getTestCaseInputPath(),
+                judgeGlobalDTO.getTestTime(),
+                judgeGlobalDTO.getMaxMemory(),
+                judgeDTO.getMaxOutputSize(),
+                judgeGlobalDTO.getMaxStack(),
+                runConfig.getExeName(),
+                judgeGlobalDTO.getUserFileId(),
+                judgeGlobalDTO.getUserFileSrc());
     }
 
     @Override
@@ -93,9 +100,15 @@ public class SpecialJudge extends AbstractJudge {
             String testCaseInputFileName = judgeGlobalDTO.getProblemId() + "_input";
             String testCaseOutputFileName = judgeGlobalDTO.getProblemId() + "_output";
             // 进行spj程序运行比对
-            JSONObject spjResult = spjRunAndCheckResult(userOutputFilePath, userOutputFileName,
-                    judgeDTO.getTestCaseInputPath(), testCaseInputFileName, judgeDTO.getTestCaseOutputPath(),
-                    testCaseOutputFileName, spjExeSrc, spjRunConfig);
+            JSONObject spjResult = spjRunAndCheckResult(
+                    userOutputFilePath,
+                    userOutputFileName,
+                    judgeDTO.getTestCaseInputPath(),
+                    testCaseInputFileName,
+                    judgeDTO.getTestCaseOutputPath(),
+                    testCaseOutputFileName,
+                    spjExeSrc,
+                    spjRunConfig);
 
             // 删除用户输出文件
             FileUtil.del(userOutputFilePath);
@@ -122,16 +135,26 @@ public class SpecialJudge extends AbstractJudge {
     }
 
     // TODO 参数过多
-    private JSONObject spjRunAndCheckResult(String userOutputFilePath, String userOutputFileName,
-                                            String testCaseInputFilePath, String testCaseInputFileName, String testCaseOutputFilePath,
-                                            String testCaseOutputFileName, String spjExeSrc, RunConfig spjRunConfig) throws SystemException {
+    private JSONObject spjRunAndCheckResult(String userOutputFilePath,
+                                            String userOutputFileName,
+                                            String testCaseInputFilePath,
+                                            String testCaseInputFileName,
+                                            String testCaseOutputFilePath,
+                                            String testCaseOutputFileName,
+                                            String spjExeSrc,
+                                            RunConfig spjRunConfig) throws SystemException {
 
         // 调用安全沙箱运行spj程序
         JSONArray spjJudgeResultList = SandboxRun.spjCheckResult(
-                parseRunCommand(spjRunConfig, testCaseInputFileName, userOutputFileName,
-                        testCaseOutputFileName),
-                spjRunConfig.getEnvs(), userOutputFilePath, userOutputFileName, testCaseInputFilePath,
-                testCaseInputFileName, testCaseOutputFilePath, testCaseOutputFileName, spjExeSrc,
+                parseRunCommand(spjRunConfig, testCaseInputFileName, userOutputFileName, testCaseOutputFileName),
+                spjRunConfig.getEnvs(),
+                userOutputFilePath,
+                userOutputFileName,
+                testCaseInputFilePath,
+                testCaseInputFileName,
+                testCaseOutputFilePath,
+                testCaseOutputFileName,
+                spjExeSrc,
                 spjRunConfig.getExeName());
 
         JSONObject result = new JSONObject();

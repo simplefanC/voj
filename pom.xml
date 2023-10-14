@@ -7,7 +7,7 @@
     <groupId>com.simplefanc</groupId>
     <artifactId>voj</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <modules>
         <module>voj-common</module>
         <module>voj-backend</module>
@@ -17,8 +17,8 @@
     <name>voj</name>
     <!--版本控制-->
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.bulid.sourceEncoding>UTF-8</project.bulid.sourceEncoding>
         <skipTests>true</skipTests>
         <shiro.redis.boot.version>3.3.1</shiro.redis.boot.version>
@@ -31,7 +31,7 @@
         <spring.boot.version>2.6.3</spring.boot.version>
         <spring.cloud.version>2021.0.1</spring.cloud.version>
         <spring.cloud.alibaba.version>2021.0.1.0</spring.cloud.alibaba.version>
-        <voj.common.version>1.0-SNAPSHOT</voj.common.version>
+        <voj.common.version>1.0</voj.common.version>
         <easyexcel.version>2.2.7</easyexcel.version>
         <hutool.version>5.7.22</hutool.version>
         <jwt.version>3.19.1</jwt.version>
