@@ -1,6 +1,8 @@
 package com.simplefanc.voj.backend.service.admin.contest.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -168,11 +171,19 @@ public class AdminContestServiceImpl implements AdminContestService {
             throw new StatusSystemErrorException("该比赛不存在，无法克隆！");
         }
         final UserRolesVO userInfo = UserSessionUtil.getUserInfo();
+        long duration = DateUtil.between(contest.getStartTime(), contest.getEndTime(), DateUnit.SECOND);
+        Date startTime = DateUtil.offsetHour(DateUtil.beginOfHour(new Date()), 1);
+        Date endTime = DateUtil.offsetSecond(startTime, (int) duration);
         Contest copyContest = BeanUtil.copyProperties(contest, Contest.class, "id", "gmtCreate", "gmtModified");
         copyContest.setUid(userInfo.getUid())
                 .setAuthor(userInfo.getUsername())
                 .setSource(cid.intValue())
-                .setTitle(contest.getTitle() + " [Clone]");
+                .setTitle(contest.getTitle() + " [Clone]")
+                .setStartTime(startTime)
+                .setEndTime(endTime)
+                .setDuration(duration)
+                .setSealRankTime(DateUtil.offsetMillisecond(endTime, (int) -DateUtil.betweenMs(contest.getSealRankTime(), contest.getEndTime())));
+
         contestEntityService.save(copyContest);
         Long copyCid = copyContest.getId();
 
