@@ -33,7 +33,7 @@ public class RegisterDTO implements Serializable {
     private String school;
 
     @NotBlank(message = "学号不能为空")
-    @Pattern(regexp = "^\\d{10,20}$", message = "学号格式错误")
+    @Pattern(regexp = "^[0-9A-Za-z]{6,18}$", message = "学号格式错误")
     private String number;
 
     @NotBlank(message = "密码不能为空")

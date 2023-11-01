@@ -958,7 +958,6 @@ public class MXTCaptchaRecognizer {
         for (BufferedImage subImg : subImgs) {
             ans.append(recognizeSymbol(subImg));
         }
-        System.out.printf("regonize: %s\n", ans);
         return ans.toString();
     }
 
