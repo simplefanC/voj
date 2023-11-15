@@ -32,7 +32,7 @@
         <spring.cloud.version>2021.0.1</spring.cloud.version>
         <spring.cloud.alibaba.version>2021.0.1.0</spring.cloud.alibaba.version>
         <voj.common.version>1.0</voj.common.version>
-        <easyexcel.version>2.2.7</easyexcel.version>
+        <easyexcel.version>3.3.2</easyexcel.version>
         <hutool.version>5.7.22</hutool.version>
         <jwt.version>3.19.1</jwt.version>
         <captcha.version>1.6.2</captcha.version>
