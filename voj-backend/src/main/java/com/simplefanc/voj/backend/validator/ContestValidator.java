@@ -129,8 +129,10 @@ public class ContestValidator {
         int startNum = Integer.parseInt(start);
         int endNum = Integer.parseInt(end);
 
+        String formatString = "%0" + String.valueOf(endNum).length() + "d";
         for (int i = startNum; i <= endNum; i++) {
-            if (username.equals(prefix + i + suffix)) {
+            String paddedNum = String.format(formatString, i);
+            if (username.equals(prefix + paddedNum + suffix)) {
                 return true;
             }
         }

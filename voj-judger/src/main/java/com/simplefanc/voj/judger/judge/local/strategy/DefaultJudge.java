@@ -69,17 +69,15 @@ public class DefaultJudge extends AbstractJudge {
     }
 
     private void abort(CaseResult result, SandBoxRes sandBoxRes) {
-        StringBuilder errMsg = new StringBuilder();
         result.setStatus(JudgeStatus.STATUS_RUNTIME_ERROR.getStatus());
+        String errMsg;
         if (sandBoxRes.getExitCode() < 32) {
-            errMsg.append(String.format("The program return exit status code: %s (%s)\n", sandBoxRes.getExitCode(),
-                    SandboxRun.SIGNALS.get(sandBoxRes.getExitCode())));
+            errMsg = String.format("The program return exit status code: %s (%s)\n", sandBoxRes.getExitCode(),
+                    SandboxRun.SIGNALS.get(sandBoxRes.getExitCode()));
         } else {
-            errMsg.append(String.format("The program return exit status code: %s\n", sandBoxRes.getExitCode()));
+            errMsg = String.format("The program return exit status code: %s\n", sandBoxRes.getExitCode());
         }
-        // 记录该测试点的错误信息
-        String str = errMsg.toString();
-        result.setErrMsg(str.substring(0, Math.min(1024 * 1024, str.length())));
+        result.setErrMsg(errMsg.substring(0, Math.min(1024 * 1024, errMsg.length())));
     }
 
 
