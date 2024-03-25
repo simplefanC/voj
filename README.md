@@ -1,6 +1,6 @@
 # Virtual Online Judge（VOJ）
 
-[![Java](https://img.shields.io/badge/Java-11-informational)](https://openjdk.java.net)
+[![Java](https://img.shields.io/badge/Java-17-informational)](https://openjdk.java.net)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.6.3-success)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2021.0.1-success)](https://spring.io/projects/spring-cloud)
 [![Spring Cloud Alibaba](https://img.shields.io/badge/Spring%20Cloud%20Alibaba-2021.0.1.0-success)](https://spring.io/projects/spring-cloud-alibaba)
