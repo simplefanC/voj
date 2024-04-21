@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 @Component
 @RequiredArgsConstructor
-public class AtCoderLoginerAbstract extends AbstractRetentiveLoginer {
+public class AtCoderLoginer extends AbstractRetentiveLoginer {
 
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
 

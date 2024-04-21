@@ -79,7 +79,7 @@ public abstract class AbstractCFStyleSubmitter implements Submitter {
         final String body = client.get(String.format(SUBMISSION_BY_USERNAME, account.getAccountId())).getBody();
         String maxRunIdStr = ReUtil.get("data-submission-id=\"(\\d+)\"", body, 1);
         if (StrUtil.isEmpty(maxRunIdStr)) {
-            log.error("[Codeforces] Failed to parse submission html:{}", body);
+            // log.error("[Codeforces] Failed to parse submission html:{}", body);
             String log = String.format("[Codeforces] Failed to parse html to get run id for problem: [%s]", info.remotePid);
             throw new RuntimeException(log);
         } else {

@@ -1,31 +1,31 @@
 package com.simplefanc.voj.judger.judge.remote.provider.codefores;
 
+import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.simplefanc.voj.common.constants.JudgeStatus;
 import com.simplefanc.voj.common.pojo.entity.judge.JudgeCase;
 import com.simplefanc.voj.judger.judge.remote.account.RemoteAccount;
-import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClient;
 import com.simplefanc.voj.judger.judge.remote.httpclient.DedicatedHttpClientFactory;
-import com.simplefanc.voj.judger.judge.remote.httpclient.HttpStatusValidator;
-import com.simplefanc.voj.judger.judge.remote.httpclient.SimpleNameValueEntityFactory;
 import com.simplefanc.voj.judger.judge.remote.pojo.RemoteOjInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionInfo;
 import com.simplefanc.voj.judger.judge.remote.pojo.SubmissionRemoteStatus;
 import com.simplefanc.voj.judger.judge.remote.provider.shared.codeforces.AbstractCFStyleQuerier;
 import lombok.RequiredArgsConstructor;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class CFQuerier extends AbstractCFStyleQuerier {
     private final DedicatedHttpClientFactory dedicatedHttpClientFactory;
+    public static final String HOST = "https://codeforces.com";
     private static final String CE_INFO_URL = "/data/submitSource";
 
     @Override
@@ -35,14 +35,25 @@ public class CFQuerier extends AbstractCFStyleQuerier {
 
     @Override
     public SubmissionRemoteStatus query(SubmissionInfo info, RemoteAccount account) {
-        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
-        HttpEntity entity = SimpleNameValueEntityFactory.create(
-                "csrf_token", account.getCsrfToken(),
-                "submissionId", info.remoteRunId
-        );
-        HttpPost post = new HttpPost(CE_INFO_URL);
-        post.setEntity(entity);
-        String body = client.execute(post, HttpStatusValidator.SC_OK).getBody();
+//        DedicatedHttpClient client = dedicatedHttpClientFactory.build(getOjInfo().mainHost, account.getContext());
+//        HttpEntity entity = SimpleNameValueEntityFactory.create(
+//                "csrf_token", account.getCsrfToken(),
+//                "submissionId", info.remoteRunId
+//        );
+//        HttpPost post = new HttpPost(CE_INFO_URL);
+//        post.setEntity(entity);
+//        String body = client.execute(post, HttpStatusValidator.SC_OK).getBody();
+        String homePage = HttpUtil.createGet(HOST).execute().body();
+        String csrfToken = ReUtil.get("data-csrf='(\\w+)'", homePage, 1);
+
+        String body = HttpUtil.createPost(HOST + CE_INFO_URL)
+                .header("Origin", HOST)
+                .header("Referer", HOST)
+                .form(MapUtil
+                        .builder(new HashMap<String, Object>())
+                        .put("csrf_token", csrfToken)
+                        .put("submissionId", info.remoteRunId).map()).execute().body();
+
         SubmissionRemoteStatus status = new SubmissionRemoteStatus();
 
         JSONObject submissionInfoJson = JSONUtil.parseObj(body);
